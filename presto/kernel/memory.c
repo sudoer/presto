@@ -192,7 +192,7 @@ void presto_memory_free(BYTE * free_me) {
 
 
 void memory_debug(unsigned short pool, KERNEL_MEMORYPOOLINFO_T * stats) {
-   if((pool<0)||(pool>=PRESTO_MEM_NUMPOOLS)) return;
+   if ((pool<0)||(pool>=PRESTO_MEM_NUMPOOLS)) return;
    stats->mempool_num_items=mempools[pool].mempool_num_items;
    stats->mempool_item_size=mempools[pool].mempool_item_size;
    stats->current_used_items=mempools[pool].current_used_items;

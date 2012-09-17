@@ -64,7 +64,7 @@ signed char clock_compare(KERNEL_TIME_T * A,KERNEL_TIME_T * B) {
       x--;
       if (A->t[x] < B->t[x]) return -1;
       if (A->t[x] > B->t[x]) return 1;
-   } while(x>0);
+   } while (x>0);
    return 0;
 }
 

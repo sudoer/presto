@@ -6,7 +6,7 @@
 
 #include <avr/io.h>
 #include "registers.h"
-#include "board.h"
+#include "avr_board.h"
 #include "types.h"
 
 ////////////////////////////////////////////////////////////////////////////////

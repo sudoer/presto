@@ -7,7 +7,7 @@
 #include <avr/io.h>
 #include "registers.h"
 #include "types.h"
-#include "board.h"
+#include "avr_board.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //   I N I T I A L I Z E
@@ -52,6 +52,9 @@ static inline void CPU_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(void (*func)(void)) {
 ////////////////////////////////////////////////////////////////////////////////
 //   T R I G G E R I N G   S W I
 ////////////////////////////////////////////////////////////////////////////////
+
+// AVR pushes PC (that's all!)
+// compiler pushes several registers and SREG
 
 static inline void CPU_MAGIC_SOFTWARE_INTERRUPT(void) {
    cbi(PORTD,2);          // drive INT0 low

@@ -39,7 +39,7 @@ void student(void) {
 
       //MASKNOT(PORTD,0x3C);
 
-      if(++count==25) {
+      if (++count==25) {
          count=0;
          PRESTO_ENVELOPE_T * send_p;
          send_p=(PRESTO_ENVELOPE_T *)presto_memory_allocate(sizeof(PRESTO_ENVELOPE_T));

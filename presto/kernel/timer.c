@@ -179,7 +179,7 @@ void timer_isr(void) {
       }
 
       // indicate that a timer expired, and that it made a high priority task ready
-      if(presto_priority_get(timer_p->owner_tid)>current_pri) count++;
+      if (presto_priority_get(timer_p->owner_tid)>current_pri) count++;
    }
 
    CPU_DEBUG_TICK_END();

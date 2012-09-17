@@ -20,9 +20,6 @@ void president(void) {
    static PRESTO_MAILBOX_T pres_mbox;
    presto_mailbox_init(&pres_mbox,FLAG_P_MAIL);
 
-   static PRESTO_SEMLOCK_T copier_pres;
-   presto_semaphore_register(&copier,&copier_pres);
-
    presto_wait_for_idle();
 
    while (1) {
@@ -46,9 +43,7 @@ void president(void) {
 
       if (t&FLAG_P_TIMER) {
          presto_memory_free((BYTE *)timer_p);
-         presto_semaphore_wait(&copier_pres);
-         busy_work(0x01,10);
-         presto_semaphore_release(&copier_pres);
+         use_copier(0x01,10);
       }
    }
 }

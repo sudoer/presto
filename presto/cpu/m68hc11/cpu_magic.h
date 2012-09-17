@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "registers.h"
-#include "board.h"
+#include "handyboard.h"
 #include "vectors.h"
 #include "types.h"
 
@@ -69,6 +69,9 @@ static inline void CPU_MAGIC_SOFTWARE_INTERRUPT() {
 #define CPU_MAGIC_DECLARE_SWI(x) void x (void) __attribute__((interrupt));
 
 ////////////////////////////////////////////////////////////////////////////////
+
+// M68HC11 pushes registers when SWI is executed
+// compiler also pushes pseudo-registers (tmp,z,xy)
 
 static inline void CPU_MAGIC_START_OF_SWI() {
 /*

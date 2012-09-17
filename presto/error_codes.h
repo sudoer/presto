@@ -5,8 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #define ERROR_FIRST_KERNEL    0x01
-#define ERROR_FIRST_CPU       0x10
-#define ERROR_FIRST_APP       0x80
+#define ERROR_FIRST_CPU       0x20
+#define ERROR_FIRST_APP       0x40
+#define ERROR_MAX_LIMIT       0xFFFF
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -20,6 +21,8 @@ typedef enum {
 
    ERROR_APP = ERROR_FIRST_APP-1,
    #include "error_app.h"
+
+   ERROR_MAX = ERROR_MAX_LIMIT,
 
 } error_number_e;
 

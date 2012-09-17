@@ -3,7 +3,7 @@
 #include "types.h"
 #include "registers.h"
 #include "error.h"
-#include "board.h"
+#include "handyboard.h"
 #include "services/serial.h"
 #include "services/string.h"
 
@@ -231,29 +231,29 @@ int main(void) {
 
 sint8 motor_get_speed(uint8 motor) {
    sint8 speed;
-   if(motor>=MOTORS_NUM_MOTORS) return 0;
+   if (motor>=MOTORS_NUM_MOTORS) return 0;
    speed=(sint8)current_motor_speed[motor];
-   if(current_motor_dir[motor]==REV) return (0-speed);
+   if (current_motor_dir[motor]==REV) return (0-speed);
    return speed;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void motor_set_speed(uint8 motor, sint8 speed) {
-   if(motor<MOTORS_NUM_MOTORS) {
+   if (motor<MOTORS_NUM_MOTORS) {
       // If intr happens while we're in this function and we happen to be
       // changing directions (say from FULL REVERSE to STOP FORWARD), do not
       // allow it reverse the motor in mid-function call.  The above case would
       // cause a transition like this: FULL-REV to FULL-FWD to STOP-FWD.
       current_motor_speed[motor]=0;
 
-      if(speed>=0) {
+      if (speed>=0) {
          current_motor_dir[motor]=FWD;
       } else {
          speed=0-speed;
          current_motor_dir[motor]=REV;
       }
-      if(speed>MOTORS_MAX_SPEED) speed=MOTORS_MAX_SPEED;
+      if (speed>MOTORS_MAX_SPEED) speed=MOTORS_MAX_SPEED;
       current_motor_speed[motor]=(uint8)speed;
    }
    apply_motor_pwm();
@@ -268,13 +268,13 @@ static void apply_motor_pwm(void) {
    BYTE motor_mask=0x11;
 
    for(m=0;m<MOTORS_NUM_MOTORS;m++) {
-      if(speed_2_pwm[current_motor_speed[m]]&speed_mask) {
+      if (speed_2_pwm[current_motor_speed[m]]&speed_mask) {
          ctrl=ctrl|((0xF0|current_motor_dir[m])&motor_mask);
       }
       motor_mask<<=1;
    }
    speed_mask<<=1;
-   if(speed_mask==0) speed_mask=0x0001;
+   if (speed_mask==0) speed_mask=0x0001;
    MOTOR_PORT=ctrl;
 }
 

@@ -15,6 +15,7 @@
    ERROR_MAIL_SENDTONULLBOX,                       // 0B
    ERROR_MEMORY_CLOBBEREDMEMBLOCK,                 // 0C
    ERROR_SEMAPHORE_BADUNLOCK,                      // 0D
+   ERROR_SEMAPHORE_TOOMANYWAITERS,                 // 0E
 
 ////////////////////////////////////////////////////////////////////////////////
 

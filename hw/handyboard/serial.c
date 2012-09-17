@@ -11,7 +11,7 @@
 // simply have a task that looks like this:
 
 //    serial_init(task_tid,SERIAL_FLAG);
-//    while(1) {
+//    while (1) {
 //       wait(SERIAL_FLAG);
 //       serial_recv_string(mybuffer,MYBUFFERSIZE);
 //       /* act on received data here */
@@ -210,7 +210,7 @@ static void serial_isr(void) {
 
    // ASSERT TRIGGERS IF NECESSARY
 
-   if((sent_something)&&(cq_used(&com1_tx_queue)<TX_RESTART_LEVEL)) {
+   if ((sent_something)&&(cq_used(&com1_tx_queue)<TX_RESTART_LEVEL)) {
       presto_trigger_send(serialuser_tid,serialuser_tx_trigger);
       // will do a task switch if necessary
    }

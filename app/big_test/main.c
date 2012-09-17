@@ -2,7 +2,7 @@
 #include "presto.h"
 #include "types.h"
 #include "error.h"
-#include "board.h"
+#include "handyboard.h"
 #include "serial.h"
 #include "string.h"
 #include "kernel/memory.h"

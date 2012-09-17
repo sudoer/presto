@@ -1,0 +1,652 @@
+Archive member included because of file (symbol)
+
+c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_exit.o)
+                              main.o (exit)
+c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_copy_data.o)
+                              vectors.o (__do_copy_data)
+c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_clear_bss.o)
+                              vectors.o (__do_clear_bss)
+
+Allocating common symbols
+Common symbol       size              file
+
+idle_tid            0x1               kernel.o
+idle_stack          0x58              kernel.o
+idle_notification   0x1               kernel.o
+two_tid             0x1               main.o
+idle_tcb_p          0x2               kernel.o
+swi_old_tcb_p       0x2               kernel.o
+swi_new_sp          0x2               kernel.o
+one_tid             0x1               main.o
+one_stack           0x80              main.o
+two_stack           0x80              main.o
+swi_old_spp         0x2               kernel.o
+tcb_list            0x27              kernel.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+vectors          0x00000000         0x0000005c         xr
+rom              0x0000005c         0x00003fa4         xr
+gpregs           0x00800000         0x00000020         rw
+ioregs           0x00800020         0x00000040         rw
+exregs           0x00800060         0x000000a0         rw
+ram              0x00800100         0x00000400         rw !x
+eeprom           0x00810000         0x00000200         rw !x
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+
+.vectors        0x00000000       0x5c
+                0x00000000                __vectors_start = .
+ vectors.o(.vectors)
+ .vectors       0x00000000       0x5c vectors.o
+                0x00000000                vector_table
+                0x0000005c                __vectors_end = .
+
+/DISCARD/
+ *(.vectors)
+ *(.fini)
+ *(.fini7)
+ *(.fini6)
+ *(.fini5)
+ *(.fini4)
+ *(.fini3)
+ *(.fini2)
+ *(.fini1)
+ *(.fini0)
+ *(.dtors)
+ *(.init2)
+
+.text           0x0000005c     0x1038
+                0x0000005c                __ctors_start = .
+ *(.ctors)
+                0x0000005c                __ctors_end = .
+                0x0000005c                __dtors_start = .
+ *(.dtors)
+                0x0000005c                __dtors_end = .
+ *(.progmem.gcc*)
+ *(.progmem*)
+ .progmem.data  0x0000005c       0x6c lcd_driver.o
+                0x0000005c                LCD_character_table
+                0x000000c8                . = ALIGN (0x2)
+ *(.init0)
+ *(.init1)
+ *(.init3)
+ *(.init4)
+ .init4         0x000000c8       0x18 c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_copy_data.o)
+                0x000000c8                __do_copy_data
+ .init4         0x000000e0       0x10 c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_clear_bss.o)
+                0x000000e0                __do_clear_bss
+ *(.init5)
+ *(.init6)
+ *(.init7)
+ *(.init8)
+ *(.init9)
+ .init9         0x000000f0        0x4 c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+ *(.text)
+ .text          0x000000f4       0xe4 vectors.o
+                0x000001d0                __vector_default
+ .text          0x000001d8       0x50 main.o
+                0x000001d8                main
+ .text          0x00000228       0xe2 one.o
+                0x00000228                one
+ .text          0x0000030a       0x68 two.o
+                0x0000030a                two
+ .text          0x00000372       0x96 error.o
+                0x00000372                error_fatal
+                0x00000402                error_crash
+                0x00000404                error_address
+ .text          0x00000408      0x10c lcd_driver.o
+                0x00000438                lcd_clear
+                0x0000044e                lcd_dashes
+                0x000004fe                lcd_SOF_interrupt
+                0x0000044c                lcd_numbers
+                0x00000408                lcd_contrast
+                0x00000410                lcd_init
+                0x00000450                lcd_text_segments
+                0x000004d2                lcd_text_string
+                0x000004a4                lcd_text_digit
+ .text          0x00000514       0x2e boot.o
+                0x00000514                reset_vector
+ .text          0x00000542       0x32 cpu_timer.o
+                0x00000542                hwtimer_start
+ .text          0x00000574       0xb2 clock.o
+                0x000005ba                clock_add_sec
+                0x00000574                clock_reset
+                0x000005bc                clock_compare
+                0x00000584                clock_add_ms
+ .text          0x00000626      0x640 kernel.o
+                0x000009ba                priority_queue_insert_tcb
+                0x00000be0                send_idle_notifications
+                0x00000976                kernel_trigger_set_noswitch
+                0x00000626                presto_init
+                0x00000a02                priority_queue_remove_tcb
+                0x0000078e                presto_scheduler_start
+                0x00000944                presto_trigger_poll
+                0x000006da                presto_task_create
+                0x00000a72                scheduler_next_ready
+                0x00000c42                tid_to_tcbptr
+                0x0000083a                presto_priority_set
+                0x00000930                presto_trigger_clear
+                0x0000099a                kernel_priority_get
+                0x0000082c                presto_priority_get
+                0x00000c38                idle_task
+                0x0000091e                presto_trigger_set
+                0x0000098c                kernel_current_task
+                0x00000898                presto_priority_restore
+                0x00000b98                presto_wait_for_idle
+                0x000009a8                kernel_context_switch
+                0x0000086a                presto_priority_override
+                0x000008c4                presto_wait
+                0x00000956                presto_trigger_send
+                0x00000aa8                context_switch_isr
+ .text          0x00000c66      0x1f4 mail.o
+                0x00000d02                presto_mail_send_to_box
+                0x00000db0                presto_mail_wait
+                0x00000cec                presto_mail_send_to_task
+                0x00000c96                presto_mailbox_init
+                0x00000cb4                presto_mailbox_default
+                0x00000c66                presto_mailbox_create
+                0x00000dca                presto_mail_get
+                0x00000cd4                presto_envelope_message
+                0x00000cdc                presto_envelope_payload
+                0x00000ce4                presto_envelope_sender
+                0x00000e30                kernel_mail_init
+ .text          0x00000e5a      0x236 memory.o
+                0x00000e5a                presto_memory_allocate
+                0x00000f36                memory_debug
+                0x00000eec                presto_memory_free
+                0x00000f7c                kernel_memory_init
+ .text          0x00001090        0x4 c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+                0x00001090                __vector_22
+                0x00001090                __vector_1
+                0x00001090                __vector_12
+                0x00001090                __bad_interrupt
+                0x00001090                __vector_6
+                0x00001090                __vector_3
+                0x00001090                __vector_11
+                0x00001090                __vector_13
+                0x00001090                __vector_17
+                0x00001090                __vector_19
+                0x00001090                __vector_7
+                0x00001090                __vector_5
+                0x00001090                __vector_4
+                0x00001090                __vector_9
+                0x00001090                __vector_2
+                0x00001090                __vector_21
+                0x00001090                __vector_15
+                0x00001090                __vector_8
+                0x00001090                __vector_14
+                0x00001090                __vector_10
+                0x00001090                __vector_16
+                0x00001090                __vector_18
+                0x00001090                __vector_20
+                0x00001094                . = ALIGN (0x2)
+ *(.text.*)
+                0x00001094                . = ALIGN (0x2)
+ *(.fini9)
+ *(.fini8)
+ *(.fini7)
+ *(.fini6)
+ *(.fini5)
+ *(.fini4)
+ *(.fini3)
+ *(.fini2)
+ *(.fini1)
+ *(.fini0)
+                0x00001094                _etext = .
+
+.strings
+ *(.string)
+
+.heap           0x00800100      0x15c
+ *(.heap)
+ .heap          0x00800100      0x15c memory.o
+
+.stack          0x0080025c       0x45
+ *(.stack)
+ .stack         0x0080025c       0x45 boot.o
+                0x0080025c                initial_stack
+
+.data           0x008002a1        0x1 load address 0x00001094
+                0x008002a1                PROVIDE (__data_start, .)
+ *(.data)
+ *(.gnu.linkonce.d*)
+                0x008002a2                . = ALIGN (0x2)
+ *fill*         0x008002a1        0x1 00
+                0x008002a2                _edata = .
+                0x008002a2                PROVIDE (__data_end, .)
+
+.bss            0x008002a2      0x1a9
+                0x008002a2                PROVIDE (__bss_start, .)
+ *(.bss)
+ .bss           0x008002a2        0x8 one.o
+ .bss           0x008002aa        0x8 two.o
+ .bss           0x008002b2        0x8 kernel.o
+                0x008002b4                tcb_head_p
+                0x008002b6                free_tcb_p
+                0x008002b2                current_tcb_p
+                0x008002b8                presto_runtime_progress
+ .bss           0x008002ba        0x6 mail.o
+ *(COMMON)
+ COMMON         0x008002c0      0x102 main.o
+                                  0x0 (size before relaxing)
+                0x008002c0                two_tid
+                0x008002c1                one_tid
+                0x008002c2                one_stack
+                0x00800342                two_stack
+ COMMON         0x008003c2       0x89 kernel.o
+                                  0x0 (size before relaxing)
+                0x008003c2                idle_tid
+                0x008003c3                idle_stack
+                0x0080041b                idle_notification
+                0x0080041c                idle_tcb_p
+                0x0080041e                swi_old_tcb_p
+                0x00800420                swi_new_sp
+                0x00800422                swi_old_spp
+                0x00800424                tcb_list
+                0x0080044b                PROVIDE (__bss_end, .)
+                0x00001094                __data_load_start = LOADADDR (.data)
+                0x00001095                __data_load_end = (__data_load_start + SIZEOF (.data))
+
+.noinit         0x0080044b        0x0
+                0x0080044b                PROVIDE (__noinit_start, .)
+ *(.noinit*)
+                0x0080044b                PROVIDE (__noinit_end, .)
+                0x0080044b                _end = .
+                0x0080044b                PROVIDE (__heap_start, .)
+
+.eeprom         0x00810000        0x0 load address 0x00001095
+ *(.eeprom*)
+                0x00810000                __eeprom_end = .
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.stab           0x00000000     0x4b00
+ *(.stab)
+ .stab          0x00000000      0x744 vectors.o
+ .stab          0x00000744      0x5f4 main.o
+                                0x714 (size before relaxing)
+ .stab          0x00000d38      0x3e4 one.o
+                                0x6b4 (size before relaxing)
+ .stab          0x0000111c      0x2f4 two.o
+                                0x5dc (size before relaxing)
+ .stab          0x00001410      0x354 error.o
+                                0x4c8 (size before relaxing)
+ .stab          0x00001764      0x600 lcd_driver.o
+                                0x810 (size before relaxing)
+ .stab          0x00001d64      0x294 boot.o
+                                0x39c (size before relaxing)
+ .stab          0x00001ff8      0x1f8 cpu_timer.o
+                                0x30c (size before relaxing)
+ .stab          0x000021f0      0x354 clock.o
+                                0x45c (size before relaxing)
+ .stab          0x00002544     0x12a8 kernel.o
+                               0x15b4 (size before relaxing)
+ .stab          0x000037ec      0x828 mail.o
+                                0xb34 (size before relaxing)
+ .stab          0x00004014      0x6c0 memory.o
+                                0x9f0 (size before relaxing)
+ .stab          0x000046d4      0x204 semaphore.o
+                                0x510 (size before relaxing)
+ .stab          0x000048d8      0x228 timer.o
+                                0x540 (size before relaxing)
+
+.stabstr        0x00000000     0x2e79
+ *(.stabstr)
+ .stabstr       0x00000000     0x2e79 vectors.o
+                                  0x0 (size before relaxing)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment
+ *(.comment)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges
+ *(.debug_aranges)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info
+ *(.debug_info)
+ *(.gnu.linkonce.wi.*)
+
+.debug_abbrev
+ *(.debug_abbrev)
+
+.debug_line
+ *(.debug_line)
+
+.debug_frame
+ *(.debug_frame)
+
+.debug_str
+ *(.debug_str)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+LOAD main.o
+LOAD one.o
+LOAD two.o
+LOAD error.o
+LOAD lcd_driver.o
+LOAD boot.o
+LOAD cpu_timer.o
+LOAD vectors.o
+LOAD clock.o
+LOAD kernel.o
+LOAD mail.o
+LOAD memory.o
+LOAD semaphore.o
+LOAD timer.o
+LOAD c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+LOAD c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a
+OUTPUT(presto.elf elf32-avr)
+
+Cross Reference Table
+
+Symbol                                            File
+LCD_character_table                               lcd_driver.o
+__bad_interrupt                                   c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__bss_end                                         c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_clear_bss.o)
+__bss_start                                       c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_clear_bss.o)
+__data_end                                        c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_copy_data.o)
+__data_load_start                                 c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_copy_data.o)
+__data_start                                      c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_copy_data.o)
+__do_clear_bss                                    c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_clear_bss.o)
+                                                  timer.o
+                                                  semaphore.o
+                                                  memory.o
+                                                  mail.o
+                                                  kernel.o
+                                                  clock.o
+                                                  cpu_timer.o
+                                                  boot.o
+                                                  lcd_driver.o
+                                                  error.o
+                                                  two.o
+                                                  one.o
+                                                  main.o
+                                                  vectors.o
+__do_copy_data                                    c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_copy_data.o)
+                                                  timer.o
+                                                  semaphore.o
+                                                  memory.o
+                                                  mail.o
+                                                  kernel.o
+                                                  clock.o
+                                                  cpu_timer.o
+                                                  boot.o
+                                                  lcd_driver.o
+                                                  error.o
+                                                  two.o
+                                                  one.o
+                                                  main.o
+                                                  vectors.o
+__heap_end                                        c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__init                                            c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+                                                  boot.o
+__stack                                           c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+                                                  main.o
+__vector_1                                        c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_10                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_11                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_12                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_13                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_14                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_15                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_16                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_17                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_18                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_19                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_2                                        c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_20                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_21                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_22                                       c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_3                                        c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_4                                        c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_5                                        c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_6                                        c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_7                                        c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_8                                        c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_9                                        c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+__vector_default                                  c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+                                                  vectors.o
+__vectors                                         c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+_exit                                             c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_exit.o)
+clock_add_ms                                      clock.o
+clock_add_sec                                     clock.o
+clock_compare                                     clock.o
+clock_reset                                       clock.o
+context_switch_isr                                kernel.o
+                                                  vectors.o
+current_tcb_p                                     kernel.o
+error_address                                     error.o
+error_crash                                       error.o
+error_fatal                                       error.o
+                                                  mail.o
+                                                  kernel.o
+                                                  main.o
+                                                  vectors.o
+exit                                              c:\programs\embedded\avr\gnu\lib\gcc-lib\avr\3.3.1\libgcc.a(_exit.o)
+                                                  main.o
+free_tcb_p                                        kernel.o
+hwtimer_start                                     cpu_timer.o
+idle_notification                                 kernel.o
+idle_stack                                        kernel.o
+idle_task                                         kernel.o
+idle_tcb_p                                        kernel.o
+idle_tid                                          kernel.o
+initial_stack                                     boot.o
+kernel_context_switch                             kernel.o
+                                                  mail.o
+kernel_current_task                               kernel.o
+                                                  mail.o
+kernel_mail_init                                  mail.o
+                                                  kernel.o
+kernel_memory_init                                memory.o
+                                                  kernel.o
+kernel_priority_get                               kernel.o
+kernel_trigger_set_noswitch                       kernel.o
+                                                  mail.o
+lcd_SOF_interrupt                                 lcd_driver.o
+lcd_clear                                         lcd_driver.o
+lcd_contrast                                      lcd_driver.o
+lcd_dashes                                        lcd_driver.o
+lcd_init                                          lcd_driver.o
+                                                  main.o
+lcd_numbers                                       lcd_driver.o
+lcd_text_digit                                    lcd_driver.o
+                                                  error.o
+                                                  one.o
+lcd_text_segments                                 lcd_driver.o
+lcd_text_string                                   lcd_driver.o
+main                                              main.o
+                                                  c:\programs\embedded\avr\gnu\avr\lib\avr5\crtm169.o
+memory_debug                                      memory.o
+one                                               one.o
+                                                  main.o
+one_stack                                         main.o
+one_tid                                           two.o
+                                                  one.o
+                                                  main.o
+presto_envelope_message                           mail.o
+                                                  two.o
+                                                  one.o
+presto_envelope_payload                           mail.o
+presto_envelope_sender                            mail.o
+presto_init                                       kernel.o
+                                                  main.o
+presto_mail_get                                   mail.o
+                                                  one.o
+presto_mail_send_to_box                           mail.o
+presto_mail_send_to_task                          mail.o
+                                                  two.o
+                                                  one.o
+presto_mail_wait                                  mail.o
+                                                  two.o
+presto_mailbox_create                             mail.o
+presto_mailbox_default                            mail.o
+presto_mailbox_init                               mail.o
+                                                  two.o
+                                                  one.o
+presto_memory_allocate                            memory.o
+                                                  two.o
+                                                  one.o
+presto_memory_free                                memory.o
+                                                  two.o
+                                                  one.o
+presto_priority_get                               kernel.o
+presto_priority_override                          kernel.o
+presto_priority_restore                           kernel.o
+presto_priority_set                               kernel.o
+presto_runtime_progress                           kernel.o
+presto_scheduler_start                            kernel.o
+                                                  main.o
+presto_task_create                                kernel.o
+                                                  main.o
+presto_trigger_clear                              kernel.o
+presto_trigger_poll                               kernel.o
+presto_trigger_send                               kernel.o
+                                                  one.o
+presto_trigger_set                                kernel.o
+presto_wait                                       kernel.o
+                                                  mail.o
+                                                  one.o
+presto_wait_for_idle                              kernel.o
+                                                  two.o
+                                                  one.o
+priority_queue_insert_tcb                         kernel.o
+priority_queue_remove_tcb                         kernel.o
+reset_vector                                      boot.o
+                                                  vectors.o
+scheduler_next_ready                              kernel.o
+send_idle_notifications                           kernel.o
+swi_new_sp                                        kernel.o
+swi_old_spp                                       kernel.o
+swi_old_tcb_p                                     kernel.o
+tcb_head_p                                        kernel.o
+tcb_list                                          kernel.o
+tid_to_tcbptr                                     kernel.o
+two                                               two.o
+                                                  main.o
+two_stack                                         main.o
+two_tid                                           one.o
+                                                  main.o
+vector_table                                      vectors.o

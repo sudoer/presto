@@ -11,20 +11,23 @@
 
 static PRESTO_MAILBOX_T ctrl_mbox;
 
+#define COPIER_USERS  2
+static PRESTO_SEMUSER_T copier_users[COPIER_USERS];
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void control(void) {
 
    BOOLEAN tf=FALSE;
    presto_mailbox_init(&ctrl_mbox,FLAG_C_MAIL);
-   presto_semaphore_init(&copier,1);   // must be higher priority than sem users
+   presto_semaphore_init(&copier,1,COPIER_USERS,copier_users);   // must be higher priority than sem users
    presto_wait_for_idle();
 
    PRESTO_ENVELOPE_T * send_p;
    while (1) {
       presto_semaphore_protocol(&copier,tf?
-         PRESTO_SEMAPHORE_PRIORITY_INHERITANCE:
-         PRESTO_SEMAPHORE_PRIORITY_NORMAL);
+         PRESTO_SEMAPHORE_PRIORITYINHERITANCE:
+         PRESTO_SEMAPHORE_NORMAL);
 
       // president is notified by mail
       send_p=(PRESTO_ENVELOPE_T *)presto_memory_allocate(sizeof(PRESTO_ENVELOPE_T));

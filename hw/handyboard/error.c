@@ -19,7 +19,7 @@
 #include "error.h"
 #include "registers.h"
 #include "cpu_locks.h"
-#include "board.h"
+#include "handyboard.h"
 #include "error.h"
 
 ////////////////////////////////////////////////////////////////////////////////

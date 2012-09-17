@@ -31,14 +31,14 @@ static BYTE low_stack[STACK_SIZE];
 
 void led(void) {
    PRESTO_TRIGGER_T t;
-   while(1) {
+   while (1) {
       t=presto_wait(0xFF);
-      if(t&LED0_ON)  cbi(PORTB,0);
-      if(t&LED0_OFF) sbi(PORTB,0);
-      if(t&LED1_ON)  cbi(PORTB,1);
-      if(t&LED1_OFF) sbi(PORTB,1);
-      if(t&LED2_ON)  cbi(PORTB,2);
-      if(t&LED2_OFF) sbi(PORTB,2);
+      if (t&LED0_ON)  cbi(PORTB,0);
+      if (t&LED0_OFF) sbi(PORTB,0);
+      if (t&LED1_ON)  cbi(PORTB,1);
+      if (t&LED1_OFF) sbi(PORTB,1);
+      if (t&LED2_ON)  cbi(PORTB,2);
+      if (t&LED2_OFF) sbi(PORTB,2);
    }
 }
 
@@ -46,7 +46,7 @@ void led(void) {
 
 void hgh(void) {
    static PRESTO_TIMER_T hgh_t;
-   while(1) {
+   while (1) {
       presto_trigger_send(led_tid,LED0_ON);
       //for(y=0;y<10000;y++) { }
       presto_timer_start(&hgh_t,50,0,0x80);
@@ -65,7 +65,7 @@ void hgh(void) {
 void med(void) {
    static PRESTO_TIMER_T med_t;
    presto_timer_start(&med_t,100,100,0x80);
-   while(1) {
+   while (1) {
       presto_trigger_send(led_tid,LED1_ON);
       presto_wait(0x80);
       presto_trigger_send(led_tid,LED1_OFF);
@@ -77,7 +77,7 @@ void med(void) {
 
 void low(void) {
    static PRESTO_TIMER_T low_t;
-   while(1) {
+   while (1) {
       presto_trigger_send(led_tid,LED2_ON);
       presto_timer_start(&low_t,500,0,0x80);
       presto_wait(0x80);
@@ -88,7 +88,7 @@ void low(void) {
 
 /*
    //volatile unsigned short y;
-   while(1) {
+   while (1) {
       presto_trigger_send(led_tid,LED2_ON);
       //for(y=0;y<10000;y++) { }
       presto_timer_start(&low_t,50,0,0x80);

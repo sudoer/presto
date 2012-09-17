@@ -118,22 +118,21 @@ extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
 
    // data types
    typedef enum {
-      PRESTO_SEMAPHORE_PRIORITY_NORMAL,
-      PRESTO_SEMAPHORE_PRIORITY_INHERITANCE,
-      PRESTO_SEMAPHORE_PRIORITY_CEILING,
+      PRESTO_SEMAPHORE_NORMAL,
+      PRESTO_SEMAPHORE_PRIORITYINHERITANCE,
+      PRESTO_SEMAPHORE_PRIORITYCEILING,
    } PRESTO_SEMPROTOCOL_T;
-   typedef KERNEL_SEMLOCK_T       PRESTO_SEMLOCK_T;
-   typedef KERNEL_SEMRESOURCE_T   PRESTO_SEMRESOURCE_T;
+   typedef KERNEL_SEMUSER_T     PRESTO_SEMUSER_T;
+   typedef KERNEL_SEMAPHORE_T   PRESTO_SEMAPHORE_T;
 
    // setting things up
-   extern void presto_semaphore_init(PRESTO_SEMRESOURCE_T * resource_p, short resources);
-   extern void presto_semaphore_register(PRESTO_SEMRESOURCE_T * resource_p, PRESTO_SEMLOCK_T * semlock_p);
-   extern void presto_semaphore_protocol(PRESTO_SEMRESOURCE_T * resource_p, PRESTO_SEMPROTOCOL_T inheritance_type);
+   extern void presto_semaphore_init(PRESTO_SEMAPHORE_T * sem_p, int resources, int num_users, PRESTO_SEMUSER_T * semuser_p);
+   extern void presto_semaphore_protocol(PRESTO_SEMAPHORE_T * sem_p, PRESTO_SEMPROTOCOL_T inheritance_type);
 
    // locking, unlocking
-   extern BOOLEAN presto_semaphore_request(PRESTO_SEMLOCK_T * semlock_p, PRESTO_TRIGGER_T trigger);
-   extern void presto_semaphore_wait(PRESTO_SEMLOCK_T * semlock_p);
-   extern void presto_semaphore_release(PRESTO_SEMLOCK_T * semlock_p);
+   extern BOOLEAN presto_semaphore_request(PRESTO_SEMAPHORE_T * sem_p, PRESTO_TRIGGER_T trigger);
+   extern void presto_semaphore_wait(PRESTO_SEMAPHORE_T * sem_p);
+   extern void presto_semaphore_release(PRESTO_SEMAPHORE_T * sem_p);
 
 #endif // FEATURE_KERNEL_SEMAPHORE
 
@@ -151,4 +150,5 @@ extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
 ////////////////////////////////////////////////////////////////////////////////
 
 #endif // _PRESTO_H_
+
 

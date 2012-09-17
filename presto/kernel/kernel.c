@@ -69,6 +69,11 @@
 #define MAX_TASKS           (PRESTO_KERNEL_MAXUSERTASKS+1)
 #define IDLE_PRIORITY       0
 #define WAIT_MASK_READY     ((KERNEL_TRIGGER_T)0)
+#define STATIC
+
+#ifdef FEATURE_STACKSHARING
+#error "DO NOT USE STACK SHARING YET!"
+#endif // FEATURE_STACKSHARING
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D A T A   T Y P E S
@@ -76,6 +81,9 @@
 
 typedef struct KERNEL_TCB_S {
    KERNEL_TASKID_T task_id;
+#ifdef FEATURE_STACKSHARING
+   void (*main)(void);
+#endif // FEATURE_STACKSHARING
    BYTE * stack_ptr;
    BYTE * stack_top;
    BYTE * stack_bottom;
@@ -91,38 +99,42 @@ typedef struct KERNEL_TCB_S {
 ////////////////////////////////////////////////////////////////////////////////
 
 // scheduling
-static KERNEL_TCB_T * scheduler_next_ready(void);
-static void send_idle_notifications(void);
-static void idle_task(void);
+STATIC KERNEL_TCB_T * scheduler_next_ready(void);
+STATIC void send_idle_notifications(void);
+STATIC void idle_task(void);
 
 // priority queue
-static void priority_queue_insert_tcb(KERNEL_TCB_T * tcb_p, KERNEL_PRIORITY_T priority);
-static void priority_queue_remove_tcb(KERNEL_TCB_T * tcb_p);
+STATIC void priority_queue_insert_tcb(KERNEL_TCB_T * tcb_p, KERNEL_PRIORITY_T priority);
+STATIC void priority_queue_remove_tcb(KERNEL_TCB_T * tcb_p);
 
 // context switching
 CPU_MAGIC_DECLARE_SWI(context_switch_isr);
 
 // utilities
-static KERNEL_TCB_T * tid_to_tcbptr(KERNEL_TASKID_T tid);
+STATIC KERNEL_TCB_T * tid_to_tcbptr(KERNEL_TASKID_T tid, unsigned char c);
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S T A T I C   G L O B A L   D A T A
 ////////////////////////////////////////////////////////////////////////////////
 
 // task control blocks
-static KERNEL_TCB_T tcb_list[MAX_TASKS];
-static KERNEL_TCB_T * current_tcb_p=NULL;
-static KERNEL_TCB_T * tcb_head_p=NULL;
-static KERNEL_TCB_T * free_tcb_p=NULL;
+STATIC KERNEL_TCB_T tcb_list[MAX_TASKS];
+STATIC KERNEL_TCB_T * current_tcb_p=NULL;
+STATIC KERNEL_TCB_T * tcb_head_p=NULL;
+STATIC KERNEL_TCB_T * free_tcb_p=NULL;
 
 // idle task stuff
-static BYTE idle_stack[PRESTO_KERNEL_IDLESTACKSIZE];
-static KERNEL_TCB_T * idle_tcb_p;
-static KERNEL_TASKID_T idle_tid;   // always equals PRESTO_KERNEL_MAXUSERTASKS
-static BYTE idle_notification[TASK_BITMASK_SIZE];
+#ifdef FEATURE_STACKSHARING
+extern BYTE initial_stack[BOOT_INITIALSTACKSIZE];
+#else
+STATIC BYTE idle_stack[PRESTO_KERNEL_IDLESTACKSIZE];
+#endif // FEATURE_STACKSHARING
+STATIC KERNEL_TCB_T * idle_tcb_p;
+STATIC KERNEL_TASKID_T idle_tid;   // always equals PRESTO_KERNEL_MAXUSERTASKS
+STATIC BYTE idle_notification[TASK_BITMASK_SIZE];
 
 // miscellaneous
-static enum {
+STATIC enum {
    PROGRESS_STARTUP,
    PROGRESS_INITIALIZED,
    PROGRESS_STARTED,
@@ -131,9 +143,9 @@ static enum {
 
 // These are used to pass arguments to inline assembly routines.
 // Do not put these on the stack (BOOM).
-static KERNEL_TCB_T * swi_old_tcb_p;
-static BYTE * swi_new_sp;
-static BYTE ** swi_old_spp;
+STATIC KERNEL_TCB_T * swi_old_tcb_p;
+STATIC BYTE * swi_new_sp;
+STATIC BYTE ** swi_old_spp;
 
 ////////////////////////////////////////////////////////////////////////////////
 //   E X T E R N A L   F U N C T I O N S
@@ -185,8 +197,12 @@ void presto_init(void) {
    presto_runtime_progress=PROGRESS_INITIALIZED;
 
    // initialize idle task
+#ifdef FEATURE_STACKSHARING
+   idle_tid=presto_task_create(idle_task,initial_stack,BOOT_INITIALSTACKSIZE,IDLE_PRIORITY);
+#else
    idle_tid=presto_task_create(idle_task,idle_stack,PRESTO_KERNEL_IDLESTACKSIZE,IDLE_PRIORITY);
-   idle_tcb_p=tid_to_tcbptr(idle_tid);
+#endif // FEATURE_STACKSHARING
+   idle_tcb_p=tid_to_tcbptr(idle_tid,8);
 }
 
 
@@ -219,6 +235,11 @@ KERNEL_TASKID_T presto_task_create(void (*func)(void), BYTE * stack, short stack
 
    // initialize TCB elements
    // new_tcb_p->task_id is already assigned
+
+
+#ifdef FEATURE_STACKSHARING
+   new_tcb_p->main=func;
+#endif // FEATURE_STACKSHARING
    new_tcb_p->stack_top=stack+stack_size-1;
    new_tcb_p->stack_bottom=stack;
    new_tcb_p->current_priority=priority;
@@ -245,15 +266,6 @@ void presto_scheduler_start(void) {
    }
    presto_runtime_progress=PROGRESS_STARTED;
 
-   // we're about to switch to our first task... interrupts off
-   cpu_lock();
-
-   CPU_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(context_switch_isr);
-
-   #ifdef FEATURE_KERNEL_TIMER
-      kernel_master_clock_start();
-   #endif // FEATURE_KERNEL_TIMER
-
    // pick next task to run
    // first task in list is highest priority and is ready
    current_tcb_p=tcb_head_p;
@@ -261,8 +273,32 @@ void presto_scheduler_start(void) {
       error_fatal(ERROR_KERNEL_NOTASKTOSTART);
    }
 
+   // we're about to switch to our first task... interrupts off
+   cpu_lock();
+
+#ifdef FEATURE_STACKSHARING
+   KERNEL_TCB_T * ptr=tcb_head_p;
+   if (ptr!=NULL) {
+      // set up task stacks, skip last one (idle task)
+      do {
+         ptr->stack_ptr=CPU_MAGIC_SETUP_STACK(ptr->stack_top,ptr->main);
+         ptr=ptr->next;
+      } while (ptr!=NULL);
+   }
+#endif // FEATURE_STACKSHARING
+
+   CPU_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(context_switch_isr);
+
+   #ifdef FEATURE_KERNEL_TIMER
+      kernel_master_clock_start();
+   #endif // FEATURE_KERNEL_TIMER
+
    // SET UP A NEW STACK AND START EXECUTION USING IT
    CPU_MAGIC_LOAD_STACK_PTR(current_tcb_p->stack_ptr);
+#ifdef FEATURE_STACKSHARING
+   // set up idle task stack
+   idle_tcb_p->stack_ptr=CPU_MAGIC_SETUP_STACK(idle_tcb_p->stack_top,idle_tcb_p->main);
+#endif // FEATURE_STACKSHARING
    CPU_MAGIC_RUN_FIRST_TASK();
 
    // we never get here
@@ -275,18 +311,8 @@ void presto_scheduler_start(void) {
 
 KERNEL_PRIORITY_T presto_priority_get(KERNEL_TASKID_T tid) {
    KERNEL_TCB_T * tcb_p;
-   tcb_p=tid_to_tcbptr(tid);
+   tcb_p=tid_to_tcbptr(tid,1);
    return tcb_p->current_priority;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-KERNEL_PRIORITY_T kernel_priority_get(KERNEL_TASKID_T tid) {
-   KERNEL_TCB_T * tcb_p;
-   tcb_p=tid_to_tcbptr(tid);
-   return tcb_p->natural_priority;
 }
 
 
@@ -295,7 +321,7 @@ KERNEL_PRIORITY_T kernel_priority_get(KERNEL_TASKID_T tid) {
 
 void presto_priority_set(PRESTO_TASKID_T tid, PRESTO_PRIORITY_T new_priority) {
    KERNEL_TCB_T * tcb_p;
-   tcb_p=tid_to_tcbptr(tid);
+   tcb_p=tid_to_tcbptr(tid,2);
    if (tcb_p->current_priority!=new_priority) {
       priority_queue_remove_tcb(tcb_p);
       tcb_p->natural_priority=new_priority;
@@ -310,7 +336,7 @@ void presto_priority_set(PRESTO_TASKID_T tid, PRESTO_PRIORITY_T new_priority) {
 
 void presto_priority_override(KERNEL_TASKID_T tid, KERNEL_PRIORITY_T new_priority) {
    KERNEL_TCB_T * tcb_p;
-   tcb_p=tid_to_tcbptr(tid);
+   tcb_p=tid_to_tcbptr(tid,3);
    if (tcb_p->current_priority!=new_priority) {
       priority_queue_remove_tcb(tcb_p);
       tcb_p->current_priority=new_priority;
@@ -324,7 +350,7 @@ void presto_priority_override(KERNEL_TASKID_T tid, KERNEL_PRIORITY_T new_priorit
 
 void presto_priority_restore(KERNEL_TASKID_T tid) {
    KERNEL_TCB_T * tcb_p;
-   tcb_p=tid_to_tcbptr(tid);
+   tcb_p=tid_to_tcbptr(tid,4);
    if (tcb_p->current_priority!=tcb_p->natural_priority) {
       priority_queue_remove_tcb(tcb_p);
       tcb_p->current_priority=tcb_p->natural_priority;
@@ -400,10 +426,10 @@ KERNEL_TRIGGER_T presto_trigger_poll(KERNEL_TRIGGER_T test) {
 
 void presto_trigger_send(KERNEL_TASKID_T tid, KERNEL_TRIGGER_T trigger) {
    KERNEL_TCB_T * tcb_p;
-   tcb_p=tid_to_tcbptr(tid);
+   tcb_p=tid_to_tcbptr(tid,5);
    MASKSET(tcb_p->triggers,trigger);
    // if the task is waiting on this trigger, then re-evaluate priorities
-   if(tcb_p->wait_mask & trigger) {
+   if (tcb_p->wait_mask & trigger) {
       kernel_context_switch();
    }
 }
@@ -416,7 +442,7 @@ void presto_trigger_send(KERNEL_TASKID_T tid, KERNEL_TRIGGER_T trigger) {
 
 void kernel_trigger_set_noswitch(KERNEL_TASKID_T tid, KERNEL_TRIGGER_T trigger) {
    KERNEL_TCB_T * tcb_p;
-   tcb_p=tid_to_tcbptr(tid);
+   tcb_p=tid_to_tcbptr(tid,6);
    MASKSET(tcb_p->triggers,trigger);
 }
 
@@ -426,6 +452,16 @@ void kernel_trigger_set_noswitch(KERNEL_TASKID_T tid, KERNEL_TRIGGER_T trigger) 
 
 KERNEL_TASKID_T kernel_current_task(void) {
    return current_tcb_p->task_id;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+KERNEL_PRIORITY_T kernel_priority_get(KERNEL_TASKID_T tid) {
+   KERNEL_TCB_T * tcb_p;
+   tcb_p=tid_to_tcbptr(tid,7);
+   return tcb_p->natural_priority;
 }
 
 
@@ -442,7 +478,7 @@ void kernel_context_switch(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-static void priority_queue_insert_tcb(KERNEL_TCB_T * new_tcb_p, BYTE new_priority) {
+STATIC void priority_queue_insert_tcb(KERNEL_TCB_T * new_tcb_p, BYTE new_priority) {
 
    // INSERT NEW TCB INTO LIST IN PRIORITY ORDER
 
@@ -475,7 +511,7 @@ static void priority_queue_insert_tcb(KERNEL_TCB_T * new_tcb_p, BYTE new_priorit
 ////////////////////////////////////////////////////////////////////////////////
 
 
-static void priority_queue_remove_tcb(KERNEL_TCB_T * old_tcb_p) {
+STATIC void priority_queue_remove_tcb(KERNEL_TCB_T * old_tcb_p) {
    KERNEL_TCB_T * ptr;
    CPU_LOCK_T lock;
 
@@ -503,15 +539,15 @@ static void priority_queue_remove_tcb(KERNEL_TCB_T * old_tcb_p) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-static KERNEL_TCB_T * scheduler_next_ready(void) {
+STATIC KERNEL_TCB_T * scheduler_next_ready(void) {
    // pick highest priority ready task to run
    KERNEL_TCB_T * ptr=tcb_head_p;
    while (ptr!=NULL) {
       // if the wait_mask equals WAIT_MASK_READY, we are "running"
       if (ptr->wait_mask==WAIT_MASK_READY) return ptr;
-      // if we are waiting on triggers, see if they have fired
+      // if we are waiting on triggers and they have fired, we are "ready"
       if (ptr->wait_mask & ptr->triggers) return ptr;
-      // next patient, please
+      // otherwise, we are "waiting"... next patient, please!
       ptr=ptr->next;
    }
    // should never get here
@@ -524,14 +560,6 @@ static KERNEL_TCB_T * scheduler_next_ready(void) {
 
 
 void context_switch_isr(void) {
-
-   // M68HC11
-   // CPU pushes registers when SWI is executed
-   // compiler also pushes pseudo-registers (tmp,z,xy)
-
-   // AVR
-   // CPU pushes PC (that's all!)
-   // compiler pushes several registers and SREG
 
    CPU_MAGIC_START_OF_SWI();
    CPU_DEBUG_SWI_START();
@@ -598,12 +626,12 @@ void presto_wait_for_idle(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-static void send_idle_notifications(void) {
+STATIC void send_idle_notifications(void) {
    KERNEL_TASKID_T t;
    BYTE index=TASK_BITMASK_FIRSTINDEX();
    BYTE mask=TASK_BITMASK_FIRSTMASK();
    for(t=0;t<PRESTO_KERNEL_MAXUSERTASKS;t++) {
-      if(idle_notification[index]&mask) {
+      if (idle_notification[index]&mask) {
          kernel_trigger_set_noswitch(t,KERNEL_INTERNAL_TRIGGER);
       }
       TASK_BITMASK_INCREMENT(index,mask);
@@ -615,7 +643,7 @@ static void send_idle_notifications(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-static void idle_task(void) {
+STATIC void idle_task(void) {
    send_idle_notifications();
    kernel_context_switch();
    while (1) {
@@ -627,8 +655,8 @@ static void idle_task(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-static KERNEL_TCB_T * tid_to_tcbptr(KERNEL_TASKID_T tid) {
-   if (tid>=MAX_TASKS) error_fatal(ERROR_KERNEL_TIDTOTCB_RANGE);
+STATIC KERNEL_TCB_T * tid_to_tcbptr(KERNEL_TASKID_T tid, unsigned char c) {
+   if (tid>=MAX_TASKS) error_fatal(0xA0+c); // ERROR_KERNEL_TIDTOTCB_RANGE);
    return &tcb_list[tid];
 }
 

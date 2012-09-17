@@ -2,13 +2,13 @@
 #include "presto.h"
 #include "types.h"
 #include "error.h"
-#include "board.h"
+#include "handyboard.h"
 #include "messages.h"
 #include "shared.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PRESTO_SEMRESOURCE_T copier;
+PRESTO_SEMAPHORE_T copier;
 BYTE lights=0xFF;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ void busy_work(BYTE blink_mask,WORD worktodo) {
       if (presto_trigger_poll(FLAG_ALL_COPYTICK)) {
          presto_trigger_clear(FLAG_ALL_COPYTICK);
          count++;
-         if(count==4) {
+         if (count==4) {
             count=0;
             work_done++;
          }
@@ -47,6 +47,14 @@ void busy_work(BYTE blink_mask,WORD worktodo) {
    presto_trigger_clear(FLAG_ALL_COPYTICK);
    MASKCLR(lights,blink_mask);
    assert_lights();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void use_copier(BYTE blink_mask,WORD worktodo) {
+   presto_semaphore_wait(&copier);
+   busy_work(blink_mask,worktodo);
+   presto_semaphore_release(&copier);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -32,7 +32,7 @@ typedef unsigned long DWORD;
 
 // UNION BIT TYPES
 
-#ifdef CPU_M68HC11
+#ifdef BIG_ENDIAN
    typedef union MISCWORD {
       WORD w;
       struct {BYTE h,l;} b;
@@ -43,9 +43,9 @@ typedef unsigned long DWORD;
       struct {WORD h,l;} w;
       BYTE b[4];
    } MISCLONG;
-#endif // CPU_M68HC11
+#endif // BIG_ENDIAN
 
-#ifdef CPU_AVR8515
+#ifdef LITTLE_ENDIAN
    typedef union MISCWORD {
       WORD w;
       struct {BYTE l,h;} b;
@@ -56,7 +56,7 @@ typedef unsigned long DWORD;
       struct {WORD l,h;} w;
       BYTE b[4];
    } MISCLONG;
-#endif // CPU_AVR8515
+#endif // LITTLE_ENDIAN
 
 
 ////////////////////////////////////////////////////////////////////////////////
