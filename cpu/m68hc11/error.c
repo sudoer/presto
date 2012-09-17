@@ -17,7 +17,7 @@
 
 #include "types.h"
 #include "error_codes.h"
-#include "hc11regs.h"
+#include "hc11_regs.h"
 #include "locks.h"
 #include "handyboard.h"
 #include "error.h"

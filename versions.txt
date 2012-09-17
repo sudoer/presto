@@ -1,3 +1,25 @@
+
+2003.08.15
+
+Presto now runs on M68HC11 or AVR8515.
+
+Triggers and timers are both supported on AVR.  All registers are
+saved during a task swap (during normal interrupts, GCC-AVR only
+saves registers that are used).
+
+All CPU-dependent stuff is in "cpu" directory.  Bootstrap stuff,
+interrupt vectors, error numbers, CPU (interrupt) locking, etc are
+all done in separate files in CPU directory.  Hardware timers have
+their own C file.  Error reporting has its own file.  All task
+swapping magic is handled in one header file, kernel_magic.h.
+
+Four major subsections (memory, semaphores, timers, mail) are now
+selectively compiled using FEATURE switches in configure.h.
+
+Still need to look at error numbers and AVR error routines.
+
+---
+
 2003.07.21
 
 Subsections are documented.

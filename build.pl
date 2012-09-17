@@ -39,9 +39,6 @@ sub setup_project {
 
    print("setting up project...");
 
-   #$CPU=$CPU_M68HC11;
-   $CPU=$CPU_AVR8515;
-
    $TARGET="presto";
 
    $OBJ_DIR=""
@@ -55,37 +52,34 @@ sub setup_project {
       ;
 
    @SRC_FILES=(
-      ifcpu($CPU_M68HC11,"$cpu_dir\\intvect.c"),
-      ifcpu($CPU_M68HC11,"$cpu_dir\\error.c"),
-      ifcpu($CPU_M68HC11,"$cpu_dir\\hwtimer.c"),
-      ifcpu($CPU_M68HC11,"$cpu_dir\\boot.c"),
-      ifcpu($CPU_M68HC11,"$cpu_dir\\crt0.s"),
+
+      # APPLICATION FILES
+
       ifcpu($CPU_M68HC11,"app\\stress_test.c"),
       ifcpu($CPU_M68HC11,"services\\serial.c"),
       ifcpu($CPU_M68HC11,"services\\string.c"),
 
-      ifcpu($CPU_M68HC11,"presto\\kernel\\clock.c"),
-      ifcpu($CPU_M68HC11,"presto\\kernel\\memory.c"),
-      ifcpu($CPU_M68HC11,"presto\\kernel\\semaphore.c"),
-      ifcpu($CPU_M68HC11,"presto\\kernel\\timer.c"),
-      ifcpu($CPU_M68HC11,"presto\\kernel\\mail.c"),
-      ifcpu($CPU_M68HC11,"presto\\kernel\\kernel.c"),
-
-
-
-      ifcpu($CPU_AVR8515,"$cpu_dir\\boot.c"),
-      ifcpu($CPU_AVR8515,"$cpu_dir\\error.c"),
-      ifcpu($CPU_AVR8515,"$cpu_dir\\vectors.s"),
-      ifcpu($CPU_AVR8515,"$cpu_dir\\hwtimer.c"),
       ifcpu($CPU_AVR8515,"app\\small_test.c"),
 
-      ifcpu($CPU_AVR8515,"presto\\kernel\\clock.c"),
-      ifcpu($CPU_AVR8515,"presto\\kernel\\memory.c"),
-      ifcpu($CPU_AVR8515,"presto\\kernel\\semaphore.c"),
-      ifcpu($CPU_AVR8515,"presto\\kernel\\timer.c"),
-      ifcpu($CPU_AVR8515,"presto\\kernel\\mail.c"),
-      ifcpu($CPU_AVR8515,"presto\\kernel\\kernel.c"),
+      # CORE RTOS KERNEL
 
+      "presto\\kernel\\clock.c",
+      "presto\\kernel\\memory.c",
+      "presto\\kernel\\semaphore.c",
+      "presto\\kernel\\timer.c",
+      "presto\\kernel\\mail.c",
+      "presto\\kernel\\kernel.c",
+
+      # CPU SUPPORT FILES
+
+      "$cpu_dir\\boot.c",
+      "$cpu_dir\\error.c",
+      "$cpu_dir\\hwtimer.c",
+
+      ifcpu($CPU_M68HC11,"$cpu_dir\\crt0.s"),
+      ifcpu($CPU_M68HC11,"$cpu_dir\\vectors.c"),
+
+      ifcpu($CPU_AVR8515,"$cpu_dir\\vectors.s"),
 
    );
 
@@ -137,6 +131,12 @@ sub prepare {
    # flush after print();
    $|=1;
 
+   # DEFINE CPU ARCHITECTURES
+   print("defining architectures...");
+   $CPU_M68HC11=1;
+   $CPU_AVR8515=2;
+   print("OK\n");
+
    # turn debug info on/off
    print("parsing command-line arguments...");
    $DEBUG=0;
@@ -144,20 +144,29 @@ sub prepare {
       if(tolower($arg) eq "debug") {
          $DEBUG=1;
       }
+      if(tolower($arg) eq "m68hc11") {
+         $CPU=$CPU_M68HC11;
+      }
+      if(tolower($arg) eq "avr8515") {
+         $CPU=$CPU_AVR8515;
+      }
    }
    print("OK\n");
+
+   if(!defined($CPU)) {
+      print("MUST SPECIFY TARGET:\n");
+      print(" - M68HC11\n");
+      print(" - AVR8515\n");
+      print("\n");
+      print("usage: PERL BUILD.PL <target> [DEBUG]\n");
+      exit(1);
+   }
 
    # REMEMBER WHERE YOU STARTED
    print("remembering build directory...");
    $BUILD_DIR=cwd();  # chop($BUILD_DIR=`cd`); was SLOW!
    $BUILD_DIR=~s/^[A-Za-z]://g;  # remove C:
    $BUILD_DIR=~s/\//\\/g;  # change / to \
-   print("OK\n");
-
-   # DEFINE CPU ARCHITECTURES
-   print("defining architectures...");
-   $CPU_M68HC11=1;
-   $CPU_AVR8515=2;
    print("OK\n");
 
 }
@@ -409,6 +418,14 @@ sub convert_binary {
       #copy_file("coff\\$TARGET.S","$TARGET.S");
       #$errors+=run($GNU_PREFIX."objcopy.exe -j .eeprom --set-section-flags=.eeprom=\"alloc,load\" --change-section-lma .eeprom=0 -O ihex $TARGET.elf $TARGET.eep");
 
+      #$errors+=run($GNU_PREFIX."objcopy.exe "
+      #   ."--debugging "
+      #   ."-O coff-ext-avr "
+      #   ."--change-section-address .data-0x800000 "
+      #   ."--change-section-address .bss-0x800000 "
+      #   ."--change-section-address .noinit-0x800000 "
+      #   ."--change-section-address .eeprom-0x810000 "
+      #   ."$TARGET.elf $TARGET.cof");
 
       $errors+=run($GNU_PREFIX."objcopy.exe "
          ."--input-target=elf32-avr "
@@ -574,6 +591,8 @@ sub section_info {
    } elsif($header eq "softregs") {   return ( ""       , "page0"          );
    } elsif($header eq "comment") {    return ( ""       , "debug"          );
    } elsif($header eq "debug") {      return ( ""       , "debug"          );
+   } elsif($header eq "stab") {       return ( ""       , "debug"          );
+   } elsif($header eq "stabstr") {    return ( ""       , "debug"          );
    } else {                           return ( ""       , "???"            );
    }
 }

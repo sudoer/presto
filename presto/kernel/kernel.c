@@ -45,7 +45,7 @@
 #include "configure.h"
 #include "error.h"
 #include "locks.h"
-#include "cpu_inline.h"
+#include "kernel_magic.h"
 #include "kernel/kernel.h"
 #include "kernel/mail.h"
 #include "kernel/timer.h"
@@ -95,7 +95,7 @@ static void priority_queue_insert_tcb(KERNEL_TCB_T * tcb_p, KERNEL_PRIORITY_T pr
 static void priority_queue_remove_tcb(KERNEL_TCB_T * tcb_p);
 
 // context switching
-void context_switch_isr(void) __attribute__((interrupt));
+KERNEL_MAGIC_DECLARE_SWI(context_switch_isr);
 
 // utilities
 static KERNEL_TCB_T * tid_to_tcbptr(KERNEL_TASKID_T tid);
@@ -208,7 +208,7 @@ KERNEL_TASKID_T presto_task_create(void (*func)(void), BYTE * stack, short stack
    new_tcb_p->triggers=(KERNEL_TRIGGER_T)0;
 
    // SET UP NEW STACK
-   new_tcb_p->stack_ptr=cpu_inline_setup_stack(new_tcb_p->stack_top,func);
+   new_tcb_p->stack_ptr=KERNEL_MAGIC_SETUP_STACK(new_tcb_p->stack_top,func);
 
    priority_queue_insert_tcb(new_tcb_p,priority);
 
@@ -224,7 +224,7 @@ void presto_scheduler_start(void) {
    // we're about to switch to our first task... interrupts off
    cpu_lock();
 
-   cpu_inline_initialize_software_interrupt(context_switch_isr);
+   KERNEL_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(context_switch_isr);
 
    #ifdef FEATURE_KERNEL_TIMER
       kernel_master_clock_start();
@@ -238,7 +238,8 @@ void presto_scheduler_start(void) {
    }
 
    // SET UP A NEW STACK AND START EXECUTION USING IT
-   cpu_inline_launch_first_task(current_tcb_p->stack_ptr);
+   KERNEL_MAGIC_LOAD_STACK_PTR(current_tcb_p->stack_ptr);
+   KERNEL_MAGIC_RUN_FIRST_TASK();
 
    // we never get here
    error_fatal(ERROR_KERNEL_STARTAFTERRTI);
@@ -398,7 +399,7 @@ KERNEL_TASKID_T kernel_current_task(void) {
 
 
 void kernel_context_switch(void) {
-   cpu_inline_software_interrupt();
+   KERNEL_MAGIC_SOFTWARE_INTERRUPT();
 }
 
 
@@ -501,7 +502,8 @@ void context_switch_isr(void) {
    // CPU pushes PC (that's all!)
    // compiler pushes several registers and SREG
 
-   cpu_inline_swi_start();
+   KERNEL_MAGIC_START_OF_SWI();
+   KERNEL_MAGIC_INDICATE_SWI_START();
 
    #ifdef SANITYCHECK_KERNEL_CLOBBEREDSTACK
       // check to see if the old task has clobbered its stack
@@ -523,7 +525,7 @@ void context_switch_isr(void) {
    // only manipulate stacks if there is a context SWITCH
    if (current_tcb_p!=old_tcb_p) {
 
-      cpu_inline_indicate_task_switch();
+      KERNEL_MAGIC_INDICATE_TASK_SWITCH();
 
       // there's a new "highest priority ready task"
 
@@ -539,12 +541,13 @@ void context_switch_isr(void) {
       // the asm routine will re-enable interrupts
       alans_new_sp=current_tcb_p->stack_ptr;
 
-      cpu_inline_swap_stack_pointers(alans_old_spp,alans_new_sp);
+      KERNEL_MAGIC_SWAP_STACK_POINTERS(alans_old_spp,alans_new_sp);
 
    }
 
-   cpu_inline_swi_end();
+   KERNEL_MAGIC_INDICATE_SWI_END();
 
+   KERNEL_MAGIC_END_OF_SWI();
 }
 
 
@@ -553,7 +556,7 @@ void context_switch_isr(void) {
 
 static void idle_task(void) {
    while (1) {
-      cpu_inline_idle_work();
+      KERNEL_MAGIC_INDICATE_IDLE_WORK();
    }
 }
 

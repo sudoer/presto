@@ -35,7 +35,7 @@
 
 #include "types.h"
 #include "error.h"
-#include "intvect.h"
+#include "vectors.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D A T A   T Y P E S

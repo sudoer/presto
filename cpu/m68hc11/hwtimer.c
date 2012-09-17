@@ -13,7 +13,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
-#include "hc11regs.h"
+#include "hc11_regs.h"
+#include "vectors.h"
 #include "hwtimer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +40,7 @@ static unsigned short eclocks_per_tick;
 //   E X P O R T E D   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-void hwtimer_start(unsigned short ms, void (*func)()) {
+void hwtimer_start(unsigned short ms, void (*func)(void)) {
    // set up interrupt vector for TOC2
    set_interrupt(INTR_TOC2, func);
    // calculate value to count up to

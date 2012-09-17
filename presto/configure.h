@@ -52,10 +52,10 @@
 #endif
 
 // TASKS
-#define PRESTO_KERNEL_MAXUSERTASKS           8
+#define PRESTO_KERNEL_MAXUSERTASKS           6
 
 // TRIGGERS
-#define PRESTO_KERNEL_TRIGGERBITS            8
+#define PRESTO_KERNEL_TRIGGERBITS           16
 
 ////////////////////////////////////////////////////////////////////////////////
 //   M A I L   M E S S A G E S

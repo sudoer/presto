@@ -28,10 +28,10 @@
 #include "presto.h"
 #include "locks.h"
 #include "hwtimer.h"
+#include "kernel_magic.h"
 #include "kernel/kernel.h"
 #include "kernel/timer.h"
 #include "kernel/clock.h"
-#include "cpu_inline.h"
 
 #ifdef FEATURE_KERNEL_TIMER
 
@@ -135,7 +135,7 @@ void kernel_master_clock_start(void) {
    // initialize master clock
    clock_reset(&system_clock);
    // do hardware timer magic
-   hwtimer_start(PRESTO_KERNEL_MSPERTICK,timer_isr);
+   hwtimer_start(PRESTO_KERNEL_MSPERTICK,(void (*)(void))timer_isr);
 }
 
 
@@ -146,7 +146,7 @@ void kernel_master_clock_start(void) {
 
 void timer_isr(void) {
 
-   cbi(PORTB,7);
+   KERNEL_MAGIC_INDICATE_TICK_START();
 
    BYTE count=0;
    KERNEL_TIMER_T * timer_p;
@@ -182,7 +182,7 @@ void timer_isr(void) {
       if(presto_priority_get(timer_p->owner_tid)>current_pri) count++;
    }
 
-   sbi(PORTB,7);
+   KERNEL_MAGIC_INDICATE_TICK_END();
 
    if (count>0) {
       kernel_context_switch();

@@ -22,13 +22,8 @@
 
 // crystal frequency
 #define CYCLES_PER_MS       4000
-
-// HC11:set in TMSK2 register (see boot.c)
-// AVR: set in TCCR1B register (see below)
 #define TIMER_PRESCALE      1
-
 #define CLOCKS_PER_MS       CYCLES_PER_MS/TIMER_PRESCALE
-
 
 // prescaler
 #define PRESCALE_1        0x01
@@ -41,7 +36,7 @@
 //   E X P O R T E D   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-void hwtimer_start(unsigned short ms, void (*func)()) {
+void hwtimer_start(unsigned short ms, void (*func)(void)) {
    // toggle OC1A and OC1B on matches, disable PWM
    outb(TCCR1A,M_COM1A0);
    // disable noise canceler, clear when A matches, prescale=1 (start now)

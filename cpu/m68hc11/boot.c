@@ -17,9 +17,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "configure.h"
-#include "hc11regs.h"
+#include "hc11_regs.h"
 #include "locks.h"
-#include "intvect.h"
+#include "vectors.h"
 #include "boot.h"
 
 
