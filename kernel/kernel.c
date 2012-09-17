@@ -63,7 +63,7 @@ static void print_tcb_list(void);
 static void print_mail_list(void);
 static void idle_task(void);
 
-#pragma interrupt presto_system_isr
+void presto_system_isr_wrapper(void);
 void presto_system_isr(void);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +91,7 @@ void presto_init(void) {
 
    // initialize mail list
    for(count=0;count<MAX_MESSAGES;count++) {
-      mail_list[count].next=&mail_list[count+1];
+      mail_list[count].next=&mail_list[count+1];  // goes past end of array - OK
       mail_list[count].serial_number=count;
    }
    mail_list[MAX_MESSAGES-1].next=NULL;
@@ -112,6 +112,7 @@ void presto_start_scheduler(void) {
    // we're about to switch to our first task... interrupts off
    INTR_OFF();
 
+   //set_interrupt(INTR_TOC2, presto_system_isr_wrapper);
    set_interrupt(INTR_TOC2, presto_system_isr);
 
    // start timer interrupts for pre-emption
@@ -156,15 +157,16 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
 
    if(free_tcb_p==NULL) {
       // There are no more TCB's left.
+      presto_fatal_error();
       return -1;
    }
+
+   // we're about to mess with tasks, TCB's... interrupts off
+   INTR_OFF();
 
    // allocate TCB for new task
    new_tcb_p=free_tcb_p;
    free_tcb_p=free_tcb_p->next;
-
-   // we're about to mess with tasks, TCB's... interrupts off
-   INTR_OFF();
 
    // initialize TCB elements
    // new_tcb_p->task_id is already assigned
@@ -260,9 +262,17 @@ void presto_kill_self(void) {
 //   C O N T E X T   S W I T C H I N G   ( I N T E R R U P T )
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_system_isr(void) {
+#pragma interrupt presto_system_isr_wrapper
+void presto_system_isr_wrapper(void) {
 
-   // no local variables... we'll mess up our stack
+   // The ICC compiler adds a "jsr __enterb" at the beginning of my interrupt
+   // service routine.  Apparently, it is concerned with preserving the state
+   // of the X register, and it tries to push it onto the stack and then do some
+   // funny math.  At the end of the ISR, it tries to undo all of the mess, and
+   // it even ends the ISR with a jump instruction.  Yikes!  I use this label
+   // to by-pass this destructive behavior at the top, and later I use an
+   // inline "RTI" instruction to by-pass the stuff at the bottom.
+   asm("_presto_system_isr::");
 
    INTR_OFF();
 
@@ -303,9 +313,11 @@ void presto_system_isr(void) {
    asm("psha");
 
    // The end of this function SHOULD be an RTI (instead of RTS), because it is
-   // an interrupt.  But checking the listing file, it looks like the ICC
-   // compiler is doing some funny math at the end of interrupt routines.  So
-   // I will add my RTI here explicitly, to force the behavior that I want.
+   // an interrupt.  But the ICC compiler adds a lot of stuff at the beginning
+   // and the end of interrupt service routines.  Specifically, it is messing
+   // with the X register (pushing it onto the stack) because it uses that as
+   // a frame pointer.  So I will add my RTI here explicitly, to force the
+   // behavior that I want.
    // Now we will pop the stack and "run" the new task.
    asm("rti");
 
@@ -342,13 +354,6 @@ void context_switch(void) {
    // the asm routine will re-enable interrupts
    global_new_sp=current_tcb_p->stack_ptr;
 
-
-
-   asm("swi");
-
-
-
-/*
    // save the registers (in the same order that an interrupt does)
    asm("pshy");  // 2 bytes (Low, then High)
    asm("pshx");  // 2 bytes (Low, then High)
@@ -374,10 +379,8 @@ void context_switch(void) {
    // call RTI here to pop the registers and "run" the new task.
    asm("rti");
 
-
    // we never get here
    presto_fatal_error();
-*/
 }
 
 
@@ -409,6 +412,7 @@ BYTE presto_send_message(PRESTO_TID_T to, PRESTO_MAIL_T payload) {
 
 BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload) {
    PRESTO_MESSAGE_T * new_mail_p;
+   PRESTO_TCB_T * tcb_ptr;
 
    // we're going to mess with the PO mail list... interrupts off
    INTR_OFF();
@@ -419,7 +423,8 @@ BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload) 
    }
 
    // check to see that the recipient is an alive task
-   if(tid_to_tcbptr(to)==NULL) {
+   tcb_ptr=tid_to_tcbptr(to);
+   if(tcb_ptr==NULL) {
       presto_fatal_error();
    }
 
@@ -430,7 +435,7 @@ BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload) 
    // fill in the blanks
    // new_mail_p->serial_number;   already set
    new_mail_p->from_tid=current_tcb_p->task_id;
-   new_mail_p->to_tcb_p=tid_to_tcbptr(to);
+   new_mail_p->to_tcb_p=tcb_ptr;
    new_mail_p->delivery_time=clock_add(presto_master_clock,delay);
    new_mail_p->payload=payload;
 
@@ -464,12 +469,6 @@ BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload) 
 
    // we're done messing with the PO mail list... interrupts back on
    INTR_ON();
-
-   /*
-   // this would be a good chance to deliver some mail...
-   // maybe someone just sent a message to himself (what a loser).
-   deliver_mail();
-   */
 
    return 0;
 }

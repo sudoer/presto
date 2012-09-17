@@ -27,8 +27,6 @@ typedef union {
 
 // KERNEL
 
-#define MAX_USER_TASKS  10
-
 void presto_init(void);
 PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_size, BYTE priority );
 void presto_start_scheduler(void);

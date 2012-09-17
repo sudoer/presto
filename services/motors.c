@@ -86,7 +86,7 @@ void motor_init(void) {
    // store (current plus MOTOR_CYCLES)
    TOC3 = TCNT + MOTOR_CYCLES;
    // request output compare interrupt
-   TMSK1 |= TMSK1_OC3I;
+//   TMSK1 |= TMSK1_OC3I;                         // NO INTERRUPTS!
    // clear the OUTPUT COMPARE flag
    // writing O's makes no change, writing 1's clears the bit
    TFLG1 = TFLG1_OC3F;

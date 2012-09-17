@@ -7,14 +7,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // system crashes after 21 seconds (42*500=21000,35*600=21000,30*700=21000)
-#define TIMER0    0
-#define TIMER1    600
-#define TIMER2    700
-#define TIMER3    800
+#define TIMER0    1200
+#define TIMER1    5000
+#define TIMER2    600
+#define TIMER3    1000
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define STACK_SIZE 256
+#define STACK_SIZE 100
 
 static BYTE task_one_stack[STACK_SIZE];
 static BYTE task_two_stack[STACK_SIZE];
