@@ -28,12 +28,14 @@ BODY {
 
 .VARIABLE {
   font-family:"Courier";
+  font-weight:bold;
   color:black;
 }
 
 .FILENAME {
   font-family:"Courier";
-  color:olive;
+  font-weight:bold;
+  color:black;
 }
 
 H1 {

@@ -1,0 +1,7 @@
+#
+# $Id$
+#
+# Reconnect in debug mode to an HC11 that already has the talker running
+
+include machine.db11
+mode debug

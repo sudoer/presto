@@ -1,0 +1,9 @@
+#
+# $Id$
+#
+# Display the HPRIO register and disable:
+# RBOOT (read bootstrap rom) and
+# MODEA (into special test mode, expanded).
+
+include debug.db11
+set *0x103C=0x35

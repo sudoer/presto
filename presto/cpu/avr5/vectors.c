@@ -89,7 +89,10 @@ void vector_table(void) {
       "jmp bad_isr_timer1_compa"  "\n\t"  // TIMER1_COMPA
       "jmp bad_isr_timer1_compb"  "\n\t"  // TIMER1_COMPB
       "jmp bad_isr_timer1_ovf"    "\n\t"  // TIMER1_OVF
-      "jmp bad_isr_timer0_comp"   "\n\t"  // TIMER0_COMP
+
+      //"jmp bad_isr_timer0_comp"   "\n\t"  // TIMER0_COMP
+      "jmp timer_isr"             "\n\t"  // TIMER0_COMP
+
       "jmp bad_isr_timer0_ovf"    "\n\t"  // TIMER0_OVF
       "jmp bad_isr_spi_stc"       "\n\t"  // SPI_STC
       "jmp bad_isr_uart_rx"       "\n\t"  // UART_RX

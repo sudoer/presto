@@ -1,0 +1,29 @@
+#
+# $Id: loadhello.db11,v 1.9 2001/02/06 11:16:42 cjh Exp $
+#
+# This db11 script sets baud rates etc, loads and starts the talker,
+# then loads "hello.s19", disassembles it, and sets PC ready to run it.
+#
+
+include machine.db11
+boot talkram.s19
+mode debug
+file hello.s19
+define Start=0x100
+define MainLoop=0x106
+define NextChar=0x109
+define ReStart=0x119
+define Delay229=0x11B
+define Next229=0x11F
+define OUTSCI=0x124
+define INPOLL=0x12F
+define STARTAGAIN=0x140
+define INPOLL_EXIT=0x143
+define HelloWorld @ 0x144
+define SCSR @0x102E
+define SCDR@ 0x102F
+define STACK_START@0x1FF
+define TDRE@0x80
+define RDRF@0x20
+list 0x100,0x44
+set pc=0x100

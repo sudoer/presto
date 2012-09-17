@@ -47,7 +47,7 @@ sub parse_command_line {
          $DEBUG=1;
       } elsif(tolower($arg) eq "batch") {
          $BATCH=1;
-      }	else {
+      }  else {
           $project_file=$arg;
       }
    }
@@ -150,17 +150,17 @@ sub determine_cpu {
 sub cpu_specific_settings {
 
    print("setting up compiler...");
-   $COMPILER_HOME=""
-      .ifcpu($CPU_M68HC11,"c:/programs/embedded/hc11/gnu")
-      .ifcpu($CPU_AVR8515,"c:/programs/embedded/avr/gnu")
-      .ifcpu($CPU_MEGA169,"c:/programs/embedded/avr/gnu")
-      ;
-   add_to_path("$COMPILER_HOME/bin");
+   #$COMPILER_HOME=""
+   #   .ifcpu($CPU_M68HC11,"c:/programs/embedded/hc11/gnu")
+   #   .ifcpu($CPU_AVR8515,"c:/programs/embedded/avr/gnu")
+   #   .ifcpu($CPU_MEGA169,"c:/programs/embedded/avr/gnu")
+   #   ;
+   #add_to_path("$COMPILER_HOME/bin");
    $CPU_COMPILER_OPTIONS=""
        # TELL MY PROGRAMS WHAT CPU WE'RE USING
-       .ifcpu($CPU_M68HC11,"-DCPU=M68HC11 ")      # 
-       .ifcpu($CPU_AVR8515,"-DCPU=AVR8515 ")      # 
-       .ifcpu($CPU_MEGA169,"-DCPU=MEGA169 ")      # 
+       .ifcpu($CPU_M68HC11,"-DCPU=M68HC11 ")      #
+       .ifcpu($CPU_AVR8515,"-DCPU=AVR8515 ")      #
+       .ifcpu($CPU_MEGA169,"-DCPU=MEGA169 ")      #
        # DEFINE ARCHITECTURE
        .ifcpu($CPU_M68HC11,"-m68hc11 ")           # platform, hc11 or hc12
        .ifcpu($CPU_AVR8515,"-mmcu=at90s8515 ")    # platform, which AVR
@@ -179,21 +179,21 @@ sub cpu_specific_settings {
        .ifcpu($CPU_M68HC11,"-mshort ")            # use short ints
        .ifcpu($CPU_M68HC11,"-msoft-reg-count=0 ") # soft registers available
        # STORAGE
-       ."-fwritable-strings "                     # store strings in "strings" section, not inline
+       #."-fwritable-strings "                     # store strings in "strings" section, not inline
        ;
    print("OK\n");
 
    ###
 
    print("setting up linker...");
-   $GCC_LIB=$COMPILER_HOME
-      .ifcpu($CPU_M68HC11,"/lib/gcc-lib/m6811-elf/3.0.4/libgcc.a")
-      .ifcpu($CPU_AVR8515,"/lib/gcc-lib/avr/3.3.1/libgcc.a")
-      .ifcpu($CPU_MEGA169,"/lib/gcc-lib/avr/3.3.1/libgcc.a")
+   $GCC_LIB=""
+      .ifcpu($CPU_M68HC11,"/usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a")
+      .ifcpu($CPU_AVR8515,"/usr/lib/gcc-lib/avr/3.3.2/libgcc.a")
+      .ifcpu($CPU_MEGA169,"/usr/lib/gcc/avr/3.4.0/libgcc.a")
       ;
    $CPU_RUNTIME_LIB=""
-      .ifcpu($CPU_AVR8515,"$COMPILER_HOME/avr/lib/crts8515.o ")
-      .ifcpu($CPU_MEGA169,"$COMPILER_HOME/avr/lib/avr5/crtm169.o ")
+      .ifcpu($CPU_AVR8515,"/usr/avr/lib/crts8515.o ")
+      .ifcpu($CPU_MEGA169,"/usr/avr/lib/avr5/crtm169.o ")
       ;
    $CPU_LINKER_OPTIONS=""
       # DEFINE ARCHITECTURE
@@ -217,7 +217,7 @@ sub cpu_specific_settings {
 
    print("setting up GNU tools...");
    $GNU_PREFIX=""
-      .ifcpu($CPU_M68HC11,"m6811-elf-")
+      .ifcpu($CPU_M68HC11,"m68hc11-")
       .ifcpu($CPU_AVR8515,"avr-")
       .ifcpu($CPU_MEGA169,"avr-")
       ;
@@ -234,12 +234,12 @@ sub cpu_specific_settings {
    $CPU_CONVERSION_OPTIONS=""
       .ifcpu($CPU_M68HC11,"--output-target=srec --strip-all --strip-debug ")
       .ifcpu($CPU_AVR8515,"--input-target=elf32-avr --output-target=ihex -j .vectors -j .text ")
-      .ifcpu($CPU_MEGA169,"--input-target=elf32-avr --output-target=ihex -j .vectors -j .text ")
+      .ifcpu($CPU_MEGA169,"--input-target=elf32-avr --output-target=srec -j .vectors -j .text ")
       ;
    $LOAD_EXT=""
-      .ifcpu($CPU_M68HC11,"S19")
-      .ifcpu($CPU_AVR8515,"HEX")
-      .ifcpu($CPU_MEGA169,"HEX")
+      .ifcpu($CPU_M68HC11,"s19")
+      .ifcpu($CPU_AVR8515,"hex")
+      .ifcpu($CPU_MEGA169,"s19")
       ;
    print("OK\n");
 
@@ -363,7 +363,7 @@ sub compile_stage {
          if($src_ext eq "c") {
             print("COMPILING  $src_file...");
             debug("");
-            $errors+=run($GNU_PREFIX."gcc.exe "
+            $errors+=run($GNU_PREFIX."gcc "
 
                # CPU-specific options
                ."$CPU_COMPILER_OPTIONS "
@@ -389,7 +389,7 @@ sub compile_stage {
          } elsif($src_ext eq "s") {
             print("ASSEMBLING $src_file...");
             debug("");
-            $errors+=run($GNU_PREFIX."as.exe "
+            $errors+=run($GNU_PREFIX."as "
                #."-x assembler-with-cpp "        # used with gcc, not with as
                ."-L "                            # include local symbols in debug table
                ."-ahlns=$lst_path "              # generate list file
@@ -440,7 +440,7 @@ sub link_stage {
    print("LINKING...\n");
 
 
-   $errors+=run($GNU_PREFIX."ld.exe "
+   $errors+=run($GNU_PREFIX."ld "
 
       # CPU-specific options
       ."$CPU_LINKER_OPTIONS "
@@ -479,13 +479,18 @@ sub convert_binary {
    change_directory("$BUILD_DIR/$OPT_OBJDIR");
 
    print("CONVERTING...\n");
-   $errors+=run($GNU_PREFIX."objcopy.exe "
+   $errors+=run($GNU_PREFIX."objcopy "
       ."$CPU_CONVERSION_OPTIONS "
       ."--verbose "
       ."$OPT_TARGET.elf "
       ."$OPT_TARGET.$LOAD_EXT");
    print("OK\n");
    print("\n");
+
+
+   # NOTE - to create COF file for debugging with AVR studio...
+   # avr-objcopy -O coff-ext-avr --debugging project.elf project.cof
+
 
    $TOTAL_ERRORS+=$errors;
    change_directory($BUILD_DIR);
@@ -494,16 +499,16 @@ sub convert_binary {
 ################################################################################
 
 # sub show_target_file {
-# 
+#
 #    if($TOTAL_ERRORS > 0) {
 #       return;
 #    }
-# 
+#
 #    my $tempfile="$OPT_TARGET.dir";
 #    my $target_file="$OPT_OBJDIR\\$OPT_TARGET.$LOAD_EXT";
 #    $target_file=dos_slashes($target_file);
 #    run("dir $target_file > $tempfile");
-# 
+#
 #    open(TEMP,"<$tempfile");
 #    my $line;
 #    while($line=<TEMP>) {
@@ -527,7 +532,7 @@ sub generate_listing {
    change_directory("$BUILD_DIR/$OPT_OBJDIR");
 
    print("GENERATING LISTING...\n");
-   $errors+=run($GNU_PREFIX."objdump.exe "
+   $errors+=run($GNU_PREFIX."objdump "
       ."--disassemble-all "
       ."--architecture=$CPU_ARCHITECTURE "
       #."--section=.text "
@@ -552,7 +557,7 @@ sub show_memory_usage {
    print("------------\n");
 
    my $tempfile="headers.txt";  #$OPT_TARGET.".tmp";
-   run($GNU_PREFIX."objdump.exe -h $OPT_OBJDIR/$OPT_TARGET.elf > $tempfile");
+   run($GNU_PREFIX."objdump -h $OPT_OBJDIR/$OPT_TARGET.elf > $tempfile");
 
    my %memusage_sectsize;
    my @memusage_ramsections;
@@ -849,7 +854,7 @@ sub unix_slashes {
 sub run {
    my $cmd=$_[0];
    my $rc;
-   $cmd=dos_slashes($cmd);
+   #$cmd=dos_slashes($cmd);
    if($DEBUG) {
       print("RUNNING [$cmd]\n\n");
    }
@@ -894,7 +899,7 @@ sub delete_file {
    my $filename=$_[0];
    unlink($filename);
    if($BATCH) {
-      $filename=dos_slashes($filename);
+      #$filename=dos_slashes($filename);
       print(BATCH "del $filename\n");
    }
 }
@@ -927,7 +932,7 @@ sub make_directory {
       print("MAKING DIRECTORY [$dir]\n");
    }
    if($BATCH) {
-      $dir=dos_slashes($dir);
+      #$dir=dos_slashes($dir);
       print(BATCH "mkdir $dir\n");
    }
    mkdir($dir,0777);
@@ -939,7 +944,7 @@ sub change_directory {
    my $dir=$_[0];
    chdir($dir);
    if($BATCH) {
-      $dir=dos_slashes($dir);
+      #$dir=dos_slashes($dir);
       print(BATCH "cd $dir\n");
    }
 }
@@ -976,7 +981,7 @@ sub setenv {
 
 sub add_to_path {
    my $dir=tolower($_[0]);
-   $dir=dos_slashes($dir);
+   #$dir=dos_slashes($dir);
    my $path=tolower($ENV{"PATH"});
    if(index($dir,$path)<0) {
       setenv("PATH",$ENV{"PATH"}.";$dir");

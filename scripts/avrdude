@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# my code, old notation
+/usr/local/share/avrdude/avrdude -p m169 -c avrisp -C /usr/local/share/avrdude/avrdude.conf -e -f s -i obj/butterfly/presto.s19 -m flash -P /dev/ttyUSB0 -v
+
+# butterfly demo, old notation
+#/usr/local/share/avrdude/avrdude -p m169 -c avrisp -C /usr/local/share/avrdude/avrdude.conf -e -f s -i original_butterfly.s19 -m flash -P /dev/ttyUSB0 -v
+
+# my code, new notation
+#/usr/local/share/avrdude/avrdude -p m169 -c avrisp -C /usr/local/share/avrdude/avrdude.conf -U flash:w:obj/butterfly/presto.s19 -P /dev/ttyUSB0 -v -v -v -v
+
+
+

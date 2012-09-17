@@ -46,15 +46,16 @@ inspiration behind the development of Presto.
 
 <P>
 
-As luck would have it, several things happened at nearly the same time, and so
-the secrets of multi-tasking were revealed.  I decided to build a simple
-single-board computer that would be me development platform.  My friend Greg
-Preston convinced me to build a Motorola 68HC11-based "Handyboard".  Presto
-takes its name from Greg's last name (plus it has a magical sound to it).  At
-the same time, I read an article in <I>Circuit Cellar</I> magazine about a
-simple time-slicing system that ran on the HC11.  I studied the example, and
-how they carefully set the stack up and then generated an interrupt which
-changed the stack pointer.  I now had enough knowledge to build my RTOS.
+As luck would have it, several things happened at nearly the same time, and
+so the secrets of multi-tasking were revealed.  I decided to build a simple
+single-board computer that would be me development platform.  A friend
+convinced me to build a Motorola 68HC11-based "Handyboard".  Presto takes
+its name from my friend's last name (Preston).  Plus, I thought that "presto"
+sounded magical.  At the same time, I read an article in <I>Circuit Cellar</I>
+magazine about a simple time-slicing system that ran on the HC11.  I studied
+the example, and how they carefully set the stack up and then generated an
+interrupt which changed the stack pointer.  I now had enough knowledge to
+build my RTOS.
 
 <P>
 
@@ -75,20 +76,21 @@ Where was I going to find some free time?
 
 <P>
 
-I decided that I needed to inspect every instruction that ran on the processor.
-I stay up late after the baby went to sleep, surfing the net for every emulator
-I could find.  I decided that they fell into two categories: those that
-emulated the processor correctly but had horrible user interfaces, and those
-that were easy to use but did not emulate the processor correctly.
-Specifically, I needed to be able to run a million instructions without
-pressing a button a million times.  And I needed to generate timer interrupts.
+I decided that in order to find the bug, I needed to inspect every instruction
+that ran on the processor.  I would stay up late after the baby went to sleep,
+surfing the net for every emulator I could find.  I decided that they fell into
+two categories: those that emulated the processor correctly but had horrible
+user interfaces, and those that were easy to use but did not emulate the
+processor correctly.  Specifically, I needed to be able to run a million
+instructions without pressing a button a million times.  And I needed to
+generate timer interrupts.
 
 <P>
 
-I finally gave up on the net, and wrote my own emulator.  It was tedious work,
+I finally gave up on my search and wrote my own emulator.  It was tedious work,
 but it was fun.  I compared the log files that I generated to the logs of the
 other emulators to find potential bugs.  Wherever they differed, I consulted
-the processor manual to see which one of us was correct.
+the processor manual to see which one was correct.
 
 <P>
 
@@ -116,7 +118,8 @@ solved the problem that night, and it felt great.
 The good news is that in the process of trying to find a bug over a period of
 four years (sitting the project on a shelf for months at a time and dusting it
 off again for a late night of bug-hunting), I wrote and re-wrote the entire
-kernel a couple of times.  So it was an evolution of small improvements.
+kernel a couple of times.  As a by-product of my bug-hunt, the kernel evolved
+into a much cleaner piece of code.
 
 
 <!-- ----------------------------------------------------------------------- -->
@@ -145,13 +148,15 @@ inline assembly language (only where necessary, in the heart of the kernel).
 
 I borrowed concepts that I had seen elsewhere, things that were pleasing in
 their simplicity, and incorporated them into Presto.  Just before version 1.0,
-I decided to change the basic metaphor that Presto used to schedule tasks.  In
-the early days, everything was based on mail messages and a central post office
-that could delay messages (to incorporate timers).  In the new metaphor, each
-task contains several "ready bits" which can be waited on.  In the process of
-making this change, I divided the code into the sections that you see today:
-the core kernel, the task-switching peripherals (mail, timers, sempahores) and
-dynamic memory management.
+I decided to change the basic metaphor that underlies Presto's operation.  Early
+version of the software used mail messages for everything.   Timers were simply
+mail messages that were delayed at the post office.  Now, I have done away with
+this "post office" metaphor, and instead each task contains "ready bits" which
+can be waited upon.  I call these bits "trigger".  Timers and mail messages and
+semaphores each set triggers that will cause a task to become 'ready'.  In the
+process of making this change, I divided the code into the sections that you see
+today: the core kernel, the task-switching peripherals (mail, timers, sempahores)
+and dynamic memory management.
 
 <P>
 
@@ -213,7 +218,7 @@ The idle task's task ID number equals
 
 <!-- ----------------------------------------------------------------------- -->
 
-<H2>Task-switching perpherals: Mail, Timers and Semaphores</H2>
+<H2>Task-switching peripherals: Mail, Timers and Semaphores</H2>
 
 
 <!-- ----------------------------------------------------------------------- -->

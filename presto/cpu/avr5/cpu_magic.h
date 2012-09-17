@@ -59,18 +59,13 @@ static inline void CPU_MAGIC_SOFTWARE_INTERRUPT(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//   S W I   E N T R Y / E X I T
-////////////////////////////////////////////////////////////////////////////////
-
-#define CPU_MAGIC_DECLARE_SWI(x) void x (void) __attribute__((naked));
-
+//   I S R   E N T R Y / E X I T
 ////////////////////////////////////////////////////////////////////////////////
 
 // AVR pushes PC (that's all!)
 // compiler pushes several registers and SREG
 
-//static inline void CPU_MAGIC_START_OF_SWI(void) {
-#define CPU_MAGIC_START_OF_SWI()               \
+#define CPU_PUSH_ALL_REGISTERS()               \
    asm volatile ("push __zero_reg__");         \
    asm volatile ("push __tmp_reg__");          \
    asm volatile ("in __tmp_reg__,__SREG__");   \
@@ -107,10 +102,7 @@ static inline void CPU_MAGIC_SOFTWARE_INTERRUPT(void) {
    asm volatile ("push r30");                  \
    asm volatile ("push r31");
 
-////////////////////////////////////////////////////////////////////////////////
-
-//static inline void CPU_MAGIC_END_OF_SWI(void) {
-#define CPU_MAGIC_END_OF_SWI()                 \
+#define CPU_POP_ALL_REGISTERS()                \
    asm volatile ("pop r31");                   \
    asm volatile ("pop r30");                   \
    asm volatile ("pop r29");                   \
@@ -148,8 +140,13 @@ static inline void CPU_MAGIC_SOFTWARE_INTERRUPT(void) {
    asm volatile ("reti");
 
 ////////////////////////////////////////////////////////////////////////////////
+//   S W I   E N T R Y / E X I T
+////////////////////////////////////////////////////////////////////////////////
 
-#define CPU_MAGIC_RUN_FIRST_TASK() CPU_MAGIC_END_OF_SWI();
+#define CPU_MAGIC_DECLARE_SWI(x)   void x (void) __attribute__((naked));
+#define CPU_MAGIC_START_OF_SWI()   CPU_PUSH_ALL_REGISTERS();
+#define CPU_MAGIC_END_OF_SWI()     CPU_POP_ALL_REGISTERS();
+#define CPU_MAGIC_RUN_FIRST_TASK() CPU_POP_ALL_REGISTERS();
 
 ////////////////////////////////////////////////////////////////////////////////
 //   I D L E   W O R K

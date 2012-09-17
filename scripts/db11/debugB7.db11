@@ -1,0 +1,9 @@
+#
+# $Id: debugB7.db11,v 1.1 2002/03/12 04:25:02 cjh Exp $
+#
+# This db11 script jumps to a preloaded talker in 'F1 EEPROM at 0xB700.
+#
+
+include machine.db11
+jump 0xB700
+mode debug

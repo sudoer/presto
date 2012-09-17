@@ -10,7 +10,7 @@
 
 #define FEATURE_KERNEL_MAIL
 //#define FEATURE_MAIL_NOSTEALING
-//#define FEATURE_KERNEL_TIMER
+#define FEATURE_KERNEL_TIMER
 #define FEATURE_KERNEL_MEMORY
 //#define FEATURE_KERNEL_SEMAPHORE
 //#define FEATURE_SEMAPHORE_PRIORITYINHERITANCE
@@ -33,7 +33,7 @@
 #define PRESTO_KERNEL_MAXUSERTASKS        2
 
 // TRIGGERS
-#define PRESTO_KERNEL_TRIGGERBITS         8
+#define PRESTO_KERNEL_TRIGGERBITS        16
 
 ////////////////////////////////////////////////////////////////////////////////
 //   M A I L   M E S S A G E S

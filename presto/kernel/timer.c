@@ -29,6 +29,7 @@
 #include "cpu_locks.h"
 #include "cpu_timer.h"
 #include "cpu_debug.h"
+#include "cpu_magic.h"
 #include "kernel/kernel.h"
 #include "kernel/timer.h"
 #include "kernel/clock.h"
@@ -53,7 +54,7 @@
 
 static void timer_insert_into_master_list(KERNEL_TIMER_T * timer_p);
 static void timer_remove_from_master_list(KERNEL_TIMER_T * timer_p);
-void timer_isr(void) __attribute__((interrupt));
+CPU_TIMER_DECLARE_ISR(timer_isr);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -145,6 +146,7 @@ void kernel_master_clock_start(void) {
 
 
 void timer_isr(void) {
+   CPU_TIMER_START_OF_ISR();
 
    CPU_DEBUG_TICK_START();
 
@@ -187,6 +189,7 @@ void timer_isr(void) {
    if (count>0) {
       kernel_context_switch();
    }
+   CPU_TIMER_END_OF_ISR();
 }
 
 

@@ -36,16 +36,18 @@ BYTE initial_stack[BOOT_INITIALSTACKSIZE] __attribute((section(".stack")));
 
 void reset_vector() __attribute__((naked));
 void reset_vector() {
-   cpu_lock();
 
+   // turn off interrupts, set SREG to a known state
    asm volatile ("clr __zero_reg__");
    asm volatile ("out __SREG__,__zero_reg__");
+
+   // set initial program stack
    outw(SPL,(unsigned short)(initial_stack+BOOT_INITIALSTACKSIZE-1));
 
    // set Clock Prescaler Change Enable
    CLKPR = (1<<CLKPCE);
-   // main clock = internal RC 8Mhz / 8 = 1Mhz
-   // set prescaler = 8, resulting in 125kHz
+   // CLKDIV8 fuse is set, so clock source = internal RC 8Mhz / 8 = 1Mhz
+   // set prescaler = 1, resulting in internal system clock = 1MHz
    CLKPR = 0;  // was (3<<CLKPS0);
 
    // Disable Analog Comparator (power save)

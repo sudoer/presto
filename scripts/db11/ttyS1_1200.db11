@@ -1,0 +1,6 @@
+#
+# $Id: ttyS1_1200.db11,v 1.1 2002/03/12 04:25:02 cjh Exp $
+#
+bootbaud 1200
+baud 9600
+tty S1

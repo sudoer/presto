@@ -77,7 +77,7 @@ typedef unsigned long DWORD;
 
 // TO REDUCE THE NUMBER OF WARNINGS GENERATED
 
-#define NOT_USED(p)  if (&p) {}
+#define NOT_USED(p)  if (&(p) != &(p)) {}
 
 ////////////////////////////////////////////////////////////////////////////////
 

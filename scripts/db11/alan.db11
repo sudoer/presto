@@ -1,0 +1,9 @@
+bootbaud 1200
+baud 9600
+map 0x8000-0xFFFF ram
+force
+boot talkram.s19
+mode debug
+file big_test.s19
+set pc=0x9904
+

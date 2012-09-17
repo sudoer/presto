@@ -1,0 +1,9 @@
+#
+# $Id$
+#
+# This db11 script jumps to a preloaded talker in 'F1 EEPROM at 0xFE80.
+#
+
+include machine.db11
+jump 0xfe80
+mode debug

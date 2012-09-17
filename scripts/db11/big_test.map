@@ -1,0 +1,685 @@
+Archive member included because of file (symbol)
+
+/usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_mulhi3.o)
+                              string.o (___mulhi3)
+/usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_memcpy.o)
+                              timer.o (memcpy)
+/usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_regs_min.o)
+                              shared.o (_.tmp)
+/usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_regs_frame.o)
+                              serial.o (_.frame)
+/usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_lshlhi3.o)
+                              kernel.o (___lshlhi3)
+
+Allocating common symbols
+Common symbol       size              file
+
+prt                 0x14              debug.o
+idle_tid            0x1               kernel.o
+copier              0xe               shared.o
+empl_tid            0x1               main.o
+idle_stack          0x40              kernel.o
+idle_notification   0x2               kernel.o
+ctrl_tid            0x1               main.o
+idle_tcb_p          0x2               kernel.o
+pres_tid            0x1               main.o
+stud_tid            0x1               main.o
+swi_old_tcb_p       0x2               kernel.o
+swi_new_sp          0x2               kernel.o
+swi_old_spp         0x2               kernel.o
+tcb_list            0xff              kernel.o
+mngr_tid            0x1               main.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+page0            0x00000040         0x000000c0         rw
+nothing1         0x00000100         0x00000f00
+registers        0x00001000         0x00000040         rw
+nothing2         0x00001040         0x00006fc0
+rom              0x00008000         0x00003fd6         xrw
+specvect         0x0000bfd6         0x0000002a         r
+ram              0x0000c000         0x00003fd6         rw
+normvect         0x0000ffd6         0x0000002a         rw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+                0x00000000                _.tmp = 0x0
+                0x00000002                _.z = 0x2
+                0x00000004                _.xy = 0x4
+
+.specvect       0x0000bfd6       0x2a
+                0x0000bfd6                __specvect_start = .
+ *(.specvect)
+ .specvect      0x0000bfd6       0x2a vectors.o
+                0x0000c000                __specvect_end = .
+
+.normvect       0x0000ffd6       0x2a
+                0x0000ffd6                __normvect_start = .
+ *(.normvect)
+ .normvect      0x0000ffd6       0x2a vectors.o
+                0x00010000                __normvect_end = .
+
+.text           0x00008000     0x1ca8
+                0x00008000                __text_start = .
+ *(.text)
+ .text          0x00008000       0x8a main.o
+                0x00008000                main
+ .text          0x0000808a       0xc8 control.o
+                0x0000808a                control
+ .text          0x00008152       0x93 president.o
+                0x00008152                president
+ .text          0x000081e5       0x83 manager.o
+                0x000081e5                manager
+ .text          0x00008268       0x67 employee.o
+                0x00008268                employee
+ .text          0x000082cf       0x91 student.o
+                0x000082cf                student
+ .text          0x00008360       0xb4 shared.o
+                0x000083f6                use_copier
+                0x00008360                assert_lights
+                0x00008367                busy_work
+ .text          0x00008414       0x30 debug.o
+                0x0000842c                debug_int
+                0x00008428                debug_string
+                0x00008414                debug_init
+ .text          0x00008444      0x3c5 string.o
+                0x00008479                string_IsHexDigit
+                0x00008585                string_IntegerToString
+                0x000086eb                string_HexToInteger
+                0x000087d5                string_SkipSpaces
+                0x0000849c                string_DigitToInteger
+                0x0000844f                string_IsNumber
+                0x000084a7                string_StringToInteger
+                0x0000846c                string_IsDigit
+                0x00008784                string_NextWord
+                0x000086bf                string_HexDigitToInteger
+                0x00008651                string_IntegerToHex
+                0x00008444                string_IsSpace
+                0x00008724                string_Copy
+ .text          0x00008809       0xa0 clock.o
+                0x0000885b                clock_add_sec
+                0x00008809                clock_reset
+                0x0000885c                clock_compare
+                0x00008813                clock_add_ms
+ .text          0x000088a9      0x263 memory.o
+                0x000088a9                presto_memory_allocate
+                0x000089c9                memory_debug
+                0x00008950                presto_memory_free
+                0x00008a08                kernel_memory_init
+ .text          0x00008b0c      0x308 semaphore.o
+                0x00008c6e                presto_semaphore_wait
+                0x00008b79                presto_semaphore_request
+                0x00008d3d                kernel_semaphore_init
+                0x00008b0c                presto_semaphore_init
+                0x00008b6f                presto_semaphore_protocol
+                0x00008c7e                presto_semaphore_release
+ .text          0x00008e14      0x1fd timer.o
+                0x00008eaf                presto_timer_stop
+                0x00008eb4                kernel_master_clock_start
+                0x00008e14                presto_timer_start
+                0x00008e83                presto_timer_wait
+                0x00008eb3                kernel_timer_init
+                0x00008ec7                timer_isr
+ .text          0x00009011      0x1eb mail.o
+                0x00009099                presto_mail_send_to_box
+                0x00009132                presto_mail_wait
+                0x00009079                presto_mail_send_to_task
+                0x0000903c                presto_mailbox_init
+                0x00009054                presto_mailbox_default
+                0x00009011                presto_mailbox_create
+                0x00009143                presto_mail_get
+                0x0000906c                presto_envelope_message
+                0x00009070                presto_envelope_payload
+                0x00009074                presto_envelope_sender
+                0x000091cf                kernel_mail_init
+ .text          0x000091fc      0x58a kernel.o
+                0x0000954d                priority_queue_insert_tcb
+                0x000096f1                send_idle_notifications
+                0x0000950d                kernel_trigger_set_noswitch
+                0x000091fc                presto_init
+                0x000095ba                priority_queue_remove_tcb
+                0x0000935c                presto_scheduler_start
+                0x000094d6                presto_trigger_poll
+                0x0000928b                presto_task_create
+                0x00009613                scheduler_next_ready
+                0x0000976a                tid_to_tcbptr
+                0x000093b9                presto_priority_set
+                0x000094ca                presto_trigger_clear
+                0x00009535                kernel_priority_get
+                0x000093a3                presto_priority_get
+                0x00009762                idle_task
+                0x000094b9                presto_trigger_set
+                0x0000952e                kernel_current_task
+                0x00009425                presto_priority_restore
+                0x000096b2                presto_wait_for_idle
+                0x0000954b                kernel_context_switch
+                0x000093f0                presto_priority_override
+                0x0000945d                presto_wait
+                0x000094de                presto_trigger_send
+                0x00009633                context_switch_isr
+ .text          0x00009786       0x33 boot.o
+                0x00009786                premain
+                0x000097b7                exit
+ .text          0x000097b9       0x51 cpu_timer.o
+                0x000097fa                hwtimer_restart
+                0x000097b9                hwtimer_start
+ .text          0x0000980a       0xfa vectors.o
+                0x00009844                error_TOC3_isr
+                0x00009852                error_TOC1_isr
+                0x0000984b                error_TOC2_isr
+                0x0000980c                error_isr
+                0x0000988a                error_COP_isr
+                0x00009821                error_PAIE_isr
+                0x00009891                error_ILLOP_isr
+                0x0000987c                error_XIRQ_isr
+                0x00009813                error_SCI_isr
+                0x000098a6                illop_isr
+                0x0000983d                error_TOC4_isr
+                0x000098c7                init_interrupts
+                0x00009875                error_IRQ_isr
+                0x0000982f                error_TOF_isr
+                0x00009860                error_TIC2_isr
+                0x0000986e                error_RTI_isr
+                0x00009867                error_TIC1_isr
+                0x0000980a                inert_isr
+                0x0000981a                error_SPI_isr
+                0x00009836                error_TOC5_isr
+                0x000098b5                set_interrupt
+                0x00009883                error_SWI_isr
+                0x0000989f                error_RESET_isr
+                0x00009859                error_TIC3_isr
+                0x00009898                error_CLM_isr
+                0x00009828                error_PAO_isr
+ .text          0x00009904       0x2f crt0.o
+                0x00009904                _start
+ .text          0x00009933       0x95 error.o
+                0x00009959                error_fatal
+                0x0000996d                error_crash
+                0x00009933                show_one_byte
+                0x0000996f                error_address
+ .text          0x000099c8      0x28f serial.o
+                0x00009a90                serial_recv_string
+                0x00009a7f                serial_recv
+                0x00009a58                serial_send_string
+                0x000099c8                serial_init
+                0x00009a4f                serial_send_byte
+ .text          0x00009c57       0x1a /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_mulhi3.o)
+                0x00009c57                ___mulhi3
+ .text          0x00009c71       0x25 /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_memcpy.o)
+                0x00009c71                memcpy
+                0x00009c71                __memcpy
+ .text          0x00009c96       0x12 /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_lshlhi3.o)
+                0x00009c96                ___lshlhi3
+                0x00009ca8                __text_end = .
+
+.strings        0x00009ca8        0x0
+                0x00009ca8                __strings_start = .
+ *(.strings)
+                0x00009ca8                __strings_end = .
+
+.rodata         0x00009ca8        0x0
+                0x00009ca8                __rodata_start = .
+ *(.rodata)
+                0x00009ca8                __rodata_end = .
+
+.end_of_rom     0x00009ca8        0x0
+                0x00009ca8                __idata_start = .
+
+.data           0x0000c000       0x19 load address 0x00009ca8
+                0x0000c000                __data_start = .
+ *(.data)
+ .data          0x0000c000        0x1 shared.o
+                0x0000c000                lights
+ .data          0x0000c001        0xe debug.o
+ .data          0x0000c00f        0x2 timer.o
+ .data          0x0000c011        0x8 kernel.o
+                0x0000c013                tcb_head_p
+                0x0000c015                free_tcb_p
+                0x0000c011                current_tcb_p
+                0x0000c017                presto_runtime_progress
+                0x0000c019                __data_end = .
+
+.page0          0x00000040        0x8 load address 0xffffdce8
+ .page0         0x00000040        0x6 /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_regs_min.o)
+ .page0         0x00000046        0x2 /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_regs_frame.o)
+                0x00000046                _.frame
+
+.bss            0x0000c019      0x4bc
+                0x0000c019                __bss_start = .
+ *(.bss)
+ .bss           0x0000c019      0x320 main.o
+ .bss           0x0000c339       0x15 control.o
+ .bss           0x0000c34e        0x9 president.o
+ .bss           0x0000c357        0x9 manager.o
+ .bss           0x0000c360        0x9 employee.o
+ .bss           0x0000c369        0x9 student.o
+ .bss           0x0000c372        0x6 timer.o
+ .bss           0x0000c378       0x30 mail.o
+ .bss           0x0000c3a8        0x2 cpu_timer.o
+ .bss           0x0000c3aa        0x4 vectors.o
+ .bss           0x0000c3ae      0x127 serial.o
+                0x0000c4d5                __bss_end = .
+
+.common         0x0000c4d5      0x171
+                0x0000c4d5                __common_start = .
+ *(COMMON)
+ COMMON         0x0000c4d5        0x5 main.o
+                                  0x0 (size before relaxing)
+                0x0000c4d5                empl_tid
+                0x0000c4d6                ctrl_tid
+                0x0000c4d7                pres_tid
+                0x0000c4d8                stud_tid
+                0x0000c4d9                mngr_tid
+ COMMON         0x0000c4da        0xe shared.o
+                                  0x0 (size before relaxing)
+                0x0000c4da                copier
+ COMMON         0x0000c4e8       0x14 debug.o
+                                  0x0 (size before relaxing)
+                0x0000c4e8                prt
+ COMMON         0x0000c4fc      0x14a kernel.o
+                                  0x0 (size before relaxing)
+                0x0000c4fc                idle_tid
+                0x0000c4fd                idle_stack
+                0x0000c53d                idle_notification
+                0x0000c53f                idle_tcb_p
+                0x0000c541                swi_old_tcb_p
+                0x0000c543                swi_new_sp
+                0x0000c545                swi_old_spp
+                0x0000c547                tcb_list
+                0x0000c646                __common_end = .
+
+.stack          0x0000c646       0x40
+                0x0000c646                __stack_start = .
+ *(.stack)
+ .stack         0x0000c646       0x40 boot.o
+                0x0000c646                initial_stack
+                0x0000c686                __stack_end = .
+
+.heap           0x0000c686      0x20c
+                0x0000c686                __heap_start = .
+ *(.heap)
+ .heap          0x0000c686      0x20c memory.o
+                0x0000c892                __heap_end = .
+
+/DISCARD/
+ *(.comment)
+ *(.debug_abbrev)
+ *(.debug_aranges)
+ *(.debug_info)
+ *(.debug_line)
+ *(.debug_pubnames)
+                0x00009cc1                __idata_end = ((__data_end - __data_start) + __idata_start)
+LOAD main.o
+LOAD control.o
+LOAD president.o
+LOAD manager.o
+LOAD employee.o
+LOAD student.o
+LOAD shared.o
+LOAD debug.o
+LOAD string.o
+LOAD clock.o
+LOAD memory.o
+LOAD semaphore.o
+LOAD timer.o
+LOAD mail.o
+LOAD kernel.o
+LOAD boot.o
+LOAD cpu_timer.o
+LOAD vectors.o
+LOAD crt0.o
+LOAD error.o
+LOAD serial.o
+LOAD /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a
+OUTPUT(big_test.elf elf32-m68hc11)
+LOAD linker stubs
+
+.debug_str      0x00000000     0x19ed
+ .debug_str     0x00000000      0x9eb main.o
+                                0xa34 (size before relaxing)
+ .debug_str     0x000009eb       0x30 control.o
+                                0x982 (size before relaxing)
+ .debug_str     0x00000a1b       0x2f president.o
+                                0x956 (size before relaxing)
+ .debug_str     0x00000a4a       0x1c manager.o
+                                0x963 (size before relaxing)
+ .debug_str     0x00000a66       0x1e employee.o
+                                0x95c (size before relaxing)
+ .debug_str     0x00000a84       0x24 student.o
+                                0x96f (size before relaxing)
+ .debug_str     0x00000aa8       0x60 shared.o
+                                0x99b (size before relaxing)
+ .debug_str     0x00000b08       0x2a debug.o
+                                0x84e (size before relaxing)
+ .debug_str     0x00000b32      0x181 string.o
+                                0x29e (size before relaxing)
+ .debug_str     0x00000cb3       0x6b clock.o
+                                0x18b (size before relaxing)
+ .debug_str     0x00000d1e      0x108 memory.o
+                                0x9c3 (size before relaxing)
+ .debug_str     0x00000e26      0x155 semaphore.o
+                                0x99e (size before relaxing)
+ .debug_str     0x00000f7b       0xd9 timer.o
+                                0x91f (size before relaxing)
+ .debug_str     0x00001054      0x116 mail.o
+                                0x945 (size before relaxing)
+ .debug_str     0x0000116a      0x41b kernel.o
+                                0xd2a (size before relaxing)
+ .debug_str     0x00001585       0x5a boot.o
+                                0x169 (size before relaxing)
+ .debug_str     0x000015df       0x3b cpu_timer.o
+                                0x177 (size before relaxing)
+ .debug_str     0x0000161a      0x1e5 vectors.o
+                                0x69b (size before relaxing)
+ .debug_str     0x000017ff       0x6f error.o
+                                0x50b (size before relaxing)
+ .debug_str     0x0000186e      0x17f serial.o
+                                0x9e0 (size before relaxing)
+
+Cross Reference Table
+
+Symbol                                            File
+_.frame                                           /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_regs_frame.o)
+                                                  serial.o
+_.tmp                                             /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_regs_min.o)
+                                                  /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_mulhi3.o)
+                                                  serial.o
+                                                  cpu_timer.o
+                                                  kernel.o
+                                                  timer.o
+                                                  semaphore.o
+                                                  memory.o
+                                                  clock.o
+                                                  string.o
+                                                  shared.o
+_.xy                                              /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_regs_min.o)
+                                                  serial.o
+                                                  cpu_timer.o
+                                                  kernel.o
+                                                  mail.o
+                                                  timer.o
+                                                  semaphore.o
+                                                  memory.o
+                                                  clock.o
+                                                  string.o
+_.z                                               /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_regs_min.o)
+                                                  serial.o
+                                                  kernel.o
+                                                  timer.o
+                                                  semaphore.o
+                                                  memory.o
+                                                  clock.o
+                                                  string.o
+___lshlhi3                                        /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_lshlhi3.o)
+                                                  kernel.o
+___mulhi3                                         /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_mulhi3.o)
+                                                  cpu_timer.o
+                                                  string.o
+__bss_end                                         crt0.o
+__bss_start                                       crt0.o
+__data_start                                      crt0.o
+__idata_end                                       crt0.o
+__idata_start                                     crt0.o
+__memcpy                                          /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_memcpy.o)
+__stack_end                                       crt0.o
+_start                                            crt0.o
+                                                  vectors.o
+assert_lights                                     shared.o
+                                                  student.o
+                                                  main.o
+busy_work                                         shared.o
+                                                  manager.o
+                                                  president.o
+clock_add_ms                                      clock.o
+                                                  timer.o
+clock_add_sec                                     clock.o
+clock_compare                                     clock.o
+                                                  timer.o
+clock_reset                                       clock.o
+                                                  timer.o
+context_switch_isr                                kernel.o
+control                                           control.o
+                                                  main.o
+copier                                            shared.o
+                                                  control.o
+ctrl_tid                                          main.o
+current_tcb_p                                     kernel.o
+debug_init                                        debug.o
+debug_int                                         debug.o
+debug_string                                      debug.o
+empl_tid                                          student.o
+                                                  control.o
+                                                  main.o
+employee                                          employee.o
+                                                  main.o
+error_CLM_isr                                     vectors.o
+error_COP_isr                                     vectors.o
+error_ILLOP_isr                                   vectors.o
+error_IRQ_isr                                     vectors.o
+error_PAIE_isr                                    vectors.o
+error_PAO_isr                                     vectors.o
+error_RESET_isr                                   vectors.o
+error_RTI_isr                                     vectors.o
+error_SCI_isr                                     vectors.o
+error_SPI_isr                                     vectors.o
+error_SWI_isr                                     vectors.o
+error_TIC1_isr                                    vectors.o
+error_TIC2_isr                                    vectors.o
+error_TIC3_isr                                    vectors.o
+error_TOC1_isr                                    vectors.o
+error_TOC2_isr                                    vectors.o
+error_TOC3_isr                                    vectors.o
+error_TOC4_isr                                    vectors.o
+error_TOC5_isr                                    vectors.o
+error_TOF_isr                                     vectors.o
+error_XIRQ_isr                                    vectors.o
+error_address                                     error.o
+                                                  vectors.o
+error_crash                                       error.o
+error_fatal                                       error.o
+                                                  vectors.o
+                                                  kernel.o
+                                                  mail.o
+                                                  semaphore.o
+                                                  memory.o
+                                                  main.o
+error_isr                                         vectors.o
+exit                                              boot.o
+free_tcb_p                                        kernel.o
+hwtimer_restart                                   cpu_timer.o
+                                                  timer.o
+hwtimer_start                                     cpu_timer.o
+                                                  timer.o
+idle_notification                                 kernel.o
+idle_stack                                        kernel.o
+idle_task                                         kernel.o
+idle_tcb_p                                        kernel.o
+idle_tid                                          kernel.o
+illop_isr                                         vectors.o
+inert_isr                                         vectors.o
+init_interrupts                                   vectors.o
+                                                  boot.o
+initial_stack                                     boot.o
+kernel_context_switch                             kernel.o
+                                                  mail.o
+                                                  timer.o
+                                                  semaphore.o
+kernel_current_task                               kernel.o
+                                                  mail.o
+                                                  timer.o
+                                                  semaphore.o
+kernel_mail_init                                  mail.o
+                                                  kernel.o
+kernel_master_clock_start                         timer.o
+                                                  kernel.o
+kernel_memory_init                                memory.o
+                                                  kernel.o
+kernel_priority_get                               kernel.o
+                                                  semaphore.o
+kernel_semaphore_init                             semaphore.o
+                                                  kernel.o
+kernel_timer_init                                 timer.o
+                                                  kernel.o
+kernel_trigger_set_noswitch                       kernel.o
+                                                  mail.o
+                                                  timer.o
+                                                  semaphore.o
+lights                                            shared.o
+                                                  student.o
+main                                              main.o
+                                                  crt0.o
+manager                                           manager.o
+                                                  main.o
+memcpy                                            /usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a(_memcpy.o)
+                                                  timer.o
+memory_debug                                      memory.o
+mngr_tid                                          employee.o
+                                                  control.o
+                                                  main.o
+premain                                           boot.o
+                                                  crt0.o
+pres_tid                                          manager.o
+                                                  control.o
+                                                  main.o
+president                                         president.o
+                                                  main.o
+presto_envelope_message                           mail.o
+                                                  employee.o
+                                                  manager.o
+                                                  president.o
+presto_envelope_payload                           mail.o
+presto_envelope_sender                            mail.o
+presto_init                                       kernel.o
+                                                  main.o
+presto_mail_get                                   mail.o
+                                                  student.o
+                                                  president.o
+presto_mail_send_to_box                           mail.o
+presto_mail_send_to_task                          mail.o
+                                                  student.o
+                                                  employee.o
+                                                  manager.o
+                                                  control.o
+presto_mail_wait                                  mail.o
+                                                  employee.o
+                                                  manager.o
+presto_mailbox_create                             mail.o
+presto_mailbox_default                            mail.o
+presto_mailbox_init                               mail.o
+                                                  student.o
+                                                  employee.o
+                                                  manager.o
+                                                  president.o
+                                                  control.o
+presto_memory_allocate                            memory.o
+                                                  student.o
+                                                  employee.o
+                                                  manager.o
+                                                  president.o
+                                                  control.o
+presto_memory_free                                memory.o
+                                                  student.o
+                                                  employee.o
+                                                  manager.o
+                                                  president.o
+presto_priority_get                               kernel.o
+                                                  timer.o
+                                                  semaphore.o
+presto_priority_override                          kernel.o
+                                                  semaphore.o
+presto_priority_restore                           kernel.o
+                                                  semaphore.o
+presto_priority_set                               kernel.o
+presto_runtime_progress                           kernel.o
+presto_scheduler_start                            kernel.o
+                                                  main.o
+presto_semaphore_init                             semaphore.o
+                                                  control.o
+presto_semaphore_protocol                         semaphore.o
+                                                  control.o
+presto_semaphore_release                          semaphore.o
+                                                  shared.o
+presto_semaphore_request                          semaphore.o
+presto_semaphore_wait                             semaphore.o
+                                                  shared.o
+presto_task_create                                kernel.o
+                                                  main.o
+presto_timer_start                                timer.o
+                                                  shared.o
+                                                  student.o
+                                                  president.o
+presto_timer_stop                                 timer.o
+                                                  shared.o
+presto_timer_wait                                 timer.o
+                                                  employee.o
+                                                  manager.o
+                                                  control.o
+presto_trigger_clear                              kernel.o
+                                                  serial.o
+                                                  shared.o
+presto_trigger_poll                               kernel.o
+                                                  shared.o
+presto_trigger_send                               kernel.o
+                                                  serial.o
+presto_trigger_set                                kernel.o
+presto_wait                                       kernel.o
+                                                  serial.o
+                                                  mail.o
+                                                  timer.o
+                                                  semaphore.o
+                                                  student.o
+                                                  president.o
+presto_wait_for_idle                              kernel.o
+                                                  student.o
+                                                  employee.o
+                                                  manager.o
+                                                  president.o
+                                                  control.o
+priority_queue_insert_tcb                         kernel.o
+priority_queue_remove_tcb                         kernel.o
+prt                                               debug.o
+scheduler_next_ready                              kernel.o
+send_idle_notifications                           kernel.o
+serial_init                                       serial.o
+                                                  debug.o
+serial_recv                                       serial.o
+serial_recv_string                                serial.o
+serial_send_byte                                  serial.o
+serial_send_string                                serial.o
+                                                  debug.o
+set_interrupt                                     vectors.o
+                                                  serial.o
+                                                  cpu_timer.o
+                                                  kernel.o
+show_one_byte                                     error.o
+string_Copy                                       string.o
+string_DigitToInteger                             string.o
+string_HexDigitToInteger                          string.o
+string_HexToInteger                               string.o
+string_IntegerToHex                               string.o
+string_IntegerToString                            string.o
+                                                  debug.o
+string_IsDigit                                    string.o
+string_IsHexDigit                                 string.o
+string_IsNumber                                   string.o
+string_IsSpace                                    string.o
+string_NextWord                                   string.o
+string_SkipSpaces                                 string.o
+string_StringToInteger                            string.o
+stud_tid                                          manager.o
+                                                  control.o
+                                                  main.o
+student                                           student.o
+                                                  main.o
+swi_new_sp                                        kernel.o
+swi_old_spp                                       kernel.o
+swi_old_tcb_p                                     kernel.o
+tcb_head_p                                        kernel.o
+tcb_list                                          kernel.o
+tid_to_tcbptr                                     kernel.o
+timer_isr                                         timer.o
+use_copier                                        shared.o
+                                                  employee.o
+                                                  president.o

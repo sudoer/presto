@@ -1,0 +1,9 @@
+#
+# $Id$
+#
+# This db11 script loads and starts the talker
+#
+
+include machine.db11
+boot talkram.s19
+mode debug

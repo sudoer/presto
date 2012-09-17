@@ -1,0 +1,17 @@
+#
+# $Id$
+#
+machine F1
+
+include expand.db11
+
+# Set HC11F1 chip select registers
+
+# CSCTL configures chip-select: 32K FLASH
+set *0x105d  = 0x0d           
+
+# CSGADR configures base address of General Purpose chip select; address 0:
+set *0x105e  = 0x00           
+
+# CSGSIZ configures General Purpose chip select chip size; 32K RAM:
+set *0x105f  = 0x01           

@@ -1,0 +1,14 @@
+#
+# $Id$
+#
+# This db11 script sets baud rates etc,
+# loads and starts the talker, then issues
+# a disassemble command that disassembles
+# the BOOT ROM.
+#
+
+include	machine.db11
+boot talkram.s19
+mode debug
+list 0xbf00-0xbfff
+quit

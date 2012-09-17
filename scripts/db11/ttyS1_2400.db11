@@ -1,0 +1,6 @@
+#
+# $Id$
+#
+bootbaud 2400
+baud 19200
+tty S1
