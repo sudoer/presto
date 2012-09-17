@@ -14,11 +14,15 @@ heading("CONFIGURATION");
 setup_project();
 setup_compiler();
 
+heading("PRE-BUILD CLEANING");
+prebuild_cleaning();
+
 heading("COMPILING AND ASSEMBLING");
 compile_stage();
 
 heading("LINKING");
 link_stage();
+convert_binary();
 
 heading("SHOW THE RESULTS");
 show_target_file();
@@ -32,27 +36,66 @@ exit;
 ################################################################################
 
 sub setup_project {
+
    print("setting up project...");
-   $OBJ_DIR="obj";
+
+   #$CPU=$CPU_M68HC11;
+   $CPU=$CPU_AVR8515;
+
    $TARGET="presto";
+
+   $OBJ_DIR=""
+      .ifcpu($CPU_M68HC11,"obj\\m68hc11")
+      .ifcpu($CPU_AVR8515,"obj\\avr8515")
+      ;
+
+   my $cpu_dir=""
+      .ifcpu($CPU_M68HC11,"cpu\\m68hc11")
+      .ifcpu($CPU_AVR8515,"cpu\\avr8515")
+      ;
+
    @SRC_FILES=(
-               "app\\stress_test.c",
-               "presto\\cpu\\boot.c",
-               "presto\\cpu\\crt0.s",
-               "presto\\cpu\\error.c",
-               "presto\\cpu\\hwtimer.c",
-               "presto\\cpu\\intvect.c",
-               "presto\\kernel\\clock.c",
-               "presto\\kernel\\kernel.c",
-               "presto\\kernel\\mail.c",
-               "presto\\kernel\\memory.c",
-               "presto\\kernel\\semaphore.c",
-               "presto\\kernel\\timer.c",
-               "services\\serial.c",
-               "services\\string.c",
+      ifcpu($CPU_M68HC11,"$cpu_dir\\intvect.c"),
+      ifcpu($CPU_M68HC11,"$cpu_dir\\error.c"),
+      ifcpu($CPU_M68HC11,"$cpu_dir\\hwtimer.c"),
+      ifcpu($CPU_M68HC11,"$cpu_dir\\boot.c"),
+      ifcpu($CPU_M68HC11,"$cpu_dir\\crt0.s"),
+      ifcpu($CPU_M68HC11,"app\\stress_test.c"),
+      ifcpu($CPU_M68HC11,"services\\serial.c"),
+      ifcpu($CPU_M68HC11,"services\\string.c"),
+
+      ifcpu($CPU_M68HC11,"presto\\kernel\\clock.c"),
+      ifcpu($CPU_M68HC11,"presto\\kernel\\memory.c"),
+      ifcpu($CPU_M68HC11,"presto\\kernel\\semaphore.c"),
+      ifcpu($CPU_M68HC11,"presto\\kernel\\timer.c"),
+      ifcpu($CPU_M68HC11,"presto\\kernel\\mail.c"),
+      ifcpu($CPU_M68HC11,"presto\\kernel\\kernel.c"),
+
+
+
+      ifcpu($CPU_AVR8515,"$cpu_dir\\boot.c"),
+      ifcpu($CPU_AVR8515,"$cpu_dir\\error.c"),
+      ifcpu($CPU_AVR8515,"$cpu_dir\\vectors.s"),
+      ifcpu($CPU_AVR8515,"$cpu_dir\\hwtimer.c"),
+      ifcpu($CPU_AVR8515,"app\\small_test.c"),
+
+      ifcpu($CPU_AVR8515,"presto\\kernel\\clock.c"),
+      ifcpu($CPU_AVR8515,"presto\\kernel\\memory.c"),
+      ifcpu($CPU_AVR8515,"presto\\kernel\\semaphore.c"),
+      ifcpu($CPU_AVR8515,"presto\\kernel\\timer.c"),
+      ifcpu($CPU_AVR8515,"presto\\kernel\\mail.c"),
+      ifcpu($CPU_AVR8515,"presto\\kernel\\kernel.c"),
+
+
    );
 
-   @INCLUDE_DIRS=("$BUILD_DIR","$BUILD_DIR\\presto",".");
+   @INCLUDE_DIRS=(
+      "$BUILD_DIR",
+      "$BUILD_DIR\\app",
+      "$BUILD_DIR\\presto",
+      "$BUILD_DIR\\$cpu_dir",
+      "."
+   );
 
    print("OK\n");
 }
@@ -60,15 +103,28 @@ sub setup_project {
 ################################################################################
 
 sub setup_compiler {
+
    print("setting up compiler...");
-   $COMPILER_HOME="c:\\programs\\hc11\\gnu";
-   $GNU_PREFIX="m6811-elf-";
+   $COMPILER_HOME=""
+      .ifcpu($CPU_M68HC11,"c:\\programs\\hc11\\gnu")
+      .ifcpu($CPU_AVR8515,"c:\\programs\\avr\\gnu")
+      ;
+   $GNU_PREFIX=""
+      .ifcpu($CPU_M68HC11,"m6811-elf-")
+      .ifcpu($CPU_AVR8515,"avr-")
+      ;
    add_to_path("$COMPILER_HOME\\bin");
    print("OK\n");
 
    print("setting up linker...");
-   $LIB_DIR=$COMPILER_HOME."\\lib";
-   $GCC_LIB=$COMPILER_HOME."\\lib\\gcc-lib\\m6811-elf\\3.0.4\\libgcc.a";
+   #$LIB_DIR=$COMPILER_HOME
+   #   .ifcpu($CPU_M68HC11,"\\m6811-elf\\lib")
+   #   .ifcpu($CPU_AVR8515,"\\avr\\lib")
+   #   ;
+   $GCC_LIB=$COMPILER_HOME
+      .ifcpu($CPU_M68HC11,"\\lib\\gcc-lib\\m6811-elf\\3.0.4\\libgcc.a")
+      .ifcpu($CPU_AVR8515,"\\lib\\gcc-lib\\avr\\3.3\\libgcc.a")
+      ;
    print("OK\n");
 }
 
@@ -78,25 +134,17 @@ sub setup_compiler {
 
 sub prepare {
 
+   # flush after print();
+   $|=1;
+
    # turn debug info on/off
+   print("parsing command-line arguments...");
    $DEBUG=0;
    foreach $arg (@ARGV) {
       if(tolower($arg) eq "debug") {
          $DEBUG=1;
       }
    }
-
-   # flush after print();
-   $|=1;
-
-   # CLEAN UP OLD FILES
-   print("deleting old target file...");
-   unlink("$OBJ_DIR\\$TARGET.s19");
-   print("OK\n");
-
-   # CREATE OBJECT DIRECTORY
-   print("creating object directory...");
-   mkdir($OBJ_DIR,0777);
    print("OK\n");
 
    # REMEMBER WHERE YOU STARTED
@@ -105,93 +153,29 @@ sub prepare {
    $BUILD_DIR=~s/^[A-Za-z]://g;  # remove C:
    $BUILD_DIR=~s/\//\\/g;  # change / to \
    print("OK\n");
+
+   # DEFINE CPU ARCHITECTURES
+   print("defining architectures...");
+   $CPU_M68HC11=1;
+   $CPU_AVR8515=2;
+   print("OK\n");
+
 }
 
 ################################################################################
 
-my %filetimes;
+sub prebuild_cleaning {
 
-sub source_time {
-   my ($givenfile,$prefix)=@_;
-   $prefix="  ".$prefix;
-   my $src_ext=extension_of($givenfile);
-   my $fullpathname;
-   if($src_ext eq "c") {
-      $fullpathname=$givenfile;
-   } elsif($src_ext eq "h") {
-      # find the H file in the include path
-      $fullpathname=find_include_file_in_path($givenfile);
-      if(length($fullpathname)==0) {
-         # H file not found in include path
-         debug("ERROR! H file (".$givenfile.") not found");
-         return 0;
-      }
-   } elsif($src_ext eq "s") {
-      $fullpathname=$givenfile;
-   } else {
-      # not a C or H file
-      debug("ERROR! unrecognized file type");
-      return 0;
-   }
+   # CREATE OBJECT DIRECTORY
+   print("creating object directory...");
+   debug("");
+   make_directory($OBJ_DIR);
+   print("OK\n");
 
-   #debug($prefix."SOURCE TIME OF [$fullpathname]");
-
-   if(!defined($filetimes{$fullpathname})) {
-      $filetimes{$fullpathname}= -M $fullpathname;
-      #debug($prefix."filetime{$fullpathname}=<".$filetimes{$fullpathname}.">");
-      my @all_includes=determine_source_dependencies($fullpathname);
-      my $one_include;
-      foreach $one_include (@all_includes) {
-         my $st=source_time($one_include,$prefix);
-         if($st<$filetimes{$fullpathname}) {
-            $filetimes{$fullpathname}=$st;
-            #debug($prefix."[$one_include] is newer than [$fullpathname]");
-         }
-      }
-   }
-
-   return $filetimes{$fullpathname};
-}
-
-################################################################################
-
-sub determine_source_dependencies {
-   my $source_file=$_[0];
-   my @includes=();
-   open(SRCFILE,"<$source_file");
-   my $line;
-   while($line=<SRCFILE>) {
-      $line=~s/\012//g;
-      $line=~s/\015//g;
-      $line=~s/\/\/.*//g;  # remove // comments
-      $line=~s/\//\\/g;  # change / to \
-      if(index($line,"#include")>-1) {
-         $match=$line;
-         $match=~s/^ *#include +\"//g;
-         $match=~s/\" *$//g;
-         push(@includes,$match);
-      }
-   }
-   close(SRCFILE);
-   return @includes;
-}
-
-################################################################################
-
-sub find_include_file_in_path {
-   my $h_file=$_[0];
-   my $dir;
-   foreach $dir (@INCLUDE_DIRS) {
-      if($dir eq ".") {
-         $dir=cwd();
-      }
-      $dir=~s/\//\\/g;  # change / to \
-      if(-f "$dir\\$h_file") {
-         #debug("INCLUDE FILE [$h_file] is [$dir\\$h_file]");
-         return "$dir\\$h_file";
-      }
-   }
-   return "";
+   # CLEAN UP OLD FILES
+   print("deleting old target file...");
+   unlink("$OBJ_DIR\\$TARGET.s19");
+   print("OK\n");
 }
 
 ################################################################################
@@ -207,6 +191,15 @@ sub compile_stage {
    foreach $dir (@INCLUDE_DIRS) {
       $include_path=$include_path."-I$dir "
    }
+
+   # remove blank entries from source file list
+   my @temp_array=();
+   for $count (0..$#SRC_FILES) {
+      if(length($SRC_FILES[$count])>0) {
+         push(@temp_array,$SRC_FILES[$count]);
+      }
+   }
+   @SRC_FILES=@temp_array;
 
    # LOOPING THROUGH OBJECT FILES
 
@@ -257,46 +250,64 @@ sub compile_stage {
          if($src_ext eq "c") {
             print("COMPILING  $src_file...");
             debug("");
-            $errors+=run($GNU_PREFIX."gcc.exe "   # compiler
-               ."-m68hc11 "                       # platform, hc11 or hc12
-               ."-DGCC "                          # define GCC
-               .$include_path                     # include path
-               ."-mshort "                        # use short ints
-               ."-O1 "                            # optimization, was (oh-zero)
-               ."-fomit-frame-pointer "           # When possible do not generate stack frames
-               ."-fwritable-strings "             # store strings in "strings" section, not inline
-               ."-msoft-reg-count=0 "             # the number of soft registers available
-               ."-funsigned-char "                # chars are unsigned
-               ."-c "                             # compile only, do not link
-               ."-g "                             # include debug info
-               ."-Wall "                          # enable all warnings
-               ."-Werror "                        # treat warnings as errors
-               #."-pass-exit-codes "
-               #."-Wp,-pass-exit-codes "
-               ."-Wa,-L,-ahlns=$lst_path "        # generate list file
-               ."-o $obj_path "                   # output file
-               ."$src_name");                     # source file
+
+            my $gcc_options=""
+
+               # TELL MY PROGRAMS WHAT CPU WE'RE USING
+               .ifcpu($CPU_M68HC11,"-DCPU_M68HC11 ")      # 
+               .ifcpu($CPU_AVR8515,"-DCPU_AVR8515 ")      # 
+
+               # DEFINE ARCHITECTURE
+               .ifcpu($CPU_M68HC11,"-m68hc11 ")           # platform, hc11 or hc12
+               .ifcpu($CPU_AVR8515,"-mmcu=at90s8515 ")    # platform, which AVR
+
+               # WHERE TO FIND INCLUDE FILES
+               .$include_path                             # include path
+
+               # OPTIMIZATION
+               .ifcpu($CPU_M68HC11,"-Os ")                # optimization, was (oh-zero)
+               .ifcpu($CPU_AVR8515,"-O1 ")                # optimization = (oh-zero)
+               ."-fomit-frame-pointer "                   # when possible do not generate stack frames
+
+               # SIZES OF TYPES
+               ."-funsigned-char "                        # chars are unsigned
+
+               # M68HC11-SPECIFIC OPTIONS
+               .ifcpu($CPU_M68HC11,"-mshort ")            # use short ints
+               .ifcpu($CPU_M68HC11,"-msoft-reg-count=0 ") # soft registers available
+
+               # STORAGE
+               ."-fwritable-strings "                     # store strings in "strings" section, not inline
+
+               # WARNINGS AND ERRORS
+               ."-Wall "                                  # enable all warnings
+               #."-Werror "                               # treat warnings as errors
+
+               # LISTINGS
+               ."-Wa,-L,-ahlns=$lst_path "                # inc local sym, generate list file
+
+               # WHAT TO DO
+               ."-c "                                     # compile only, do not link
+               ."-g "                                     # include debug info
+               ;
+
+            $errors+=run($GNU_PREFIX."gcc.exe $gcc_options -o $obj_path $src_name");
             print("OK\n");
          } elsif($src_ext eq "s") {
             print("ASSEMBLING $src_file...");
             debug("");
-            $errors+=run($GNU_PREFIX."as.exe "   # assembler
+            $errors+=run($GNU_PREFIX."as.exe "
+               #."-x assembler-with-cpp "        # used with gcc, not with as
                ."-L "                            # include local symbols in debug table
                ."-ahlns=$lst_path "              # generate list file
                ."-o $obj_path "                  # output file
                ."$src_name");                    # source file
             print("OK\n");
-         } else {
-            print("WHAT???    $src_file\n");
          }
       } else {
          print("NO WORK ON $src_file\n");
          debug("");
       }
-
-      # RECORD THE FILES THAT WE NEED TO LINK TOGETHER
-
-      push(@OBJS,$obj_name);
 
       $TOTAL_ERRORS+=$errors;
       if($errors > 0) {
@@ -304,6 +315,9 @@ sub compile_stage {
          print("ERRORS IN COMPILE ... stopping\n");
          return;
       }
+
+      # record the files that we need to link together
+      push(@OBJS,$obj_name);
 
       chdir($BUILD_DIR);
    }
@@ -331,37 +345,92 @@ sub link_stage {
    if($DEBUG) { $trace="--trace"; }
 
    print("LINKING...\n");
-   $errors+=run($GNU_PREFIX."ld.exe "   # linker
-      ."--script ..\\memory.x "         # memory and segment map
-      ."-m m68hc11elf "                 # architecture, file format
-      ."$trace "                        # print file names as they are completed
-      ."-nostdlib "                     # do not include C standard library
-      ."-nostartfiles "                 # do not include crt0.s
-      ."-defsym _.tmp=0x0 "             # temporary "soft" register
-      ."-defsym _.z=0x2 "               # temporary "soft" register
-      ."-defsym _.xy=0x4 "              # temporary "soft" register
-      ."-Map $TARGET.map --cref "       # create memory map file
-      ."--oformat=elf32-m68hc11 "       # output file format
-      ."-o $TARGET.elf "                # output file
-      ."$ofiles "                       # input files
-      ."$GCC_LIB");                     # include GCC library
-      #."-L$LIB_DIR -lgcc");             # include GCC library (should be last argument)
+
+
+   $errors+=run($GNU_PREFIX."ld.exe "
+
+      # DEFINE ARCHITECTURE
+      .ifcpu($CPU_M68HC11,"-m m68hc11elf ")            # architecture, file format
+      .ifcpu($CPU_AVR8515,"-m avr85xx ")               # architecture, file format
+
+      # DEFINE MEMORY MAP
+      .ifcpu($CPU_M68HC11,"--script $BUILD_DIR\\cpu\\m68hc11.x ")
+      .ifcpu($CPU_AVR8515,"--script $BUILD_DIR\\cpu\\avr8515.x ")
+
+      # GIVE FEEDBACK ON THE SCREEN, IN MAP FILE
+      ."$trace "                                       # print file names as they are completed
+      ."-Map $TARGET.map --cref "                      # create memory map file
+
+      # M68HC11-SPECIFIC STUFF
+      .ifcpu($CPU_M68HC11,"-nostdlib ")                # do not include C standard library
+      .ifcpu($CPU_M68HC11,"-nostartfiles ")            # do not include crt0.s
+      .ifcpu($CPU_M68HC11,"-defsym _.tmp=0x0 ")        # temporary "soft" register
+      .ifcpu($CPU_M68HC11,"-defsym _.z=0x2 ")          # temporary "soft" register
+      .ifcpu($CPU_M68HC11,"-defsym _.xy=0x4 ")         # temporary "soft" register
+      .ifcpu($CPU_M68HC11,"--oformat=elf32-m68hc11 ")  # output file format
+
+      # AVR-SPECIFIC STUFF
+      .ifcpu($CPU_AVR8515,"-nostdlib ")                # do not include C standard library
+
+      # OUTPUT FILE
+      ."-o $TARGET.elf "
+
+      # INPUT FILES
+      ."$ofiles "
+      .ifcpu($CPU_AVR8515,"$COMPILER_HOME\\avr\\lib\\crts8515.o ")
+      ."$GCC_LIB "
+   );
+
    print("OK\n");
    print("\n");
 
+   $TOTAL_ERRORS+=$errors;
+   chdir($BUILD_DIR);
+}
 
-   if($errors==0) {
+################################################################################
+
+sub convert_binary {
+
+   if($TOTAL_ERRORS > 0) {
+      return;
+   }
+
+   chdir("$BUILD_DIR\\$OBJ_DIR");
+
+   if(cpu($CPU_AVR8515)) {
+      print("CONVERTING...\n");
+
+      #$errors+=run($GNU_PREFIX."objcopy.exe -O avrobj -R .eeprom $TARGET.elf $TARGET.obj");
+      #$errors+=run($GNU_PREFIX."objcopy.exe -O ihex -R .eeprom $TARGET.elf $TARGET.rom");
+      #$errors+=run("elfcoff $TARGET.elf -coff $TARGET.cof $TARGET.sym");
+      #copy_file("coff\\$TARGET.cof","$TARGET.cof");
+      #copy_file("coff\\$TARGET.sym","$TARGET.sym");
+      #copy_file("coff\\$TARGET.S","$TARGET.S");
+      #$errors+=run($GNU_PREFIX."objcopy.exe -j .eeprom --set-section-flags=.eeprom=\"alloc,load\" --change-section-lma .eeprom=0 -O ihex $TARGET.elf $TARGET.eep");
+
+
+      $errors+=run($GNU_PREFIX."objcopy.exe "
+         ."--input-target=elf32-avr "
+         ."--output-target=ihex "
+         ."-j .vectors "
+         ."-j .text "
+         ."--verbose "
+         ."$TARGET.elf $TARGET.hex");
+
+      print("OK\n");
+   } elsif(cpu($CPU_M68HC11)) {
       print("CONVERTING...\n");
       $errors+=run($GNU_PREFIX."objcopy.exe "
          ."--output-target=srec "
          #."--srec-forceS3 "
          ."--strip-all "
          ."--strip-debug "
+         ."--verbose "
          ."$TARGET.elf $TARGET.s19");
       print("OK\n");
-      print("\n");
    }
-
+   print("\n");
 
    $TOTAL_ERRORS+=$errors;
    chdir($BUILD_DIR);
@@ -376,7 +445,11 @@ sub show_target_file {
    }
 
    my $tempfile="$TARGET.dir";
-   run("dir $OBJ_DIR\\$TARGET.S19 > $tempfile");
+   my $target_file=""
+      .ifcpu($CPU_AVR8515,"$OBJ_DIR\\$TARGET.elf")
+      .ifcpu($CPU_M68HC11,"$OBJ_DIR\\$TARGET.S19")
+      ;
+   run("dir $target_file > $tempfile");
 
    open(TEMP,"<$tempfile");
    my $line;
@@ -403,8 +476,9 @@ sub generate_listing {
    print("GENERATING LISTING...\n");
    $errors+=run($GNU_PREFIX."objdump.exe "
       ."--disassemble-all "
-      ."--architecture=m68hc11 "
-      ."--section=.text "
+      .ifcpu($CPU_AVR8515,"--architecture=avr:2 ")
+      .ifcpu($CPU_M68HC11,"--architecture=m68hc11 ")
+      #."--section=.text "
       #."--debugging "
       ."$TARGET.elf > $TARGET.lst");
    print("OK\n");
@@ -488,11 +562,12 @@ sub section_info {
    if(     $header eq "text") {       return ( "ROM"    , "code"           );
    } elsif($header eq "rodata") {     return ( "ROM"    , "const data"     );
    } elsif($header eq "strings") {    return ( "ROM"    , "strings"        );
+   } elsif($header eq "vectors") {    return ( "ROM"    , "vectors (init)" );
    } elsif($header eq "specvect") {   return ( "ROM"    , "vectors (init)" );
    } elsif($header eq "data") {       return ( "ROM,RAM", "data (init)"    );
+   } elsif($header eq "normvect") {   return (     "RAM", "vectors (zero)" );
    } elsif($header eq "bss") {        return (     "RAM", "data (zero)"    );
    } elsif($header eq "common") {     return (     "RAM", "data (uninit)"  );
-   } elsif($header eq "normvect") {   return (     "RAM", "vectors (zero)" );
    } elsif($header eq "stack") {      return (     "RAM", "stack (zero)"   );
    } elsif($header eq "heap") {       return (     "RAM", "heap (zero)"    );
    } elsif($header eq "end_of_rom") { return ( ""       , "???"            );
@@ -504,7 +579,114 @@ sub section_info {
 }
 
 ################################################################################
+#   D E T E R M I N I N G   D E P E N D E N C I E S
+################################################################################
+
+my %filetimes;
+
+sub source_time {
+   my ($givenfile,$prefix)=@_;
+   $prefix="  ".$prefix;
+   my $src_ext=extension_of($givenfile);
+   my $fullpathname;
+   if($src_ext eq "c") {
+      $fullpathname=$givenfile;
+   } elsif($src_ext eq "h") {
+      # find the H file in the include path
+      $fullpathname=find_include_file_in_path($givenfile);
+      if(length($fullpathname)==0) {
+         # H file not found in include path
+         debug("ERROR! H file (".$givenfile.") not found");
+         return 0;
+      }
+   } elsif($src_ext eq "s") {
+      $fullpathname=$givenfile;
+   } else {
+      # not a C or H file
+      debug("ERROR! unrecognized file type");
+      return 0;
+   }
+
+   #debug($prefix."SOURCE TIME OF [$fullpathname]");
+
+   if(!defined($filetimes{$fullpathname})) {
+      $filetimes{$fullpathname}= -M $fullpathname;
+      #debug($prefix."filetime{$fullpathname}=<".$filetimes{$fullpathname}.">");
+      my @all_includes=determine_source_dependencies($fullpathname);
+      my $one_include;
+      foreach $one_include (@all_includes) {
+         my $st=source_time($one_include,$prefix);
+         if($st<$filetimes{$fullpathname}) {
+            $filetimes{$fullpathname}=$st;
+            #debug($prefix."[$one_include] is newer than [$fullpathname]");
+         }
+      }
+   }
+
+   return $filetimes{$fullpathname};
+}
+
+################################################################################
+
+sub determine_source_dependencies {
+   my $source_file=$_[0];
+   my @includes=();
+   open(SRCFILE,"<$source_file");
+   my $line;
+   while($line=<SRCFILE>) {
+      $line=~s/\012//g;
+      $line=~s/\015//g;
+      $line=~s/\/\/.*//g;  # remove // comments
+      $line=~s/\//\\/g;  # change / to \
+      # look for "#include"
+      # ignore standard includes (in angle brackets)
+      if((index($line,"#include")>-1)&&(index($line,"<")==-1)) {
+         $match=$line;
+         $match=~s/^ *#include +\"//g;
+         $match=~s/\" *$//g;
+         push(@includes,$match);
+      }
+   }
+   close(SRCFILE);
+   return @includes;
+}
+
+################################################################################
+
+sub find_include_file_in_path {
+   my $h_file=$_[0];
+   my $dir;
+   foreach $dir (@INCLUDE_DIRS) {
+      if($dir eq ".") {
+         $dir=cwd();
+      }
+      $dir=~s/\//\\/g;  # change / to \
+      if(-f "$dir\\$h_file") {
+         #debug("INCLUDE FILE [$h_file] is [$dir\\$h_file]");
+         return "$dir\\$h_file";
+      }
+   }
+   return "";
+}
+
+################################################################################
 #   F U N C T I O N S
+################################################################################
+
+sub cpu {
+   my ($cpu)=@_;
+   if($CPU==$cpu) { return 1; }
+   else { return 0; }
+}
+
+################################################################################
+
+sub ifcpu {
+   my ($cpu,$str)=@_;
+   if($CPU==$cpu) { return $str; }
+   else { return ""; }
+}
+
 ################################################################################
 
 sub heading {
@@ -600,9 +782,36 @@ sub move_file {
    my $src=$_[0];
    my $dest=$_[1];
    if($DEBUG) {
-      print("MOVING [$src] to [$dest]\n");
+      print("MOVING [$src] -> [$dest]\n");
    }
    move($src,$dest);
+}
+
+################################################################################
+
+sub copy_file {
+   my $src=$_[0];
+   my $dest=$_[1];
+   if($DEBUG) {
+      print("COPYING [$src] => [$dest]\n");
+   }
+   copy($src,$dest);
+}
+
+################################################################################
+
+sub make_directory {
+   my $dir=$_[0];
+   my $parent=directory_of($dir);
+   if((length($parent)>0)&&($parent ne "\\")&&($parent ne ".")) {
+      if(! -e $parent) {
+         make_directory($parent);
+      }
+   }
+   if($DEBUG) {
+      print("MAKING DIRECTORY [$dir]\n");
+   }
+   mkdir($dir,0777);
 }
 
 ################################################################################
@@ -673,8 +882,17 @@ sub directory_of {
    $dir=~tr/A-Z/a-z/;
    # remove C:
    $dir=~s/^[a-z]://g;
+   # remove trailing backslash
+   $dir=~s/\\$//g;
+   # check for root directory
+   if($dir eq "\\") { return "\\"; }
+   # check for current directory
+   if(index($dir,"\\")==-1) { return "."; }
    # remove stuff after last backslash
    $dir=~s/\\[^\\]*$//g;
+   # check for root directory (again)
+   if(length($dir)==0) { return "\\"; }
+   # done
    return $dir;
 }
 

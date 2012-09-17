@@ -1,0 +1,60 @@
+////////////////////////////////////////////////////////////////////////////////
+//   C O M M E N T A R Y
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//   D E P E N D E N C I E S
+////////////////////////////////////////////////////////////////////////////////
+
+#include "avr_regs.h"
+#include <avr/io.h>
+#include "types.h"
+#include "hwtimer.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+//   C O N S T A N T S
+////////////////////////////////////////////////////////////////////////////////
+
+// These settings depend on your hardware platform
+
+// crystal frequency
+#define CYCLES_PER_MS       4000
+
+// HC11:set in TMSK2 register (see boot.c)
+// AVR: set in TCCR1B register (see below)
+#define TIMER_PRESCALE      1
+
+#define CLOCKS_PER_MS       CYCLES_PER_MS/TIMER_PRESCALE
+
+
+// prescaler
+#define PRESCALE_1        0x01
+#define PRESCALE_8        0x02
+#define PRESCALE_64       0x03
+#define PRESCALE_256      0x04
+#define PRESCALE_1024     0x05
+
+////////////////////////////////////////////////////////////////////////////////
+//   E X P O R T E D   F U N C T I O N S
+////////////////////////////////////////////////////////////////////////////////
+
+void hwtimer_start(unsigned short ms, void (*func)()) {
+   // toggle OC1A and OC1B on matches, disable PWM
+   outb(TCCR1A,M_COM1A0);
+   // disable noise canceler, clear when A matches, prescale=1 (start now)
+   outb(TCCR1B,M_CTC1|PRESCALE_1);
+   // set timer output compare 1A
+   outw(OCR1AL,(unsigned short)(CLOCKS_PER_MS*ms));
+   // enable OC1A interrupt
+   sbi(TIMSK,B_OCIE1A);
+#ifdef FEATURE_DEBUG
+   // PORTD.5 (OC1A) is output
+   sbi(DDRD,B_DDD5);   // DEBUG ONLY
+#endif
+}
+
+////////////////////////////////////////////////////////////////////////////////
+

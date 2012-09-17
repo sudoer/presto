@@ -17,10 +17,10 @@
 
 #include "types.h"
 #include "error_codes.h"
-#include "cpu/hc11regs.h"
-#include "cpu/locks.h"
-#include "cpu/misc_hw.h"
-#include "cpu/error.h"
+#include "hc11regs.h"
+#include "locks.h"
+#include "handyboard.h"
+#include "error.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S T A T I C   F U N C T I O N S

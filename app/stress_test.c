@@ -1,8 +1,8 @@
 
 #include "presto.h"
 #include "types.h"
-#include "cpu/error.h"
-#include "cpu/misc_hw.h"
+#include "error.h"
+#include "handyboard.h"
 #include "services/serial.h"
 #include "services/string.h"
 #include "kernel/memory.h"
@@ -339,7 +339,7 @@ void student(void) {
       MASKNOT(lights,0x08);
       assert_lights();
 
-      MASKNOT(PORTD,0x3C);
+      //MASKNOT(PORTD,0x3C);
 
       if(++count==25) {
          count=0;
@@ -524,7 +524,7 @@ static void debugger(void) {
 
 int main(void) {
 
-   DDRD=0x3F;
+   //DDRD=0x3F;
    assert_lights();
    presto_init();
    pres_tid=presto_task_create(president,  pres_stack,  STACK_SIZE, 14);

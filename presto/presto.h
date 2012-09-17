@@ -12,7 +12,7 @@
 
 #include "configure.h"
 #include "types.h"
-#include "cpu/error.h"
+#include "error.h"
 #include "kernel/clock.h"
 #include "kernel/kernel.h"
 #include "kernel/mail.h"

@@ -7,7 +7,7 @@
 //   D E P E N D E N C I E S
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cpu/hc11regs.h"
+#include "hc11regs.h"
 #include "types.h"
 #include "services\inputs.h"
 #include "services\serial.h"

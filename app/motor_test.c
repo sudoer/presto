@@ -1,9 +1,9 @@
 
 #include "presto.h"
 #include "types.h"
-#include "cpu/hc11regs.h"
-#include "cpu/error.h"
-#include "cpu/misc_hw.h"
+#include "hc11regs.h"
+#include "error.h"
+#include "handyboard.h"
 #include "services/serial.h"
 #include "services/string.h"
 

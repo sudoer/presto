@@ -34,8 +34,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
-#include "cpu/error.h"
-#include "cpu/intvect.h"
+#include "error.h"
+#include "intvect.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D A T A   T Y P E S
@@ -141,7 +141,7 @@ static interrupt_vector normal_interrupt_vectors[NUM_INTERRUPTS]
 ////////////////////////////////////////////////////////////////////////////////
 
 void set_interrupt(BYTE intr, void (*function_p)(void)) {
-   if (intr<=INTR_RESET) {
+   if (intr<NUM_INTERRUPTS) {
       normal_interrupt_vectors[intr]=function_p;
    }
 }
@@ -151,7 +151,7 @@ void set_interrupt(BYTE intr, void (*function_p)(void)) {
 void init_interrupts(void) {
    int i;
    //NOT_USED(special_interrupt_vectors);
-   for (i=INTR_SCI;i<INTR_RESET;i++) {
+   for (i=INTR_SCI;i<NUM_INTERRUPTS;i++) {
       //normal_interrupt_vectors[i]=error_isr;
       normal_interrupt_vectors[i]=special_interrupt_vectors[i];
    }

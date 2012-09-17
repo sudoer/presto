@@ -1,22 +1,18 @@
 
 MEMORY
 {
-   /* 32k of "nothing" */
-   page0     (rw) : ORIGIN =  0x0040, LENGTH =  0x0100 - 0x0040
-   nothing1       : ORIGIN =  0x0100, LENGTH =  0x1000 - 0x0100
-   registers (rw) : ORIGIN =  0x1000, LENGTH =  0x1040 - 0x1000
-   nothing2       : ORIGIN =  0x1040, LENGTH =  0x8000 - 0x1040
+   /* 8k of flash ROM */
+   vectors    (r) : ORIGIN = 0x000000, LENGTH =  0x001a - 0x0000
+   rom       (rx) : ORIGIN = 0x00001a, LENGTH =  0x1000 - 0x001a
 
-   /* 16k of "ROM" */
-   rom      (rwx) : ORIGIN =  0x8000, LENGTH =  0xBFD6 - 0x8000
-   specvect   (r) : ORIGIN =  0xBFD6, LENGTH =  0xC000 - 0xBFD6
+   /* not much RAM */
 
-   /* 16k of "RAM" */
-   ram       (rw) : ORIGIN =  0xC000, LENGTH =  0xFFD6 - 0xC000
-   normvect  (rw) : ORIGIN =  0xFFD6, LENGTH = 0x10000 - 0xFFD6
+   registers (rw) : ORIGIN = 0x800000, LENGTH =  0x0020 - 0x0000
+   ioregs    (rw) : ORIGIN = 0x800020, LENGTH =  0x0060 - 0x0020
+   sram      (rw) : ORIGIN = 0x800060, LENGTH =  0x0260 - 0x0060
 
    /* 64k of "nothing" */
-   trash          : ORIGIN = 0x10000, LENGTH = 0x10000
+   trash          : ORIGIN = 0x810000, LENGTH = 0x10000
 }
 
 
@@ -28,23 +24,21 @@ SECTIONS
    /*---------------------------------------*/
 
    /* interrupt vectors */
-   .specvect : {
-     __specvect_start = . ;
-     *(.specvect)
-     __specvect_end = . ;
-   } > specvect
-
-
-   /* interrupt vectors */
-   .normvect : {
-     __normvect_start = . ;
-     *(.normvect)
-     __normvect_end = . ;
-   } > normvect
+   .vectors : {
+     __vectors_start = . ;
+     *(.vectors)
+     __vectors_end = . ;
+   } > vectors
 
    /*-----------*/
    /*   R O M   */
    /*-----------*/
+
+   .other : {
+     *(.stab)
+     *(.stabstr)
+   } > rom
+
 
    /* code */
    .text : {
@@ -91,7 +85,7 @@ SECTIONS
      __data_start = . ;
       *(.data)
      __data_end = . ;
-   } > ram
+   } > sram
 
 
    /* (uninitialized) static global data */
@@ -99,7 +93,7 @@ SECTIONS
      __bss_start = . ;
       *(.bss)
      __bss_end = . ;
-   } > ram
+   } > sram
 
 
    /* uninitialized global data */
@@ -107,7 +101,7 @@ SECTIONS
      __common_start = . ;
       *(COMMON)
      __common_end = . ;
-   } > ram
+   } > sram
 
 
    /* stack */
@@ -115,7 +109,7 @@ SECTIONS
      __stack_start = . ;
       *(.stack)
      __stack_end = . ;
-   } > ram
+   } > sram
 
 
    /* heap */
@@ -123,7 +117,7 @@ SECTIONS
      __heap_start = . ;
       *(.heap)
      __heap_end = . ;
-   } > ram
+   } > sram
 
 
    /*---------------*/

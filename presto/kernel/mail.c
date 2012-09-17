@@ -60,12 +60,13 @@
 
 #include "types.h"
 #include "presto.h"
-#include "cpu/error.h"
-#include "cpu/locks.h"
+#include "error.h"
+#include "locks.h"
 #include "configure.h"
 #include "kernel/kernel.h"
 #include "kernel/mail.h"
 
+#ifdef FEATURE_KERNEL_MAIL
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S T A T I C   G L O B A L   D A T A
@@ -280,5 +281,5 @@ void kernel_mail_init(void) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
+#endif  // FEATURE_KERNEL_MAIL
 

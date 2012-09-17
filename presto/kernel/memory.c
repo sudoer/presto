@@ -37,10 +37,12 @@
 #include "types.h"
 #include "presto.h"
 #include "configure.h"
-#include "cpu/error.h"
-#include "cpu/locks.h"
+#include "error.h"
+#include "locks.h"
 #include "kernel/kernel.h"
 #include "kernel/memory.h"
+
+#ifdef FEATURE_KERNEL_MEMORY
 
 ////////////////////////////////////////////////////////////////////////////////
 //   C O N S T A N T S
@@ -54,7 +56,7 @@
 
 typedef struct MEMORY_ITEM_S {
    /* short debug_item_number; */
-   short requested_bytes;
+   unsigned short requested_bytes;
    // We never us 'next' and 'pool' at the same time, so we use a union.
    union {
       struct MEMORY_ITEM_S * next;
@@ -63,14 +65,14 @@ typedef struct MEMORY_ITEM_S {
 } MEMORY_ITEM_T;
 
 typedef struct MEMORY_POOL_S {
-   short mempool_num_items;
-   short mempool_item_size;
-   short current_used_items;
+   unsigned short mempool_num_items;
+   unsigned short mempool_item_size;
+   unsigned short current_used_items;
    MEMORY_ITEM_T * free_list;
    #ifdef FEATURE_MEMORY_STATISTICS
-      short current_total_bytes;
-      short max_used_items;
-      short max_requested_size;
+      unsigned short current_total_bytes;
+      unsigned short max_used_items;
+      unsigned short max_requested_size;
    #endif
 } MEMORY_POOL_T;
 
@@ -97,7 +99,7 @@ static BYTE membytes[PRESTO_MEM_TOTALBYTES+(PRESTO_MEM_NUM_ITEMS*sizeof(MEMORY_I
 
 
 BYTE * presto_memory_allocate(unsigned short requested_bytes) {
-   short pool;
+   unsigned short pool;
 
    if (requested_bytes==0) return NULL;
 
@@ -189,7 +191,7 @@ void presto_memory_free(BYTE * free_me) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-void memory_debug(int pool, KERNEL_MEMORYPOOLSTATS_T * stats) {
+void memory_debug(unsigned short pool, KERNEL_MEMORYPOOLSTATS_T * stats) {
    if((pool<0)||(pool>=PRESTO_MEM_NUMPOOLS)) return;
    stats->mempool_num_items=mempools[pool].mempool_num_items;
    stats->mempool_item_size=mempools[pool].mempool_item_size;
@@ -269,25 +271,5 @@ void kernel_memory_init(void) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif  // FEATURE_KERNEL_MEMORY
 

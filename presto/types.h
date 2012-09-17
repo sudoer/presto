@@ -32,16 +32,32 @@ typedef unsigned long DWORD;
 
 // UNION BIT TYPES
 
-typedef union MISCWORD {
-   WORD w;
-   struct {BYTE h,l;} b;
-} MISCWORD;
+#ifdef CPU_M68HC11
+   typedef union MISCWORD {
+      WORD w;
+      struct {BYTE h,l;} b;
+   } MISCWORD;
 
-typedef union MISCLONG {
-   DWORD l;
-   struct {WORD h,l;} w;
-   BYTE b[4];
-} MISCLONG;
+   typedef union MISCLONG {
+      DWORD l;
+      struct {WORD h,l;} w;
+      BYTE b[4];
+   } MISCLONG;
+#endif
+
+#ifdef CPU_AVR8515
+   typedef union MISCWORD {
+      WORD w;
+      struct {BYTE l,h;} b;
+   } MISCWORD;
+
+   typedef union MISCLONG {
+      DWORD l;
+      struct {WORD l,h;} w;
+      BYTE b[4];
+   } MISCLONG;
+#endif
+
 
 ////////////////////////////////////////////////////////////////////////////////
 

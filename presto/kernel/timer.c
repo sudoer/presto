@@ -26,15 +26,14 @@
 
 #include "types.h"
 #include "presto.h"
-#include "cpu/error.h"
-#include "cpu/locks.h"
-#include "cpu/misc_hw.h"
-#include "cpu/intvect.h"
-#include "cpu/hwtimer.h"
+#include "locks.h"
+#include "hwtimer.h"
 #include "kernel/kernel.h"
 #include "kernel/timer.h"
 #include "kernel/clock.h"
+#include "cpu_inline.h"
 
+#ifdef FEATURE_KERNEL_TIMER
 
 ////////////////////////////////////////////////////////////////////////////////
 //   C O N S T A N T S
@@ -54,7 +53,7 @@
 
 static void timer_insert_into_master_list(KERNEL_TIMER_T * timer_p);
 static void timer_remove_from_master_list(KERNEL_TIMER_T * timer_p);
-static void timer_isr(void) __attribute__((interrupt));
+void timer_isr(void) __attribute__((interrupt));
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,10 +134,8 @@ void kernel_timer_init(void) {
 void kernel_master_clock_start(void) {
    // initialize master clock
    clock_reset(&system_clock);
-   // set up interrupt vector for TOC2
-   set_interrupt(INTR_TOC2, timer_isr);
-   // set up timer/counter 2 to tick every so often
-   hwtimer_start(PRESTO_KERNEL_MSPERTICK);
+   // do hardware timer magic
+   hwtimer_start(PRESTO_KERNEL_MSPERTICK,timer_isr);
 }
 
 
@@ -147,7 +144,10 @@ void kernel_master_clock_start(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-static void timer_isr(void) {
+void timer_isr(void) {
+
+   cbi(PORTB,7);
+
    BYTE count=0;
    KERNEL_TIMER_T * timer_p;
    PRESTO_PRIORITY_T current_pri;
@@ -181,6 +181,8 @@ static void timer_isr(void) {
       // indicate that a timer expired, and that it made a high priority task ready
       if(presto_priority_get(timer_p->owner_tid)>current_pri) count++;
    }
+
+   sbi(PORTB,7);
 
    if (count>0) {
       kernel_context_switch();
@@ -239,6 +241,6 @@ static void timer_remove_from_master_list(KERNEL_TIMER_T * timer_p) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
+#endif  // FEATURE_KERNEL_TIMER
 
 

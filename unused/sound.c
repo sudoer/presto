@@ -1,7 +1,7 @@
 
 #include "types.h"
-#include "cpu/hc11regs.h"
-#include "cpu/intvect.h"
+#include "hc11regs.h"
+#include "intvect.h"
 #include "services/sound.h"
 
 ////////////////////////////////////////////////////////////////////////////////

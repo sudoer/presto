@@ -20,6 +20,8 @@ typedef enum {
    ERROR_SEMAPHORE_TOOMANYWAITERS,               // 0A
 
    // CPU-SPECIFIC ERRORS
+
+#ifdef CPU_M68HC11
    ERROR_INTVECT_SCI,                            // 0B
    ERROR_INTVECT_SPI,                            // 0C
    ERROR_INTVECT_PAIE,                           // 0D
@@ -42,6 +44,23 @@ typedef enum {
    ERROR_INTVECT_CLM,                            // 1E
    ERROR_INTVECT_RESET,                          // 1F
    ERROR_INTVECT_OTHER,                          // 20
+#endif
+
+#ifdef CPU_AVR8515
+   ERROR_INTVECT_INT0,
+   ERROR_INTVECT_INT1,
+   ERROR_INTVECT_T1CAP,
+   ERROR_INTVECT_T1CMPA,
+   ERROR_INTVECT_T1CMPB,
+   ERROR_INTVECT_T1OVF,
+   ERROR_INTVECT_T0OVF,
+   ERROR_INTVECT_SPISTC,
+   ERROR_INTVECT_UARTRX,
+   ERROR_INTVECT_UARTUDRE,
+   ERROR_INTVECT_UARTTX,
+   ERROR_INTVECT_ANACOMP,
+   ERROR_INTVECT_OTHER,
+#endif
 
    // APPLICATION ERRORS
    ERROR_MAIN_AFTERSTART,                        // 21

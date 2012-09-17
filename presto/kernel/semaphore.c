@@ -37,12 +37,13 @@
 
 #include "types.h"
 #include "presto.h"
-#include "cpu/error.h"
-#include "cpu/locks.h"
+#include "error.h"
+#include "locks.h"
 #include "configure.h"
 #include "kernel/kernel.h"
 #include "kernel/semaphore.h"
 
+#ifdef FEATURE_KERNEL_SEMAPHORE
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S T A T I C   F U N C T I O N   P R O T O T Y P E S
@@ -311,5 +312,5 @@ static void promote_runners_to_top_waiter_priority(KERNEL_SEMAPHORE_T * sem_p) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
+#endif  // FEATURE_KERNEL_SEMAPHORE
 

@@ -43,16 +43,19 @@
 #include "types.h"
 #include "presto.h"
 #include "configure.h"
-#include "cpu/error.h"
-#include "cpu/boot.h"
-#include "cpu/intvect.h"
-#include "cpu/locks.h"
-#include "cpu/misc_hw.h"
+#include "error.h"
+#include "locks.h"
+#include "cpu_inline.h"
 #include "kernel/kernel.h"
 #include "kernel/mail.h"
 #include "kernel/timer.h"
 #include "kernel/semaphore.h"
 #include "kernel/memory.h"
+
+#ifdef CPU_AVR8515
+   #include "avr_regs.h"
+   #include <avr/io.h>
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //   C O N S T A N T S
@@ -61,8 +64,6 @@
 // CONFIGURATION
 #define MAX_TASKS           (PRESTO_KERNEL_MAXUSERTASKS+1)
 #define IDLE_PRIORITY       0
-#define IDLE_STACK_SIZE     0x100
-
 #define WAIT_MASK_READY     ((KERNEL_TRIGGER_T)0)
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +95,7 @@ static void priority_queue_insert_tcb(KERNEL_TCB_T * tcb_p, KERNEL_PRIORITY_T pr
 static void priority_queue_remove_tcb(KERNEL_TCB_T * tcb_p);
 
 // context switching
-static void context_switch_isr(void) __attribute__((interrupt));
+void context_switch_isr(void) __attribute__((interrupt));
 
 // utilities
 static KERNEL_TCB_T * tid_to_tcbptr(KERNEL_TASKID_T tid);
@@ -110,7 +111,7 @@ static KERNEL_TCB_T * tcb_head_p=NULL;
 static KERNEL_TCB_T * free_tcb_p=NULL;
 
 // idle task stuff
-static BYTE idle_stack[IDLE_STACK_SIZE];
+static BYTE idle_stack[PRESTO_KERNEL_IDLESTACKSIZE];
 static KERNEL_TCB_T * idle_tcb_p;
 static BYTE idle_tid;
 
@@ -120,9 +121,6 @@ static BYTE presto_initialized=0;
 // These are used to pass arguments to inline assembly routines.
 // Do not put these on the stack (BOOM).
 static KERNEL_TCB_T * old_tcb_p;
-static BYTE * global_new_sp=NULL;
-static BYTE * global_old_sp=NULL;
-static BYTE ** old_task_stack_pointer_p;
 
 ////////////////////////////////////////////////////////////////////////////////
 //   E X T E R N A L   F U N C T I O N S
@@ -151,16 +149,24 @@ void presto_init(void) {
    tcb_list[MAX_TASKS-2].next=NULL;
 
    // initialize other kernel subsystems
-   kernel_timer_init();
-   kernel_mail_init();
-   kernel_semaphore_init();
-   kernel_memory_init();
+   #ifdef FEATURE_KERNEL_TIMER
+      kernel_timer_init();
+   #endif
+   #ifdef FEATURE_KERNEL_MAIL
+      kernel_mail_init();
+   #endif
+   #ifdef FEATURE_KERNEL_SEMAPHORE
+      kernel_semaphore_init();
+   #endif
+   #ifdef FEATURE_KERNEL_MEMORY
+      kernel_memory_init();
+   #endif
 
    // must be done before creating idle task
    presto_initialized=1;
 
    // initialize idle task
-   idle_tid=presto_task_create(idle_task,idle_stack,IDLE_STACK_SIZE,IDLE_PRIORITY);
+   idle_tid=presto_task_create(idle_task,idle_stack,PRESTO_KERNEL_IDLESTACKSIZE,IDLE_PRIORITY);
    idle_tcb_p=tid_to_tcbptr(idle_tid);
 }
 
@@ -171,8 +177,6 @@ void presto_init(void) {
 KERNEL_TASKID_T presto_task_create(void (*func)(void), BYTE * stack, short stack_size, KERNEL_PRIORITY_T priority) {
 
    KERNEL_TCB_T * new_tcb_p;
-   BYTE * sp;
-   MISCWORD xlate;    // to split a word into two bytes
    CPU_LOCK_T lock;
 
    if (!presto_initialized) {
@@ -203,27 +207,8 @@ KERNEL_TASKID_T presto_task_create(void (*func)(void), BYTE * stack, short stack
    new_tcb_p->wait_mask=WAIT_MASK_READY;
    new_tcb_p->triggers=(KERNEL_TRIGGER_T)0;
 
-   // SET UP NEW STACK (stack grows down)
-
-   sp=new_tcb_p->stack_top;
-   xlate.w=(WORD)func;
-   *sp--=xlate.b.l;    // function pointer(L)
-   *sp--=xlate.b.h;    // function pointer(H)
-   *sp--=0x66;         // Y(L) register
-   *sp--=0x55;         // Y(H) register
-   *sp--=0x44;         // X(L) register
-   *sp--=0x33;         // X(H) register
-   *sp--=0x11;         // A register
-   *sp--=0x22;         // B register
-   *sp--=0x00;         // condition codes (I bit cleared)
-   *sp--=0xBB;         // _.tmp 0000(L)
-   *sp--=0xAA;         // _.tmp 0000(H)
-   *sp--=0xDD;         // _.z   0002(L)
-   *sp--=0xCC;         // _.z   0002(H)
-   *sp--=0xFF;         // _.xy  0004(L)
-   *sp--=0xEE;         // _.xy  0004(H)
-
-   new_tcb_p->stack_ptr=sp;
+   // SET UP NEW STACK
+   new_tcb_p->stack_ptr=cpu_inline_setup_stack(new_tcb_p->stack_top,func);
 
    priority_queue_insert_tcb(new_tcb_p,priority);
 
@@ -239,9 +224,11 @@ void presto_scheduler_start(void) {
    // we're about to switch to our first task... interrupts off
    cpu_lock();
 
-   set_interrupt(INTR_SWI, context_switch_isr);
+   cpu_inline_initialize_software_interrupt(context_switch_isr);
 
-   kernel_master_clock_start();
+   #ifdef FEATURE_KERNEL_TIMER
+      kernel_master_clock_start();
+   #endif
 
    // pick next task to run
    // first task in list is highest priority and is ready
@@ -251,16 +238,7 @@ void presto_scheduler_start(void) {
    }
 
    // SET UP A NEW STACK AND START EXECUTION USING IT
-
-   // these parameters will be used in inline assembly...
-   // must be put in global space, not on stack
-   global_new_sp=current_tcb_p->stack_ptr;
-
-   asm("lds global_new_sp");
-   asm("pulx");  // _.xy
-   asm("pulx");  // _.z
-   asm("pulx");  // _.tmp
-   asm("rti");
+   cpu_inline_launch_first_task(current_tcb_p->stack_ptr);
 
    // we never get here
    error_fatal(ERROR_KERNEL_STARTAFTERRTI);
@@ -334,7 +312,7 @@ KERNEL_TRIGGER_T presto_wait(KERNEL_TRIGGER_T wait_for) {
    if ((wait_for & current_tcb_p->triggers)==0) {
       // Current task must wait.
       // We should re-evaluate priorities and swap tasks.
-      asm("swi");
+      kernel_context_switch();
    }
 
    // When we wake up, we'll be ready to run again.
@@ -361,7 +339,7 @@ KERNEL_TRIGGER_T presto_wait(KERNEL_TRIGGER_T wait_for) {
 
 void presto_trigger_set(KERNEL_TRIGGER_T trigger) {
    MASKSET(current_tcb_p->triggers,trigger);
-   // No need to asm("swi").
+   // No need to do kernel_context_switch() here.
    // We are not waiting on this trigger (we are running now).
 }
 
@@ -391,7 +369,7 @@ void presto_trigger_send(KERNEL_TASKID_T tid, KERNEL_TRIGGER_T trigger) {
    MASKSET(tcb_p->triggers,trigger);
    // if the task is waiting on this trigger, then re-evaluate priorities
    if(tcb_p->wait_mask & trigger) {
-      asm("swi");
+      kernel_context_switch();
    }
 }
 
@@ -420,7 +398,7 @@ KERNEL_TASKID_T kernel_current_task(void) {
 
 
 void kernel_context_switch(void) {
-   asm("swi");
+   cpu_inline_software_interrupt();
 }
 
 
@@ -510,9 +488,20 @@ static KERNEL_TCB_T * scheduler_next_ready(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-static void context_switch_isr(void) {
-   // registers are pushed when SWI is executed
-   // pseudo-registers are also pushed (tmp,z,xy)
+static BYTE * alans_new_sp;
+static BYTE ** alans_old_spp;
+
+void context_switch_isr(void) {
+
+   // M68HC11
+   // CPU pushes registers when SWI is executed
+   // compiler also pushes pseudo-registers (tmp,z,xy)
+
+   // AVR
+   // CPU pushes PC (that's all!)
+   // compiler pushes several registers and SREG
+
+   cpu_inline_swi_start();
 
    #ifdef SANITYCHECK_KERNEL_CLOBBEREDSTACK
       // check to see if the old task has clobbered its stack
@@ -522,7 +511,7 @@ static void context_switch_isr(void) {
    #endif // SANITYCHECK_KERNEL_CLOBBEREDSTACK
 
    // the inline asm will save old SP in old TCB
-   old_task_stack_pointer_p=&(current_tcb_p->stack_ptr);
+   alans_old_spp=&(current_tcb_p->stack_ptr);
 
    // remember which task was running... we may not need to switch
    old_tcb_p=current_tcb_p;
@@ -534,9 +523,9 @@ static void context_switch_isr(void) {
    // only manipulate stacks if there is a context SWITCH
    if (current_tcb_p!=old_tcb_p) {
 
-      // there's a new "highest priority ready task"
+      cpu_inline_indicate_task_switch();
 
-      TOGGLE_SPEAKER();
+      // there's a new "highest priority ready task"
 
       #ifdef SANITYCHECK_KERNEL_CLOBBEREDSTACK
          // check to see if the new task has clobbered its stack
@@ -548,19 +537,14 @@ static void context_switch_isr(void) {
       // call asm routine to set up new stack
       // when we return, we'll be another process
       // the asm routine will re-enable interrupts
-      global_new_sp=current_tcb_p->stack_ptr;
+      alans_new_sp=current_tcb_p->stack_ptr;
 
-      // store the old stack pointer in a global place
-      asm("sts global_old_sp");
-      // put the old stack pointer into the old task's TCB
-      *old_task_stack_pointer_p=global_old_sp;
-      // load the new stack pointer
-      asm("lds global_new_sp");
+      cpu_inline_swap_stack_pointers(alans_old_spp,alans_new_sp);
 
    }
 
-   // pseudo-registers are pulled (xy,z,tmp)
-   // then normal registers are pulled
+   cpu_inline_swi_end();
+
 }
 
 
@@ -569,10 +553,7 @@ static void context_switch_isr(void) {
 
 static void idle_task(void) {
    while (1) {
-      // Wait for an interrupt.  The WAI instruction places the CPU in
-      // a low power "wait" mode.  Plus, it pre-stacks the registers for
-      // a slightly faster response time.
-      asm("wai");
+      cpu_inline_idle_work();
    }
 }
 

@@ -23,9 +23,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
-#include "cpu/hc11regs.h"
-#include "cpu/locks.h"
-#include "cpu/intvect.h"
+#include "hc11regs.h"
+#include "locks.h"
+#include "intvect.h"
 #include "presto.h"
 #include "services/serial.h"
 
