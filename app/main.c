@@ -2,7 +2,6 @@
 #include "presto.h"
 #include "types.h"
 #include "error.h"
-#include "hc11regs.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,8 +38,9 @@ BYTE lights=0xF0;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define FLAG_MAIL  0x10
-#define FLAG_TIMER 0x01
+#define FLAG_MAIL   0x10
+#define FLAG_TIMER1 0x01
+#define FLAG_TIMER2 0x02
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -56,7 +56,9 @@ void Zero(void) {
    PRESTO_MAIL_T msg;
    PRESTO_MAIL_T off;
    PRESTO_MAIL_T on;
-   PRESTO_TIMER_T ticker;
+   PRESTO_TIMER_T ticker1;
+   PRESTO_TIMER_T ticker2;
+   PRESTO_FLAG_T flags;
    unsigned char count=1;
    msg.dw.dw1=0;
    off.b.b1=0;
@@ -64,12 +66,11 @@ void Zero(void) {
    lights=0xFF;
    assert_lights();
 
-   presto_timer(&ticker,250,100,FLAG_TIMER);
+   presto_timer(&ticker1,2000,500,FLAG_TIMER1);
+   presto_timer(&ticker2,1100,2000,FLAG_TIMER1);
    while(1) {
-      presto_wait(FLAG_TIMER);
-      clear_flag(FLAG_TIMER);
-
-      BITNOT(PORTA,3);   // toggle speaker
+      flags=presto_wait(FLAG_TIMER1);
+      presto_flag_clear(flags);
       switch(count) {
          case 1: {
             presto_mail_send(&box1,off);
@@ -98,17 +99,16 @@ void Zero(void) {
       }
       count++;
       if(count==9) count=1;
-      presto_timer(&ticker,125,0,FLAG_TIMER);
    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void One(void) {
-   presto_mailbox_init(&box1,FLAG_MAIL);
+   presto_mail_init(&box1,FLAG_MAIL);
    while(1) {
       presto_wait(FLAG_MAIL);
-      clear_flag(FLAG_MAIL);
+      presto_flag_clear(FLAG_MAIL);
       presto_mail_get(&box1,&msg1);
       switch(msg1.b.b1) {
          case 0: lights&=~0x01; break;
@@ -121,10 +121,10 @@ void One(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void Two(void) {
-   presto_mailbox_init(&box2,FLAG_MAIL);
+   presto_mail_init(&box2,FLAG_MAIL);
    while(1) {
       presto_wait(FLAG_MAIL);
-      clear_flag(FLAG_MAIL);
+      presto_flag_clear(FLAG_MAIL);
       presto_mail_get(&box2,&msg2);
       switch(msg2.b.b1) {
          case 0: lights&=~0x02; break;
@@ -137,10 +137,10 @@ void Two(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void Three(void) {
-   presto_mailbox_init(&box3,FLAG_MAIL);
+   presto_mail_init(&box3,FLAG_MAIL);
    while(1) {
       presto_wait(FLAG_MAIL);
-      clear_flag(FLAG_MAIL);
+      presto_flag_clear(FLAG_MAIL);
       presto_mail_get(&box3,&msg3);
       switch(msg3.b.b1) {
          case 0: lights&=~0x04; break;
@@ -153,10 +153,10 @@ void Three(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void Four(void) {
-   presto_mailbox_init(&box4,FLAG_MAIL);
+   presto_mail_init(&box4,FLAG_MAIL);
    while(1) {
       presto_wait(FLAG_MAIL);
-      clear_flag(FLAG_MAIL);
+      presto_flag_clear(FLAG_MAIL);
       presto_mail_get(&box4,&msg4);
       switch(msg4.b.b1) {
          case 0: lights&=~0x08; break;
@@ -187,7 +187,7 @@ int main(void) {
 
    presto_start_scheduler();
    // we never get here
-   presto_fatal_error(ERROR_MAIN_END);
+   presto_fatal_error(ERROR_MAIN_AFTERSTART);
    return 0;
 }
 

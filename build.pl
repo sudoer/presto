@@ -30,13 +30,15 @@ sub setup_project {
    $OBJ_DIR="obj";
    $TARGET="presto";
    @SRC_FILES=(
-               "app\\test.c",
-               "kernel\\kernel.c",
-               "kernel\\system.c",
-               "kernel\\crt11.s",
-               "kernel\\clock.c",
-               "kernel\\error.c",
-               "kernel\\intvect.c",
+               "app\\main.c",
+               "presto\\kernel\\clock.c",
+               "presto\\kernel\\error.c",
+               "presto\\kernel\\kernel.c",
+               "presto\\kernel\\mail.c",
+               "presto\\kernel\\timer.c",
+               "presto\\chip\\crt11.s",
+               "presto\\chip\\boot.c",
+               "presto\\chip\\intvect.c",
    );
 
    print("OK\n");
@@ -141,7 +143,7 @@ sub compile_stage {
             $errors+=run("gcc.exe "
                         ."-m68hc11 "
                         ."-DGCC "
-                        ."-I$build_dir -I. "
+                        ."-I$build_dir -I. -I$build_dir\\presto "
                         ."-mshort "
                         ."-O "  # was ."O0 "  # oh-zero
                         ."-fomit-frame-pointer "

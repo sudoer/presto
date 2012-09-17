@@ -45,13 +45,13 @@ extern void _start(void);      // entry point in crt11.s (ICC only)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//   I N E R T   I N T E R R U P T   S E R V I C E   R O U T I N E ( S )
+//   S I M P L E   I N T E R R U P T   S E R V I C E   R O U T I N E ( S )
 ////////////////////////////////////////////////////////////////////////////////
 
 //void inert_isr(void) __attribute__((interrupt));
 void inert_isr(void) { asm("rti"); }
-void illop_isr(void) { presto_fatal_error(ERROR_INTR_ILLOP); }
-void error_isr(void) { presto_fatal_error(ERROR_INTR_OTHER); }
+void illop_isr(void) { presto_fatal_error(ERROR_INTVECT_ILLOP); }
+void error_isr(void) { presto_fatal_error(ERROR_INTVECT_OTHER); }
 
 ////////////////////////////////////////////////////////////////////////////////
 //   I N T E R R U P T   V E C T O R   T A B L E S

@@ -12,20 +12,20 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // note - clock rolls over after seven years
-typedef struct {
+typedef struct KERNEL_TIME_S {
    unsigned short usec;
    unsigned short msec;
    unsigned short sec;
    unsigned short hour;
-} PRESTO_TIME_T;
+} KERNEL_TIME_T;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern void clock_reset(PRESTO_TIME_T * clk);
-extern void clock_add_us(PRESTO_TIME_T * clk, unsigned short us);
-extern void clock_add_ms(PRESTO_TIME_T * clk, unsigned short ms);
-extern void clock_add_sec(PRESTO_TIME_T * clk, unsigned short s);
-extern signed char clock_compare(PRESTO_TIME_T * A,PRESTO_TIME_T * B);
+extern void clock_reset(struct KERNEL_TIME_S * clk);
+extern void clock_add_us(struct KERNEL_TIME_S * clk, unsigned short us);
+extern void clock_add_ms(struct KERNEL_TIME_S * clk, unsigned short ms);
+extern void clock_add_sec(struct KERNEL_TIME_S * clk, unsigned short s);
+extern signed char clock_compare(struct KERNEL_TIME_S * A,struct KERNEL_TIME_S * B);
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -1,3 +1,17 @@
+2003.05.13
+
+Split kernel.c into several files (kernel, mail, timers, etc).  Moved
+source files around into kernel-specific and chip-specific diretories.
+Entire public interface is specified in PRESTO.H.  Other H files are
+internal to the kernel (mostly kernel.h, some other H files are blank).
+
+Things to look at:
+ - KERNEL_BLAH_T vs PRESTO_BLAH_T
+ - where does processor-specific systimer stuff go?
+
+
+---
+
 2003.05.12
 
 Totally redesigned.  Some interfaces are still a bit rough, but the

@@ -6,10 +6,9 @@
 
 // this stuff was stolen from the ImageCraft compiler libraries
 
-/* base address of register block, change this if you relocate the register
- * block. This is from an A8. May need to be changed for other HC11 members
- * or if you relocate the IO base address.
- */
+// base address of register block, change this if you relocate the register
+// block. This is from an A8. May need to be changed for other HC11 members
+// or if you relocate the IO base address.
 
 #define IO_BASE  0x1000
 #define PORTA  *(volatile unsigned char *)(IO_BASE + 0x00)
@@ -174,3 +173,4 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #endif
+
