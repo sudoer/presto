@@ -14,7 +14,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define STACK_SIZE 100
+#define STACK_SIZE 0x100
 
 /*static*/ BYTE task_one_stack[STACK_SIZE];
 /*static*/ BYTE task_two_stack[STACK_SIZE];

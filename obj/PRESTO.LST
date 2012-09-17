@@ -43,7 +43,7 @@
                        ;  rMEM -> 2,x
                        ;         lights -> 5,x
  C040                  _assert_lights::
- C040  BDCE7D            jsr __enterb
+ C040  BDCE72            jsr __enterb
  C043  06                .byte 0x6
  C044                  test.40::	
                        ; 
@@ -62,7 +62,7 @@
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
                        ; 
-                       ; #define STACK_SIZE 100
+                       ; #define STACK_SIZE 0x100
                        ; 
                        ; /*static*/ BYTE task_one_stack[STACK_SIZE];
                        ; /*static*/ BYTE task_two_stack[STACK_SIZE];
@@ -137,7 +137,7 @@
                        ;          ?temp -> 2,x
                        ;            msg -> 6,x
  C085                  _One::
- C085  BDCE7D            jsr __enterb
+ C085  BDCE72            jsr __enterb
  C088  8A                .byte 0x8a
  C089                  test.48::	
                        ; 
@@ -147,11 +147,11 @@
                        ;    PRESTO_MAIL_T msg;
                        ;    msg.dw.dw1=0;
  C089  18CEC29F          ldy #L12
- C08D  BDCF83            jsr __ly2reg
+ C08D  BDCF78            jsr __ly2reg
  C090  EC00              ldd 0,x
  C092  C30006            addd #6
  C095  188F              xgdy
- C097  BDCFC0            jsr __lreg2y
+ C097  BDCFB5            jsr __lreg2y
  C09A  2046              bra L14
  C09C                  L13:
  C09C                  test.50::	
@@ -175,7 +175,7 @@
  C0B6  3C                pshx
  C0B7  8F                xgdx
  C0B8  CC0004            ldd #4
- C0BB  BDCF26            jsr __asgnblk
+ C0BB  BDCF1B            jsr __asgnblk
  C0BE  38                pulx
  C0BF  EC00              ldd 0,x
  C0C1  C30002            addd #2
@@ -190,14 +190,14 @@
  C0D0  2A01              bpl X0
  C0D2  43                coma
  C0D3                  X0:
- C0D3  BDC9D7            jsr _presto_timer
+ C0D3  BDC9CC            jsr _presto_timer
  C0D6  1838              puly
  C0D8  1838              puly
  C0DA                  test.53::	
                        ;       presto_wait_for_message(&msg);
  C0DA  EC00              ldd 0,x
  C0DC  C30006            addd #6
- C0DF  BDCBA1            jsr _presto_wait_for_message
+ C0DF  BDCB96            jsr _presto_wait_for_message
  C0E2                  test.54::	
                        ;    }
  C0E2                  L14:
@@ -215,7 +215,7 @@
                        ;          ?temp -> 2,x
                        ;            msg -> 6,x
  C0EC                  _Two::
- C0EC  BDCE7D            jsr __enterb
+ C0EC  BDCE72            jsr __enterb
  C0EF  8A                .byte 0x8a
  C0F0                  test.61::	
                        ; }
@@ -226,11 +226,11 @@
                        ;    PRESTO_MAIL_T msg;
                        ;    msg.dw.dw1=0;
  C0F0  18CEC29F          ldy #L12
- C0F4  BDCF83            jsr __ly2reg
+ C0F4  BDCF78            jsr __ly2reg
  C0F7  EC00              ldd 0,x
  C0F9  C30006            addd #6
  C0FC  188F              xgdy
- C0FE  BDCFC0            jsr __lreg2y
+ C0FE  BDCFB5            jsr __lreg2y
  C101  2046              bra L18
  C103                  L17:
  C103                  test.63::	
@@ -254,7 +254,7 @@
  C11D  3C                pshx
  C11E  8F                xgdx
  C11F  CC0004            ldd #4
- C122  BDCF26            jsr __asgnblk
+ C122  BDCF1B            jsr __asgnblk
  C125  38                pulx
  C126  EC00              ldd 0,x
  C128  C30002            addd #2
@@ -269,14 +269,14 @@
  C137  2A01              bpl X1
  C139  43                coma
  C13A                  X1:
- C13A  BDC9D7            jsr _presto_timer
+ C13A  BDC9CC            jsr _presto_timer
  C13D  1838              puly
  C13F  1838              puly
  C141                  test.66::	
                        ;       presto_wait_for_message(&msg);
  C141  EC00              ldd 0,x
  C143  C30006            addd #6
- C146  BDCBA1            jsr _presto_wait_for_message
+ C146  BDCB96            jsr _presto_wait_for_message
  C149                  test.67::	
                        ;    }
  C149                  L18:
@@ -294,7 +294,7 @@
                        ;          ?temp -> 2,x
                        ;            msg -> 6,x
  C153                  _Three::
- C153  BDCE7D            jsr __enterb
+ C153  BDCE72            jsr __enterb
  C156  8A                .byte 0x8a
  C157                  test.74::	
                        ; }
@@ -305,11 +305,11 @@
                        ;    PRESTO_MAIL_T msg;
                        ;    msg.dw.dw1=0;
  C157  18CEC29F          ldy #L12
- C15B  BDCF83            jsr __ly2reg
+ C15B  BDCF78            jsr __ly2reg
  C15E  EC00              ldd 0,x
  C160  C30006            addd #6
  C163  188F              xgdy
- C165  BDCFC0            jsr __lreg2y
+ C165  BDCFB5            jsr __lreg2y
  C168  2046              bra L22
  C16A                  L21:
  C16A                  test.76::	
@@ -333,7 +333,7 @@
  C184  3C                pshx
  C185  8F                xgdx
  C186  CC0004            ldd #4
- C189  BDCF26            jsr __asgnblk
+ C189  BDCF1B            jsr __asgnblk
  C18C  38                pulx
  C18D  EC00              ldd 0,x
  C18F  C30002            addd #2
@@ -348,14 +348,14 @@
  C19E  2A01              bpl X2
  C1A0  43                coma
  C1A1                  X2:
- C1A1  BDC9D7            jsr _presto_timer
+ C1A1  BDC9CC            jsr _presto_timer
  C1A4  1838              puly
  C1A6  1838              puly
  C1A8                  test.79::	
                        ;       presto_wait_for_message(&msg);
  C1A8  EC00              ldd 0,x
  C1AA  C30006            addd #6
- C1AD  BDCBA1            jsr _presto_wait_for_message
+ C1AD  BDCB96            jsr _presto_wait_for_message
  C1B0                  test.80::	
                        ;    }
  C1B0                  L22:
@@ -373,7 +373,7 @@
                        ;          ?temp -> 2,x
                        ;            msg -> 6,x
  C1BA                  _Four::
- C1BA  BDCE7D            jsr __enterb
+ C1BA  BDCE72            jsr __enterb
  C1BD  8A                .byte 0x8a
  C1BE                  test.87::	
                        ; }
@@ -384,11 +384,11 @@
                        ;    PRESTO_MAIL_T msg;
                        ;    msg.dw.dw1=0;
  C1BE  18CEC29F          ldy #L12
- C1C2  BDCF83            jsr __ly2reg
+ C1C2  BDCF78            jsr __ly2reg
  C1C5  EC00              ldd 0,x
  C1C7  C30006            addd #6
  C1CA  188F              xgdy
- C1CC  BDCFC0            jsr __lreg2y
+ C1CC  BDCFB5            jsr __lreg2y
  C1CF  2046              bra L26
  C1D1                  L25:
  C1D1                  test.89::	
@@ -412,7 +412,7 @@
  C1EB  3C                pshx
  C1EC  8F                xgdx
  C1ED  CC0004            ldd #4
- C1F0  BDCF26            jsr __asgnblk
+ C1F0  BDCF1B            jsr __asgnblk
  C1F3  38                pulx
  C1F4  EC00              ldd 0,x
  C1F6  C30002            addd #2
@@ -427,14 +427,14 @@
  C205  2A01              bpl X3
  C207  43                coma
  C208                  X3:
- C208  BDC9D7            jsr _presto_timer
+ C208  BDC9CC            jsr _presto_timer
  C20B  1838              puly
  C20D  1838              puly
  C20F                  test.92::	
                        ;       presto_wait_for_message(&msg);
  C20F  EC00              ldd 0,x
  C211  C30006            addd #6
- C214  BDCBA1            jsr _presto_wait_for_message
+ C214  BDCB96            jsr _presto_wait_for_message
  C217                  test.93::	
                        ;    }
  C217                  L26:
@@ -463,15 +463,15 @@
  C224  CC0023            ldd #35
  C227  37                pshb
  C228  36                psha
- C229  CC0064            ldd #100
+ C229  CC0100            ldd #256
  C22C  37                pshb
  C22D  36                psha
- C22E  CC992C            ldd #_task_one_stack
+ C22E  CC9B00            ldd #_task_one_stack
  C231  37                pshb
  C232  36                psha
  C233  CCC085            ldd #_One
  C236  BDC64E            jsr _presto_create_task
- C239  BDCEC6            jsr __movspb
+ C239  BDCEBB            jsr __movspb
  C23C  06                .byte 6
  C23D  F78000            stab _one_tid
  C240                  test.105::	
@@ -481,15 +481,15 @@
  C240  CC0028            ldd #40
  C243  37                pshb
  C244  36                psha
- C245  CC0064            ldd #100
+ C245  CC0100            ldd #256
  C248  37                pshb
  C249  36                psha
- C24A  CC98C8            ldd #_task_two_stack
+ C24A  CC9A00            ldd #_task_two_stack
  C24D  37                pshb
  C24E  36                psha
  C24F  CCC0EC            ldd #_Two
  C252  BDC64E            jsr _presto_create_task
- C255  BDCEC6            jsr __movspb
+ C255  BDCEBB            jsr __movspb
  C258  06                .byte 6
  C259  F78001            stab _two_tid
  C25C                  test.108::	
@@ -499,15 +499,15 @@
  C25C  CC002D            ldd #45
  C25F  37                pshb
  C260  36                psha
- C261  CC0064            ldd #100
+ C261  CC0100            ldd #256
  C264  37                pshb
  C265  36                psha
- C266  CC9864            ldd #_task_three_stack
+ C266  CC9900            ldd #_task_three_stack
  C269  37                pshb
  C26A  36                psha
  C26B  CCC153            ldd #_Three
  C26E  BDC64E            jsr _presto_create_task
- C271  BDCEC6            jsr __movspb
+ C271  BDCEBB            jsr __movspb
  C274  06                .byte 6
  C275  F78002            stab _three_tid
  C278                  test.111::	
@@ -517,7 +517,7 @@
  C278  CC0032            ldd #50
  C27B  37                pshb
  C27C  36                psha
- C27D  CC0064            ldd #100
+ C27D  CC0100            ldd #256
  C280  37                pshb
  C281  36                psha
  C282  CC9800            ldd #_task_four_stack
@@ -525,7 +525,7 @@
  C286  36                psha
  C287  CCC1BA            ldd #_Four
  C28A  BDC64E            jsr _presto_create_task
- C28D  BDCEC6            jsr __movspb
+ C28D  BDCEBB            jsr __movspb
  C290  06                .byte 6
  C291  F78003            stab _four_tid
  C294                  test.118::	
@@ -549,13 +549,13 @@
  C29E  39                rts
                          .area bss
  9800                  _task_four_stack::
- 9800                    .blkb 100
- 9864                  _task_three_stack::
- 9864                    .blkb 100
- 98C8                  _task_two_stack::
- 98C8                    .blkb 100
- 992C                  _task_one_stack::
- 992C                    .blkb 100
+ 9800                    .blkb 256
+ 9900                  _task_three_stack::
+ 9900                    .blkb 256
+ 9A00                  _task_two_stack::
+ 9A00                    .blkb 256
+ 9B00                  _task_one_stack::
+ 9B00                    .blkb 256
                          .area text
 --- 025F                 L12:
 --- 025F 00000000          .word 0,0
@@ -564,7 +564,7 @@
                        ;          clock -> 2,x
                        ;          ?temp -> 8,x
  C2A3                  _clock_reset::
- C2A3  BDCE7D            jsr __enterb
+ C2A3  BDCE72            jsr __enterb
  C2A6  46                .byte 0x46
  C2A7                  clock.9::	
                        ; 
@@ -591,7 +591,7 @@
  C2BA  3C                pshx
  C2BB  8F                xgdx
  C2BC  CC0004            ldd #4
- C2BF  BDCF26            jsr __asgnblk
+ C2BF  BDCF1B            jsr __asgnblk
  C2C2  38                pulx
  C2C3                  L5:
  C2C3  8F                xgdx
@@ -607,7 +607,7 @@
                        ;          clock -> 10,x
                        ;          ?temp -> 6,x
  C2CD                  _clock_add::
- C2CD  BDCE7D            jsr __enterb
+ C2CD  BDCE72            jsr __enterb
  C2D0  44                .byte 0x44
  C2D1                  clock.17::	
                        ; }
@@ -650,7 +650,7 @@
  C309  3C                pshx
  C30A  8F                xgdx
  C30B  CC0004            ldd #4
- C30E  BDCF26            jsr __asgnblk
+ C30E  BDCF1B            jsr __asgnblk
  C311  38                pulx
  C312                  L8:
  C312  8F                xgdx
@@ -1258,7 +1258,7 @@
                        ;          ?temp -> 2,x
                        ;          delay -> 3,x
  C4B4                  _presto_fatal_error::
- C4B4  BDCE7D            jsr __enterb
+ C4B4  BDCE72            jsr __enterb
  C4B7  04                .byte 0x4
  C4B8  0F                    sei
  C4B9  8EB5FF            lds #init_sp
@@ -1414,7 +1414,7 @@
                        ;          ?temp -> 4,x
                        ;          count -> 7,x
  C4FA                  _presto_init::
- C4FA  BDCE7D            jsr __enterb
+ C4FA  BDCE72            jsr __enterb
  C4FD  08                .byte 0x8
  C4FE                  kernel.80::	
                        ; 
@@ -1511,7 +1511,7 @@
                        ; 
                        ;    // initialize master clock
                        ;    presto_master_clock=clock_reset();
- C510  CC9B05            ldd #_presto_master_clock
+ C510  CC9D75            ldd #_presto_master_clock
  C513  BDC2A3            jsr _clock_reset
  C516                  kernel.87::	
                        ; 
@@ -1526,12 +1526,12 @@
  C51C  4F                clra
  C51D  188F              xgdy
  C51F  CC0012            ldd #18
- C522  BDCE1E            jsr __muli
+ C522  BDCE13            jsr __muli
  C525  ED04              std 4,x
- C527  C39B15            addd #_tcb_list+12
+ C527  C39D85            addd #_tcb_list+12
  C52A  188F              xgdy
  C52C  EC04              ldd 4,x
- C52E  C39B1B            addd #_tcb_list+18
+ C52E  C39D8B            addd #_tcb_list+18
  C531  18ED00            std 0,y
  C534                  kernel.89::	
                        ;       tcb_list[count].task_id=count;
@@ -1540,8 +1540,8 @@
  C537  ED02              std 2,x
  C539  CC0012            ldd #18
  C53C  1AEE02            ldy 2,x
- C53F  BDCE1E            jsr __muli
- C542  C39B09            addd #_tcb_list
+ C53F  BDCE13            jsr __muli
+ C542  C39D79            addd #_tcb_list
  C545  188F              xgdy
  C547  E603              ldab 3,x
  C549  18E700            stab 0,y
@@ -1551,8 +1551,8 @@
  C54E  4F                clra
  C54F  188F              xgdy
  C551  CC0012            ldd #18
- C554  BDCE1E            jsr __muli
- C557  C39B13            addd #_tcb_list+10
+ C554  BDCE13            jsr __muli
+ C557  C39D83            addd #_tcb_list+10
  C55A  188F              xgdy
  C55C  CC0002            ldd #2
  C55F  18ED00            std 0,y
@@ -1570,10 +1570,10 @@
  C570                  kernel.92::	
                        ;    tcb_list[MAX_TASKS-1].next=NULL;
  C570  CC0000            ldd #0
- C573  FD9B6F            std _tcb_list+90+12
+ C573  FD9DDF            std _tcb_list+90+12
  C576                  kernel.93::	
                        ;    free_tcb_p=&tcb_list[0];
- C576  CC9B09            ldd #_tcb_list
+ C576  CC9D79            ldd #_tcb_list
  C579  FD8013            std _free_tcb_p
  C57C                  kernel.96::	
                        ; 
@@ -1591,10 +1591,10 @@
  C585  05                lsld
  C586  05                lsld
  C587  ED04              std 4,x
- C589  C3999E            addd #_mail_list+14
+ C589  C39C0E            addd #_mail_list+14
  C58C  188F              xgdy
  C58E  EC04              ldd 4,x
- C590  C399A0            addd #_mail_list+16
+ C590  C39C10            addd #_mail_list+16
  C593  18ED00            std 0,y
  C596                  kernel.98::	
                        ;       mail_list[count].serial_number=count;
@@ -1605,7 +1605,7 @@
  C59C  05                lsld
  C59D  05                lsld
  C59E  05                lsld
- C59F  C39990            addd #_mail_list
+ C59F  C39C00            addd #_mail_list
  C5A2  188F              xgdy
  C5A4  EC02              ldd 2,x
  C5A6  18ED00            std 0,y
@@ -1623,10 +1623,10 @@
  C5B7                  kernel.100::	
                        ;    mail_list[MAX_MESSAGES-1].next=NULL;
  C5B7  CC0000            ldd #0
- C5BA  FD9ACE            std _mail_list+304+14
+ C5BA  FD9D3E            std _mail_list+304+14
  C5BD                  kernel.101::	
                        ;    free_mail_p=&mail_list[0];
- C5BD  CC9990            ldd #_mail_list
+ C5BD  CC9C00            ldd #_mail_list
  C5C0  FD8016            std _free_mail_p
  C5C3                  kernel.105::	
                        ; 
@@ -1639,25 +1639,25 @@
  C5C8  CC0032            ldd #50
  C5CB  37                pshb
  C5CC  36                psha
- C5CD  CC9AD3            ldd #_idle_stack
+ C5CD  CC9D43            ldd #_idle_stack
  C5D0  37                pshb
  C5D1  36                psha
- C5D2  CCCD66            ldd #_idle_task
+ C5D2  CCCD5B            ldd #_idle_task
  C5D5  BDC64E            jsr _presto_create_task
- C5D8  BDCEC6            jsr __movspb
+ C5D8  BDCEBB            jsr __movspb
  C5DB  06                .byte 6
  C5DC  4F                clra
  C5DD  5D                tstb
  C5DE  2A01              bpl X0
  C5E0  43                coma
  C5E1                  X0:
- C5E1  F79AD0            stab _idle_tid
+ C5E1  F79D40            stab _idle_tid
  C5E4                  kernel.106::	
                        ;    idle_tcb_p=tid_to_tcbptr(idle_tid);
- C5E4  F69AD0            ldab _idle_tid
+ C5E4  F69D40            ldab _idle_tid
  C5E7  4F                clra
- C5E8  BDCD69            jsr _tid_to_tcbptr
- C5EB  FD9AD1            std _idle_tcb_p
+ C5E8  BDCD5E            jsr _tid_to_tcbptr
+ C5EB  FD9D41            std _idle_tcb_p
  C5EE                  kernel.107::	
                        ; }
  C5EE                  L11:
@@ -1688,7 +1688,7 @@
                        ; 
                        ;    //set_interrupt(INTR_TOC2, presto_system_isr_wrapper);
                        ;    set_interrupt(INTR_TOC2, presto_system_isr);
- C5FF  CCC809            ldd #_presto_system_isr
+ C5FF  CCC807            ldd #_presto_system_isr
  C602  37                pshb
  C603  36                psha
  C604  CC0008            ldd #8
@@ -1696,7 +1696,7 @@
  C60A  1838              puly
  C60C                  kernel.120::	
                        ;    set_interrupt(INTR_SWI, context_switch);
- C60C  CCC8AA            ldd #_context_switch
+ C60C  CCC8A8            ldd #_context_switch
  C60F  37                pshb
  C610  36                psha
  C611  CC0010            ldd #16
@@ -1706,7 +1706,7 @@
                        ; 
                        ;    // start timer interrupts for pre-emption
                        ;    presto_start_master_timer();
- C619  BDCDC4            jsr _presto_start_master_timer
+ C619  BDCDB9            jsr _presto_start_master_timer
  C61C                  kernel.127::	
                        ; 
                        ;    // pick next task to run
@@ -1776,7 +1776,7 @@
                        ;          stack -> 12,x
                        ;           func -> 8,x
  C64E                  _presto_create_task::
- C64E  BDCE7D            jsr __enterb
+ C64E  BDCE72            jsr __enterb
  C651  46                .byte 0x46
  C652  EC10              ldd 16,x
  C654  E711              stab 17,x
@@ -1910,25 +1910,24 @@
                        ;    global_new_fn=func;
  C6FC  EC08              ldd 8,x
  C6FE  FD800C            std _global_new_fn
- C701  BF9B75            sts _global_save_sp
+ C701  BF9DE5            sts _global_save_sp
  C704  BE8008            lds _global_new_sp
- C707  CCC4B4            ldd #_presto_fatal_error
+ C707  FC800C            ldd _global_new_fn
  C70A  37                pshb
  C70B  36                psha
- C70C  FC800C            ldd _global_new_fn
- C70F  37                pshb
+ C70C  8600              ldaa #0
+ C70E  36                psha
+ C70F  36                psha
  C710  36                psha
- C711  8600              ldaa #0
+ C711  36                psha
+ C712  36                psha
  C713  36                psha
- C714  36                psha
- C715  36                psha
- C716  36                psha
+ C714  07                tpa
+ C715  84EF              anda ~#0x10
  C717  36                psha
- C718  36                psha
- C719  36                psha
- C71A  BF8008            sts _global_new_sp
- C71D  BE9B75            lds _global_save_sp
- C720                  kernel.231::	
+ C718  BF8008            sts _global_new_sp
+ C71B  BE9DE5            lds _global_save_sp
+ C71E                  kernel.235::	
                        ; 
                        ;    // store our own SP so we can work on the new task
                        ;    asm("sts _global_save_sp");
@@ -1936,11 +1935,13 @@
                        ;    // load empty SP from task so we can initialize it
                        ;    asm("lds _global_new_sp");
                        ; 
+                       ; /*
                        ;    // Set presto_fatal_error as the "return pc" of a new task.  If some bozo
                        ;    // tries to return out of his task's main function, we will cause an alarm.
                        ;    asm("ldd #_presto_fatal_error");
                        ;    asm("pshb");
                        ;    asm("psha");
+                       ; */
                        ; 
                        ;    // push the actual function call on the stack
                        ;    asm("ldd _global_new_fn");
@@ -1957,7 +1958,9 @@
                        ;    asm("psha"); // X(H) register
                        ;    asm("psha"); // A register
                        ;    asm("psha"); // B register
-                       ;    asm("psha"); // Initial Condition Codes (I bit cleared)
+                       ;    asm("tpa");  // do not push $00 here, use actual condition codes
+                       ;    ENABLE_CCR_INTERRUPT_BIT;  // enable interrupts in pushed CC register (I bit cleared)
+                       ;    asm("psha");  // 1 byte, the condition codes
                        ; 
                        ;    // save task SP in TCB
                        ;    asm("sts _global_new_sp");
@@ -1966,164 +1969,164 @@
                        ; 
                        ;    // recover the altered stack pointer and save it in the TCB
                        ;    new_tcb_p->stack_ptr=global_new_sp;
- C720  EC04              ldd 4,x
- C722  C30002            addd #2
- C725  188F              xgdy
- C727  FC8008            ldd _global_new_sp
- C72A  18ED00            std 0,y
- C72D                  kernel.235::	
+ C71E  EC04              ldd 4,x
+ C720  C30002            addd #2
+ C723  188F              xgdy
+ C725  FC8008            ldd _global_new_sp
+ C728  18ED00            std 0,y
+ C72B                  kernel.239::	
                        ; 
                        ;    // INSERT NEW TCB INTO LIST IN PRIORITY ORDER
                        ; 
                        ;    if(tcb_head_p==NULL) {
- C72D  FC8011            ldd _tcb_head_p
- C730  2615              bne L41
- C732                  kernel.237::	
+ C72B  FC8011            ldd _tcb_head_p
+ C72E  2615              bne L41
+ C730                  kernel.241::	
                        ;       // we are the first TCB in the list
                        ;       tcb_head_p=new_tcb_p;
- C732  EC04              ldd 4,x
- C734  FD8011            std _tcb_head_p
- C737                  kernel.238::	
+ C730  EC04              ldd 4,x
+ C732  FD8011            std _tcb_head_p
+ C735                  kernel.242::	
                        ;       new_tcb_p->next=NULL;
- C737  EC04              ldd 4,x
- C739  C3000C            addd #12
- C73C  188F              xgdy
- C73E  CC0000            ldd #0
- C741  18ED00            std 0,y
- C744                  kernel.239::	
+ C735  EC04              ldd 4,x
+ C737  C3000C            addd #12
+ C73A  188F              xgdy
+ C73C  CC0000            ldd #0
+ C73F  18ED00            std 0,y
+ C742                  kernel.243::	
                        ;    } else if((new_tcb_p->priority)>(tcb_head_p->priority)) {
- C744  7EC7DE            jmp L42
- C747                  L41:
- C747  EC04              ldd 4,x
- C749  C30008            addd #8
- C74C  188F              xgdy
- C74E  18E600            ldab 0,y
- C751  37                pshb ; 
- C752  36                psha ; spill
- C753  FC8011            ldd _tcb_head_p
- C756  C30008            addd #8
- C759  188F              xgdy
- C75B  32                pula ; 
- C75C  33                pulb ; reload
- C75D  18E100            cmpb 0,y
- C760  2315              bls L43
- C762                  kernel.241::	
+ C742  7EC7DC            jmp L42
+ C745                  L41:
+ C745  EC04              ldd 4,x
+ C747  C30008            addd #8
+ C74A  188F              xgdy
+ C74C  18E600            ldab 0,y
+ C74F  37                pshb ; 
+ C750  36                psha ; spill
+ C751  FC8011            ldd _tcb_head_p
+ C754  C30008            addd #8
+ C757  188F              xgdy
+ C759  32                pula ; 
+ C75A  33                pulb ; reload
+ C75B  18E100            cmpb 0,y
+ C75E  2315              bls L43
+ C760                  kernel.245::	
                        ;       // advance to the head of the class!
                        ;       new_tcb_p->next=tcb_head_p;
- C762  EC04              ldd 4,x
- C764  C3000C            addd #12
- C767  188F              xgdy
- C769  FC8011            ldd _tcb_head_p
- C76C  18ED00            std 0,y
- C76F                  kernel.242::	
+ C760  EC04              ldd 4,x
+ C762  C3000C            addd #12
+ C765  188F              xgdy
+ C767  FC8011            ldd _tcb_head_p
+ C76A  18ED00            std 0,y
+ C76D                  kernel.246::	
                        ;       tcb_head_p=new_tcb_p;
- C76F  EC04              ldd 4,x
- C771  FD8011            std _tcb_head_p
- C774                  kernel.243::	
+ C76D  EC04              ldd 4,x
+ C76F  FD8011            std _tcb_head_p
+ C772                  kernel.247::	
                        ;    } else {
- C774  7EC7DE            jmp L44
- C777                  L43:
- C777                  kernel.244::	
+ C772  7EC7DC            jmp L44
+ C775                  L43:
+ C775                  kernel.248::	
                        ;       PRESTO_TCB_T * ptr=tcb_head_p;
- C777  FC8011            ldd _tcb_head_p
- C77A  ED02              std 2,x
- C77C  2030              bra L46
- C77E                  L45:
- C77E                  kernel.246::	
+ C775  FC8011            ldd _tcb_head_p
+ C778  ED02              std 2,x
+ C77A  2030              bra L46
+ C77C                  L45:
+ C77C                  kernel.250::	
                        ;       while(ptr->next!=NULL) {
                        ;          if((new_tcb_p->priority)>(ptr->next->priority)) break;
- C77E  EC02              ldd 2,x
- C780  C3000C            addd #12
- C783  188F              xgdy
- C785  18EC00            ldd 0,y
- C788  C30008            addd #8
- C78B  188F              xgdy
- C78D  EC04              ldd 4,x
- C78F  C30008            addd #8
- C792  183C              pshy ; spill
- C794  188F              xgdy
- C796  18E600            ldab 0,y
- C799  1838              puly ; reload
- C79B  18E100            cmpb 0,y
- C79E  2302              bls L48
- C7A0  2018              bra L47
- C7A2                  L48:
- C7A2                  kernel.247::	
+ C77C  EC02              ldd 2,x
+ C77E  C3000C            addd #12
+ C781  188F              xgdy
+ C783  18EC00            ldd 0,y
+ C786  C30008            addd #8
+ C789  188F              xgdy
+ C78B  EC04              ldd 4,x
+ C78D  C30008            addd #8
+ C790  183C              pshy ; spill
+ C792  188F              xgdy
+ C794  18E600            ldab 0,y
+ C797  1838              puly ; reload
+ C799  18E100            cmpb 0,y
+ C79C  2302              bls L48
+ C79E  2018              bra L47
+ C7A0                  L48:
+ C7A0                  kernel.251::	
                        ;          ptr=ptr->next;
- C7A2  EC02              ldd 2,x
- C7A4  C3000C            addd #12
- C7A7  188F              xgdy
- C7A9  18EC00            ldd 0,y
- C7AC  ED02              std 2,x
- C7AE                  kernel.248::	
+ C7A0  EC02              ldd 2,x
+ C7A2  C3000C            addd #12
+ C7A5  188F              xgdy
+ C7A7  18EC00            ldd 0,y
+ C7AA  ED02              std 2,x
+ C7AC                  kernel.252::	
                        ;       }
- C7AE                  L46:
- C7AE  EC02              ldd 2,x
- C7B0  C3000C            addd #12
- C7B3  188F              xgdy
- C7B5  18EC00            ldd 0,y
- C7B8  26C4              bne L45
- C7BA                  L47:
- C7BA                  kernel.252::	
+ C7AC                  L46:
+ C7AC  EC02              ldd 2,x
+ C7AE  C3000C            addd #12
+ C7B1  188F              xgdy
+ C7B3  18EC00            ldd 0,y
+ C7B6  26C4              bne L45
+ C7B8                  L47:
+ C7B8                  kernel.256::	
                        ; 
                        ;       // ptr->next is either NULL or lower priority than us
                        ;       // either way, we want to get inserted between ptr and ptr->next
                        ;       new_tcb_p->next=ptr->next;
- C7BA  EC02              ldd 2,x
- C7BC  C3000C            addd #12
- C7BF  188F              xgdy
- C7C1  18EC00            ldd 0,y
- C7C4  37                pshb ; 
- C7C5  36                psha ; spill
- C7C6  EC04              ldd 4,x
- C7C8  C3000C            addd #12
- C7CB  188F              xgdy
- C7CD  32                pula ; 
- C7CE  33                pulb ; reload
- C7CF  18ED00            std 0,y
- C7D2                  kernel.253::	
+ C7B8  EC02              ldd 2,x
+ C7BA  C3000C            addd #12
+ C7BD  188F              xgdy
+ C7BF  18EC00            ldd 0,y
+ C7C2  37                pshb ; 
+ C7C3  36                psha ; spill
+ C7C4  EC04              ldd 4,x
+ C7C6  C3000C            addd #12
+ C7C9  188F              xgdy
+ C7CB  32                pula ; 
+ C7CC  33                pulb ; reload
+ C7CD  18ED00            std 0,y
+ C7D0                  kernel.257::	
                        ;       ptr->next=new_tcb_p;
- C7D2  EC02              ldd 2,x
- C7D4  C3000C            addd #12
- C7D7  188F              xgdy
- C7D9  EC04              ldd 4,x
- C7DB  18ED00            std 0,y
- C7DE                  kernel.254::	
+ C7D0  EC02              ldd 2,x
+ C7D2  C3000C            addd #12
+ C7D5  188F              xgdy
+ C7D7  EC04              ldd 4,x
+ C7D9  18ED00            std 0,y
+ C7DC                  kernel.258::	
                        ;    }
- C7DE                  L44:
- C7DE                  L42:
- C7DE  0E                    cli
- C7DF                  kernel.259::	
+ C7DC                  L44:
+ C7DC                  L42:
+ C7DC  0E                    cli
+ C7DD                  kernel.263::	
                        ; 
                        ;    // we're done messing with the task list... interrupts back on
                        ;    INTR_ON();
                        ; 
                        ;    return new_tcb_p->task_id;
- C7DF  1AEE04            ldy 4,x
- C7E2  18E600            ldab 0,y
- C7E5  4F                clra
- C7E6  5D                tstb
- C7E7  2A01              bpl X1
- C7E9  43                coma
- C7EA                  X1:
- C7EA  8F                xgdx
- C7EB  C30006            addd #6
- C7EE  8F                xgdx
- C7EF  35                txs
- C7F0  38                pulx
- C7F1  1838              puly
- C7F3  39                rts
- C7F4                  L36:
- C7F4  8F                xgdx
- C7F5  C30006            addd #6
- C7F8  8F                xgdx
- C7F9  35                txs
- C7FA  38                pulx
- C7FB  1838              puly
- C7FD  39                rts
+ C7DD  1AEE04            ldy 4,x
+ C7E0  18E600            ldab 0,y
+ C7E3  4F                clra
+ C7E4  5D                tstb
+ C7E5  2A01              bpl X1
+ C7E7  43                coma
+ C7E8                  X1:
+ C7E8  8F                xgdx
+ C7E9  C30006            addd #6
+ C7EC  8F                xgdx
+ C7ED  35                txs
+ C7EE  38                pulx
+ C7EF  1838              puly
+ C7F1  39                rts
+ C7F2                  L36:
+ C7F2  8F                xgdx
+ C7F3  C30006            addd #6
+ C7F6  8F                xgdx
+ C7F7  35                txs
+ C7F8  38                pulx
+ C7F9  1838              puly
+ C7FB  39                rts
                        ;  IX -> 0,x
- C7FE                  _presto_kill_self::
- C7FE                  kernel.266::	
+ C7FC                  _presto_kill_self::
+ C7FC                  kernel.270::	
                        ; }
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
@@ -2131,18 +2134,18 @@
                        ; void presto_kill_self(void) {
                        ;    // TODO - remove TCB from list
                        ;    presto_fatal_error();
- C7FE  BDC4B4            jsr _presto_fatal_error
- C801                  kernel.267::	
+ C7FC  BDC4B4            jsr _presto_fatal_error
+ C7FF                  kernel.271::	
                        ; }
- C801                  L50:
- C801  39                rts
+ C7FF                  L50:
+ C7FF  39                rts
                        ;  IX -> 0,x
                        ;          ?temp -> 2,x
                        ;          ?temp -> 4,x
- C802                  _presto_system_isr_wrapper::
- C802  BDCE7D            jsr __enterb
- C805  08                .byte 0x8
- C806                  kernel.283::	
+ C800                  _presto_system_isr_wrapper::
+ C800  BDCE72            jsr __enterb
+ C803  08                .byte 0x8
+ C804                  kernel.287::	
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
                        ; //   C O N T E X T   S W I T C H I N G   ( I N T E R R U P T )
@@ -2159,116 +2162,118 @@
                        ;    // to by-pass this destructive behavior at the top, and later I use an
                        ;    // inline "RTI" instruction to by-pass the stuff at the bottom.
                        ;    presto_fatal_error();
- C806  BDC4B4            jsr _presto_fatal_error
- C809                  	_presto_system_isr::
- C809                  kernel.289::	
+ C804  BDC4B4            jsr _presto_fatal_error
+ C807                  	_presto_system_isr::
+ C807                  kernel.296::	
+                       ; 
                        ;    asm("_presto_system_isr::");
+                       ; 
+                       ;    // registers are pushed when timer interrupt is executed
                        ; 
                        ;    // interrupts are disabled at this time
                        ; 
                        ;    // take care of clock things
                        ;    presto_master_clock=clock_add(presto_master_clock,MS_PER_TICK);
- C809  CC0064            ldd #100
- C80C  37                pshb
- C80D  36                psha
- C80E  EC00              ldd 0,x
- C810  C30004            addd #4
- C813  18CE9B05          ldy #_presto_master_clock
- C817  3C                pshx
- C818  8F                xgdx
- C819  CC0004            ldd #4
- C81C  BDCF26            jsr __asgnblk
- C81F  38                pulx
- C820  EC00              ldd 0,x
- C822  C30004            addd #4
- C825  37                pshb
- C826  36                psha
- C827  CC9B05            ldd #_presto_master_clock
- C82A  BDC2CD            jsr _clock_add
+ C807  CC0064            ldd #100
+ C80A  37                pshb
+ C80B  36                psha
+ C80C  EC00              ldd 0,x
+ C80E  C30004            addd #4
+ C811  18CE9D75          ldy #_presto_master_clock
+ C815  3C                pshx
+ C816  8F                xgdx
+ C817  CC0004            ldd #4
+ C81A  BDCF1B            jsr __asgnblk
+ C81D  38                pulx
+ C81E  EC00              ldd 0,x
+ C820  C30004            addd #4
+ C823  37                pshb
+ C824  36                psha
+ C825  CC9D75            ldd #_presto_master_clock
+ C828  BDC2CD            jsr _clock_add
+ C82B  1838              puly
  C82D  1838              puly
- C82F  1838              puly
- C831                  kernel.290::	
+ C82F                  kernel.297::	
                        ;    presto_restart_master_timer();
- C831  BDCDF9            jsr _presto_restart_master_timer
- C834                  kernel.293::	
+ C82F  BDCDEE            jsr _presto_restart_master_timer
+ C832                  kernel.300::	
                        ; 
                        ;    // check mail
                        ;    if(deliver_mail()>0) {
- C834  BDCC70            jsr _deliver_mail
- C837  C100              cmpb #0
- C839  235F              bls L52
- C83B                  kernel.296::	
+ C832  BDCC65            jsr _deliver_mail
+ C835  C100              cmpb #0
+ C837  235F              bls L52
+ C839                  kernel.303::	
                        ; 
                        ;       // check to see if we've clobbered our stack
                        ;       if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
- C83B  FC800E            ldd _current_tcb_p
- C83E  C30002            addd #2
- C841  188F              xgdy
- C843  18EC00            ldd 0,y
- C846  ED02              std 2,x
- C848  FC800E            ldd _current_tcb_p
- C84B  C30004            addd #4
- C84E  188F              xgdy
- C850  EC02              ldd 2,x
- C852  CDA300            cpd 0,y
- C855  220F              bhi L56
- C857  FC800E            ldd _current_tcb_p
- C85A  C30006            addd #6
- C85D  188F              xgdy
- C85F  EC02              ldd 2,x
- C861  CDA300            cpd 0,y
- C864  2403              bhs L54
- C866                  L56:
- C866                  kernel.298::	
+ C839  FC800E            ldd _current_tcb_p
+ C83C  C30002            addd #2
+ C83F  188F              xgdy
+ C841  18EC00            ldd 0,y
+ C844  ED02              std 2,x
+ C846  FC800E            ldd _current_tcb_p
+ C849  C30004            addd #4
+ C84C  188F              xgdy
+ C84E  EC02              ldd 2,x
+ C850  CDA300            cpd 0,y
+ C853  220F              bhi L56
+ C855  FC800E            ldd _current_tcb_p
+ C858  C30006            addd #6
+ C85B  188F              xgdy
+ C85D  EC02              ldd 2,x
+ C85F  CDA300            cpd 0,y
+ C862  2403              bhs L54
+ C864                  L56:
+ C864                  kernel.305::	
                        ;       ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
                        ;          presto_fatal_error();
- C866  BDC4B4            jsr _presto_fatal_error
- C869                  L54:
- C869                  kernel.304::	
+ C864  BDC4B4            jsr _presto_fatal_error
+ C867                  L54:
+ C867                  kernel.311::	
                        ; 
                        ;       // these parameters will be used in inline assembly...
                        ;       // must be put in global space, not on stack
                        ; 
                        ;       // the ISR will save old SP in old TCB
                        ;       global_old_sp_p=&(current_tcb_p->stack_ptr);
- C869  FC800E            ldd _current_tcb_p
- C86C  C30002            addd #2
- C86F  FD800A            std _global_old_sp_p
- C872                  kernel.307::	
+ C867  FC800E            ldd _current_tcb_p
+ C86A  C30002            addd #2
+ C86D  FD800A            std _global_old_sp_p
+ C870                  kernel.314::	
                        ; 
                        ;       // pick next task to run
                        ;       current_tcb_p=presto_next_tcb_to_run();
- C872  BDC94C            jsr _presto_next_tcb_to_run
- C875  FD800E            std _current_tcb_p
- C878                  kernel.308::	
+ C870  BDC941            jsr _presto_next_tcb_to_run
+ C873  FD800E            std _current_tcb_p
+ C876                  kernel.315::	
                        ;       current_tid=current_tcb_p->task_id;
- C878  18FE800E          ldy _current_tcb_p
- C87C  18E600            ldab 0,y
- C87F  F78010            stab _current_tid
- C882                  kernel.311::	
+ C876  18FE800E          ldy _current_tcb_p
+ C87A  18E600            ldab 0,y
+ C87D  F78010            stab _current_tid
+ C880                  kernel.318::	
                        ; 
                        ;       // end of ISR will set up new stack
                        ;       global_new_sp=current_tcb_p->stack_ptr;
- C882  FC800E            ldd _current_tcb_p
- C885  C30002            addd #2
- C888  188F              xgdy
- C88A  18EC00            ldd 0,y
- C88D  FD8008            std _global_new_sp
- C890  18FE800A          ldy _global_old_sp_p
- C894  18AF00            sts 0,y
- C897  BE8008            lds _global_new_sp
- C89A                  kernel.319::	
+ C880  FC800E            ldd _current_tcb_p
+ C883  C30002            addd #2
+ C886  188F              xgdy
+ C888  18EC00            ldd 0,y
+ C88B  FD8008            std _global_new_sp
+ C88E  18FE800A          ldy _global_old_sp_p
+ C892  18AF00            sts 0,y
+ C895  BE8008            lds _global_new_sp
+ C898                  kernel.325::	
                        ; 
-                       ; // WHAT??? CHANGE STACK POINTER WITHOUT SAVING REGISTERS???
-                       ; 
-                       ;       // swap the stack pointers
+                       ;       // store the old stack pointer
                        ;       asm("ldy _global_old_sp_p");
                        ;       asm("sts 0,y");
+                       ;       // load the new stack pointer
                        ;       asm("lds _global_new_sp");
                        ;    }
- C89A                  L52:
- C89A  3B                rti
- C89B                  kernel.339::	
+ C898                  L52:
+ C898  3B                rti
+ C899                  kernel.345::	
                        ; 
                        ; /*
                        ;    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
@@ -2289,24 +2294,24 @@
                        ; 
                        ;    // we never get here
                        ;    presto_fatal_error();
- C89B  BDC4B4            jsr _presto_fatal_error
- C89E                  kernel.340::	
+ C899  BDC4B4            jsr _presto_fatal_error
+ C89C                  kernel.346::	
                        ; }
- C89E                  L51:
- C89E  8F                xgdx
- C89F  C30008            addd #8
- C8A2  8F                xgdx
- C8A3  35                txs
- C8A4  38                pulx
- C8A5  39                rts
+ C89C                  L51:
+ C89C  8F                xgdx
+ C89D  C30008            addd #8
+ C8A0  8F                xgdx
+ C8A1  35                txs
+ C8A2  38                pulx
+ C8A3  39                rts
                        ;  IX -> 0,x
                        ;          ?temp -> 2,x
                        ;          ?temp -> 4,x
- C8A6                  _context_switch_wrapper::
- C8A6  BDCE7D            jsr __enterb
- C8A9  06                .byte 0x6
- C8AA                  	_context_switch::
- C8AA                  kernel.351::	
+ C8A4                  _context_switch_wrapper::
+ C8A4  BDCE72            jsr __enterb
+ C8A7  06                .byte 0x6
+ C8A8                  	_context_switch::
+ C8A8                  kernel.357::	
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
                        ; 
@@ -2314,104 +2319,97 @@
                        ; 
                        ;    asm("_context_switch::");
                        ; 
-                       ; // REGISTERS PUSHED THE FIRST TIME WHEN SWI EXECUTED!!
+                       ;    // registers are pushed when SWI is executed
                        ; 
                        ;    // check to see if the old task has clobbered its stack
                        ;    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
- C8AA  FC800E            ldd _current_tcb_p
- C8AD  C30002            addd #2
- C8B0  188F              xgdy
- C8B2  18EC00            ldd 0,y
- C8B5  ED04              std 4,x
- C8B7  FC800E            ldd _current_tcb_p
- C8BA  C30004            addd #4
- C8BD  188F              xgdy
- C8BF  EC04              ldd 4,x
- C8C1  CDA300            cpd 0,y
- C8C4  220F              bhi L60
- C8C6  FC800E            ldd _current_tcb_p
- C8C9  C30006            addd #6
- C8CC  188F              xgdy
- C8CE  EC04              ldd 4,x
- C8D0  CDA300            cpd 0,y
- C8D3  2403              bhs L58
- C8D5                  L60:
- C8D5                  kernel.353::	
+ C8A8  FC800E            ldd _current_tcb_p
+ C8AB  C30002            addd #2
+ C8AE  188F              xgdy
+ C8B0  18EC00            ldd 0,y
+ C8B3  ED04              std 4,x
+ C8B5  FC800E            ldd _current_tcb_p
+ C8B8  C30004            addd #4
+ C8BB  188F              xgdy
+ C8BD  EC04              ldd 4,x
+ C8BF  CDA300            cpd 0,y
+ C8C2  220F              bhi L60
+ C8C4  FC800E            ldd _current_tcb_p
+ C8C7  C30006            addd #6
+ C8CA  188F              xgdy
+ C8CC  EC04              ldd 4,x
+ C8CE  CDA300            cpd 0,y
+ C8D1  2403              bhs L58
+ C8D3                  L60:
+ C8D3                  kernel.359::	
                        ;    ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
                        ;       presto_fatal_error();
- C8D5  BDC4B4            jsr _presto_fatal_error
- C8D8                  L58:
- C8D8                  kernel.356::	
+ C8D3  BDC4B4            jsr _presto_fatal_error
+ C8D6                  L58:
+ C8D6                  kernel.362::	
                        ; 
                        ;    // the inline asm will save old SP in old TCB
                        ;    global_old_sp_p=&(current_tcb_p->stack_ptr);
- C8D8  FC800E            ldd _current_tcb_p
- C8DB  C30002            addd #2
- C8DE  FD800A            std _global_old_sp_p
- C8E1                  kernel.359::	
+ C8D6  FC800E            ldd _current_tcb_p
+ C8D9  C30002            addd #2
+ C8DC  FD800A            std _global_old_sp_p
+ C8DF                  kernel.365::	
                        ; 
                        ;    // pick next task to run
                        ;    current_tcb_p=presto_next_tcb_to_run();
- C8E1  BDC94C            jsr _presto_next_tcb_to_run
- C8E4  FD800E            std _current_tcb_p
- C8E7                  kernel.360::	
+ C8DF  BDC941            jsr _presto_next_tcb_to_run
+ C8E2  FD800E            std _current_tcb_p
+ C8E5                  kernel.366::	
                        ;    current_tid=current_tcb_p->task_id;
- C8E7  18FE800E          ldy _current_tcb_p
- C8EB  18E600            ldab 0,y
- C8EE  F78010            stab _current_tid
- C8F1                  kernel.363::	
+ C8E5  18FE800E          ldy _current_tcb_p
+ C8E9  18E600            ldab 0,y
+ C8EC  F78010            stab _current_tid
+ C8EF                  kernel.369::	
                        ; 
                        ;    // check to see if the new task has clobbered its stack
                        ;    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
- C8F1  FC800E            ldd _current_tcb_p
- C8F4  C30002            addd #2
- C8F7  188F              xgdy
- C8F9  18EC00            ldd 0,y
- C8FC  ED02              std 2,x
- C8FE  FC800E            ldd _current_tcb_p
- C901  C30004            addd #4
- C904  188F              xgdy
- C906  EC02              ldd 2,x
- C908  CDA300            cpd 0,y
- C90B  220F              bhi L63
- C90D  FC800E            ldd _current_tcb_p
- C910  C30006            addd #6
- C913  188F              xgdy
- C915  EC02              ldd 2,x
- C917  CDA300            cpd 0,y
- C91A  2403              bhs L61
- C91C                  L63:
- C91C                  kernel.365::	
+ C8EF  FC800E            ldd _current_tcb_p
+ C8F2  C30002            addd #2
+ C8F5  188F              xgdy
+ C8F7  18EC00            ldd 0,y
+ C8FA  ED02              std 2,x
+ C8FC  FC800E            ldd _current_tcb_p
+ C8FF  C30004            addd #4
+ C902  188F              xgdy
+ C904  EC02              ldd 2,x
+ C906  CDA300            cpd 0,y
+ C909  220F              bhi L63
+ C90B  FC800E            ldd _current_tcb_p
+ C90E  C30006            addd #6
+ C911  188F              xgdy
+ C913  EC02              ldd 2,x
+ C915  CDA300            cpd 0,y
+ C918  2403              bhs L61
+ C91A                  L63:
+ C91A                  kernel.371::	
                        ;    ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
                        ;       presto_fatal_error();
- C91C  BDC4B4            jsr _presto_fatal_error
- C91F                  L61:
- C91F                  kernel.370::	
+ C91A  BDC4B4            jsr _presto_fatal_error
+ C91D                  L61:
+ C91D                  kernel.376::	
                        ; 
                        ;    // call asm routine to set up new stack
                        ;    // when we return, we'll be another process
                        ;    // the asm routine will re-enable interrupts
                        ;    global_new_sp=current_tcb_p->stack_ptr;
- C91F  FC800E            ldd _current_tcb_p
- C922  C30002            addd #2
- C925  188F              xgdy
- C927  18EC00            ldd 0,y
- C92A  FD8008            std _global_new_sp
- C92D  183C              pshy
- C92F  3C                pshx
- C930  36                psha
- C931  37                pshb
- C932  07                tpa
- C933  84EF              anda ~#0x10
- C935  36                psha
- C936  18FE800A          ldy _global_old_sp_p
- C93A  18AF00            sts 0,y
- C93D  BE8008            lds _global_new_sp
- C940  3B                rti
- C941                  kernel.402::	
+ C91D  FC800E            ldd _current_tcb_p
+ C920  C30002            addd #2
+ C923  188F              xgdy
+ C925  18EC00            ldd 0,y
+ C928  FD8008            std _global_new_sp
+ C92B  18FE800A          ldy _global_old_sp_p
+ C92F  18AF00            sts 0,y
+ C932  BE8008            lds _global_new_sp
+ C935  3B                rti
+ C936                  kernel.410::	
                        ; 
-                       ; // REGISTERS PUSHED A SECOND TIME HERE!!
-                       ; 
+                       ; /*
+                       ;    // AIGH! - REGISTERS PUSHED A SECOND TIME HERE!!
                        ;    // save the registers (in the same order that an interrupt does)
                        ;    asm("pshy");  // 2 bytes (Low, then High)
                        ;    asm("pshx");  // 2 bytes (Low, then High)
@@ -2420,10 +2418,12 @@
                        ;    asm("tpa");
                        ;    ENABLE_CCR_INTERRUPT_BIT;  // enable interrupts in pushed CC register
                        ;    asm("psha");  // 1 byte, the condition codes
+                       ; */
                        ; 
-                       ;    // swap the stack pointers
+                       ;    // store the old stack pointer
                        ;    asm("ldy _global_old_sp_p");
                        ;    asm("sts 0,y");
+                       ;    // load the new stack pointer
                        ;    asm("lds _global_new_sp");
                        ; 
                        ; /*
@@ -2441,22 +2441,22 @@
                        ; 
                        ;    // we never get here
                        ;    presto_fatal_error();
- C941  BDC4B4            jsr _presto_fatal_error
- C944                  kernel.403::	
+ C936  BDC4B4            jsr _presto_fatal_error
+ C939                  kernel.411::	
                        ; }
- C944                  L57:
- C944  8F                xgdx
- C945  C30006            addd #6
- C948  8F                xgdx
- C949  35                txs
- C94A  38                pulx
- C94B  39                rts
+ C939                  L57:
+ C939  8F                xgdx
+ C93A  C30006            addd #6
+ C93D  8F                xgdx
+ C93E  35                txs
+ C93F  38                pulx
+ C940  39                rts
                        ;  IX -> 0,x
                        ;            ptr -> 2,x
- C94C                  _presto_next_tcb_to_run::
- C94C  BDCE7D            jsr __enterb
- C94F  04                .byte 0x4
- C950                  kernel.412::	
+ C941                  _presto_next_tcb_to_run::
+ C941  BDCE72            jsr __enterb
+ C944  04                .byte 0x4
+ C945                  kernel.420::	
                        ; 
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
@@ -2466,66 +2466,66 @@
                        ; /*static*/ PRESTO_TCB_T * presto_next_tcb_to_run(void) {
                        ;    // pick highest priority ready task to run
                        ;    PRESTO_TCB_T * ptr=tcb_head_p;
- C950  FC8011            ldd _tcb_head_p
- C953  ED02              std 2,x
- C955  2022              bra L66
- C957                  L65:
- C957                  kernel.414::	
+ C945  FC8011            ldd _tcb_head_p
+ C948  ED02              std 2,x
+ C94A  2022              bra L66
+ C94C                  L65:
+ C94C                  kernel.422::	
                        ;    while(ptr!=NULL) {
                        ;       if(ptr->state==STATE_READY) return ptr;
- C957  EC02              ldd 2,x
- C959  C3000A            addd #10
- C95C  188F              xgdy
- C95E  18EC00            ldd 0,y
- C961  260A              bne L68
- C963  EC02              ldd 2,x
- C965  8F                xgdx
- C966  C30004            addd #4
- C969  8F                xgdx
- C96A  35                txs
- C96B  38                pulx
- C96C  39                rts
- C96D                  L68:
- C96D                  kernel.415::	
+ C94C  EC02              ldd 2,x
+ C94E  C3000A            addd #10
+ C951  188F              xgdy
+ C953  18EC00            ldd 0,y
+ C956  260A              bne L68
+ C958  EC02              ldd 2,x
+ C95A  8F                xgdx
+ C95B  C30004            addd #4
+ C95E  8F                xgdx
+ C95F  35                txs
+ C960  38                pulx
+ C961  39                rts
+ C962                  L68:
+ C962                  kernel.423::	
                        ;       ptr=ptr->next;
- C96D  EC02              ldd 2,x
- C96F  C3000C            addd #12
- C972  188F              xgdy
- C974  18EC00            ldd 0,y
- C977  ED02              std 2,x
- C979                  kernel.416::	
+ C962  EC02              ldd 2,x
+ C964  C3000C            addd #12
+ C967  188F              xgdy
+ C969  18EC00            ldd 0,y
+ C96C  ED02              std 2,x
+ C96E                  kernel.424::	
                        ;    }
- C979                  L66:
- C979  EC02              ldd 2,x
- C97B  26DA              bne L65
- C97D                  kernel.418::	
+ C96E                  L66:
+ C96E  EC02              ldd 2,x
+ C970  26DA              bne L65
+ C972                  kernel.426::	
                        ;    // should never get here
                        ;    presto_fatal_error();
- C97D  BDC4B4            jsr _presto_fatal_error
- C980                  kernel.419::	
+ C972  BDC4B4            jsr _presto_fatal_error
+ C975                  kernel.427::	
                        ;    return NULL;
- C980  CC0000            ldd #0
- C983  8F                xgdx
- C984  C30004            addd #4
- C987  8F                xgdx
- C988  35                txs
- C989  38                pulx
- C98A  39                rts
- C98B                  L64:
- C98B  8F                xgdx
- C98C  C30004            addd #4
- C98F  8F                xgdx
- C990  35                txs
- C991  38                pulx
- C992  39                rts
+ C975  CC0000            ldd #0
+ C978  8F                xgdx
+ C979  C30004            addd #4
+ C97C  8F                xgdx
+ C97D  35                txs
+ C97E  38                pulx
+ C97F  39                rts
+ C980                  L64:
+ C980  8F                xgdx
+ C981  C30004            addd #4
+ C984  8F                xgdx
+ C985  35                txs
+ C986  38                pulx
+ C987  39                rts
                        ;  IX -> 0,x
                        ;          ?temp -> 2,x
                        ;        payload -> 12,x
                        ;             to -> 9,x
- C993                  _presto_send_message::
- C993  BDCE7D            jsr __enterb
- C996  46                .byte 0x46
- C997                  kernel.427::	
+ C988                  _presto_send_message::
+ C988  BDCE72            jsr __enterb
+ C98B  46                .byte 0x46
+ C98C                  kernel.435::	
                        ; }
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
@@ -2534,46 +2534,46 @@
                        ; 
                        ; BYTE presto_send_message(PRESTO_TID_T to, PRESTO_MAIL_T payload) {
                        ;    return presto_timer(to,0,payload);
- C997  EC00              ldd 0,x
- C999  C30002            addd #2
- C99C  1AEE0C            ldy 12,x
- C99F  3C                pshx
- C9A0  8F                xgdx
- C9A1  CC0004            ldd #4
- C9A4  BDCF26            jsr __asgnblk
- C9A7  38                pulx
- C9A8  EC00              ldd 0,x
- C9AA  C30002            addd #2
- C9AD  37                pshb
- C9AE  36                psha
- C9AF  CC0000            ldd #0
- C9B2  37                pshb
- C9B3  36                psha
- C9B4  E609              ldab 9,x
- C9B6  4F                clra
- C9B7  5D                tstb
- C9B8  2A01              bpl X2
- C9BA  43                coma
- C9BB                  X2:
- C9BB  BDC9D7            jsr _presto_timer
- C9BE  1838              puly
- C9C0  1838              puly
- C9C2  4F                clra
- C9C3  8F                xgdx
- C9C4  C30006            addd #6
- C9C7  8F                xgdx
- C9C8  35                txs
- C9C9  38                pulx
- C9CA  1838              puly
- C9CC  39                rts
- C9CD                  L70:
- C9CD  8F                xgdx
- C9CE  C30006            addd #6
- C9D1  8F                xgdx
- C9D2  35                txs
- C9D3  38                pulx
- C9D4  1838              puly
- C9D6  39                rts
+ C98C  EC00              ldd 0,x
+ C98E  C30002            addd #2
+ C991  1AEE0C            ldy 12,x
+ C994  3C                pshx
+ C995  8F                xgdx
+ C996  CC0004            ldd #4
+ C999  BDCF1B            jsr __asgnblk
+ C99C  38                pulx
+ C99D  EC00              ldd 0,x
+ C99F  C30002            addd #2
+ C9A2  37                pshb
+ C9A3  36                psha
+ C9A4  CC0000            ldd #0
+ C9A7  37                pshb
+ C9A8  36                psha
+ C9A9  E609              ldab 9,x
+ C9AB  4F                clra
+ C9AC  5D                tstb
+ C9AD  2A01              bpl X2
+ C9AF  43                coma
+ C9B0                  X2:
+ C9B0  BDC9CC            jsr _presto_timer
+ C9B3  1838              puly
+ C9B5  1838              puly
+ C9B7  4F                clra
+ C9B8  8F                xgdx
+ C9B9  C30006            addd #6
+ C9BC  8F                xgdx
+ C9BD  35                txs
+ C9BE  38                pulx
+ C9BF  1838              puly
+ C9C1  39                rts
+ C9C2                  L70:
+ C9C2  8F                xgdx
+ C9C3  C30006            addd #6
+ C9C6  8F                xgdx
+ C9C7  35                txs
+ C9C8  38                pulx
+ C9C9  1838              puly
+ C9CB  39                rts
                        ;  IX -> 0,x
                        ;  func temp: 2,x - 6,x
                        ;          ?temp -> 6,x
@@ -2588,11 +2588,11 @@
                        ;        payload -> 44,x
                        ;          delay -> 42,x
                        ;             to -> 39,x
- C9D7                  _presto_timer::
- C9D7  BDCE7D            jsr __enterb
- C9DA  64                .byte 0x64
- C9DB  0F                    sei
- C9DC                  kernel.440::	
+ C9CC                  _presto_timer::
+ C9CC  BDCE72            jsr __enterb
+ C9CF  64                .byte 0x64
+ C9D0  0F                    sei
+ C9D1                  kernel.448::	
                        ; }
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
@@ -2606,321 +2606,321 @@
                        ; 
                        ;    // check to see if there's room
                        ;    if(free_mail_p==NULL) {
- C9DC  FC8016            ldd _free_mail_p
- C9DF  2603              bne L72
- C9E1                  kernel.441::	
+ C9D1  FC8016            ldd _free_mail_p
+ C9D4  2603              bne L72
+ C9D6                  kernel.449::	
                        ;       presto_fatal_error();
- C9E1  BDC4B4            jsr _presto_fatal_error
- C9E4                  kernel.442::	
+ C9D6  BDC4B4            jsr _presto_fatal_error
+ C9D9                  kernel.450::	
                        ;    }
- C9E4                  L72:
- C9E4                  kernel.445::	
+ C9D9                  L72:
+ C9D9                  kernel.453::	
                        ; 
                        ;    // check to see that the recipient is an alive task
                        ;    tcb_ptr=tid_to_tcbptr(to);
- C9E4  E627              ldab 39,x
- C9E6  4F                clra
- C9E7  5D                tstb
- C9E8  2A01              bpl X3
- C9EA  43                coma
- C9EB                  X3:
- C9EB  4F                clra
- C9EC  BDCD69            jsr _tid_to_tcbptr
- C9EF  ED20              std 32,x
- C9F1                  kernel.446::	
+ C9D9  E627              ldab 39,x
+ C9DB  4F                clra
+ C9DC  5D                tstb
+ C9DD  2A01              bpl X3
+ C9DF  43                coma
+ C9E0                  X3:
+ C9E0  4F                clra
+ C9E1  BDCD5E            jsr _tid_to_tcbptr
+ C9E4  ED20              std 32,x
+ C9E6                  kernel.454::	
                        ;    if(tcb_ptr==NULL) {
- C9F1  EC20              ldd 32,x
- C9F3  2603              bne L74
- C9F5                  kernel.447::	
+ C9E6  EC20              ldd 32,x
+ C9E8  2603              bne L74
+ C9EA                  kernel.455::	
                        ;       presto_fatal_error();
- C9F5  BDC4B4            jsr _presto_fatal_error
- C9F8                  kernel.448::	
+ C9EA  BDC4B4            jsr _presto_fatal_error
+ C9ED                  kernel.456::	
                        ;    }
- C9F8                  L74:
- C9F8                  kernel.451::	
+ C9ED                  L74:
+ C9ED                  kernel.459::	
                        ; 
                        ;    // allocate space for a new message
                        ;    new_mail_p=free_mail_p;
- C9F8  FC8016            ldd _free_mail_p
- C9FB  ED22              std 34,x
- C9FD                  kernel.452::	
+ C9ED  FC8016            ldd _free_mail_p
+ C9F0  ED22              std 34,x
+ C9F2                  kernel.460::	
                        ;    free_mail_p=free_mail_p->next;
- C9FD  FC8016            ldd _free_mail_p
- CA00  C3000E            addd #14
- CA03  188F              xgdy
- CA05  18EC00            ldd 0,y
- CA08  FD8016            std _free_mail_p
- CA0B                  kernel.456::	
+ C9F2  FC8016            ldd _free_mail_p
+ C9F5  C3000E            addd #14
+ C9F8  188F              xgdy
+ C9FA  18EC00            ldd 0,y
+ C9FD  FD8016            std _free_mail_p
+ CA00                  kernel.464::	
                        ; 
                        ;    // fill in the blanks
                        ;    // new_mail_p->serial_number;   already set
                        ;    new_mail_p->from_tid=current_tcb_p->task_id;
- CA0B  EC22              ldd 34,x
- CA0D  C30002            addd #2
- CA10  188F              xgdy
- CA12  183C              pshy ; spill
- CA14  18FE800E          ldy _current_tcb_p
- CA18  18E600            ldab 0,y
- CA1B  1838              puly ; reload
- CA1D  18E700            stab 0,y
- CA20                  kernel.457::	
+ CA00  EC22              ldd 34,x
+ CA02  C30002            addd #2
+ CA05  188F              xgdy
+ CA07  183C              pshy ; spill
+ CA09  18FE800E          ldy _current_tcb_p
+ CA0D  18E600            ldab 0,y
+ CA10  1838              puly ; reload
+ CA12  18E700            stab 0,y
+ CA15                  kernel.465::	
                        ;    new_mail_p->to_tcb_p=tcb_ptr;
- CA20  EC22              ldd 34,x
- CA22  C30004            addd #4
- CA25  188F              xgdy
- CA27  EC20              ldd 32,x
- CA29  18ED00            std 0,y
- CA2C                  kernel.458::	
+ CA15  EC22              ldd 34,x
+ CA17  C30004            addd #4
+ CA1A  188F              xgdy
+ CA1C  EC20              ldd 32,x
+ CA1E  18ED00            std 0,y
+ CA21                  kernel.466::	
                        ;    new_mail_p->delivery_time=clock_add(presto_master_clock,delay);
- CA2C  EC2A              ldd 42,x
- CA2E  37                pshb
- CA2F  36                psha
- CA30  EC00              ldd 0,x
- CA32  C3001C            addd #28
- CA35  18CE9B05          ldy #_presto_master_clock
- CA39  3C                pshx
- CA3A  8F                xgdx
- CA3B  CC0004            ldd #4
- CA3E  BDCF26            jsr __asgnblk
- CA41  38                pulx
- CA42  EC00              ldd 0,x
- CA44  C3001C            addd #28
- CA47  37                pshb
- CA48  36                psha
- CA49  EC00              ldd 0,x
- CA4B  C30018            addd #24
- CA4E  BDC2CD            jsr _clock_add
- CA51  1838              puly
- CA53  1838              puly
- CA55  EC00              ldd 0,x
- CA57  C30018            addd #24
- CA5A  188F              xgdy
- CA5C  EC22              ldd 34,x
- CA5E  C30006            addd #6
- CA61  3C                pshx
- CA62  8F                xgdx
- CA63  CC0004            ldd #4
- CA66  BDCF26            jsr __asgnblk
- CA69  38                pulx
- CA6A                  kernel.459::	
+ CA21  EC2A              ldd 42,x
+ CA23  37                pshb
+ CA24  36                psha
+ CA25  EC00              ldd 0,x
+ CA27  C3001C            addd #28
+ CA2A  18CE9D75          ldy #_presto_master_clock
+ CA2E  3C                pshx
+ CA2F  8F                xgdx
+ CA30  CC0004            ldd #4
+ CA33  BDCF1B            jsr __asgnblk
+ CA36  38                pulx
+ CA37  EC00              ldd 0,x
+ CA39  C3001C            addd #28
+ CA3C  37                pshb
+ CA3D  36                psha
+ CA3E  EC00              ldd 0,x
+ CA40  C30018            addd #24
+ CA43  BDC2CD            jsr _clock_add
+ CA46  1838              puly
+ CA48  1838              puly
+ CA4A  EC00              ldd 0,x
+ CA4C  C30018            addd #24
+ CA4F  188F              xgdy
+ CA51  EC22              ldd 34,x
+ CA53  C30006            addd #6
+ CA56  3C                pshx
+ CA57  8F                xgdx
+ CA58  CC0004            ldd #4
+ CA5B  BDCF1B            jsr __asgnblk
+ CA5E  38                pulx
+ CA5F                  kernel.467::	
                        ;    new_mail_p->payload=payload;
- CA6A  EC22              ldd 34,x
- CA6C  C3000A            addd #10
- CA6F  1AEE2C            ldy 44,x
- CA72  3C                pshx
- CA73  8F                xgdx
- CA74  CC0004            ldd #4
- CA77  BDCF26            jsr __asgnblk
- CA7A  38                pulx
- CA7B                  kernel.462::	
+ CA5F  EC22              ldd 34,x
+ CA61  C3000A            addd #10
+ CA64  1AEE2C            ldy 44,x
+ CA67  3C                pshx
+ CA68  8F                xgdx
+ CA69  CC0004            ldd #4
+ CA6C  BDCF1B            jsr __asgnblk
+ CA6F  38                pulx
+ CA70                  kernel.470::	
                        ; 
                        ;    // insert new message into list in time order
                        ;    if(po_mail_p==NULL) {
- CA7B  FC8018            ldd _po_mail_p
- CA7E  2615              bne L76
- CA80                  kernel.465::	
+ CA70  FC8018            ldd _po_mail_p
+ CA73  2615              bne L76
+ CA75                  kernel.473::	
                        ; 
                        ;       // we are the first message in PO
                        ;       po_mail_p=new_mail_p;
- CA80  EC22              ldd 34,x
- CA82  FD8018            std _po_mail_p
- CA85                  kernel.466::	
+ CA75  EC22              ldd 34,x
+ CA77  FD8018            std _po_mail_p
+ CA7A                  kernel.474::	
                        ;       new_mail_p->next=NULL;
- CA85  EC22              ldd 34,x
- CA87  C3000E            addd #14
- CA8A  188F              xgdy
- CA8C  CC0000            ldd #0
- CA8F  18ED00            std 0,y
- CA92                  kernel.468::	
+ CA7A  EC22              ldd 34,x
+ CA7C  C3000E            addd #14
+ CA7F  188F              xgdy
+ CA81  CC0000            ldd #0
+ CA84  18ED00            std 0,y
+ CA87                  kernel.476::	
                        ; 
                        ;    } else if(clock_compare(po_mail_p->delivery_time,new_mail_p->delivery_time)>0) {
- CA92  7ECB89            jmp L77
- CA95                  L76:
- CA95  EC00              ldd 0,x
- CA97  C30014            addd #20
- CA9A  37                pshb ; 
- CA9B  36                psha ; spill
- CA9C  EC22              ldd 34,x
- CA9E  C30006            addd #6
- CAA1  188F              xgdy
- CAA3  32                pula ; 
- CAA4  33                pulb ; reload
- CAA5  3C                pshx
- CAA6  8F                xgdx
- CAA7  CC0004            ldd #4
- CAAA  BDCF26            jsr __asgnblk
- CAAD  38                pulx
- CAAE  EC00              ldd 0,x
- CAB0  C30014            addd #20
- CAB3  37                pshb
- CAB4  36                psha
- CAB5  EC00              ldd 0,x
- CAB7  C30010            addd #16
- CABA  37                pshb ; 
- CABB  36                psha ; spill
- CABC  FC8018            ldd _po_mail_p
- CABF  C30006            addd #6
- CAC2  188F              xgdy
- CAC4  32                pula ; 
- CAC5  33                pulb ; reload
- CAC6  3C                pshx
- CAC7  8F                xgdx
- CAC8  CC0004            ldd #4
- CACB  BDCF26            jsr __asgnblk
- CACE  38                pulx
- CACF  EC00              ldd 0,x
- CAD1  C30010            addd #16
- CAD4  BDC31C            jsr _clock_compare
- CAD7  1838              puly
- CAD9  ED02              std 2,x
- CADB  6D03              tst 3,x
- CADD  2F15              ble L78
- CADF                  kernel.471::	
+ CA87  7ECB7E            jmp L77
+ CA8A                  L76:
+ CA8A  EC00              ldd 0,x
+ CA8C  C30014            addd #20
+ CA8F  37                pshb ; 
+ CA90  36                psha ; spill
+ CA91  EC22              ldd 34,x
+ CA93  C30006            addd #6
+ CA96  188F              xgdy
+ CA98  32                pula ; 
+ CA99  33                pulb ; reload
+ CA9A  3C                pshx
+ CA9B  8F                xgdx
+ CA9C  CC0004            ldd #4
+ CA9F  BDCF1B            jsr __asgnblk
+ CAA2  38                pulx
+ CAA3  EC00              ldd 0,x
+ CAA5  C30014            addd #20
+ CAA8  37                pshb
+ CAA9  36                psha
+ CAAA  EC00              ldd 0,x
+ CAAC  C30010            addd #16
+ CAAF  37                pshb ; 
+ CAB0  36                psha ; spill
+ CAB1  FC8018            ldd _po_mail_p
+ CAB4  C30006            addd #6
+ CAB7  188F              xgdy
+ CAB9  32                pula ; 
+ CABA  33                pulb ; reload
+ CABB  3C                pshx
+ CABC  8F                xgdx
+ CABD  CC0004            ldd #4
+ CAC0  BDCF1B            jsr __asgnblk
+ CAC3  38                pulx
+ CAC4  EC00              ldd 0,x
+ CAC6  C30010            addd #16
+ CAC9  BDC31C            jsr _clock_compare
+ CACC  1838              puly
+ CACE  ED02              std 2,x
+ CAD0  6D03              tst 3,x
+ CAD2  2F15              ble L78
+ CAD4                  kernel.479::	
                        ; 
                        ;       // advance to the head of the class!
                        ;       new_mail_p->next=po_mail_p;
- CADF  EC22              ldd 34,x
- CAE1  C3000E            addd #14
- CAE4  188F              xgdy
- CAE6  FC8018            ldd _po_mail_p
- CAE9  18ED00            std 0,y
- CAEC                  kernel.472::	
+ CAD4  EC22              ldd 34,x
+ CAD6  C3000E            addd #14
+ CAD9  188F              xgdy
+ CADB  FC8018            ldd _po_mail_p
+ CADE  18ED00            std 0,y
+ CAE1                  kernel.480::	
                        ;       po_mail_p=new_mail_p;
- CAEC  EC22              ldd 34,x
- CAEE  FD8018            std _po_mail_p
- CAF1                  kernel.474::	
+ CAE1  EC22              ldd 34,x
+ CAE3  FD8018            std _po_mail_p
+ CAE6                  kernel.482::	
                        ; 
                        ;    } else {
- CAF1  7ECB89            jmp L79
- CAF4                  L78:
- CAF4                  kernel.477::	
+ CAE6  7ECB7E            jmp L79
+ CAE9                  L78:
+ CAE9                  kernel.485::	
                        ; 
                        ;       // we are one of many messages in the PO
                        ;       PRESTO_MESSAGE_T * msg_p=po_mail_p;
- CAF4  FC8018            ldd _po_mail_p
- CAF7  ED0E              std 14,x
- CAF9  205B              bra L81
- CAFB                  L80:
- CAFB                  kernel.479::	
+ CAE9  FC8018            ldd _po_mail_p
+ CAEC  ED0E              std 14,x
+ CAEE  205B              bra L81
+ CAF0                  L80:
+ CAF0                  kernel.487::	
                        ;       while(msg_p->next!=NULL) {
                        ;          if(clock_compare(msg_p->next->delivery_time,new_mail_p->delivery_time)>0) break;
- CAFB  EC00              ldd 0,x
- CAFD  C3000A            addd #10
- CB00  37                pshb ; 
- CB01  36                psha ; spill
- CB02  EC22              ldd 34,x
- CB04  C30006            addd #6
- CB07  188F              xgdy
- CB09  32                pula ; 
- CB0A  33                pulb ; reload
- CB0B  3C                pshx
- CB0C  8F                xgdx
- CB0D  CC0004            ldd #4
- CB10  BDCF26            jsr __asgnblk
- CB13  38                pulx
- CB14  EC00              ldd 0,x
- CB16  C3000A            addd #10
- CB19  37                pshb
- CB1A  36                psha
- CB1B  EC0E              ldd 14,x
- CB1D  C3000E            addd #14
- CB20  188F              xgdy
- CB22  18EC00            ldd 0,y
- CB25  C30006            addd #6
- CB28  188F              xgdy
- CB2A  EC00              ldd 0,x
- CB2C  C30006            addd #6
- CB2F  3C                pshx
- CB30  8F                xgdx
- CB31  CC0004            ldd #4
- CB34  BDCF26            jsr __asgnblk
- CB37  38                pulx
- CB38  EC00              ldd 0,x
- CB3A  C30006            addd #6
- CB3D  BDC31C            jsr _clock_compare
- CB40  1838              puly
- CB42  ED04              std 4,x
- CB44  6D05              tst 5,x
- CB46  2F02              ble L83
- CB48  201B              bra L82
- CB4A                  L83:
- CB4A                  kernel.480::	
+ CAF0  EC00              ldd 0,x
+ CAF2  C3000A            addd #10
+ CAF5  37                pshb ; 
+ CAF6  36                psha ; spill
+ CAF7  EC22              ldd 34,x
+ CAF9  C30006            addd #6
+ CAFC  188F              xgdy
+ CAFE  32                pula ; 
+ CAFF  33                pulb ; reload
+ CB00  3C                pshx
+ CB01  8F                xgdx
+ CB02  CC0004            ldd #4
+ CB05  BDCF1B            jsr __asgnblk
+ CB08  38                pulx
+ CB09  EC00              ldd 0,x
+ CB0B  C3000A            addd #10
+ CB0E  37                pshb
+ CB0F  36                psha
+ CB10  EC0E              ldd 14,x
+ CB12  C3000E            addd #14
+ CB15  188F              xgdy
+ CB17  18EC00            ldd 0,y
+ CB1A  C30006            addd #6
+ CB1D  188F              xgdy
+ CB1F  EC00              ldd 0,x
+ CB21  C30006            addd #6
+ CB24  3C                pshx
+ CB25  8F                xgdx
+ CB26  CC0004            ldd #4
+ CB29  BDCF1B            jsr __asgnblk
+ CB2C  38                pulx
+ CB2D  EC00              ldd 0,x
+ CB2F  C30006            addd #6
+ CB32  BDC31C            jsr _clock_compare
+ CB35  1838              puly
+ CB37  ED04              std 4,x
+ CB39  6D05              tst 5,x
+ CB3B  2F02              ble L83
+ CB3D  201B              bra L82
+ CB3F                  L83:
+ CB3F                  kernel.488::	
                        ;          msg_p=msg_p->next;
- CB4A  EC0E              ldd 14,x
- CB4C  C3000E            addd #14
- CB4F  188F              xgdy
- CB51  18EC00            ldd 0,y
- CB54  ED0E              std 14,x
- CB56                  kernel.481::	
+ CB3F  EC0E              ldd 14,x
+ CB41  C3000E            addd #14
+ CB44  188F              xgdy
+ CB46  18EC00            ldd 0,y
+ CB49  ED0E              std 14,x
+ CB4B                  kernel.489::	
                        ;       }
- CB56                  L81:
- CB56  EC0E              ldd 14,x
- CB58  C3000E            addd #14
- CB5B  188F              xgdy
- CB5D  18EC00            ldd 0,y
- CB60  2703              beq X4
- CB62  7ECAFB            jmp L80
- CB65                  X4:
- CB65                  L82:
- CB65                  kernel.485::	
+ CB4B                  L81:
+ CB4B  EC0E              ldd 14,x
+ CB4D  C3000E            addd #14
+ CB50  188F              xgdy
+ CB52  18EC00            ldd 0,y
+ CB55  2703              beq X4
+ CB57  7ECAF0            jmp L80
+ CB5A                  X4:
+ CB5A                  L82:
+ CB5A                  kernel.493::	
                        ; 
                        ;       // msg_p->next is either NULL or later delivery time than us
                        ;       // either way, we want to get inserted between msg_p and msg_p->next
                        ;       new_mail_p->next=msg_p->next;
- CB65  EC0E              ldd 14,x
- CB67  C3000E            addd #14
- CB6A  188F              xgdy
- CB6C  18EC00            ldd 0,y
- CB6F  37                pshb ; 
- CB70  36                psha ; spill
- CB71  EC22              ldd 34,x
- CB73  C3000E            addd #14
- CB76  188F              xgdy
- CB78  32                pula ; 
- CB79  33                pulb ; reload
- CB7A  18ED00            std 0,y
- CB7D                  kernel.486::	
+ CB5A  EC0E              ldd 14,x
+ CB5C  C3000E            addd #14
+ CB5F  188F              xgdy
+ CB61  18EC00            ldd 0,y
+ CB64  37                pshb ; 
+ CB65  36                psha ; spill
+ CB66  EC22              ldd 34,x
+ CB68  C3000E            addd #14
+ CB6B  188F              xgdy
+ CB6D  32                pula ; 
+ CB6E  33                pulb ; reload
+ CB6F  18ED00            std 0,y
+ CB72                  kernel.494::	
                        ;       msg_p->next=new_mail_p;
- CB7D  EC0E              ldd 14,x
- CB7F  C3000E            addd #14
- CB82  188F              xgdy
- CB84  EC22              ldd 34,x
- CB86  18ED00            std 0,y
- CB89                  kernel.487::	
+ CB72  EC0E              ldd 14,x
+ CB74  C3000E            addd #14
+ CB77  188F              xgdy
+ CB79  EC22              ldd 34,x
+ CB7B  18ED00            std 0,y
+ CB7E                  kernel.495::	
                        ;    }
- CB89                  L79:
- CB89                  L77:
- CB89  0E                    cli
- CB8A                  kernel.492::	
+ CB7E                  L79:
+ CB7E                  L77:
+ CB7E  0E                    cli
+ CB7F                  kernel.500::	
                        ; 
                        ;    // we're done messing with the PO mail list... interrupts back on
                        ;    INTR_ON();
                        ; 
                        ;    return 0;
- CB8A  CC0000            ldd #0
- CB8D  8F                xgdx
- CB8E  C30024            addd #36
- CB91  8F                xgdx
- CB92  35                txs
- CB93  38                pulx
- CB94  1838              puly
- CB96  39                rts
- CB97                  L71:
- CB97  8F                xgdx
- CB98  C30024            addd #36
- CB9B  8F                xgdx
- CB9C  35                txs
- CB9D  38                pulx
- CB9E  1838              puly
- CBA0  39                rts
+ CB7F  CC0000            ldd #0
+ CB82  8F                xgdx
+ CB83  C30024            addd #36
+ CB86  8F                xgdx
+ CB87  35                txs
+ CB88  38                pulx
+ CB89  1838              puly
+ CB8B  39                rts
+ CB8C                  L71:
+ CB8C  8F                xgdx
+ CB8D  C30024            addd #36
+ CB90  8F                xgdx
+ CB91  35                txs
+ CB92  38                pulx
+ CB93  1838              puly
+ CB95  39                rts
                        ;  IX -> 0,x
                        ;          msg_p -> 2,x
                        ;      payload_p -> 6,x
- CBA1                  _presto_wait_for_message::
- CBA1  BDCE7D            jsr __enterb
- CBA4  44                .byte 0x44
- CBA5  0F                    sei
- CBA6                  kernel.504::	
+ CB96                  _presto_wait_for_message::
+ CB96  BDCE72            jsr __enterb
+ CB99  44                .byte 0x44
+ CB9A  0F                    sei
+ CB9B                  kernel.512::	
                        ; }
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
@@ -2933,167 +2933,169 @@
                        ; 
                        ;    // we will only sleep if there are no messages in our queue
                        ;    if(current_tcb_p->mailbox_head==NULL) {
- CBA6  FC800E            ldd _current_tcb_p
- CBA9  C3000E            addd #14
- CBAC  188F              xgdy
- CBAE  18EC00            ldd 0,y
- CBB1  260F              bne L86
- CBB3                  kernel.506::	
+ CB9B  FC800E            ldd _current_tcb_p
+ CB9E  C3000E            addd #14
+ CBA1  188F              xgdy
+ CBA3  18EC00            ldd 0,y
+ CBA6  260F              bne L86
+ CBA8                  kernel.514::	
                        ;       // no mail, so we can sleep
                        ;       current_tcb_p->state=STATE_BLOCKED;
- CBB3  FC800E            ldd _current_tcb_p
- CBB6  C3000A            addd #10
- CBB9  188F              xgdy
- CBBB  CC0001            ldd #1
- CBBE  18ED00            std 0,y
- CBC1  3F                swi
- CBC2                  kernel.510::	
+ CBA8  FC800E            ldd _current_tcb_p
+ CBAB  C3000A            addd #10
+ CBAE  188F              xgdy
+ CBB0  CC0001            ldd #1
+ CBB3  18ED00            std 0,y
+ CBB6  3F                swi
+ CBB7                  kernel.518::	
                        ;       asm("swi");
                        ;       // When we wake up, we'll be ready to recieve our mail.
                        ;       // Interrupts will be enabled.
                        ;    }
- CBC2                  L86:
- CBC2  0F                    sei
- CBC3                  kernel.515::	
+ CBB7                  L86:
+ CBB7  0F                    sei
+ CBB8                  kernel.523::	
                        ; 
                        ;    // we're about to mess with the mail list... interrupts off
                        ;    INTR_OFF();
                        ;    // we're going to use this a lot, so dereference now
                        ;    msg_p=current_tcb_p->mailbox_head;
- CBC3  FC800E            ldd _current_tcb_p
- CBC6  C3000E            addd #14
- CBC9  188F              xgdy
- CBCB  18EC00            ldd 0,y
- CBCE  ED02              std 2,x
- CBD0                  kernel.518::	
+ CBB8  FC800E            ldd _current_tcb_p
+ CBBB  C3000E            addd #14
+ CBBE  188F              xgdy
+ CBC0  18EC00            ldd 0,y
+ CBC3  ED02              std 2,x
+ CBC5                  kernel.528::	
+                       ; 
+                       ;    // AIGH! - this is where the error happens
                        ; 
                        ;    // get one message from the task's mail queue
                        ;    if(msg_p==NULL) {
- CBD0  EC02              ldd 2,x
- CBD2  2603              bne L88
- CBD4                  kernel.520::	
+ CBC5  EC02              ldd 2,x
+ CBC7  2603              bne L88
+ CBC9                  kernel.530::	
                        ;       // there are no messages in the task's mail list
                        ;       presto_fatal_error();
- CBD4  BDC4B4            jsr _presto_fatal_error
- CBD7                  kernel.521::	
+ CBC9  BDC4B4            jsr _presto_fatal_error
+ CBCC                  kernel.531::	
                        ;    }
- CBD7                  L88:
- CBD7                  kernel.524::	
+ CBCC                  L88:
+ CBCC                  kernel.534::	
                        ; 
                        ;    // are we being paranoid?
                        ;    if((msg_p->to_tcb_p)!=current_tcb_p) {
- CBD7  EC02              ldd 2,x
- CBD9  C30004            addd #4
- CBDC  188F              xgdy
- CBDE  18EC00            ldd 0,y
- CBE1  1AB3800E          cpd _current_tcb_p
- CBE5  2703              beq L90
- CBE7                  kernel.525::	
+ CBCC  EC02              ldd 2,x
+ CBCE  C30004            addd #4
+ CBD1  188F              xgdy
+ CBD3  18EC00            ldd 0,y
+ CBD6  1AB3800E          cpd _current_tcb_p
+ CBDA  2703              beq L90
+ CBDC                  kernel.535::	
                        ;       presto_fatal_error();
- CBE7  BDC4B4            jsr _presto_fatal_error
- CBEA                  kernel.526::	
+ CBDC  BDC4B4            jsr _presto_fatal_error
+ CBDF                  kernel.536::	
                        ;    }
- CBEA                  L90:
- CBEA                  kernel.529::	
+ CBDF                  L90:
+ CBDF                  kernel.539::	
                        ; 
                        ;    // there is at least one message, get one
                        ;    if (msg_p==current_tcb_p->mailbox_tail) {
- CBEA  FC800E            ldd _current_tcb_p
- CBED  C30010            addd #16
- CBF0  188F              xgdy
- CBF2  EC02              ldd 2,x
- CBF4  CDA300            cpd 0,y
- CBF7  261E              bne L92
- CBF9                  kernel.531::	
+ CBDF  FC800E            ldd _current_tcb_p
+ CBE2  C30010            addd #16
+ CBE5  188F              xgdy
+ CBE7  EC02              ldd 2,x
+ CBE9  CDA300            cpd 0,y
+ CBEC  261E              bne L92
+ CBEE                  kernel.541::	
                        ;       // there is only one item in the list, take it
                        ;       current_tcb_p->mailbox_head=NULL;
- CBF9  FC800E            ldd _current_tcb_p
- CBFC  C3000E            addd #14
- CBFF  188F              xgdy
- CC01  CC0000            ldd #0
- CC04  18ED00            std 0,y
- CC07                  kernel.532::	
+ CBEE  FC800E            ldd _current_tcb_p
+ CBF1  C3000E            addd #14
+ CBF4  188F              xgdy
+ CBF6  CC0000            ldd #0
+ CBF9  18ED00            std 0,y
+ CBFC                  kernel.542::	
                        ;       current_tcb_p->mailbox_tail=NULL;
- CC07  FC800E            ldd _current_tcb_p
- CC0A  C30010            addd #16
- CC0D  188F              xgdy
- CC0F  CC0000            ldd #0
- CC12  18ED00            std 0,y
- CC15                  kernel.533::	
+ CBFC  FC800E            ldd _current_tcb_p
+ CBFF  C30010            addd #16
+ CC02  188F              xgdy
+ CC04  CC0000            ldd #0
+ CC07  18ED00            std 0,y
+ CC0A                  kernel.543::	
                        ;    } else {
- CC15  2019              bra L93
- CC17                  L92:
- CC17                  kernel.535::	
+ CC0A  2019              bra L93
+ CC0C                  L92:
+ CC0C                  kernel.545::	
                        ;       // there are many messages, take first
                        ;       current_tcb_p->mailbox_head=msg_p->next;
- CC17  EC02              ldd 2,x
- CC19  C3000E            addd #14
- CC1C  188F              xgdy
- CC1E  18EC00            ldd 0,y
- CC21  37                pshb ; 
- CC22  36                psha ; spill
- CC23  FC800E            ldd _current_tcb_p
- CC26  C3000E            addd #14
- CC29  188F              xgdy
- CC2B  32                pula ; 
- CC2C  33                pulb ; reload
- CC2D  18ED00            std 0,y
- CC30                  kernel.536::	
+ CC0C  EC02              ldd 2,x
+ CC0E  C3000E            addd #14
+ CC11  188F              xgdy
+ CC13  18EC00            ldd 0,y
+ CC16  37                pshb ; 
+ CC17  36                psha ; spill
+ CC18  FC800E            ldd _current_tcb_p
+ CC1B  C3000E            addd #14
+ CC1E  188F              xgdy
+ CC20  32                pula ; 
+ CC21  33                pulb ; reload
+ CC22  18ED00            std 0,y
+ CC25                  kernel.546::	
                        ;    }
- CC30                  L93:
- CC30                  kernel.539::	
+ CC25                  L93:
+ CC25                  kernel.549::	
                        ; 
                        ;    // record the message id before we can get interrupted
                        ;    if(payload_p!=NULL) *payload_p=msg_p->payload;
+ CC25  EC06              ldd 6,x
+ CC27  2712              beq L94
+ CC29  EC02              ldd 2,x
+ CC2B  C3000A            addd #10
+ CC2E  188F              xgdy
  CC30  EC06              ldd 6,x
- CC32  2712              beq L94
- CC34  EC02              ldd 2,x
- CC36  C3000A            addd #10
- CC39  188F              xgdy
- CC3B  EC06              ldd 6,x
- CC3D  3C                pshx
- CC3E  8F                xgdx
- CC3F  CC0004            ldd #4
- CC42  BDCF26            jsr __asgnblk
- CC45  38                pulx
- CC46                  L94:
- CC46                  kernel.542::	
+ CC32  3C                pshx
+ CC33  8F                xgdx
+ CC34  CC0004            ldd #4
+ CC37  BDCF1B            jsr __asgnblk
+ CC3A  38                pulx
+ CC3B                  L94:
+ CC3B                  kernel.552::	
                        ; 
                        ;    // return the message to the free list
                        ;    msg_p->next=free_mail_p;
- CC46  EC02              ldd 2,x
- CC48  C3000E            addd #14
- CC4B  188F              xgdy
- CC4D  FC8016            ldd _free_mail_p
- CC50  18ED00            std 0,y
- CC53                  kernel.543::	
+ CC3B  EC02              ldd 2,x
+ CC3D  C3000E            addd #14
+ CC40  188F              xgdy
+ CC42  FC8016            ldd _free_mail_p
+ CC45  18ED00            std 0,y
+ CC48                  kernel.553::	
                        ;    free_mail_p=msg_p;
- CC53  EC02              ldd 2,x
- CC55  FD8016            std _free_mail_p
- CC58  0E                    cli
- CC59                  kernel.549::	
+ CC48  EC02              ldd 2,x
+ CC4A  FD8016            std _free_mail_p
+ CC4D  0E                    cli
+ CC4E                  kernel.559::	
                        ; 
                        ;    // done messing with mail lists... interrupts back on
                        ;    INTR_ON();
                        ; 
                        ;    // return the number of messages retrieved
                        ;    return 1;
- CC59  CC0001            ldd #1
- CC5C  8F                xgdx
- CC5D  C30004            addd #4
- CC60  8F                xgdx
- CC61  35                txs
- CC62  38                pulx
- CC63  1838              puly
- CC65  39                rts
- CC66                  L85:
- CC66  8F                xgdx
- CC67  C30004            addd #4
- CC6A  8F                xgdx
- CC6B  35                txs
- CC6C  38                pulx
- CC6D  1838              puly
- CC6F  39                rts
+ CC4E  CC0001            ldd #1
+ CC51  8F                xgdx
+ CC52  C30004            addd #4
+ CC55  8F                xgdx
+ CC56  35                txs
+ CC57  38                pulx
+ CC58  1838              puly
+ CC5A  39                rts
+ CC5B                  L85:
+ CC5B  8F                xgdx
+ CC5C  C30004            addd #4
+ CC5F  8F                xgdx
+ CC60  35                txs
+ CC61  38                pulx
+ CC62  1838              puly
+ CC64  39                rts
                        ;  IX -> 0,x
                        ;  func temp: 2,x - 4,x
                        ;          ?temp -> 4,x
@@ -3101,188 +3103,188 @@
                        ;          count -> 13,x
                        ;          msg_p -> 14,x
                        ;          tcb_p -> 16,x
- CC70                  _deliver_mail::
- CC70  BDCE7D            jsr __enterb
- CC73  12                .byte 0x12
- CC74                  kernel.555::	
+ CC65                  _deliver_mail::
+ CC65  BDCE72            jsr __enterb
+ CC68  12                .byte 0x12
+ CC69                  kernel.565::	
                        ; }
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
                        ; 
                        ; /*static*/ BYTE deliver_mail(void) {
                        ;    BYTE count=0;
- CC74  6F0D              clr 13,x
- CC76  7ECD08            jmp L98
- CC79                  L97:
- CC79                  kernel.560::	
+ CC69  6F0D              clr 13,x
+ CC6B  7ECCFD            jmp L98
+ CC6E                  L97:
+ CC6E                  kernel.570::	
                        ;    PRESTO_MESSAGE_T * msg_p;
                        ;    PRESTO_TCB_T * tcb_p;
                        ;    while((po_mail_p!=NULL)&&(clock_compare(po_mail_p->delivery_time,presto_master_clock)<=0)) {
                        ;       // we're going to use this a lot, so de-reference once
                        ;       tcb_p=po_mail_p->to_tcb_p;
- CC79  FC8018            ldd _po_mail_p
- CC7C  C30004            addd #4
- CC7F  188F              xgdy
- CC81  18EC00            ldd 0,y
- CC84  ED10              std 16,x
- CC86                  kernel.561::	
+ CC6E  FC8018            ldd _po_mail_p
+ CC71  C30004            addd #4
+ CC74  188F              xgdy
+ CC76  18EC00            ldd 0,y
+ CC79  ED10              std 16,x
+ CC7B                  kernel.571::	
                        ;       if(tcb_p==NULL) presto_fatal_error();
- CC86  EC10              ldd 16,x
- CC88  2603              bne L100
- CC8A  BDC4B4            jsr _presto_fatal_error
- CC8D                  L100:
- CC8D                  kernel.564::	
+ CC7B  EC10              ldd 16,x
+ CC7D  2603              bne L100
+ CC7F  BDC4B4            jsr _presto_fatal_error
+ CC82                  L100:
+ CC82                  kernel.574::	
                        ; 
                        ;       // make receiver task ready
                        ;       tcb_p->state=STATE_READY;
- CC8D  EC10              ldd 16,x
- CC8F  C3000A            addd #10
- CC92  188F              xgdy
- CC94  CC0000            ldd #0
- CC97  18ED00            std 0,y
- CC9A                  kernel.567::	
+ CC82  EC10              ldd 16,x
+ CC84  C3000A            addd #10
+ CC87  188F              xgdy
+ CC89  CC0000            ldd #0
+ CC8C  18ED00            std 0,y
+ CC8F                  kernel.577::	
                        ; 
                        ;       // remove message from PO list
-                       ;       msg_p=po_mail_p;
- CC9A  FC8018            ldd _po_mail_p
- CC9D  ED0E              std 14,x
- CC9F                  kernel.568::	
+                       ;       msg_p=po_mail_p;                      // we know that po_mail_p!=NULL
+ CC8F  FC8018            ldd _po_mail_p
+ CC92  ED0E              std 14,x
+ CC94                  kernel.578::	
                        ;       po_mail_p=po_mail_p->next;
- CC9F  FC8018            ldd _po_mail_p
- CCA2  C3000E            addd #14
- CCA5  188F              xgdy
- CCA7  18EC00            ldd 0,y
- CCAA  FD8018            std _po_mail_p
- CCAD                  kernel.571::	
+ CC94  FC8018            ldd _po_mail_p
+ CC97  C3000E            addd #14
+ CC9A  188F              xgdy
+ CC9C  18EC00            ldd 0,y
+ CC9F  FD8018            std _po_mail_p
+ CCA2                  kernel.581::	
                        ; 
                        ;       // move the message to the task's mail list
                        ;       if(tcb_p->mailbox_head==NULL) {
- CCAD  EC10              ldd 16,x
- CCAF  C3000E            addd #14
- CCB2  188F              xgdy
- CCB4  18EC00            ldd 0,y
- CCB7  261A              bne L102
- CCB9                  kernel.574::	
+ CCA2  EC10              ldd 16,x
+ CCA4  C3000E            addd #14
+ CCA7  188F              xgdy
+ CCA9  18EC00            ldd 0,y
+ CCAC  261A              bne L102
+ CCAE                  kernel.584::	
                        ; 
                        ;          // we are the only message in the list
                        ;          tcb_p->mailbox_head=msg_p;
- CCB9  EC10              ldd 16,x
- CCBB  C3000E            addd #14
- CCBE  188F              xgdy
- CCC0  EC0E              ldd 14,x
- CCC2  18ED00            std 0,y
- CCC5                  kernel.575::	
+ CCAE  EC10              ldd 16,x
+ CCB0  C3000E            addd #14
+ CCB3  188F              xgdy
+ CCB5  EC0E              ldd 14,x
+ CCB7  18ED00            std 0,y
+ CCBA                  kernel.585::	
                        ;          tcb_p->mailbox_tail=msg_p;
- CCC5  EC10              ldd 16,x
- CCC7  C30010            addd #16
- CCCA  188F              xgdy
- CCCC  EC0E              ldd 14,x
- CCCE  18ED00            std 0,y
- CCD1                  kernel.577::	
+ CCBA  EC10              ldd 16,x
+ CCBC  C30010            addd #16
+ CCBF  188F              xgdy
+ CCC1  EC0E              ldd 14,x
+ CCC3  18ED00            std 0,y
+ CCC6                  kernel.587::	
                        ; 
                        ;       } else {
- CCD1  2020              bra L103
- CCD3                  L102:
- CCD3                  kernel.580::	
+ CCC6  2020              bra L103
+ CCC8                  L102:
+ CCC8                  kernel.590::	
                        ; 
                        ;          // we are one of many, add to the tail of the list
                        ;          tcb_p->mailbox_tail->next=msg_p;
- CCD3  EC10              ldd 16,x
- CCD5  C30010            addd #16
- CCD8  188F              xgdy
- CCDA  18EC00            ldd 0,y
- CCDD  C3000E            addd #14
- CCE0  188F              xgdy
- CCE2  EC0E              ldd 14,x
- CCE4  18ED00            std 0,y
- CCE7                  kernel.581::	
+ CCC8  EC10              ldd 16,x
+ CCCA  C30010            addd #16
+ CCCD  188F              xgdy
+ CCCF  18EC00            ldd 0,y
+ CCD2  C3000E            addd #14
+ CCD5  188F              xgdy
+ CCD7  EC0E              ldd 14,x
+ CCD9  18ED00            std 0,y
+ CCDC                  kernel.591::	
                        ;          tcb_p->mailbox_tail=msg_p;
- CCE7  EC10              ldd 16,x
- CCE9  C30010            addd #16
- CCEC  188F              xgdy
- CCEE  EC0E              ldd 14,x
- CCF0  18ED00            std 0,y
- CCF3                  kernel.583::	
+ CCDC  EC10              ldd 16,x
+ CCDE  C30010            addd #16
+ CCE1  188F              xgdy
+ CCE3  EC0E              ldd 14,x
+ CCE5  18ED00            std 0,y
+ CCE8                  kernel.593::	
                        ; 
                        ;       }
- CCF3                  L103:
- CCF3                  kernel.585::	
+ CCE8                  L103:
+ CCE8                  kernel.595::	
                        ;       // no matter what, we are the last in the task's message list
                        ;       msg_p->next=NULL;
- CCF3  EC0E              ldd 14,x
- CCF5  C3000E            addd #14
- CCF8  188F              xgdy
- CCFA  CC0000            ldd #0
- CCFD  18ED00            std 0,y
- CD00                  kernel.588::	
+ CCE8  EC0E              ldd 14,x
+ CCEA  C3000E            addd #14
+ CCED  188F              xgdy
+ CCEF  CC0000            ldd #0
+ CCF2  18ED00            std 0,y
+ CCF5                  kernel.598::	
                        ; 
                        ;       // indicate that we moved one mail message
                        ;       count++;
- CD00  E60D              ldab 13,x
- CD02  4F                clra
- CD03  C30001            addd #1
- CD06  E70D              stab 13,x
- CD08                  kernel.589::	
+ CCF5  E60D              ldab 13,x
+ CCF7  4F                clra
+ CCF8  C30001            addd #1
+ CCFB  E70D              stab 13,x
+ CCFD                  kernel.599::	
                        ;    }
- CD08                  L98:
- CD08  FC8018            ldd _po_mail_p
- CD0B  2746              beq L104
- CD0D  EC00              ldd 0,x
- CD0F  C30008            addd #8
- CD12  18CE9B05          ldy #_presto_master_clock
- CD16  3C                pshx
- CD17  8F                xgdx
- CD18  CC0004            ldd #4
- CD1B  BDCF26            jsr __asgnblk
- CD1E  38                pulx
- CD1F  EC00              ldd 0,x
- CD21  C30008            addd #8
- CD24  37                pshb
- CD25  36                psha
- CD26  EC00              ldd 0,x
- CD28  C30004            addd #4
- CD2B  37                pshb ; 
- CD2C  36                psha ; spill
- CD2D  FC8018            ldd _po_mail_p
- CD30  C30006            addd #6
- CD33  188F              xgdy
- CD35  32                pula ; 
- CD36  33                pulb ; reload
- CD37  3C                pshx
- CD38  8F                xgdx
- CD39  CC0004            ldd #4
- CD3C  BDCF26            jsr __asgnblk
- CD3F  38                pulx
- CD40  EC00              ldd 0,x
- CD42  C30004            addd #4
- CD45  BDC31C            jsr _clock_compare
- CD48  1838              puly
- CD4A  ED02              std 2,x
- CD4C  6D03              tst 3,x
- CD4E  2E03              bgt X5
- CD50  7ECC79            jmp L97
- CD53                  X5:
- CD53                  L104:
- CD53                  kernel.590::	
+ CCFD                  L98:
+ CCFD  FC8018            ldd _po_mail_p
+ CD00  2746              beq L104
+ CD02  EC00              ldd 0,x
+ CD04  C30008            addd #8
+ CD07  18CE9D75          ldy #_presto_master_clock
+ CD0B  3C                pshx
+ CD0C  8F                xgdx
+ CD0D  CC0004            ldd #4
+ CD10  BDCF1B            jsr __asgnblk
+ CD13  38                pulx
+ CD14  EC00              ldd 0,x
+ CD16  C30008            addd #8
+ CD19  37                pshb
+ CD1A  36                psha
+ CD1B  EC00              ldd 0,x
+ CD1D  C30004            addd #4
+ CD20  37                pshb ; 
+ CD21  36                psha ; spill
+ CD22  FC8018            ldd _po_mail_p
+ CD25  C30006            addd #6
+ CD28  188F              xgdy
+ CD2A  32                pula ; 
+ CD2B  33                pulb ; reload
+ CD2C  3C                pshx
+ CD2D  8F                xgdx
+ CD2E  CC0004            ldd #4
+ CD31  BDCF1B            jsr __asgnblk
+ CD34  38                pulx
+ CD35  EC00              ldd 0,x
+ CD37  C30004            addd #4
+ CD3A  BDC31C            jsr _clock_compare
+ CD3D  1838              puly
+ CD3F  ED02              std 2,x
+ CD41  6D03              tst 3,x
+ CD43  2E03              bgt X5
+ CD45  7ECC6E            jmp L97
+ CD48                  X5:
+ CD48                  L104:
+ CD48                  kernel.600::	
                        ;    return count;
- CD53  E60D              ldab 13,x
- CD55  4F                clra
- CD56  8F                xgdx
- CD57  C30012            addd #18
- CD5A  8F                xgdx
- CD5B  35                txs
- CD5C  38                pulx
- CD5D  39                rts
- CD5E                  L96:
- CD5E  8F                xgdx
- CD5F  C30012            addd #18
- CD62  8F                xgdx
- CD63  35                txs
- CD64  38                pulx
- CD65  39                rts
+ CD48  E60D              ldab 13,x
+ CD4A  4F                clra
+ CD4B  8F                xgdx
+ CD4C  C30012            addd #18
+ CD4F  8F                xgdx
+ CD50  35                txs
+ CD51  38                pulx
+ CD52  39                rts
+ CD53                  L96:
+ CD53  8F                xgdx
+ CD54  C30012            addd #18
+ CD57  8F                xgdx
+ CD58  35                txs
+ CD59  38                pulx
+ CD5A  39                rts
                        ;  IX -> 0,x
- CD66                  _idle_task::
- CD66                  kernel.597::	
+ CD5B                  _idle_task::
+ CD5B                  kernel.607::	
                        ; }
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
@@ -3290,27 +3292,27 @@
                        ; ////////////////////////////////////////////////////////////////////////////////
                        ; 
                        ; /*static*/ void idle_task(void) {
- CD66                  L106:
- CD66                  kernel.600::	
+ CD5B                  L106:
+ CD5B                  kernel.610::	
                        ;    while(1) {
                        ;       // do nothing
                        ;    }
- CD66                  L107:
- CD66  20FE              bra L106
- CD68                  L105:
- CD68  39                rts
+ CD5B                  L107:
+ CD5B  20FE              bra L106
+ CD5D                  L105:
+ CD5D  39                rts
                        ;  IX -> 0,x
                        ;            tid -> 5,x
- CD69                  _tid_to_tcbptr::
- CD69  37                pshb
- CD6A  36                psha
- CD6B  3C                pshx
- CD6C  30                tsx
- CD6D  3C                pshx
- CD6E  30                tsx
- CD6F  EC04              ldd 4,x
- CD71  E705              stab 5,x
- CD73                  kernel.608::	
+ CD5E                  _tid_to_tcbptr::
+ CD5E  37                pshb
+ CD5F  36                psha
+ CD60  3C                pshx
+ CD61  30                tsx
+ CD62  3C                pshx
+ CD63  30                tsx
+ CD64  EC04              ldd 4,x
+ CD66  E705              stab 5,x
+ CD68                  kernel.618::	
                        ; }
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
@@ -3319,61 +3321,61 @@
                        ; 
                        ; /*static*/ PRESTO_TCB_T * tid_to_tcbptr(BYTE tid) {
                        ;    if(tid>=MAX_TASKS) presto_fatal_error();
- CD73  E605              ldab 5,x
- CD75  C106              cmpb #6
- CD77  2503              blo L110
- CD79  BDC4B4            jsr _presto_fatal_error
- CD7C                  L110:
- CD7C                  kernel.609::	
+ CD68  E605              ldab 5,x
+ CD6A  C106              cmpb #6
+ CD6C  2503              blo L110
+ CD6E  BDC4B4            jsr _presto_fatal_error
+ CD71                  L110:
+ CD71                  kernel.619::	
                        ;    if(tcb_list[tid].state==STATE_INACTIVE) return NULL;
- CD7C  E605              ldab 5,x
- CD7E  4F                clra
+ CD71  E605              ldab 5,x
+ CD73  4F                clra
+ CD74  188F              xgdy
+ CD76  CC0012            ldd #18
+ CD79  BDCE13            jsr __muli
+ CD7C  C39D83            addd #_tcb_list+10
  CD7F  188F              xgdy
- CD81  CC0012            ldd #18
- CD84  BDCE1E            jsr __muli
- CD87  C39B13            addd #_tcb_list+10
- CD8A  188F              xgdy
- CD8C  18EC00            ldd 0,y
- CD8F  1A830002          cpd #2
- CD93  260D              bne L112
- CD95  CC0000            ldd #0
- CD98  8F                xgdx
- CD99  C30002            addd #2
- CD9C  8F                xgdx
- CD9D  35                txs
- CD9E  38                pulx
- CD9F  1838              puly
- CDA1  39                rts
- CDA2                  L112:
- CDA2                  kernel.610::	
+ CD81  18EC00            ldd 0,y
+ CD84  1A830002          cpd #2
+ CD88  260D              bne L112
+ CD8A  CC0000            ldd #0
+ CD8D  8F                xgdx
+ CD8E  C30002            addd #2
+ CD91  8F                xgdx
+ CD92  35                txs
+ CD93  38                pulx
+ CD94  1838              puly
+ CD96  39                rts
+ CD97                  L112:
+ CD97                  kernel.620::	
                        ;    return &tcb_list[tid];
- CDA2  E605              ldab 5,x
- CDA4  4F                clra
- CDA5  188F              xgdy
- CDA7  CC0012            ldd #18
- CDAA  BDCE1E            jsr __muli
- CDAD  C39B09            addd #_tcb_list
- CDB0  8F                xgdx
- CDB1  C30002            addd #2
- CDB4  8F                xgdx
- CDB5  35                txs
- CDB6  38                pulx
- CDB7  1838              puly
- CDB9  39                rts
- CDBA                  L109:
- CDBA  8F                xgdx
- CDBB  C30002            addd #2
- CDBE  8F                xgdx
- CDBF  35                txs
- CDC0  38                pulx
- CDC1  1838              puly
- CDC3  39                rts
+ CD97  E605              ldab 5,x
+ CD99  4F                clra
+ CD9A  188F              xgdy
+ CD9C  CC0012            ldd #18
+ CD9F  BDCE13            jsr __muli
+ CDA2  C39D79            addd #_tcb_list
+ CDA5  8F                xgdx
+ CDA6  C30002            addd #2
+ CDA9  8F                xgdx
+ CDAA  35                txs
+ CDAB  38                pulx
+ CDAC  1838              puly
+ CDAE  39                rts
+ CDAF                  L109:
+ CDAF  8F                xgdx
+ CDB0  C30002            addd #2
+ CDB3  8F                xgdx
+ CDB4  35                txs
+ CDB5  38                pulx
+ CDB6  1838              puly
+ CDB8  39                rts
                        ;  IX -> 0,x
                        ;  rMEM -> 2,x
- CDC4                  _presto_start_master_timer::
- CDC4  BDCE7D            jsr __enterb
- CDC7  04                .byte 0x4
- CDC8                  kernel.619::	
+ CDB9                  _presto_start_master_timer::
+ CDB9  BDCE72            jsr __enterb
+ CDBC  04                .byte 0x4
+ CDBD                  kernel.629::	
                        ; }
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
@@ -3383,84 +3385,84 @@
                        ; /*static*/ void presto_start_master_timer(void) {
                        ;    // store (current plus CYCLES_PER_TICK)
                        ;    TOC2 = TCNT + CYCLES_PER_TICK;
- CDC8  CC07D0            ldd #2000
- CDCB  18CE0064          ldy #100
- CDCF  BDCE1E            jsr __muli
- CDD2  ED02              std 2,x
- CDD4  FC100E            ldd 0x100e ; vol
- CDD7  E302              addd 2,x
- CDD9  FD1018            std 0x1018
- CDDC                  kernel.621::	
+ CDBD  CC07D0            ldd #2000
+ CDC0  18CE0064          ldy #100
+ CDC4  BDCE13            jsr __muli
+ CDC7  ED02              std 2,x
+ CDC9  FC100E            ldd 0x100e ; vol
+ CDCC  E302              addd 2,x
+ CDCE  FD1018            std 0x1018
+ CDD1                  kernel.631::	
                        ;    // request output compare interrupt
                        ;    TMSK1 |= TMSK1_OC2I;
- CDDC  18CE1022          ldy #0x1022
- CDE0  181C0040          bset 0,y,#64
- CDE4                  kernel.624::	
+ CDD1  18CE1022          ldy #0x1022
+ CDD5  181C0040          bset 0,y,#64
+ CDD9                  kernel.634::	
                        ;    // clear the OUTPUT COMPARE flag
                        ;    // writing O's makes no change, writing 1's clears the bit
                        ;    TFLG1 = TFLG1_OC2F;
- CDE4  C640              ldab #64
- CDE6  F71023            stab 0x1023
- CDE9                  kernel.626::	
+ CDD9  C640              ldab #64
+ CDDB  F71023            stab 0x1023
+ CDDE                  kernel.636::	
                        ;    // counter disconnected from output pin logic
                        ;    TCTL1 &= ~(TCTL1_OM2|TCTL1_OL2);
- CDE9  18CE1020          ldy #0x1020
- CDED  181D00C0          bclr 0,y,~#-193
- CDF1                  kernel.627::	
+ CDDE  18CE1020          ldy #0x1020
+ CDE2  181D00C0          bclr 0,y,~#-193
+ CDE6                  kernel.637::	
                        ; }
- CDF1                  L115:
- CDF1  8F                xgdx
- CDF2  C30004            addd #4
- CDF5  8F                xgdx
- CDF6  35                txs
- CDF7  38                pulx
- CDF8  39                rts
+ CDE6                  L115:
+ CDE6  8F                xgdx
+ CDE7  C30004            addd #4
+ CDEA  8F                xgdx
+ CDEB  35                txs
+ CDEC  38                pulx
+ CDED  39                rts
                        ;  IX -> 0,x
                        ;  rMEM -> 2,x
- CDF9                  _presto_restart_master_timer::
- CDF9  BDCE7D            jsr __enterb
- CDFC  04                .byte 0x4
- CDFD                  kernel.633::	
+ CDEE                  _presto_restart_master_timer::
+ CDEE  BDCE72            jsr __enterb
+ CDF1  04                .byte 0x4
+ CDF2                  kernel.643::	
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
                        ; 
                        ; /*static*/ void presto_restart_master_timer(void) {
                        ;    // store (last plus CYCLES_PER_TICK)
                        ;    TOC2 = TOC2 + CYCLES_PER_TICK;
- CDFD  CC07D0            ldd #2000
- CE00  18CE0064          ldy #100
- CE04  BDCE1E            jsr __muli
- CE07  ED02              std 2,x
- CE09  FC1018            ldd 0x1018 ; vol
- CE0C  E302              addd 2,x
- CE0E  FD1018            std 0x1018
- CE11                  kernel.636::	
+ CDF2  CC07D0            ldd #2000
+ CDF5  18CE0064          ldy #100
+ CDF9  BDCE13            jsr __muli
+ CDFC  ED02              std 2,x
+ CDFE  FC1018            ldd 0x1018 ; vol
+ CE01  E302              addd 2,x
+ CE03  FD1018            std 0x1018
+ CE06                  kernel.646::	
                        ;    // clear the OUTPUT COMPARE flag
                        ;    // writing O's makes no change, writing 1's clears the bit
                        ;    TFLG1 = TFLG1_OC2F;
- CE11  C640              ldab #64
- CE13  F71023            stab 0x1023
- CE16                  kernel.637::	
+ CE06  C640              ldab #64
+ CE08  F71023            stab 0x1023
+ CE0B                  kernel.647::	
                        ; }
- CE16                  L116:
- CE16  8F                xgdx
- CE17  C30004            addd #4
- CE1A  8F                xgdx
- CE1B  35                txs
- CE1C  38                pulx
- CE1D  39                rts
+ CE0B                  L116:
+ CE0B  8F                xgdx
+ CE0C  C30004            addd #4
+ CE0F  8F                xgdx
+ CE10  35                txs
+ CE11  38                pulx
+ CE12  39                rts
                          .area bss
- 9990                  _mail_list::
- 9990                    .blkb 320
- 9AD0                  _idle_tid::
- 9AD0                    .blkb 1
- 9AD1                  _idle_tcb_p::
- 9AD1                    .blkb 2
- 9AD3                  _idle_stack::
- 9AD3                    .blkb 50
- 9B05                  _presto_master_clock::
- 9B05                    .blkb 4
- 9B09                  _tcb_list::
- 9B09                    .blkb 108
- 9B75                  _global_save_sp::
- 9B75                    .blkb 2
+ 9C00                  _mail_list::
+ 9C00                    .blkb 320
+ 9D40                  _idle_tid::
+ 9D40                    .blkb 1
+ 9D41                  _idle_tcb_p::
+ 9D41                    .blkb 2
+ 9D43                  _idle_stack::
+ 9D43                    .blkb 50
+ 9D75                  _presto_master_clock::
+ 9D75                    .blkb 4
+ 9D79                  _tcb_list::
+ 9D79                    .blkb 108
+ 9DE5                  _global_save_sp::
+ 9DE5                    .blkb 2

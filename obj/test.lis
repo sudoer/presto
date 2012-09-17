@@ -62,7 +62,7 @@
                        ; 
                        ; ////////////////////////////////////////////////////////////////////////////////
                        ; 
-                       ; #define STACK_SIZE 100
+                       ; #define STACK_SIZE 0x100
                        ; 
                        ; /*static*/ BYTE task_one_stack[STACK_SIZE];
                        ; /*static*/ BYTE task_two_stack[STACK_SIZE];
@@ -463,10 +463,10 @@
  01E4 CC0023            ldd #35
  01E7 37                pshb
  01E8 36                psha
- 01E9 CC0064            ldd #100
+ 01E9 CC0100            ldd #256
  01EC 37                pshb
  01ED 36                psha
- 01EE CC012C            ldd #_task_one_stack
+ 01EE CC0300            ldd #_task_one_stack
  01F1 37                pshb
  01F2 36                psha
  01F3 CC0045            ldd #_One
@@ -481,10 +481,10 @@
  0200 CC0028            ldd #40
  0203 37                pshb
  0204 36                psha
- 0205 CC0064            ldd #100
+ 0205 CC0100            ldd #256
  0208 37                pshb
  0209 36                psha
- 020A CC00C8            ldd #_task_two_stack
+ 020A CC0200            ldd #_task_two_stack
  020D 37                pshb
  020E 36                psha
  020F CC00AC            ldd #_Two
@@ -499,10 +499,10 @@
  021C CC002D            ldd #45
  021F 37                pshb
  0220 36                psha
- 0221 CC0064            ldd #100
+ 0221 CC0100            ldd #256
  0224 37                pshb
  0225 36                psha
- 0226 CC0064            ldd #_task_three_stack
+ 0226 CC0100            ldd #_task_three_stack
  0229 37                pshb
  022A 36                psha
  022B CC0113            ldd #_Three
@@ -517,7 +517,7 @@
  0238 CC0032            ldd #50
  023B 37                pshb
  023C 36                psha
- 023D CC0064            ldd #100
+ 023D CC0100            ldd #256
  0240 37                pshb
  0241 36                psha
  0242 CC0000            ldd #_task_four_stack
@@ -549,13 +549,13 @@
  025E 39                rts
                          .area bss
  0000                 _task_four_stack::
- 0000                   .blkb 100
- 0064                 _task_three_stack::
- 0064                   .blkb 100
- 00C8                 _task_two_stack::
- 00C8                   .blkb 100
- 012C                 _task_one_stack::
- 012C                   .blkb 100
+ 0000                   .blkb 256
+ 0100                 _task_three_stack::
+ 0100                   .blkb 256
+ 0200                 _task_two_stack::
+ 0200                   .blkb 256
+ 0300                 _task_one_stack::
+ 0300                   .blkb 256
                          .area text
  025F                 L12:
  025F 00000000          .word 0,0

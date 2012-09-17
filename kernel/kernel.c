@@ -199,11 +199,13 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
    // load empty SP from task so we can initialize it
    asm("lds _global_new_sp");
 
+/*
    // Set presto_fatal_error as the "return pc" of a new task.  If some bozo
    // tries to return out of his task's main function, we will cause an alarm.
    asm("ldd #_presto_fatal_error");
    asm("pshb");
    asm("psha");
+*/
 
    // push the actual function call on the stack
    asm("ldd _global_new_fn");
@@ -220,7 +222,9 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
    asm("psha"); // X(H) register
    asm("psha"); // A register
    asm("psha"); // B register
-   asm("psha"); // Initial Condition Codes (I bit cleared)
+   asm("tpa");  // do not push $00 here, use actual condition codes
+   ENABLE_CCR_INTERRUPT_BIT;  // enable interrupts in pushed CC register (I bit cleared)
+   asm("psha");  // 1 byte, the condition codes
 
    // save task SP in TCB
    asm("sts _global_new_sp");
@@ -281,7 +285,10 @@ void presto_system_isr_wrapper(void) {
    // to by-pass this destructive behavior at the top, and later I use an
    // inline "RTI" instruction to by-pass the stuff at the bottom.
    presto_fatal_error();
+
    asm("_presto_system_isr::");
+
+   // registers are pushed when timer interrupt is executed
 
    // interrupts are disabled at this time
 
@@ -310,11 +317,10 @@ void presto_system_isr_wrapper(void) {
       // end of ISR will set up new stack
       global_new_sp=current_tcb_p->stack_ptr;
 
-// WHAT??? CHANGE STACK POINTER WITHOUT SAVING REGISTERS???
-
-      // swap the stack pointers
+      // store the old stack pointer
       asm("ldy _global_old_sp_p");
       asm("sts 0,y");
+      // load the new stack pointer
       asm("lds _global_new_sp");
    }
 
@@ -345,7 +351,7 @@ void context_switch_wrapper(void) {
 
    asm("_context_switch::");
 
-// REGISTERS PUSHED THE FIRST TIME WHEN SWI EXECUTED!!
+   // registers are pushed when SWI is executed
 
    // check to see if the old task has clobbered its stack
    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
@@ -369,8 +375,8 @@ void context_switch_wrapper(void) {
    // the asm routine will re-enable interrupts
    global_new_sp=current_tcb_p->stack_ptr;
 
-// REGISTERS PUSHED A SECOND TIME HERE!!
-
+/*
+   // AIGH! - REGISTERS PUSHED A SECOND TIME HERE!!
    // save the registers (in the same order that an interrupt does)
    asm("pshy");  // 2 bytes (Low, then High)
    asm("pshx");  // 2 bytes (Low, then High)
@@ -379,10 +385,12 @@ void context_switch_wrapper(void) {
    asm("tpa");
    ENABLE_CCR_INTERRUPT_BIT;  // enable interrupts in pushed CC register
    asm("psha");  // 1 byte, the condition codes
+*/
 
-   // swap the stack pointers
+   // store the old stack pointer
    asm("ldy _global_old_sp_p");
    asm("sts 0,y");
+   // load the new stack pointer
    asm("lds _global_new_sp");
 
 /*
@@ -514,6 +522,8 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
    // we're going to use this a lot, so dereference now
    msg_p=current_tcb_p->mailbox_head;
 
+   // AIGH! - this is where the error happens
+
    // get one message from the task's mail queue
    if(msg_p==NULL) {
       // there are no messages in the task's mail list
@@ -564,7 +574,7 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
       tcb_p->state=STATE_READY;
 
       // remove message from PO list
-      msg_p=po_mail_p;
+      msg_p=po_mail_p;                      // we know that po_mail_p!=NULL
       po_mail_p=po_mail_p->next;
 
       // move the message to the task's mail list
