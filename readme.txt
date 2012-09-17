@@ -1,3 +1,30 @@
+2003.05.12
+
+Totally redesigned.  Some interfaces are still a bit rough, but the
+overall design works.
+
+We no longer rely on the message / post office metaphor.  Instead, we
+have a set of flags that can be set for a variety of reasons (currently
+by an incoming mail message or an expired timer -- in the future, by
+an unlocked semaphore or directly by another task).  When a task wants
+to wait, it waits for one or more flags to be set.  When the flags are
+set, that task becomes ready.
+
+The new metaphor is based on Qualcomm's rex OS.  I think it is more
+flexible, because you can wait for more than one thing at a time.  For
+example, you might want to wait on a semaphore, but set a timeout timer
+as well.  When you become ready, you can check whether it was the timer
+or the semaphore that made you ready (or even an incoming mail message).
+That provides a nice way to handle operations that need timeouts.
+
+The new timer interrupt should be a lot simpler (faster).  However, it
+still has to do a lot of time compares.  Maybe it's the same.
+
+Still a lot of rough edges.  Need more work soon.  But it seems to run
+OK for a while.
+
+---
+
 2002.10.30
 
 Previous problem with task switching seems to be gone.  In the context

@@ -46,7 +46,7 @@ sub setup_project {
 
 sub setup_compiler {
    print("setting up compiler...");
-   $compiler_home="c:\\programs\\hc11\\gcc";
+   $compiler_home="c:\\programs\\hc11\\gnu";
    add_to_path("$compiler_home\\BIN");
    print("OK\n");
 }

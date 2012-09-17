@@ -59,26 +59,26 @@ void error_isr(void) { presto_fatal_error(ERROR_INTR_OTHER); }
 
 static void (*special_interrupt_vectors[])()
    __attribute((section(".specvect"))) = {
-   inert_isr,     // SCI
-   inert_isr,     // SPI
-   inert_isr,     // PAIE
-   inert_isr,     // PAO
-   inert_isr,     // TOF
-   inert_isr,     // TOC5
-   inert_isr,     // TOC4
-   inert_isr,     // TOC3
-   inert_isr,     // TOC2
-   inert_isr,     // TOC1
-   inert_isr,     // TIC3
-   inert_isr,     // TIC2
-   inert_isr,     // TIC1
-   inert_isr,     // RTI
-   inert_isr,     // IRQ
-   inert_isr,     // XIRQ
-   inert_isr,     // SWI
-   inert_isr,     // ILLOP
-   inert_isr,     // COP
-   inert_isr,     // CLM
+   error_isr,     // SCI
+   error_isr,     // SPI
+   error_isr,     // PAIE
+   error_isr,     // PAO
+   error_isr,     // TOF
+   error_isr,     // TOC5
+   error_isr,     // TOC4
+   error_isr,     // TOC3
+   error_isr,     // TOC2
+   error_isr,     // TOC1
+   error_isr,     // TIC3
+   error_isr,     // TIC2
+   error_isr,     // TIC1
+   error_isr,     // RTI
+   error_isr,     // IRQ
+   error_isr,     // XIRQ
+   error_isr,     // SWI
+   error_isr,     // ILLOP
+   error_isr,     // COP
+   error_isr,     // CLM
    _start         // RESET
 };
 
@@ -121,4 +121,3 @@ void set_interrupt(BYTE intr, void (*vector)(void)) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-

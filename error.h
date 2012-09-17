@@ -19,14 +19,20 @@ typedef enum {
    ERROR_NEXTTCB_NOTFOUND,                    // 07
    ERROR_NO_MORE_TCB,                         // 08
    ERROR_START_AFTERRTI,                      // 09
-   ERROR_START_BEFORE_INIT,                   // 10
-   ERROR_SYSTEMISR_STACKCLOBBERED,            // 11
-   ERROR_TCB_HEAD_IS_NULL,                    // 12
-   ERROR_TIDTOTCB_RANGE,                      // 13
-   ERROR_TIMER_NOFREE,                        // 14
-   ERROR_TIMER_TONOBODY,                      // 15
-   ERROR_WAITFORMSG_NOMESSAGES,               // 16
-   ERROR_WAITFORMSG_NOTFORME,                 // 17
+   ERROR_START_BEFORE_INIT,                   // 0A
+   ERROR_SYSTEMISR_STACKCLOBBERED,            // 0B
+   ERROR_TCB_HEAD_IS_NULL,                    // 0C
+   ERROR_TIDTOTCB_RANGE,                      // 0D
+   ERROR_TIMER_NOFREE,                        // 0E
+   ERROR_TIMER_TONOBODY,                      // 0F
+   ERROR_MAILGET_NOMESSAGES,                  // 10
+   ERROR_MAILGET_NOTFORME,                    // 11
+   ERROR_MAIL_DESTBOXNULL,                    // 12
+   ERROR_MAIL_NOFREE,                         // 13
+   ERROR_MAIL_TONULLBOX,                      // 14
+   ERROR_MAIL_TONOBODY,                       // 15
+   ERROR_MAILWAIT_NOMAIL,                     // 16
+   ERROR_TIMER_ERROR1,                        // 17
 } error_number_e;
 
 ////////////////////////////////////////////////////////////////////////////////
