@@ -75,16 +75,16 @@ void _HC11Setup() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/*
+
 #pragma interrupt inert_isr
 void inert_isr(void) {
 }
-*/
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // address FFD6 for simulator
 // address BFD6 for handyboard
-/*
+
 #pragma abs_address:0xBFD6
 static void (*special_interrupt_vectors[])() = {
    inert_isr,          // SCI    -   presto_serial_isr
@@ -110,14 +110,13 @@ static void (*special_interrupt_vectors[])() = {
    _start              // RESET
 };
 #pragma end_abs_address
-*/
 
 ////////////////////////////////////////////////////////////////////////////////
 
 //extern void os_set_irq(int number, void (*fn)() );
 void set_interrupt(BYTE intr, void (*vector)(void)) {
    if(intr<=INTR_RESET) {
-//    os_set_irq(intr,vector);
+      special_interrupt_vectors[intr]=vector;
    }
 }
 
@@ -127,14 +126,18 @@ void set_interrupt(BYTE intr, void (*vector)(void)) {
 
 void presto_fatal_error(void) {
    // should never get here
-   WORD delay=0;
+   BYTE delay;
    INTR_OFF();
 
+   // speaker is always an output
    BITSET(DDRD,4);              // LED is an output
    while(1) {
-      BITNOT(PORTA,3);          // toggle speaker
-      BITCLR(PORTD,4);          // LED on
-      while(delay!=0) delay++;
+      // toggle speaker
+      BITNOT(PORTA,3);
+      // LED on
+      BITCLR(PORTD,4);
+      // delay
+      while(--delay>0);
    }
 }
 

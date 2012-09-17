@@ -17,7 +17,7 @@ $icc="ICC";
 $gcc="GCC";
 
 # pick the compiler here
-$compiler=$gcc;
+$compiler=$icc;
 
 if($compiler eq $icc) {
    print("using the ImageCraft C compiler\n");
@@ -41,7 +41,7 @@ $TARGET="hbtest";
             "kernel\\task_sw.asm",
             "kernel\\clock.c",
             "kernel\\system.c",
-            "kernel\\crt0.asm",
+#           "kernel\\crt0.asm",
             "services\\debugger.c",
             "services\\lcd.c",
             "services\\i2c.c",
@@ -211,6 +211,8 @@ foreach $src_path (@SRC_FILES) {
             # -I for include file directories
             print($indent."COMPILING...");
             $errors|=run("icc11 -c -l -e -I. -D$compiler -o $obj_path $src_path");
+            $temp=chop_extension($src_name);
+            move_file("$temp.lis",$OBJ_DIR);
             print("OK\n");
          } elsif($compiler eq $gcc) {
             print($indent."COMPILING...");

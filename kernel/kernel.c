@@ -194,41 +194,6 @@ void presto_start_scheduler(void) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_sleep(void) {
-
-   // we're about to switch to a new task... interrupts off
-   INTR_OFF();
-
-   // check to see if we've clobbered our stack
-   if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
-   ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
-      presto_fatal_error();
-
-   // we will only sleep if there are no messages in our queue
-   if(current_tcb_p->mailbox_head==NULL) {
-      // no mail, so we can sleep
-      current_tcb_p->state=STATE_BLOCKED;
-
-      // the asm routine will save old SP in old TCB
-      presto_asm_old_sp_p=&(current_tcb_p->stack_ptr);
-
-      // pick next task to run
-      current_tcb_p=presto_next_tcb_to_run();
-
-      // call asm routine to set up new stack
-      // when we return, we'll be another process
-      // the asm routine will re-enable interrupts
-      presto_asm_new_sp=current_tcb_p->stack_ptr;
-      presto_switch_tasks();
-   } else {
-      // you have mail... we can't sleep when we have mail
-      // hmmm, can't think of anything to do here... yet
-   }
-   INTR_ON();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void presto_kill_self(void) {
    // TODO - remove TCB from list
    presto_fatal_error();
@@ -307,12 +272,14 @@ BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload) 
 
    // check to see if there's room
    if(free_mail_p==NULL) {
+      presto_fatal_error();
       INTR_ON();
       return 1;
    }
 
    // check to see that the recipient is an alive task
    if(tid_to_tcbptr(to)==NULL) {
+      presto_fatal_error();
       INTR_ON();
       return 2;
    }
@@ -404,23 +371,50 @@ static BYTE deliver_mail(void) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-BYTE presto_mail_waiting(void) {
-   return (current_tcb_p->mailbox_head!=NULL);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 BYTE presto_get_message(PRESTO_MAIL_T * payload_p) {
    PRESTO_MESSAGE_T * msg_p;
+
+   // we're about to switch to a new task... interrupts off
+   INTR_OFF();
+
+   // check to see if we've clobbered our stack
+   if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
+   ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
+      presto_fatal_error();
+
+   // we will only sleep if there are no messages in our queue
+   if(current_tcb_p->mailbox_head==NULL) {
+      // no mail, so we can sleep
+      current_tcb_p->state=STATE_BLOCKED;
+
+      // the asm routine will save old SP in old TCB
+      presto_asm_old_sp_p=&(current_tcb_p->stack_ptr);
+
+      // pick next task to run
+      current_tcb_p=presto_next_tcb_to_run();
+
+      // call asm routine to set up new stack
+      // when we return, we'll be another process
+      // the asm routine will re-enable interrupts
+      presto_asm_new_sp=current_tcb_p->stack_ptr;
+      presto_switch_tasks();
+
+      // when we wake up, we will be here,
+      // and we will be ready to recieve our mail.
+   }
+
    // we're about to mess with the mail list... interrupts off
    INTR_OFF();
    // we're going to use this a lot, so dereference now
    msg_p=current_tcb_p->mailbox_head;
+
+   // are we being paranoid?
+   if((msg_p->to_tcb_p)!=current_tcb_p) presto_fatal_error();
+
    // get one message from the task's mail queue
    if(msg_p==NULL) {
       // there are no messages in the task's mail list
-      INTR_ON();
-      return 0;
+      presto_fatal_error();
    } else if (msg_p==current_tcb_p->mailbox_tail) {
       // there is only one item in the list, take it
       current_tcb_p->mailbox_head=NULL;

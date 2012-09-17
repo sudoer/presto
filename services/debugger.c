@@ -249,7 +249,6 @@ static void debugger(void) {
       if(input_start_button()) motor_set_speed(0,6);
 
       presto_timer(debugger_tid,100,wake_up);
-      presto_sleep();
       presto_get_message(&wake_up);
       while(serial_recv(&in)) {
          if((in=='\r')||(in=='\n')) {
