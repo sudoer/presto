@@ -14,8 +14,8 @@
 //#include "services\motors.h"
 //#include "services\sound.h"
 
-// ICC only
-extern void _start();   // entry point in crt11.s
+
+extern void _start();   // entry point in crt11.s or crt0.o
 
 ////////////////////////////////////////////////////////////////////////////////
 //   C O N S T A N T S
@@ -65,7 +65,9 @@ void inert_reset_isr(void);
 
 // INTERRUPT VECTORS
 
-#pragma abs_address:0xFFD6 // for NORMAL and EXPANDED MULTIPLEXED modes
+#ifdef ICC
+   #pragma abs_address:0xFFD6 // for NORMAL and EXPANDED MULTIPLEXED modes
+#endif
 void (*normal_interrupt_vectors[])() = {
    inert_sci_isr,      // SCI    -   presto_serial_isr
    inert_spi_isr,      // SPI
@@ -89,7 +91,9 @@ void (*normal_interrupt_vectors[])() = {
    inert_clm_isr,      // CLM
    inert_reset_isr     // RESET
 };
-#pragma end_abs_address
+#ifdef ICC
+   #pragma end_abs_address
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +108,12 @@ void (*normal_interrupt_vectors[])() = {
 // This function is called from the startup (crt11.s) before interrupts have
 // been turned on but after the stack has been set up.
 
+#ifdef ICC
 void _HC11Setup() {
+#endif
+#ifdef GCC
+void __premain() {
+#endif
 
    INTR_OFF();
 
@@ -201,6 +210,13 @@ void set_interrupt(BYTE intr, void (*vector)(void)) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#ifdef GCC
+void __attribute__((noreturn)) exit(int code) {
+}
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
 //   S A F E T Y   C H E C K
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -213,7 +229,12 @@ void presto_fatal_error(void) {
    INTR_OFF();
 
    // reload the original stack pointer, so we don't trash anything else
+#ifdef ICC
    asm("lds #init_sp");
+#endif
+#ifdef GCC
+   asm("lds #0xB5FF");
+#endif
 
    // speaker is always an output
    BITSET(DDRD,4);              // LED is an output

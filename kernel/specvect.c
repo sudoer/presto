@@ -45,8 +45,11 @@ extern void inert_reset_isr(void);
 // So this table is only used to get us up and running.  In _HC11Setup(), we'll
 // switch to normal mode, and start using the "normal" table.
 
-#pragma abs_address:0xBFD6 // for SPECIAL BOOTSTRAP and SPECIAL TEST modes
+#ifdef ICC
+   #pragma abs_address:0xBFD6 // for SPECIAL BOOTSTRAP and SPECIAL TEST modes
+#endif
 void (*special_interrupt_vectors[])() = {
+   //__asm__(".org 0xBFD6");
    inert_sci_isr,      // SCI
    inert_spi_isr,      // SPI
    inert_paie_isr,     // PAIE
@@ -69,6 +72,8 @@ void (*special_interrupt_vectors[])() = {
    inert_clm_isr,      // CLM
    _start              // RESET
 };
-#pragma end_abs_address
+#ifdef ICC
+   #pragma end_abs_address
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////

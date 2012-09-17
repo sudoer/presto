@@ -3,285 +3,290 @@
 #   B A S I C   I N C L U D E S   A N D   D E B U G   I N F O
 ################################################################################
 
-# turn debug info on/off
-$debug=0;
-
 # fast move/copy routines
 use File::Copy;
 
-################################################################################
-#   P R O J E C T   C O N F I G U R A T I O N
-################################################################################
+# turn debug info on/off
+$debug=1;
 
-print("--- CONFIGURATION ---\n");
-
-# SETTING UP THE PROJECT
-
-print("setting up project...");
-$OBJ_DIR="obj";
-$TARGET="presto";
-@SRC_FILES=(
-            "app\\test.c",
-#           "services\\debugger.c",
-#           "services\\lcd.c",
-#           "services\\i2c.c",
-#           "services\\inputs.c",
-#           "services\\motors.c",
-#           "services\\serial.c",
-#           "services\\sound.c",
-#           "utils\\string.c",
-            "kernel\\clock.c",
-            "kernel\\system.c",
-            "kernel\\intvect.c",
-            "kernel\\kernel.c",
-);
-@LIBS=();
-print("OK\n");
+setup_project();
+setup_compiler();
+setup_linker();
+prepare();
+compile_stage();
+link_stage();
+show_results();
+cleanup();
+exit;
 
 ################################################################################
-#   T O O L   C O N F I G U R A T I O N
-################################################################################
 
-# COMPILER CONFIGURATION
+sub setup_project {
+   print("--- CONFIGURATION ---\n");
 
-print("setting up compiler...");
-$compiler_home="c:\\programs\\hc11\\icc";
-add_to_path("$compiler_home\\BIN");
-setenv("ICC11_INCLUDE","$compiler_home\\INCLUDE");
-setenv("DOS4G","quiet");
-setenv("DOS16M","0");
-print("OK\n");
+   # SETTING UP THE PROJECT
 
-print("setting up linker...");
-$icc11_lib="$compiler_home\\LIB";
-setenv("ICC11_LIB",$icc11_lib);
-print("OK\n");
-
-# PERL/DOS CONFIGURATION
-
-#$TO_NULL=">&> NUL:";   # Win98
-$TO_NULL="";   # Win2k
-
-# END OF --- CONFIGURATION ---
-
-print("\n");
-
-################################################################################
-#   P R E P A R I N G
-################################################################################
-
-print("--- PREPARING ---\n");
-
-# CLEANING UP OLD FILES
-
-print("deleting old intermediate files...");
-unlink <*.bak>;
-unlink <*.aaa>;
-unlink <*.s>;
-unlink <*.i>;
-#rem del /s/y/x/q %OBJ_DIR% >&> NUL:
-#rem del /s/q *.s19 >&> NUL:
-print("OK\n");
-
-# CREATING OBJECT DIRECTORY
-
-print("creating object directory...");
-mkdir($OBJ_DIR,0777);
-print("OK\n");
-
-# REMEMBER WHERE YOU STARTED
-
-chop($base_dir=`cd`);
-$base_dir=~s/^[A-Za-z]://g;  # remove C:
-
-# END OF --- PREPARING ---
-
-print("\n");
+   print("setting up project...");
+   $OBJ_DIR="obj";
+   $TARGET="presto";
+   @SRC_FILES=(
+               "app\\test.c",
+   #           "services\\debugger.c",
+   #           "services\\lcd.c",
+   #           "services\\i2c.c",
+   #           "services\\inputs.c",
+   #           "services\\motors.c",
+   #           "services\\serial.c",
+   #           "services\\sound.c",
+   #           "utils\\string.c",
+               "kernel\\clock.c",
+               "kernel\\system.c",
+               "kernel\\specvect.c",
+               "kernel\\kernel.c",
+   );
+   @LIBS=();
+   print("OK\n");
+}
 
 ################################################################################
-#   C O M P I L I N G   A N D   A S S E M B L I N G
+
+sub setup_compiler {
+   # COMPILER CONFIGURATION
+
+   print("setting up compiler...");
+   $compiler_home="c:\\programs\\hc11\\gnu";
+   add_to_path("$compiler_home\\BIN");
+
+   #set GCCPATH=h:\68hc11\gcc
+   #set DJGPP=%GCCPATH%\djgpp.env
+   #set GO32TMP=%GCCPATH%\tmp
+   #set C_INCLUDE_PATH=%GCCPATH%\include
+   #set CPLUS_INCLUDE_PATH=%GCCPATH%\include
+   #set PATH=%PATH%;%GCCPATH%\bin
+
+   #rem batch file for compiling a gnu c program
+   #rem uses the new aslink and as6811 programs
+   #rem SLB 1999
+   #xgcc -c -O2 -mlong_branch -S %2 %3 %4 %1.c
+   #xgcc -c -O2 -mlong_branch -S %2 %3 %4 all.c
+   #as6811 -loszg %1.s
+   #as6811 -loszg all.s
+   print("OK\n");
+}
+
 ################################################################################
 
-print("--- COMPILING AND ASSEMBLING ---\n");
+sub setup_linker {
+   print("setting up linker...");
+   #echo -mszu > %1.lnk
+   #echo -b_CODE=0x0d000 >> %1.lnk
+   #echo -b_BSS=0x0C000 >> %1.lnk
+   #echo %1 >> %1.lnk
+   #echo crt0 >> %1.lnk
+   #echo all >> %1.lnk
+   #echo -e >> %1.lnk
+   #aslink -f %1
+   #$gcc_lib="$compiler_home\\LIB";
+   #setenv("ICC11_LIB",$icc11_lib);
+   print("OK\n");
+}
 
-$indent="   ";
+################################################################################
 
-# LOOPING THROUGH OBJECT FILES
+sub prepare {
 
-@OBJS=();
-$total_errors=0;
-foreach $src_path (@SRC_FILES) {
-   print("FILE $src_path\n");
-   $errors=0;
+   print("--- PREPARING ---\n");
 
-   # DETERMINE FILE NAMES, BASE NAMES, EXTENSIONS, PATHS
+   # CLEANING UP OLD FILES
 
-   $src_dir=directory_of($src_path);
-   $src_name=basename($src_path);
-   $src_base=chop_extension($src_name);
-   $src_ext=extension_of($src_path);
-   debug("src_name=[$src_name]");
-   debug("src_path=[$src_path]");
-   debug("src_base=[$src_base]");
-   debug("src_dir=[$src_dir]");
-   debug("src_ext=[$src_ext]");
+   print("deleting old intermediate files...");
+   unlink <*.bak>;
+   unlink <*.aaa>;
+   unlink <*.s>;
+   unlink <*.i>;
+   #rem del /s/y/x/q %OBJ_DIR% >&> NUL:
+   #rem del /s/q *.s19 >&> NUL:
+   print("OK\n");
 
-   $obj_name="$src_base.o";
+   # CREATING OBJECT DIRECTORY
 
-   $obj_path="$OBJ_DIR\\$obj_name";
-   debug("obj_name=[$obj_name]");
-   debug("obj_path=[$obj_path]");
+   print("creating object directory...");
+   mkdir($OBJ_DIR,0777);
+   print("OK\n");
 
-   # DETERMINE IF WE NEED TO DO ANYTHING FOR THIS FILE
+   # REMEMBER WHERE YOU STARTED
 
-   $work=0;
-   if( ! -e "$obj_path" ) {
-      $work=1;
-   } else {
-      $filetime= -M $src_path;
-      $objtime= -M $obj_path;
-      if( $filetime < $objtime ) {
-         $work=1;
-      }
-   }
-
-   # IF WE HAVE WORK TO DO, THEN DO IT
-
-   if( $work == 1 ) {
-      if($src_ext eq "c") {
-         # -c for compile to object code
-         # -l for interspersed C/asm listings
-         # -e for C++ comments
-         # -I for include file directories
-         # -v for verbose
-         print($indent."COMPILING...");
-         if($debug) { print("\n"); }
-         $errors|=run("icc11 -c -l -e -I. -o $obj_path $src_path");
-         # actually runs the following
-         #icpp.exe -D_HC11 -I. -DICC -e app\\test.c test.i
-         #iccom11.exe -lapp\\test.c test.i test.s
-         #ias6811.exe -o obj\\test.o test.s
-         #rm test.i
-         $temp=chop_extension($src_name);
-         move_file("$temp.lis",$OBJ_DIR);
-         print("OK\n");
-      } elsif( $src_ext eq "asm" ) {
-         print($indent."ASSEMBLING...");
-         if($debug) { print("\n"); }
-         $errors|=run("ias6811 -o $obj_path $src_path");
-         move_file(chop_extension($src_path).".lis",$OBJ_DIR);
-         print("OK\n");
-      } else {
-         print("HUH?\n");
-      }
-   } else {
-      print("OK\n");
-   }
+   chop($build_dir=`cd`);
+   $build_dir=~s/^[A-Za-z]://g;  # remove C:
 
    print("\n");
+}
 
-   # RECORD THE FILES THAT WE NEED TO LINK TOGETHER
+################################################################################
 
-   push(@OBJS,$obj_path);
+sub compile_stage {
 
-   if($errors gt 0) {
+   print("--- COMPILING AND ASSEMBLING ---\n");
+
+   $indent="   ";
+   @OBJS=();
+   $total_errors=0;
+
+   # LOOPING THROUGH OBJECT FILES
+
+   foreach $src_path (@SRC_FILES) {
+      print("FILE $src_path\n");
+      $errors=0;
+
+      # DETERMINE FILE NAMES, BASE NAMES, EXTENSIONS, PATHS
+
+      $src_dir=directory_of($src_path);
+      $src_name=basename($src_path);
+      $src_base=chop_extension($src_name);
+      $src_ext=extension_of($src_path);
+      debug("src_name=[$src_name]");
+      debug("src_path=[$src_path]");
+      debug("src_dir=[$src_dir]");
+      debug("src_base=[$src_base]");
+      debug("src_ext=[$src_ext]");
+
+      $obj_name="$src_base.o";
+
+      $obj_path="$OBJ_DIR\\$obj_name";
+      debug("obj_name=[$obj_name]");
+      debug("obj_path=[$obj_path]");
+
+      # DETERMINE IF WE NEED TO DO ANYTHING FOR THIS FILE
+
+      $work=0;
+      if( ! -e "$obj_path" ) {
+         $work=1;
+      } else {
+         $filetime= -M $src_path;
+         $objtime= -M $obj_path;
+         if( $filetime < $objtime ) {
+            $work=1;
+         }
+      }
+
+      # IF WE HAVE WORK TO DO, THEN DO IT
+
+      if( $work == 1 ) {
+         if($src_ext eq "c") {
+            print($indent."COMPILING...");
+            if($debug) { print("\n"); }
+            chdir($src_dir);
+            $errors|=run("m6811-elf-gcc.exe "
+                        ."-m68hc11 "
+                        ."-DGCC "
+                        ."-I$build_dir -I. "
+                        ."-mshort "
+                        ."-Os "
+                        ."-fomit-frame-pointer "
+                        ."-msoft-reg-count=0 "
+                        ."-c "
+                        ."-o $build_dir\\$OBJ_DIR\\$src_base.o "
+                        ."$src_name");
+            #chdir("$build_dir\\$OBJ_DIR");
+            # GNU compiler thinks that LDD and STD can use "x" as address -- should use "0,x"
+            #search_and_replace("$src_base.asm","\tldd\tx","\tldd\t0,x\t","\tstd\tx","\tstd\t0,x\t");
+            #$errors|=run("as6811 -loszg $src_base");
+            chdir($build_dir);
+            print("OK\n");
+         } else {
+            print("HUH?\n");
+         }
+      } else {
+         print("OK\n");
+      }
+
       print("\n");
+
+      # RECORD THE FILES THAT WE NEED TO LINK TOGETHER
+
+      push(@OBJS,$obj_name);
+
+      $total_errors+=$errors;
+      if($errors gt 0) {
+         print("\n");
+         print("ERRORS IN COMPILE ... stopping\n");
+         return;
+      }
+
    }
-   $total_errors+=$errors;
+
+   # END OF --- COMPILING AND ASSEMBLING ---
+
+   print("\n");
 
 }
 
-# END OF --- COMPILING AND ASSEMBLING ---
-
-print("\n");
-
-
-################################################################################
-#   L I N K I N G
 ################################################################################
 
-# -bdata:0x0000.0x1111:0x2222.0x3333 for multiple zones
-# define heap_size for crt11.o to allocate heap area
-# define init_sp for your initial stack pointer
-# -m option to produce map file
+sub link_stage {
 
-#         MEMORY MAP
-# ------------------------
-#        DATA   8000-97FF    6k      GLOBAL VARIABLES
-#         BSS   9800-AFFF    6k      INITIALIZED GLOBAL VARIABLES
-#       STACK   B000-B5FF  1536      INITIAL STACK
-#     NOTHING   B600-B7FF   512      sometimes mapped to EEPROM
-#     NOTHING   B800-BFBF   ~2k      empty
-# INT VECTORS   BFC0-BFFF    64      SPECIAL INTERRUPTS (HANDYBOARD)
-#        TEXT   C000-FFBF  ~16k      CODE INSTRUCTIONS, CONSTANT DATA
-# INT VECTORS   FFC0-FFFF    64      NORMAL INTERRUPTS (SIMULATOR)
+   if($total_errors gt 0) {
+      print("errors compiling, skipping the link stage\n");
+      print("\n");
+      return;
+   }
 
-if($total_errors gt 0) {
-   print("errors compiling, skipping the link stage\n");
-   print("\n");
-} else {
-   print("--- LINKING ---\n");
-   print("setting up link map and linker options...");
-   setenv("ICC11_LINKER_OPTS",
-      "-bdata:0x8000.0x97ff ".
-      "-bbss:0x9800.0xafff ".
-      "-btext:0xc000.0xffbf ".
-      "-dinit_sp:0xb5ff ".
-      "-dheap_size:0x0 ".
-      "-m ");
-   print("OK\n");
-   print("creating linker parm file...");
-   open(TEMP1,">BUILD.TMP");
-   print TEMP1 "-L$icc11_lib -o $TARGET.S19 @OBJS";   # TODO - LIBS
-   close(TEMP1);
-   print("OK\n");
-   print("linking...");
-   if($debug) { print("\n"); }
-   run("icc11 \@BUILD.TMP");
-   print("OK\n");
-   print("moving map/list files to obj dir...");
-   if($debug) { print("\n"); }
-   run("move $TARGET.MP $OBJ_DIR $TO_NULL");
-   run("move $TARGET.LST $OBJ_DIR $TO_NULL");
-   print("OK\n");
-   print("cleaning up...");
-   unlink("BUILD.TMP");
-   print("OK\n");
+   chdir("$build_dir\\$OBJ_DIR");
 
-   # END OF --- LINKING ---
+   $ofiles="";
+   foreach $obj_file (@OBJS) {
+      $ofiles=$ofiles." ".$obj_file;
+   }
 
+   print("LINKING...\n");
+   run("m6811-elf-ld.exe "
+      ."--script ../linker.x "
+      ."-nostdlib "
+      ."-nostartfiles "
+      ."-defsym _io_ports=0x1000 "
+      ."-defsym _.tmp=0x0 "
+      ."-defsym _.z=0x2 "
+      ."-defsym _.xy=0x4 "
+      ."-defsym vectors_addr=0xbfc0 "
+      ."-o $TARGET.elf "
+      ."../lib/crt0.o $ofiles");
+   print("OK\n");
    print("\n");
 
+   print("CONVERTING TO S19...\n");
+   run("m6811-elf-objcopy "
+      ."--only-section=.text "
+      ."--only-section=.rodata "
+      ."--only-section=.vectors "
+      ."--only-section=.data "
+      ."--output-target=srec "
+      ."$TARGET.elf $TARGET.s19");
+   print("OK\n");
+   print("\n");
+
+}
+
+################################################################################
+
+sub show_results {
+   print("done\n");
    print("--- SHOW THE RESULTS ---\n");
    run("dir *.s19");
-
-   # END OF --- SHOW THE RESULTS ---
-
    print("\n");
-
 }
 
 ################################################################################
-#   C L E A N   U P
-################################################################################
 
-print("--- CLEAN UP ---\n");
-print("removing intermediate files...");
-unlink <*.aaa>;
-unlink <*.aaa>;
-unlink <*.s>;
-unlink <*.i>;
-print("OK\n");
+sub cleanup {
+   print("--- CLEAN UP ---\n");
+   print("removing intermediate files...");
+   unlink <*.aaa>;
+   unlink <*.aaa>;
+   unlink <*.s>;
+   unlink <*.i>;
+   print("OK\n");
 
-# END OF --- CLEAN UP ---
-
-print("\n");
-
-################################################################################
-
-print("done\n");
-
-#END
+}
 
 ################################################################################
 #   F U N C T I O N S

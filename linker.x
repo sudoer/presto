@@ -1,0 +1,40 @@
+OUTPUT_FORMAT("elf32-m68hc11", "elf32-m68hc11", "elf32-m68hc11")
+OUTPUT_ARCH(m68hc11)
+ENTRY(_start)
+SEARCH_DIR(/usr/local/m6811-elf/lib);
+
+/*
+   #         MEMORY MAP
+   # ------------------------
+   #        DATA   8000-97FF    6k   GLOBAL VARIABLES
+   #         BSS   9800-AFFF    6k   INITIALIZED GLOBAL VARIABLES
+   #       STACK   B000-B5FF  1536   INITIAL STACK
+   #     NOTHING   B600-B7FF   512   EEPROM
+   #     NOTHING   B800-BFBF   ~2k   NOTHING
+   # INT VECTORS   BFC0-BFFF    64   SPECIAL INTERRUPTS (HANDYBOARD)
+   #        TEXT   C000-FFBF  ~16k   CODE INSTRUCTIONS, CONSTANT DATA
+   # INT VECTORS   FFC0-FFFF    64   NORMAL INTERRUPTS (SIMULATOR)
+*/
+
+
+/*
+           DATA   8000-97FF    6k   GLOBAL VARIABLES
+            BSS   9800-AFFF    6k   INITIALIZED GLOBAL VARIABLES
+          STACK   B000-B5FF  1536   INITIAL STACK
+        NOTHING   B600-B7FF   512   EEPROM
+        NOTHING   B800-BFBF   ~2k   NOTHING
+    INT VECTORS   BFC0-BFFF    64   SPECIAL INTERRUPTS (HANDYBOARD)
+           TEXT   C000-FFBF  ~16k   CODE INSTRUCTIONS, CONSTANT DATA
+    INT VECTORS   FFC0-FFFF    64   NORMAL INTERRUPTS (SIMULATOR)
+*/
+
+MEMORY
+{
+  page0 (rwx)    : ORIGIN = 0x0,     LENGTH = 256
+  data           : ORIGIN = 0x08000, LENGTH = 0x0AFFF - 0x08000
+  text  (rx)     : ORIGIN = 0x0C000, LENGTH = 0x0FFBF - 0x0C000
+}
+/* Setup the stack on the top of the data memory bank.  */
+PROVIDE (_stack = 0x0B5FF);
+
+

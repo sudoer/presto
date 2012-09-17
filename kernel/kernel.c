@@ -14,8 +14,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define DISABLE_CCR_INTERRUPT_BIT      asm("oraa #0x10");
-#define ENABLE_CCR_INTERRUPT_BIT      asm("anda ~#0x10");
+#define DISABLE_CCR_INTERRUPT_BIT      //asm("oraa #0x10");
+#define ENABLE_CCR_INTERRUPT_BIT      //asm("anda ~#0x10");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -64,10 +64,8 @@
 /*static*/ void print_mail_list(void);
 /*static*/ void idle_task(void);
 
-void presto_system_isr_wrapper(void);
-void presto_system_isr(void);
-void context_switch_wrapper(void);
-void context_switch(void);
+void presto_system_isr(void) __attribute__((interrupt));
+void context_switch(void) __attribute__((interrupt));
 
 ////////////////////////////////////////////////////////////////////////////////
 //   I N I T I A L I Z A T I O N
@@ -136,7 +134,7 @@ void presto_start_scheduler(void) {
    // must be put in global space, not on stack
    global_new_sp=current_tcb_p->stack_ptr;
 
-   asm("lds _global_new_sp");
+   asm("lds global_new_sp");
 
    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
    // That way, the new task will have interrupts enabled when it wakes up.
@@ -194,10 +192,10 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
    global_new_fn=func;
 
    // store our own SP so we can work on the new task
-   asm("sts _global_save_sp");
+   asm("sts global_save_sp");
 
    // load empty SP from task so we can initialize it
-   asm("lds _global_new_sp");
+   asm("lds global_new_sp");
 
 /*
    // Set presto_fatal_error as the "return pc" of a new task.  If some bozo
@@ -208,7 +206,7 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
 */
 
    // push the actual function call on the stack
-   asm("ldd _global_new_fn");
+   asm("ldd global_new_fn");
    asm("pshb");
    asm("psha");
 
@@ -227,9 +225,9 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
    asm("psha");  // 1 byte, the condition codes
 
    // save task SP in TCB
-   asm("sts _global_new_sp");
+   asm("sts global_new_sp");
    // re-load our own SP so we can return
-   asm("lds _global_save_sp");
+   asm("lds global_save_sp");
 
    // recover the altered stack pointer and save it in the TCB
    new_tcb_p->stack_ptr=global_new_sp;
@@ -274,19 +272,7 @@ void presto_kill_self(void) {
 //   C O N T E X T   S W I T C H I N G   ( I N T E R R U P T )
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma interrupt presto_system_isr_wrapper
-void presto_system_isr_wrapper(void) {
-
-   // The ICC compiler adds a "jsr __enterb" at the beginning of my interrupt
-   // service routine.  Apparently, it is concerned with preserving the state
-   // of the X register, and it tries to push it onto the stack and then do some
-   // funny math.  At the end of the ISR, it tries to undo all of the mess, and
-   // it even ends the ISR with a jump instruction.  Yikes!  I use this label
-   // to by-pass this destructive behavior at the top, and later I use an
-   // inline "RTI" instruction to by-pass the stuff at the bottom.
-   presto_fatal_error();
-
-   asm("_presto_system_isr::");
+void presto_system_isr(void) {
 
    // registers are pushed when timer interrupt is executed
 
@@ -318,10 +304,10 @@ void presto_system_isr_wrapper(void) {
       global_new_sp=current_tcb_p->stack_ptr;
 
       // store the old stack pointer
-      asm("ldy _global_old_sp_p");
+      asm("ldy global_old_sp_p");
       asm("sts 0,y");
       // load the new stack pointer
-      asm("lds _global_new_sp");
+      asm("lds global_new_sp");
    }
 
 /*
@@ -331,25 +317,11 @@ void presto_system_isr_wrapper(void) {
    ENABLE_CCR_INTERRUPT_BIT;
    asm("psha");
 */
-
-   // The end of this function SHOULD be an RTI (instead of RTS), because it is
-   // an interrupt.  But the ICC compiler adds a lot of stuff at the beginning
-   // and the end of interrupt service routines.  Specifically, it is messing
-   // with the X register (pushing it onto the stack) because it uses that as
-   // a frame pointer.  So I will add my RTI here explicitly, to force the
-   // behavior that I want.
-   // Now we will pop the stack and "run" the new task.
-   asm("rti");
-
-   // we never get here
-   presto_fatal_error();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void context_switch_wrapper(void) {
-
-   asm("_context_switch::");
+void context_switch(void) {
 
    // registers are pushed when SWI is executed
 
@@ -388,10 +360,10 @@ void context_switch_wrapper(void) {
 */
 
    // store the old stack pointer
-   asm("ldy _global_old_sp_p");
+   asm("ldy global_old_sp_p");
    asm("sts 0,y");
    // load the new stack pointer
-   asm("lds _global_new_sp");
+   asm("lds global_new_sp");
 
 /*
    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
@@ -400,14 +372,6 @@ void context_switch_wrapper(void) {
    ENABLE_CCR_INTERRUPT_BIT;
    asm("psha");
 */
-
-   // Normally, this function would end with an RTS, but we want to act EXACTLY
-   // the same as if we had just been inside of an interrupt.  So we manually
-   // call RTI here to pop the registers and "run" the new task.
-   asm("rti");
-
-   // we never get here
-   presto_fatal_error();
 }
 
 
