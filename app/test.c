@@ -8,7 +8,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// system crashes after...
 #define TIMER0     0
 #define TIMER1     0
 #define TIMER2     0
@@ -123,9 +122,6 @@ void Three(void) {
    PRESTO_MAIL_T msg;
    PRESTO_MAIL_T msg3;
 
-   uint16 timer=0;
-   char timerstring[6];
-
    msg.dw.dw1=0;
    while(1) {
       motor_speed(3,speed3);
@@ -133,17 +129,6 @@ void Three(void) {
       presto_sleep();
       presto_get_message(&msg3);
       speed3=0-speed3;
-
-      timer++;
-      timerstring[0]=(timer/10000)%10+'0';
-      timerstring[1]=(timer/1000)%10+'0';
-      timerstring[2]=(timer/100)%10+'0';
-      timerstring[3]=(timer/10)%10+'0';
-      timerstring[4]=(timer)%10+'0';
-      timerstring[5]=0;
-      serial_send_string(timerstring);
-      serial_send_byte(' ');
-
    }
 }
 
@@ -165,7 +150,7 @@ void main(void) {
    three_tid=presto_create_task(Three, task_three_stack, STACK_SIZE, 45);
 #endif
    serial_init(9600);
-   //debugger_init();
+   debugger_init();
    motor_init();
    lcd_init();
    presto_start_scheduler();

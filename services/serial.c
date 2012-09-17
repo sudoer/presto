@@ -12,8 +12,8 @@
 
 // CONSTANTS
 
-#define TX_BUFFER_SIZE 1000
-#define RX_BUFFER_SIZE 10
+#define TX_BUFFER_SIZE 500
+#define RX_BUFFER_SIZE 20
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -61,7 +61,8 @@ void serial_init(uint16 baud) {
 
    // transmit interrupt enable, receive interrupt enable
    // transmit enable, receive enable
-   SCCR2= /*SCCR2_TIE|SCCR2_RIE|*/ SCCR2_TE|SCCR2_RE;
+   // SCCR2= /*SCCR2_TIE|SCCR2_RIE|*/ SCCR2_TE|SCCR2_RE;
+   SCCR2= SCCR2_TIE|SCCR2_RIE|SCCR2_TE|SCCR2_RE;
 
    // 2400 baud for 2 MHz clock
    BAUD=BAUD_SCP1|BAUD_SCP0;
@@ -82,12 +83,13 @@ static void clear_buffers(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+//   SENDING
 ////////////////////////////////////////////////////////////////////////////////
 
 void serial_send_byte(BYTE send) {
    // disable TX interrupt
    MASKCLR(SCCR2,SCCR2_TIE);
-   // queue up the byte to send
+   // queue up one byte to send
    cq_put_byte(&com1_tx_queue,send);
    // re-enable the TX interrupt
    MASKSET(SCCR2,SCCR2_TIE);
@@ -110,9 +112,32 @@ void serial_send_string(char * send) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+//   RECEIVING
+////////////////////////////////////////////////////////////////////////////////
 
-BYTE serial_recv(void) {
-   return SCDR;
+BOOLEAN serial_recv(BYTE * r) {
+   BOOLEAN b;
+   // disable RX interrupt
+   MASKCLR(SCCR2,SCCR2_RIE);
+   // read one byte from the serial RX queue
+   b=cq_get_byte(&com1_rx_queue, r);
+   // re-enable the RX interrupt
+   MASKSET(SCCR2,SCCR2_RIE);
+   return b;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int serial_recv_string(BYTE * recv, uint8 maxlen) {
+   int count=0;
+   BYTE * ptr=recv;
+   // disable RX interrupt
+   MASKCLR(SCCR2,SCCR2_RIE);
+   // read the serial RX queue until it is empty or we are full
+   while(cq_get_byte(&com1_rx_queue,ptr++)&&(count<maxlen)) count++;
+   // re-enable the RX interrupt
+   MASKSET(SCCR2,SCCR2_RIE);
+   return count;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,29 +1,39 @@
 
+print("\n");
+print("--- CONFIGURATION ---\n");
+
 ################################################################################
 
 # PROJECT CONFIGURATION
 
+print("setting up project...");
 $OBJ_DIR="obj";
 $TARGET="hbtest";
-@SRC_FILES=("presto/kernel.c",
-            "presto/task_sw.asm",
-            "presto/clock.c",
-            "presto/system.c",
+@SRC_FILES=("kernel/kernel.c",
+            "kernel/task_sw.asm",
+            "kernel/clock.c",
+            "kernel/system.c",
             "services/debugger.c",
             "services/lcd.c",
             "services/i2c.c",
             "services/motors.c",
             "services/serial.c",
             "services/sound.c",
+            "utils/string.c",
             "app/test.c");
+print("OK\n");
 
 ################################################################################
 
 # COMPILER CONFIGURATION
-$compiler_home="c:\\alan\\play\\hc11\\icc";
-$ICC11_PATH="$compiler_home\\BIN";
-$ICC11_LIB="$compiler_home\\LIB";
-$ICC11_INCLUDE="$compiler_home\\INCLUDE";
+
+print("setting up compiler...");
+$compiler_home="c:\\programs\\hc11\\icc";
+add_to_path("$compiler_home\\BIN");
+setenv("ICC11_INCLUDE","$compiler_home\\INCLUDE");
+setenv("DOS4G","quiet");
+setenv("DOS16M","0");
+print("OK\n");
 
 ################################################################################
 
@@ -45,57 +55,46 @@ $ICC11_INCLUDE="$compiler_home\\INCLUDE";
 #        TEXT   C000-FFBF  ~16k      CODE INSTRUCTIONS, CONSTANT DATA
 # INT VECTORS   FFC0-FFFF    64      NORMAL INTERRUPTS
 
-$ICC11_LINKER_OPTS="-bdata:0x8000.0x97ff ".
-                   "-bbss:0x9800.0xafff ".
-                   "-dinit_sp:0xb5ff ".
-                   "-btext:0xc000.0xffbf ".
-                   "-dheap_size:0x0 ".
-                   "-m ";
+print("setting up linker...");
+setenv("ICC11_LINKER_OPTS",
+   "-bdata:0x8000.0x97ff ".
+   "-bbss:0x9800.0xafff ".
+   "-dinit_sp:0xb5ff ".
+   "-btext:0xc000.0xffbf ".
+   "-dheap_size:0x0 ".
+   "-m ");
+$icc11_lib="$compiler_home\\LIB";
+setenv("ICC11_LIB",$icc11_lib);
+print("OK\n");
 
 ################################################################################
 #   YOU DON'T NEED TO MESS WITH ANYTHING BELOW THIS LINE
 ################################################################################
 
-print("\n");
-print("--- CONFIGURATION ---\n");
-$path=tolower($ENV{PATH});
-if(index($ICC11_PATH,$path)<0) {
-   $ENV{PATH}=$ENV{PATH}.";$ICC11_PATH";
-}
-print("path is $ENV{PATH}\n");
+print("\n"); # end of --- CONFIGURATION ---
 
-print("--- CLEANING UP ---\n");
-
+print("--- PREPARING ---\n");
+print("deleting old intermediate files...");
 unlink <*.bak>;
 unlink <*.aaa>;
 unlink <*.s>;
 unlink <*.i>;
 #rem del /s/y/x/q %OBJ_DIR% >&> NUL:
 #rem del /s/q *.s19 >&> NUL:
-
-print("\n");
-print("--- PREPARING ---\n");
-
+print("OK\n");
+print("creating object directory...");
 mkdir($OBJ_DIR,0777);
+print("OK\n");
+print("\n"); # end of --- PREPARING ---
 
-print("\n");
 print("--- COMPILING AND ASSEMBLING ---\n");
-
-$ENV{"ICC11_INCLUDE"}=$ICC11_INCLUDE;
-
 @OBJS=();
 foreach $filepath (@SRC_FILES) {
    print("FILE $filepath...");
-   $filename=$filepath;
-   $filename=~s/^.*\\//g;
-   $filename=~s/^.*\///g;
-   $objname=$filename;
-   $objname=~s/\.asm$/\.o/g;
-   $objname=~s/\.c$/\.o/g;
+   $filename=basename($filepath);
+   $objname=chop_extension($filename).".o";
    $objpath="$OBJ_DIR/$objname";
-   $ext=$filepath;
-   $ext=~s/^.*\.//g;
-   $ext=~tr/A-Z/a-z/;
+   $ext=extension_of($filepath);
    #print("\n");
    #print("filename=[$filename]\n");
    #print("objname=[$objname]\n");
@@ -135,40 +134,45 @@ foreach $filepath (@SRC_FILES) {
    }
    push(@OBJS,$objpath);
 }
+print("\n"); # end of --- COMPILING AND ASSEMBLING ---
 
-
-print("\n");
 print("--- LINKING ---\n");
-
-$ENV{"ICC11_LIB"}=$ICC11_LIB;
-$ENV{"ICC11_LINKER_OPTS"}=$ICC11_LINKER_OPTS;
-
+print("creating linker parm file...");
 open(TEMP1,">BUILD.TMP");
-print TEMP1 "-L$ICC11_LIB -o $TARGET.S19 @OBJS";
-#print "-L$ICC11_LIB -o $TARGET.S19 @OBJS";
+print TEMP1 "-L$icc11_lib -o $TARGET.S19 @OBJS";
 close(TEMP1);
+print("OK\n");
+print("linking...");
 system("icc11 \@BUILD.TMP");
+print("OK\n");
+print("cleaning up...");
 unlink("BUILD.TMP");
+print("OK\n");
+print("\n"); # end of --- LINKING ---
 
-print("\n");
 print("--- SHOW THE RESULTS ---\n");
-
 system("dir *.s19");
+print("\n"); # end of --- SHOW THE RESULTS ---
 
-print("\n");
 print("--- CLEAN UP ---\n");
-
+print("removing intermediate files...");
 unlink <*.aaa>;
 unlink <*.aaa>;
 unlink <*.s>;
 unlink <*.i>;
+print("OK\n");
+print("moving list files to obj dir...");
 system("move *.lis *.lst *.mp $OBJ_DIR >&> NUL:");
+print("OK\n");
+print("\n"); # end of --- CLEAN UP ---
+
+print("done\n");
 #END
 
 ################################################################################
 
 sub tolower {
-   $string=$_[0];
+   my $string=$_[0];
    $string=~tr/A-Z/a-z/;
    return $string;
 }
@@ -176,10 +180,68 @@ sub tolower {
 ################################################################################
 
 sub toupper {
-   $string=$_[0];
+   my $string=$_[0];
    $string=~tr/a-z/A-Z/;
    return $string;
 }
 
 ################################################################################
+
+sub setenv {
+   my $varname=$_[0];
+   my $value=$_[1];
+   $ENV{$varname}=$value;
+   #print("$varname=[$value]\n");;
+}
+
+################################################################################
+
+sub add_to_path {
+   my $dir=tolower($_[0]);
+   my $path=tolower($ENV{"PATH"});
+   if(index($dir,$path)<0) {
+      setenv("PATH",$ENV{"PATH"}.";$dir");
+   }
+}
+
+################################################################################
+
+sub chop_extension {
+   my $filename=tolower($_[0]);
+   $filename=~s/\..*$//g;
+   return $filename;
+}
+
+################################################################################
+
+sub add_extension {
+   my $filename=tolower($_[0]);
+   my $ext=tolower($_[1]);
+   $filename="$filename.$ext";
+   return $filename;
+}
+
+################################################################################
+
+sub extension_of {
+   my $ext=tolower($_[0]);
+   # convert to lowercase
+   $ext=~tr/A-Z/a-z/;
+   $ext=~s/^.*\.//g;
+   return $ext;
+}
+
+################################################################################
+
+sub basename {
+   my $filename=tolower($_[0]);
+   # get rid of everything before backslashes
+   $filename=~s/^.*\\//g;
+   # get rid of everything before slashes
+   $filename=~s/^.*\///g;
+   return $filename;
+}
+
+################################################################################
+
 

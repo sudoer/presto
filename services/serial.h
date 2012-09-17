@@ -8,7 +8,8 @@ void presto_serial_isr(void);
 void serial_init(uint16 baud);
 void serial_send_byte(BYTE send);
 void serial_send_string(char * send);
-BYTE serial_recv(void);
+BOOLEAN serial_recv(BYTE * r);
+int serial_recv_string(BYTE * recv, uint8 maxlen);
 
 ////////////////////////////////////////////////////////////////////////////////
 
