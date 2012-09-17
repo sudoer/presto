@@ -16,6 +16,7 @@ $TARGET="hbtest";
             "services/debugger.c",
             "services/lcd.c",
             "services/i2c.c",
+            "services/inputs.c",
             "services/motors.c",
             "services/serial.c",
             "services/sound.c",
@@ -119,11 +120,11 @@ foreach $filepath (@SRC_FILES) {
          # -c for compile to object code
          # -l for interspersed C/asm listings
          # -e for C++ comments
-         system("icc11 -c -l -e -I. -o $objpath $filepath");
+         $errors|=system("icc11 -c -l -e -I. -o $objpath $filepath");
          # if errorlevel 1 goto abort
       } elsif( $ext eq "asm" ) {
          print("ASSEMBLING\n");
-         system("ias6811 -o $objpath $filepath");
+         $errors|=system("ias6811 -o $objpath $filepath");
          # if errorlevel 1 goto abort
          # system("move /q %@PATH[%file%]\%@NAME[%file%].lis %OBJ_DIR%");
       } else {
@@ -134,25 +135,36 @@ foreach $filepath (@SRC_FILES) {
    }
    push(@OBJS,$objpath);
 }
+print("moving list files to obj dir...");
+system("move *.lis $OBJ_DIR >&> NUL:");
+print("OK\n");
 print("\n"); # end of --- COMPILING AND ASSEMBLING ---
 
-print("--- LINKING ---\n");
-print("creating linker parm file...");
-open(TEMP1,">BUILD.TMP");
-print TEMP1 "-L$icc11_lib -o $TARGET.S19 @OBJS";
-close(TEMP1);
-print("OK\n");
-print("linking...");
-system("icc11 \@BUILD.TMP");
-print("OK\n");
-print("cleaning up...");
-unlink("BUILD.TMP");
-print("OK\n");
-print("\n"); # end of --- LINKING ---
+if($errors gt 0) {
+   print("errors compiling, skipping the link stage\n");
+   print("\n");
+} else {
+   print("--- LINKING ---\n");
+   print("creating linker parm file...");
+   open(TEMP1,">BUILD.TMP");
+   print TEMP1 "-L$icc11_lib -o $TARGET.S19 @OBJS";
+   close(TEMP1);
+   print("OK\n");
+   print("linking...");
+   system("icc11 \@BUILD.TMP");
+   print("OK\n");
+   print("moving map/list files to obj dir...");
+   system("move *.lst *.mp $OBJ_DIR >&> NUL:");
+   print("OK\n");
+   print("cleaning up...");
+   unlink("BUILD.TMP");
+   print("OK\n");
+   print("\n"); # end of --- LINKING ---
 
-print("--- SHOW THE RESULTS ---\n");
-system("dir *.s19");
-print("\n"); # end of --- SHOW THE RESULTS ---
+   print("--- SHOW THE RESULTS ---\n");
+   system("dir *.s19");
+   print("\n"); # end of --- SHOW THE RESULTS ---
+}
 
 print("--- CLEAN UP ---\n");
 print("removing intermediate files...");
@@ -160,9 +172,6 @@ unlink <*.aaa>;
 unlink <*.aaa>;
 unlink <*.s>;
 unlink <*.i>;
-print("OK\n");
-print("moving list files to obj dir...");
-system("move *.lis *.lst *.mp $OBJ_DIR >&> NUL:");
 print("OK\n");
 print("\n"); # end of --- CLEAN UP ---
 

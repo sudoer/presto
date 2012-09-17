@@ -12,6 +12,7 @@
 //   C O N S T A N T S
 ////////////////////////////////////////////////////////////////////////////////
 
+#define STRING_INVALID_HEX_DIGIT  16
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D A T A   T Y P E S
@@ -27,15 +28,33 @@
 //   F U N C T I O N   P R O T O T Y P E S
 ////////////////////////////////////////////////////////////////////////////////
 
+extern BOOLEAN string_IsSpace(char c);
+extern BOOLEAN string_IsNumber(char c);
+extern BOOLEAN string_IsDigit(char c);
+extern BOOLEAN string_IsHexDigit(char c);
+
+// floating point
 #ifdef FLOAT
 extern float string_StringToFloat(const char * string);
 extern void string_FloatToString(float value, uint8 decimals, char * string, uint8 len);
 #endif
 
-extern void string_Copy( char * Destination, char * Source, uint8 Length );
+// integers
+extern uint8 string_DigitToInteger(char digit);
 extern sint16 string_StringToInteger(const char * string);
 extern void string_IntegerToString(sint16 value, char * string, uint8 maxlen);
-extern void string_IntegerToHexString(uint16 value, char * string, uint8 len);
+
+// hex
+extern uint8 string_HexDigitToInteger(char digit);
+extern void string_IntegerToHex(uint16 value, char * string, uint8 len);
+extern uint16 string_HexToInteger(char * string);
+
+// copy
+extern void string_Copy(char * Destination, char * Source, uint8 Length);
+
+// iterate
+extern char * string_NextWord(char * String);
+extern char * string_SkipSpaces( char * String );
 
 ////////////////////////////////////////////////////////////////////////////////
 

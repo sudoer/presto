@@ -4,7 +4,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_serial_isr(void);
 void serial_init(uint16 baud);
 void serial_send_byte(BYTE send);
 void serial_send_string(char * send);

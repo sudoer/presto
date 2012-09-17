@@ -19,26 +19,26 @@ void One(void) {
    PRESTO_MAIL_T msg;
    msg.dw.dw1=0;
    while(1) {
-      motor_speed(0,MOTORS_MAX_SPEED);
-      motor_speed(1,0-MOTORS_MAX_SPEED);
+      motor_set_speed(0,MOTORS_MAX_SPEED);
+      motor_set_speed(1,0-MOTORS_MAX_SPEED);
       presto_timer(one_tid,8000,msg);
       presto_sleep();
       presto_get_message(&msg);
 
-      motor_speed(0,MOTORS_MAX_SPEED);
-      motor_speed(1,MOTORS_MAX_SPEED);
+      motor_set_speed(0,MOTORS_MAX_SPEED);
+      motor_set_speed(1,MOTORS_MAX_SPEED);
       presto_timer(one_tid,2000,msg);
       presto_sleep();
       presto_get_message(&msg);
 
-      motor_speed(0,MOTORS_MAX_SPEED);
-      motor_speed(1,MOTORS_MAX_SPEED);
+      motor_set_speed(0,MOTORS_MAX_SPEED);
+      motor_set_speed(1,MOTORS_MAX_SPEED);
       presto_timer(one_tid,6000,msg);
       presto_sleep();
       presto_get_message(&msg);
 
-      motor_speed(0,0-MOTORS_MAX_SPEED);
-      motor_speed(1,0-MOTORS_MAX_SPEED);
+      motor_set_speed(0,0-MOTORS_MAX_SPEED);
+      motor_set_speed(1,0-MOTORS_MAX_SPEED);
       presto_timer(one_tid,1250,msg);
       presto_sleep();
       presto_get_message(&msg);

@@ -4,7 +4,7 @@
 #include "hc11regs.h"
 #include "system.h"
 #include "presto.h"
-#include "presto\kernel.h"
+#include "kernel\kernel.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -491,28 +491,6 @@ static void presto_restart_master_timer(void) {
    // clear the OUTPUT COMPARE flag
    // writing O's makes no change, writing 1's clears the bit
    TFLG1 = TFLG1_OC2F;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//   S A F E T Y   C H E C K
-////////////////////////////////////////////////////////////////////////////////
-
-void presto_fatal_error(void) {
-   // should never get here
-   WORD delay=0;
-   INTR_OFF();
-
-   motor_speed(0,-1);
-   motor_speed(1,-1);
-   motor_speed(2,-1);
-   motor_speed(3,-1);
-
-   BITSET(DDRD,4);              // LED is an output
-   while(1) {
-      BITNOT(PORTA,3);          // toggle speaker
-      BITCLR(PORTD,4);          // LED on
-      while(delay!=0) delay++;
-   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

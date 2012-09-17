@@ -11,9 +11,10 @@
 #define TIMER0     0
 #define TIMER1     0
 #define TIMER2     0
-#define TIMER3  1000
+#define TIMER3   279
 
 ////////////////////////////////////////////////////////////////////////////////
+
 /*
 // system crashes after 21 seconds
 #define TIMER0    500      // 42*500=21000
@@ -21,6 +22,7 @@
 #define TIMER2    700      // 30*700=21000
 #define TIMER3    210      //
 */
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #define STACK_SIZE 256
@@ -70,11 +72,11 @@ void LcdTask(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void Zero(void) {
-   int speed0=MOTORS_MAX_SPEED;
+   sint8 speed0=MOTORS_MAX_SPEED;
    PRESTO_MAIL_T msg;
    msg.dw.dw1=0;
    while(1) {
-      motor_speed(0,speed0);
+      motor_set_speed(0,speed0);
       presto_timer(zero_tid,TIMER0,msg);
       presto_sleep();
       presto_get_message(&msg);
@@ -87,11 +89,11 @@ void Zero(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void One(void) {
-   int speed1=MOTORS_MAX_SPEED;
+   sint8 speed1=MOTORS_MAX_SPEED;
    PRESTO_MAIL_T msg;
    msg.dw.dw1=0;
    while(1) {
-      motor_speed(1,speed1);
+      motor_set_speed(1,speed1);
       presto_timer(one_tid,TIMER1,msg);
       presto_sleep();
       presto_get_message(&msg);
@@ -102,12 +104,12 @@ void One(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void Two(void) {
-   int speed2=MOTORS_MAX_SPEED;
+   sint8 speed2=MOTORS_MAX_SPEED;
    PRESTO_MAIL_T msg;
    char c='A';
    msg.dw.dw1=0;
    while(1) {
-      motor_speed(2,speed2);
+      motor_set_speed(2,speed2);
       presto_timer(two_tid,TIMER2,msg);
       presto_sleep();
       presto_get_message(&msg);
@@ -118,14 +120,16 @@ void Two(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void Three(void) {
-   int speed3=MOTORS_MAX_SPEED;
+   sint8 speed3=MOTORS_MAX_SPEED;
    PRESTO_MAIL_T msg;
    PRESTO_MAIL_T msg3;
 
    msg.dw.dw1=0;
    while(1) {
-      motor_speed(3,speed3);
+      motor_set_speed(3,speed3);
       presto_timer(three_tid,TIMER3,msg);
+      msg.b.b1=MSG_LCD_BATT;
+      presto_send_message(lcd_task_tid,msg);
       presto_sleep();
       presto_get_message(&msg3);
       speed3=0-speed3;
@@ -149,10 +153,10 @@ void main(void) {
 #if TIMER3 != 0
    three_tid=presto_create_task(Three, task_three_stack, STACK_SIZE, 45);
 #endif
-   serial_init(9600);
-   debugger_init();
    motor_init();
    lcd_init();
+   serial_init(9600);
+   debugger_init();
    presto_start_scheduler();
 }
 

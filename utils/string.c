@@ -33,6 +33,41 @@
 ////////////////////////////////////////////////////////////////////////////////
 //   E X P O R T E D   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
+//   TYPES
+////////////////////////////////////////////////////////////////////////////////
+
+BOOLEAN string_IsSpace(char c) {
+   if(c==' ') return TRUE;
+   return FALSE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+BOOLEAN string_IsNumber(char c) {
+   if((c>='0')&&(c<='9')) return TRUE;
+   if((c=='-')||(c=='+')) return TRUE;
+   return FALSE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+BOOLEAN string_IsDigit(char c) {
+   if((c>='0')&&(c<='9')) return TRUE;
+   return FALSE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+BOOLEAN string_IsHexDigit(char c) {
+   if((c>='0')&&(c<='9')) return TRUE;
+   if((c>='A')&&(c<='F')) return TRUE;
+   if((c>='a')&&(c<='f')) return TRUE;
+   return FALSE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//   FLOATING POINT
+////////////////////////////////////////////////////////////////////////////////
 
 #ifdef FLOAT
 float string_StringToFloat(const char * string) {
@@ -143,6 +178,15 @@ void string_FloatToString(float value, uint8 decimals, char * string, uint8 len)
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
+//   INTEGERS
+////////////////////////////////////////////////////////////////////////////////
+
+uint8 string_DigitToInteger(char digit) {
+   if((digit>='0')&&(digit<='9')) return digit-'0';
+   return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 sint16 string_StringToInteger(const char * string) {
    uint8 posn;
@@ -210,8 +254,10 @@ void string_IntegerToString(sint16 value, char * string, uint8 maxlen) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+//   HEX
+////////////////////////////////////////////////////////////////////////////////
 
-void string_IntegerToHexString(uint16 value, char * string, uint8 len) {
+void string_IntegerToHex(uint16 value, char * string, uint8 len) {
    uint8 count;
    uint8 digit;
 
@@ -228,6 +274,31 @@ void string_IntegerToHexString(uint16 value, char * string, uint8 len) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+uint8 string_HexDigitToInteger(char digit) {
+   if((digit>='0')&&(digit<='9')) return digit-'0';
+   if((digit>='A')&&(digit<='F')) return digit-'A'+10;
+   if((digit>='a')&&(digit<='f')) return digit-'a'+10;
+   return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+uint16 string_HexToInteger(char * string) {
+   uint8 p=0;
+   uint8 d;
+   uint16 total=0;
+   while(string_IsHexDigit(string[p])) {
+      d=string_HexDigitToInteger(string[p]);
+      if(d==STRING_INVALID_HEX_DIGIT) break;
+      total=total*16+(uint16)d;
+   }
+   return total;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//   COPYING
+////////////////////////////////////////////////////////////////////////////////
+
 // Copy Source to Destination.  The length of Destination is not to exceed Length.
 
 void string_Copy( char * Destination, char * Source, uint8 Length ) {
@@ -238,6 +309,46 @@ void string_Copy( char * Destination, char * Source, uint8 Length ) {
       Counter++;
    }
    Destination[Counter]=0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//   SEARCHING
+////////////////////////////////////////////////////////////////////////////////
+
+// Return a pointer to the beginning of the next word in String.  Words
+// are delimited by spaces.  If Length is specified, do not search past Length
+// digits.  If no next word exists, return a pointer to the end of String.
+// This makes it easy to iterate through words in a string like this:
+//    while(next=NextWordInString(next),*next!=0) {
+//       printf"product is %ld\n",atol(next));
+//    }
+
+char * string_NextWord( char * String ) {
+// written by Alan Porter, 5 March 1996
+   BOOLEAN LookingForSpaces=TRUE;
+   int Counter=0;
+   while(1) {
+      if( *(String+Counter) == 0 ) break;
+      if(LookingForSpaces) {
+         if( string_IsSpace( *(String+Counter) ) ) LookingForSpaces=FALSE;
+      } else {
+         if( !string_IsSpace( *(String+Counter) ) ) break;
+      }
+      Counter++;
+   }
+   return (String+Counter);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+char * string_SkipSpaces( char * String ) {
+// written by Alan Porter, 5 March 1996
+   int Counter=0;
+   while(1) {
+      if( !string_IsSpace( *(String+Counter) ) ) break;
+      Counter++;
+   }
+   return (String+Counter);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

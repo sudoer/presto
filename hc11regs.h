@@ -82,6 +82,22 @@
 #define BAUD_SCR1   0x02
 #define BAUD_SCR0   0x01
 
+#define OPTION_ADPU 0x80
+#define OPTION_CSEL 0x40
+#define OPTION_IRQE 0x20
+#define OPTION_DLY  0x10
+#define OPTION_CME  0x08
+#define OPTION_CR1  0x02
+#define OPTION_CR0  0x01
+
+#define ADCTL_CCF   0x80
+#define ADCTL_SCAN  0x20
+#define ADCTL_MULT  0x10
+#define ADCTL_CD    0x08
+#define ADCTL_CC    0x04
+#define ADCTL_CB    0x02
+#define ADCTL_CA    0x01
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // INTERRUPTS
