@@ -19,7 +19,7 @@ print("--- CONFIGURATION ---\n");
 
 print("setting up project...");
 $OBJ_DIR="obj";
-$TARGET="hbtest";
+$TARGET="presto";
 @SRC_FILES=(
             "app\\test.c",
 #           "services\\debugger.c",
@@ -205,8 +205,8 @@ print("\n");
 #        DATA   8000-97FF    6k      GLOBAL VARIABLES
 #         BSS   9800-AFFF    6k      INITIALIZED GLOBAL VARIABLES
 #       STACK   B000-B5FF  1536      INITIAL STACK
-#     NOTHING   B600-B7FF   512      EEPROM
-#     NOTHING   B800-BFBF   ~2k      NOTHING
+#     NOTHING   B600-B7FF   512      sometimes mapped to EEPROM
+#     NOTHING   B800-BFBF   ~2k      empty
 # INT VECTORS   BFC0-BFFF    64      SPECIAL INTERRUPTS (HANDYBOARD)
 #        TEXT   C000-FFBF  ~16k      CODE INSTRUCTIONS, CONSTANT DATA
 # INT VECTORS   FFC0-FFFF    64      NORMAL INTERRUPTS (SIMULATOR)
