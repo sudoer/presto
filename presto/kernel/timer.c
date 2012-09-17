@@ -11,16 +11,18 @@
 #include "presto.h"
 #include "error.h"
 #include "chip/locks.h"
-#include "kernel/kernel.h"
-#include "kernel/timer.h"
+#include "chip/misc_hw.h"
+#include "kernel/kernel_types.h"
+#include "kernel/kernel_funcs.h"
+#include "kernel/kernel_data.h"
+#include "kernel/timer_types.h"
+#include "kernel/timer_funcs.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //   C O N S T A N T S
 ////////////////////////////////////////////////////////////////////////////////
 
-// debug
-#define STATIC //static
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,40 +35,105 @@
 //   S T A T I C   F U N C T I O N   P R O T O T Y P E S
 ////////////////////////////////////////////////////////////////////////////////
 
-STATIC void timer_InsertIntoMasterList(PRESTO_TIMER_T * timer_p);
+static void timer_InsertIntoMasterList(KERNEL_TIMER_T * timer_p);
+static void timer_RemoveFromMasterList(KERNEL_TIMER_T * timer_p);
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //   K E R N E L - O N L Y   D A T A
 ///////////////////////////////////////////////////////////////////////////////
 
-PRESTO_TIMER_T * kernel_timer_list=NULL;
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S T A T I C   G L O B A L   D A T A
 ////////////////////////////////////////////////////////////////////////////////
 
+KERNEL_TIMER_T * kernel_timer_list=NULL;
+
+
+////////////////////////////////////////////////////////////////////////////////
+//   E X T E R N A L   F U N C T I O N S
+////////////////////////////////////////////////////////////////////////////////
+
+
+void presto_timer_start(KERNEL_TIMER_T * timer_p, KERNEL_INTERVAL_T delay, KERNEL_INTERVAL_T period, KERNEL_TRIGGER_T trigger) {
+
+   // set members of the timer structure
+   timer_p->delivery_time=kernel_clock;
+   clock_add_ms(&timer_p->delivery_time,delay);
+   timer_p->timer_period=period;
+   timer_p->owner_tcb_p=kernel_current_tcb_p;
+   timer_p->trigger=trigger;
+
+   if(delay==0) {
+      // This timer fires immediately.
+      kernel_trigger_set(kernel_current_tcb_p, trigger);
+      if(period==0) {
+         // This timer is a one-shot timer.
+         // We have already fired once.
+         // Do not insert into the list.
+         return;
+      } else {
+         // This timer is a repeating timer.
+         // We have already fired the first shot.
+         // Update the delivery time for the next shot.
+         clock_add_ms(&timer_p->delivery_time,period);
+      }
+   }
+   // make sure we don't have double-entries
+   timer_RemoveFromMasterList(timer_p);
+   // insert into the queue in "delivery time" order
+   timer_InsertIntoMasterList(timer_p);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+void presto_timer_wait(KERNEL_INTERVAL_T delay, KERNEL_TRIGGER_T trigger) {
+   KERNEL_TIMER_T timer;
+   presto_timer_start(&timer, delay, 0, trigger);
+   presto_wait(trigger);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+void presto_timer_disable(PRESTO_TIMER_T * timer_p) {
+   timer_RemoveFromMasterList(timer_p);
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //   K E R N E L - O N L Y   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-BYTE kernel_timer_poll(void) {
-   BYTE count=0;
-   PRESTO_TIMER_T * timer_p;
-   WORD lock;
 
+void kernel_timer_init(void) {
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+extern PRESTO_TIMER_T ticker1;
+
+BYTE kernel_timer_tick(void) {
+   BYTE count=0;
+   KERNEL_TIMER_T * timer_p;
+   KERNEL_LOCK_T lock;
+
+   presto_lock_save(lock);
    while((kernel_timer_list!=NULL)&&(clock_compare(&kernel_timer_list->delivery_time,&kernel_clock)<=0)) {
 
-      // remove timer from master list
-      presto_lock_save(lock);
-      timer_p=kernel_timer_list;                      // we know that kernel_timer_list!=NULL
-      kernel_timer_list=kernel_timer_list->next;
-      presto_unlock_restore(lock);
+      // save a pointer to the first timer in the list
+      timer_p=kernel_timer_list;
 
-      kernel_flag_set(timer_p->owner_tcb_p, timer_p->trigger_flag);
+      // remove timer from master list
+      kernel_timer_list=kernel_timer_list->next;   // we know that kernel_timer_list!=NULL
+
+      kernel_trigger_set(timer_p->owner_tcb_p, timer_p->trigger);
 
       if(timer_p->timer_period>0) {
          // This timer is a repeating timer.
@@ -78,69 +145,63 @@ BYTE kernel_timer_poll(void) {
       // indicate that a timer expired
       count++;
    }
+
+   presto_unlock_restore(lock);
    return count;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//   E X T E R N A L   F U N C T I O N S
-////////////////////////////////////////////////////////////////////////////////
-
-void presto_timer(PRESTO_TIMER_T * timer_p, KERNEL_INTERVAL_T delay, KERNEL_INTERVAL_T period, KERNEL_FLAG_T flag) {
-
-   // set members of the timer structure
-   timer_p->delivery_time=kernel_clock;
-   clock_add_ms(&timer_p->delivery_time,delay);
-   timer_p->timer_period=period;
-   timer_p->owner_tcb_p=current_tcb_p;
-   timer_p->trigger_flag=flag;
-
-   if(delay==0) {
-      // This timer fires immediately.
-      kernel_flag_set(current_tcb_p, flag);
-      if(period==0) {
-         // This timer is a one-shot timer.
-         return;
-      } else {
-         // This timer is a repeating timer.
-         // Update the delivery time.  We have already fired the first shot.
-         clock_add_ms(&timer_p->delivery_time,period);
-      }
-   }
-   timer_InsertIntoMasterList(timer_p);
-
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S T A T I C   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-STATIC void timer_InsertIntoMasterList(PRESTO_TIMER_T * timer_p) {
-   WORD lock;
+
+static void timer_InsertIntoMasterList(KERNEL_TIMER_T * timer_p) {
+   KERNEL_LOCK_T lock;
+   KERNEL_TIMER_T ** p0;
+   KERNEL_TIMER_T * p1;
+   KERNEL_TIMER_T * temp;
 
    presto_lock_save(lock);
-   if(kernel_timer_list==NULL) {
-      // we are the first timer in the list
-      kernel_timer_list=timer_p;
-      timer_p->next=NULL;
-   } else if(clock_compare(&kernel_timer_list->delivery_time,&timer_p->delivery_time)>0) {
-      // advance to the head of the class!
-      timer_p->next=kernel_timer_list;
-      kernel_timer_list=timer_p;
-   } else {
-      // we are one of many timers in the list
-      PRESTO_TIMER_T * temp_p=kernel_timer_list;
-      PRESTO_TIMER_T * next_p;
-      while(next_p=temp_p->next,next_p!=NULL) {
-         if(clock_compare(&next_p->delivery_time,&timer_p->delivery_time)>0) break;
-         temp_p=next_p;
+   // Start at the head, look at delivery times.
+   p0=&kernel_timer_list;
+   p1=kernel_timer_list;
+   while(1) {
+      if((p1==NULL)||(clock_compare(&p1->delivery_time,&timer_p->delivery_time)>0)) {
+         // Insert our item between p0 and p1
+         timer_p->next=p1;
+         *p0=timer_p;
+         break; // out of the while(1) loop
       }
-      // temp_p->next is either NULL or later delivery time than us
-      // either way, we want to get inserted between temp_p and temp_p->next
-      timer_p->next=temp_p->next;
-      temp_p->next=timer_p;
+      p0=&(p1->next);
+      p1=p1->next;
    }
    presto_unlock_restore(lock);
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+static void timer_RemoveFromMasterList(KERNEL_TIMER_T * timer_p) {
+   KERNEL_TIMER_T * ptr;
+   KERNEL_LOCK_T lock;
+
+   presto_lock_save(lock);
+   // If the timer is at the head of the list, remove it.
+   while(kernel_timer_list==timer_p) {
+      kernel_timer_list=kernel_timer_list->next;
+   }
+   // First timer in the list is not the one.
+   // Go through the list, looking for the one.
+   ptr=kernel_timer_list;
+   while(ptr!=NULL) {
+      if(ptr->next==timer_p) ptr->next=timer_p->next;
+      else ptr=ptr->next;
+   }
+   presto_unlock_restore(lock);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 

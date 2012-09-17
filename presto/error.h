@@ -6,7 +6,8 @@
 
 typedef enum {
 
-     ERROR_INTVECT_ILLOP,
+     ERROR_NOT_USED,
+
      ERROR_INTVECT_OTHER,
 
      ERROR_KERNEL_CREATE_BEFORE_INIT,
@@ -22,14 +23,11 @@ typedef enum {
      ERROR_KERNEL_MAILGET_NOTFORME,
      ERROR_KERNEL_CONTEXTSWITCH_STACKCLOBBERED,
      ERROR_KERNEL_TIDTOTCB_RANGE,
+     ERROR_KERNEL_SEMWAIT_TOOMANYUSERS,
 
      ERROR_MAIN_AFTERSTART,
 
 } error_number_e;
-
-////////////////////////////////////////////////////////////////////////////////
-
-extern void presto_fatal_error(error_number_e err);
 
 ////////////////////////////////////////////////////////////////////////////////
 

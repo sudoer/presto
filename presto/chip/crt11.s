@@ -6,7 +6,7 @@ USEHEAP = 0
 
 
 _start:
-   lds   #init_sp
+   lds   #__stack_end-1
    jsr   premain
 
 

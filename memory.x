@@ -1,12 +1,13 @@
 
 MEMORY
 {
-   page0    (rwx) : ORIGIN = 0x0040, LENGTH =  0x0100 - 0x0040
-   nothing        : ORIGIN = 0x0100, LENGTH =  0x8000 - 0x0100
-   rom      (rwx) : ORIGIN = 0x8000, LENGTH =  0xBFD6 - 0x8000
-   specvect  (r)  : ORIGIN = 0xBFD6, LENGTH =  0xC000 - 0xBFD6
-   ram      (rwx) : ORIGIN = 0xC000, LENGTH =  0xFFD6 - 0xC000
-   normvect  (r)  : ORIGIN = 0xFFD6, LENGTH = 0x10000 - 0xFFD6
+   page0    (rwx) : ORIGIN =  0x0040, LENGTH =  0x0100 - 0x0040
+   nothing        : ORIGIN =  0x0100, LENGTH =  0x8000 - 0x0100
+   rom      (rwx) : ORIGIN =  0x8000, LENGTH =  0xBFD6 - 0x8000
+   specvect  (r)  : ORIGIN =  0xBFD6, LENGTH =  0xC000 - 0xBFD6
+   ram      (rwx) : ORIGIN =  0xC000, LENGTH =  0xFFD6 - 0xC000
+   normvect  (r)  : ORIGIN =  0xFFD6, LENGTH = 0x10000 - 0xFFD6
+   trash          : ORIGIN = 0x10000, LENGTH = 0x10000
 }
 
 
@@ -34,6 +35,7 @@ SECTIONS
      __text_start = . ;
      *(.text)
      *(.strings)
+     *(.rodata)
      __text_end = . ;
    } > rom
 
@@ -75,11 +77,12 @@ SECTIONS
    .debug : {
      __debug_start = . ;
      *(.debug_abbrev)
+     *(.debug_aranges)
      *(.debug_info)
      *(.debug_line)
      *(.debug_pubnames)
      __debug_end = . ;
-   } > nothing
+   } > trash
 
 
 }

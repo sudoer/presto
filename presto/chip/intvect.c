@@ -33,6 +33,7 @@
 //   D E P E N D E N C I E S
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "types.h"
 #include "error.h"
 #include "intvect.h"
 
@@ -45,13 +46,31 @@ extern void _start(void);      // entry point in crt11.s (ICC only)
 
 
 ////////////////////////////////////////////////////////////////////////////////
+//   S T A T I C   G L O B A L   D A T A
+////////////////////////////////////////////////////////////////////////////////
+
+static BYTE * illop_sp;
+static WORD illop_address;
+
+
+////////////////////////////////////////////////////////////////////////////////
 //   S I M P L E   I N T E R R U P T   S E R V I C E   R O U T I N E ( S )
 ////////////////////////////////////////////////////////////////////////////////
 
 //void inert_isr(void) __attribute__((interrupt));
 void inert_isr(void) { asm("rti"); }
-void illop_isr(void) { presto_fatal_error(ERROR_INTVECT_ILLOP); }
 void error_isr(void) { presto_fatal_error(ERROR_INTVECT_OTHER); }
+
+////////////////////////////////////////////////////////////////////////////////
+
+void illop_isr(void) {
+   // When an illegal opcode is encountered, the ILLOP ISR is triggered.
+   // The address of the offending instruction is on the stack (where the
+   // return address would normally be).
+   asm("sts illop_sp");
+   illop_address=*((WORD *)(illop_sp+8));
+   presto_crash_address(illop_address);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //   I N T E R R U P T   V E C T O R   T A B L E S

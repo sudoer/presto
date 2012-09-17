@@ -15,7 +15,9 @@ setup_linker();
 prepare();
 compile_stage();
 link_stage();
-show_results();
+show_target_file();
+generate_listing();
+show_memory_usage();
 cleanup();
 exit;
 
@@ -30,15 +32,17 @@ sub setup_project {
    $OBJ_DIR="obj";
    $TARGET="presto";
    @SRC_FILES=(
-               "app\\main.c",
+               "presto\\chip\\crt11.s",
+               "presto\\chip\\boot.c",
+               "presto\\chip\\intvect.c",
+               "presto\\chip\\hwtimer.c",
                "presto\\kernel\\clock.c",
                "presto\\kernel\\error.c",
                "presto\\kernel\\kernel.c",
                "presto\\kernel\\mail.c",
                "presto\\kernel\\timer.c",
-               "presto\\chip\\crt11.s",
-               "presto\\chip\\boot.c",
-               "presto\\chip\\intvect.c",
+               "presto\\kernel\\semaphore.c",
+               "app\\main.c",
    );
 
    print("OK\n");
@@ -222,7 +226,6 @@ sub link_stage {
       ."--trace "
       ."-nostdlib "
       ."-nostartfiles "
-      ."-defsym init_sp=0xB5FF "
       ."-defsym _.tmp=0x0 "
       ."-defsym _.z=0x2 "
       ."-defsym _.xy=0x4 "
@@ -246,17 +249,42 @@ sub link_stage {
    }
 
 
-   if($errors==0) {
-      print("GENERATING LISTING...\n");
-      $errors+=run("objdump.exe "
-         ."--disassemble-all "
-         ."--architecture=m68hc11 "
-         ."--section=.text "
-         #."--debugging "
-         ."$TARGET.elf > $TARGET.lst");
-      print("OK\n");
-      print("\n");
+   $total_errors+=$errors;
+   chdir($build_dir);
+}
+
+################################################################################
+
+sub show_target_file {
+   if($total_errors > 0) {
+      return;
    }
+   print("--- TARGET IS READY -- SHOW THE RESULTS ---\n");
+   run("dir $OBJ_DIR\\$TARGET.s19");
+   print("\n");
+}
+
+################################################################################
+
+sub generate_listing {
+
+   if($total_errors > 0) {
+      print("errors linking, skipping the listing\n");
+      print("\n");
+      return;
+   }
+
+   chdir("$build_dir\\$OBJ_DIR");
+
+   print("GENERATING LISTING...\n");
+   $errors+=run("objdump.exe "
+      ."--disassemble-all "
+      ."--architecture=m68hc11 "
+      ."--section=.text "
+      #."--debugging "
+      ."$TARGET.elf > $TARGET.lst");
+   print("OK\n");
+   print("\n");
 
    $total_errors+=$errors;
    chdir($build_dir);
@@ -264,17 +292,69 @@ sub link_stage {
 
 ################################################################################
 
-sub show_results {
-   if($total_errors > 0) {
-      return;
+sub show_memory_usage {
+
+   my $tempfile=$TARGET.".tmp";
+   run("objdump.exe -h $OBJ_DIR\\$TARGET.elf > $tempfile");
+
+   #  obj\presto.elf:     file format elf32-m68hc11
+   #
+   #  Sections:
+   #  Idx Name          Size      VMA       LMA       File off  Algn
+   #    0 .specvect     0000002a  0000bfd6  0000bfd6  00000e5d  2**0
+   #                    CONTENTS, ALLOC, LOAD, DATA
+   #    1 .normvect     0000002a  0000ffd6  0000ffd6  00000eb9  2**0
+   #                    CONTENTS, ALLOC, LOAD, DATA
+   #    2 .text         00000d79  00008000  00008000  000000d4  2**0
+   #                    CONTENTS, ALLOC, LOAD, READONLY, CODE
+   #    3 .bss          000006ae  0000c000  0000c000  00000e87  2**0
+   #                    ALLOC
+   #    4 .data         00000010  0000c6ae  00008d79  00000e4d  2**0
+   #                    CONTENTS, ALLOC, LOAD, DATA
+   #    5 .stack        00000032  0000c6be  0000c6be  00000e87  2**0
+   #                    CONTENTS, ALLOC, LOAD, DATA
+   #    6 .comment      0000015e  0000c6f0  0000c6f0  00000ee3  2**0
+   #                    CONTENTS, READONLY
+   #    7 .debug        0000825c  00010000  00010000  00001041  2**0
+   #                    CONTENTS, READONLY, DEBUGGING
+
+   open(TEMP,"<$tempfile");
+   my $line;
+   my $hexsize="";
+   my %segsize;
+   while($line=<TEMP>) {
+      if(index($line,"2**0")>-1) {
+         $hexsize=substr($line,18,8);
+      } else {
+         if(length($hexsize)>0) {
+            my $segment=substr($line,18,-1);
+            $segsize{$segment}+=hex($hexsize);
+         }
+         $hexsize="";
+      }
    }
-   print("done\n");
-   print("--- SHOW THE RESULTS ---\n");
-   run("dir $OBJ_DIR\\$TARGET.s19");
+
    print("\n");
+   print("MEMORY USAGE\n");
+   print("------------\n");
+   foreach $segment (sort keys %segsize) {
+      my $segname;
+      if($segment eq "ALLOC") {                                       $segname="udata";
+      } elsif($segment eq "CONTENTS, ALLOC, LOAD, DATA") {            $segname="idata";
+      } elsif($segment eq "CONTENTS, ALLOC, LOAD, READONLY, CODE") {  $segname="code";
+      } elsif($segment eq "CONTENTS, READONLY") {                     $segname="comment";
+      } elsif($segment eq "CONTENTS, READONLY, DEBUGGING") {          $segname="debug";
+      } else {                                                        $segname="???";
+      }
+      printf("%8s %d\n",$segname,$segsize{$segment});
+   }
+   print("\n");
+
+   unlink($tempfile);
 }
 
 ################################################################################
+
 
 sub cleanup {
    print("--- CLEAN UP ---\n");

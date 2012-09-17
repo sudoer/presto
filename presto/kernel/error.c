@@ -10,6 +10,7 @@
 #include "types.h"
 #include "chip/hc11regs.h"
 #include "chip/locks.h"
+#include "chip/misc_hw.h"
 #include "error.h"
 
 
@@ -17,30 +18,59 @@
 //   C O N S T A N T S
 ////////////////////////////////////////////////////////////////////////////////
 
-// this is the memory location for the motor controller
-#define MOTOR_LED_PORT *(unsigned char *)(0x7FFF)
 
+
+////////////////////////////////////////////////////////////////////////////////
+//   S T A T I C   F U N C T I O N S
+////////////////////////////////////////////////////////////////////////////////
+
+void show_one_byte(BYTE leds) {
+   BYTE delay=0;
+   // assert LED's 256 times (high nibble 128 times, low nibble 128 times)
+   while(--delay>0) {
+      if(delay&0x01) MOTOR_LED_PORT=0xF0&((leds&0x0F)<<4);
+      else MOTOR_LED_PORT=0x0F|(leds&0xF0);
+   }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //   E X T E R N A L   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
 void presto_fatal_error(error_number_e err) {
-   BYTE delay;
-
-   //  0x80 - motor 3 on    0x08 - motor 3 reverse
-   //  0x40 - motor 2 on    0x04 - motor 2 reverse
-   //  0x20 - motor 1 on    0x02 - motor 1 reverse
-   //  0x10 - motor 0 on    0x01 - motor 0 reverse
-
    presto_lock();
-   // speaker is always an output
    while(1) {
-      // toggle speaker
-      BITNOT(PORTA,3);
-      while(--delay>0) {
-         if(delay&0x01) MOTOR_LED_PORT=0xF0&((err&0x0F)<<4);
-         else MOTOR_LED_PORT=0x0F|(err&0xF0);
+      TOGGLE_SPEAKER();
+      show_one_byte(err);
+   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void presto_crash(void) {
+   // This will cause an ILLEGAL OPERATION interrupt
+   asm("test");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void presto_crash_address(unsigned short address) {
+   BYTE delay;
+   presto_lock();
+   while(1) {
+      for(delay=0;delay<150;delay++) {
+         show_one_byte(0x00);
+      }
+      for(delay=0;delay<100;delay++) {
+         TOGGLE_SPEAKER();
+         show_one_byte((BYTE)(address>>8));
+      }
+      for(delay=0;delay<25;delay++) {
+         show_one_byte(0x00);
+      }
+      for(delay=0;delay<100;delay++) {
+         TOGGLE_SPEAKER();
+         show_one_byte((BYTE)(address&0x00FF));
       }
    }
 }

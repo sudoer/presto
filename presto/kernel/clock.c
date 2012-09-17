@@ -4,11 +4,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define STATIC //static
-
-////////////////////////////////////////////////////////////////////////////////
-
-STATIC clock_add(struct KERNEL_TIME_S * clk, unsigned short sec, unsigned short msec, unsigned short usec) {
+static clock_add(struct KERNEL_TIME_S * clk, unsigned short sec, unsigned short msec, unsigned short usec) {
    clk->usec+=usec;
    while(clk->usec>=1000) {
       clk->usec-=1000;

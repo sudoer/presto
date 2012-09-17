@@ -1,5 +1,30 @@
 2003.05.13
 
+Semaphores work, with and without priority inheritance.  I need to
+add support for more that one resource (semaphores which are initialized
+to something greater than 1).  I need to think through the cases where
+priorities are changed when a HI task waits on two tasks that have a
+resource.  What about having two ready tasks with the same priority?
+A few questions here.
+
+I added a few extra functions, like presto_trigger_send, which lets
+you set trigger flags in another task.
+
+Did an overkill job of splitting the kernel.  Each module has up to
+three H files (types, functions, data).  And that does not count the
+global PRESTO.H, which defines all of the public interfaces and types.
+
+I'm working on making each facility (mail, semaphores, timers) have
+non-blocking functions (like presto_timer_start) which will be followed
+by a presto_wait call, and blocking functions (like presto_timer_wait).
+I'm thinking about letting the ***_wait functions also clear the
+flags when they are done, since this would clean up the application
+code a lot.  Time will tell.
+
+---
+
+2003.05.13
+
 Split kernel.c into several files (kernel, mail, timers, etc).  Moved
 source files around into kernel-specific and chip-specific diretories.
 Entire public interface is specified in PRESTO.H.  Other H files are

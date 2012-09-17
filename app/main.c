@@ -5,42 +5,34 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define STATIC    // static
-
-////////////////////////////////////////////////////////////////////////////////
-
 #define STACK_SIZE 0x100
 
-STATIC BYTE task_zero_stack[STACK_SIZE];
-STATIC BYTE task_one_stack[STACK_SIZE];
-STATIC BYTE task_two_stack[STACK_SIZE];
-STATIC BYTE task_three_stack[STACK_SIZE];
-STATIC BYTE task_four_stack[STACK_SIZE];
+static BYTE task_one_stack[STACK_SIZE];
+static BYTE task_two_stack[STACK_SIZE];
+static BYTE task_three_stack[STACK_SIZE];
+static BYTE task_four_stack[STACK_SIZE];
+static BYTE task_five_stack[STACK_SIZE];
 
-/*
-PRESTO_TID_T zero_tid;
-PRESTO_TID_T one_tid;
-PRESTO_TID_T two_tid;
-PRESTO_TID_T three_tid;
-PRESTO_TID_T four_tid;
-*/
-
-PRESTO_MAIL_T msg1;
-PRESTO_MAIL_T msg2;
-PRESTO_MAIL_T msg3;
-PRESTO_MAIL_T msg4;
-PRESTO_MAILBOX_T box1;
-PRESTO_MAILBOX_T box2;
-PRESTO_MAILBOX_T box3;
-PRESTO_MAILBOX_T box4;
+PRESTO_SEMAPHORE_T copier;
 
 BYTE lights=0xF0;
 
+PRESTO_TID_T control_tid;
+PRESTO_TID_T pres_tid;
+PRESTO_TID_T mgr_tid;
+PRESTO_TID_T emp_tid;
+PRESTO_TID_T coop_tid;
+
 ////////////////////////////////////////////////////////////////////////////////
 
-#define FLAG_MAIL   0x10
-#define FLAG_TIMER1 0x01
-#define FLAG_TIMER2 0x02
+#define FLAG_INIT     0x80
+#define FLAG_LOOP     0x40
+#define FLAG_COPYTICK 0x20
+#define FLAG_SEM      0x10
+#define FLAG_MAIL     0x04
+#define FLAG_COOP     0x02
+#define FLAG_TIMER    0x01
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -52,116 +44,129 @@ void assert_lights(void) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Zero(void) {
-   PRESTO_MAIL_T msg;
-   PRESTO_MAIL_T off;
-   PRESTO_MAIL_T on;
-   PRESTO_TIMER_T ticker1;
-   PRESTO_TIMER_T ticker2;
-   PRESTO_FLAG_T flags;
-   unsigned char count=1;
-   msg.dw.dw1=0;
-   off.b.b1=0;
-   on.b.b1=1;
-   lights=0xFF;
-   assert_lights();
-
-   presto_timer(&ticker1,2000,500,FLAG_TIMER1);
-   presto_timer(&ticker2,1100,2000,FLAG_TIMER1);
-   while(1) {
-      flags=presto_wait(FLAG_TIMER1);
-      presto_flag_clear(flags);
-      switch(count) {
-         case 1: {
-            presto_mail_send(&box1,off);
-         } break;
-         case 2: {
-            presto_mail_send(&box2,off);
-         } break;
-         case 3: {
-            presto_mail_send(&box3,off);
-         } break;
-         case 4: {
-            presto_mail_send(&box4,off);
-         } break;
-         case 5: {
-            presto_mail_send(&box1,on);
-         } break;
-         case 6: {
-            presto_mail_send(&box2,on);
-         } break;
-         case 7: {
-            presto_mail_send(&box3,on);
-         } break;
-         case 8: {
-            presto_mail_send(&box4,on);
-         } break;
+void busy_work(BYTE blink_mask,WORD work_to_do) {
+   PRESTO_TIMER_T timer;
+   WORD work_done=0;
+   presto_timer_start(&timer,0,100,FLAG_COPYTICK);
+   while(work_done<work_to_do) {
+      if(presto_trigger_poll(FLAG_COPYTICK)) {
+         presto_trigger_clear(FLAG_COPYTICK);
+         work_done++;
+         lights^=blink_mask;
+         assert_lights();
       }
-      count++;
-      if(count==9) count=1;
+   }
+   presto_timer_disable(&timer);
+   presto_trigger_clear(FLAG_COPYTICK);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void use_copier(BYTE blink_mask,WORD work_to_do) {
+   WORD work_done=0;
+   presto_semaphore_wait(&copier,FLAG_SEM);
+   busy_work(blink_mask,work_to_do);
+   presto_semaphore_release(&copier);
+   presto_trigger_clear(FLAG_SEM);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void control(void) {
+
+   BOOLEAN tf=FALSE;
+
+   // tell each task to initialize here
+
+   presto_trigger_send(pres_tid,FLAG_INIT);
+   presto_wait(FLAG_INIT);
+   presto_trigger_clear(FLAG_INIT);
+
+   presto_trigger_send(mgr_tid,FLAG_INIT);
+   presto_wait(FLAG_INIT);
+   presto_trigger_clear(FLAG_INIT);
+
+   presto_trigger_send(emp_tid,FLAG_INIT);
+   presto_wait(FLAG_INIT);
+   presto_trigger_clear(FLAG_INIT);
+
+   presto_trigger_send(coop_tid,FLAG_INIT);
+   presto_wait(FLAG_INIT);
+   presto_trigger_clear(FLAG_INIT);
+
+   while(1) {
+      presto_semaphore_init(&copier,1,tf);
+      presto_trigger_send(pres_tid,FLAG_LOOP);
+      presto_trigger_send(mgr_tid,FLAG_LOOP);
+      presto_trigger_send(emp_tid,FLAG_LOOP);
+      presto_trigger_send(coop_tid,FLAG_LOOP);
+      presto_timer_wait(15000,FLAG_TIMER);
+      presto_trigger_clear(FLAG_TIMER);
+      tf=tf?FALSE:TRUE;
    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void One(void) {
-   presto_mail_init(&box1,FLAG_MAIL);
+void president(void) {
+   presto_wait(FLAG_INIT);
+   // initialize here
+   presto_trigger_send(control_tid, FLAG_INIT);
    while(1) {
-      presto_wait(FLAG_MAIL);
-      presto_flag_clear(FLAG_MAIL);
-      presto_mail_get(&box1,&msg1);
-      switch(msg1.b.b1) {
-         case 0: lights&=~0x01; break;
-         case 1: lights|=0x01; break;
-      }
-      assert_lights();
+      presto_wait(FLAG_LOOP);
+      presto_trigger_clear(FLAG_LOOP);
+
+      presto_timer_wait(3000,FLAG_TIMER);
+      presto_trigger_clear(FLAG_TIMER);
+      use_copier(0x01,10);
    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Two(void) {
-   presto_mail_init(&box2,FLAG_MAIL);
+void manager(void) {
+   presto_wait(FLAG_INIT);
+   // initialize here
+   presto_trigger_send(control_tid, FLAG_INIT);
    while(1) {
-      presto_wait(FLAG_MAIL);
-      presto_flag_clear(FLAG_MAIL);
-      presto_mail_get(&box2,&msg2);
-      switch(msg2.b.b1) {
-         case 0: lights&=~0x02; break;
-         case 1: lights|=0x02; break;
-      }
-      assert_lights();
+      presto_wait(FLAG_LOOP);
+      presto_trigger_clear(FLAG_LOOP);
+
+      presto_timer_wait(4000,FLAG_TIMER);
+      presto_trigger_clear(FLAG_TIMER);
+      busy_work(0x02,50);
    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Three(void) {
-   presto_mail_init(&box3,FLAG_MAIL);
+void employee(void) {
+   presto_wait(FLAG_INIT);
+   // initialize here
+   presto_trigger_send(control_tid, FLAG_INIT);
    while(1) {
-      presto_wait(FLAG_MAIL);
-      presto_flag_clear(FLAG_MAIL);
-      presto_mail_get(&box3,&msg3);
-      switch(msg3.b.b1) {
-         case 0: lights&=~0x04; break;
-         case 1: lights|=0x04; break;
-      }
-      assert_lights();
+      presto_wait(FLAG_LOOP);
+      presto_trigger_clear(FLAG_LOOP);
+
+      presto_timer_wait(1000,FLAG_TIMER);
+      presto_trigger_clear(FLAG_TIMER);
+      use_copier(0x04,50);
    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Four(void) {
-   presto_mail_init(&box4,FLAG_MAIL);
+PRESTO_TIMER_T ticker1;
+
+void co_op(void) {
+   presto_wait(FLAG_INIT);
+   // initialize here
+   presto_timer_start(&ticker1,0,200,FLAG_COOP);
+   presto_trigger_send(control_tid, FLAG_INIT);
    while(1) {
-      presto_wait(FLAG_MAIL);
-      presto_flag_clear(FLAG_MAIL);
-      presto_mail_get(&box4,&msg4);
-      switch(msg4.b.b1) {
-         case 0: lights&=~0x08; break;
-         case 1: lights|=0x08; break;
-      }
+      presto_wait(FLAG_COOP);
+      presto_trigger_clear(FLAG_COOP);
+      lights^=0x08;
       assert_lights();
    }
 }
@@ -171,21 +176,15 @@ void Four(void) {
 int main(void) {
    PRESTO_MAIL_T msg;
 
+   assert_lights();
    presto_init();
-/*
-   zero_tid=presto_create_task(Zero, task_zero_stack, STACK_SIZE, 50);
-   one_tid=presto_create_task(One, task_one_stack, STACK_SIZE, 35);
-   two_tid=presto_create_task(Two, task_two_stack, STACK_SIZE, 30);
-   three_tid=presto_create_task(Three, task_three_stack, STACK_SIZE, 20);
-   four_tid=presto_create_task(Four, task_four_stack, STACK_SIZE, 5);
-*/
-   presto_create_task(Zero,  task_zero_stack,  STACK_SIZE, 50);
-   presto_create_task(One,   task_one_stack,   STACK_SIZE, 35);
-   presto_create_task(Two,   task_two_stack,   STACK_SIZE, 30);
-   presto_create_task(Three, task_three_stack, STACK_SIZE, 20);
-   presto_create_task(Four,  task_four_stack,  STACK_SIZE, 5);
-
+   control_tid=presto_create_task(control,    task_five_stack,  STACK_SIZE, 99);
+   pres_tid=   presto_create_task(president,  task_four_stack,  STACK_SIZE, 14);
+   mgr_tid=    presto_create_task(manager,    task_three_stack, STACK_SIZE, 13);
+   emp_tid=    presto_create_task(employee,   task_two_stack,   STACK_SIZE, 12);
+   coop_tid=   presto_create_task(co_op,      task_one_stack,   STACK_SIZE, 11);
    presto_start_scheduler();
+
    // we never get here
    presto_fatal_error(ERROR_MAIN_AFTERSTART);
    return 0;

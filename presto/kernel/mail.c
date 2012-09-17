@@ -11,29 +11,22 @@
 #include "presto.h"
 #include "error.h"
 #include "chip/locks.h"
-#include "kernel/kernel.h"
-#include "kernel/mail.h"
+#include "config.h"
+#include "kernel/kernel_types.h"
+#include "kernel/kernel_funcs.h"
+#include "kernel/kernel_data.h"
+#include "kernel/mail_types.h"
+#include "kernel/mail_funcs.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //   C O N S T A N T S
 ////////////////////////////////////////////////////////////////////////////////
 
-// debug
-#define STATIC //static
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D A T A   T Y P E S
 ////////////////////////////////////////////////////////////////////////////////
-
-typedef struct KERNEL_MESSAGE_S {
-   KERNEL_MSGID_T serial_number;
-   KERNEL_TID_T from_tid;
-   union KERNEL_MAIL_U payload;
-   struct KERNEL_MAILBOX_S * to_box_p;
-   struct KERNEL_MESSAGE_S * next;
-} PRESTO_MESSAGE_T;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,44 +45,32 @@ typedef struct KERNEL_MESSAGE_S {
 //   S T A T I C   G L O B A L   D A T A
 ////////////////////////////////////////////////////////////////////////////////
 
-STATIC PRESTO_MESSAGE_T * free_mail_p=NULL;
-STATIC PRESTO_MESSAGE_T mail_list[MAX_MESSAGES];
+static KERNEL_MESSAGE_T * free_mail_p=NULL;
+static KERNEL_MESSAGE_T mail_list[MAX_MESSAGES];
 
-
-////////////////////////////////////////////////////////////////////////////////
-//   K E R N E L - O N L Y   F U N C T I O N S
-////////////////////////////////////////////////////////////////////////////////
-
-void kernel_mail_init(void) {
-   int count;
-   // initialize mail list
-   for(count=0;count<MAX_MESSAGES;count++) {
-      mail_list[count].next=&mail_list[count+1];  // goes past end of array - OK
-      mail_list[count].serial_number=count;
-   }
-   mail_list[MAX_MESSAGES-1].next=NULL;
-   free_mail_p=&mail_list[0];
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 //   E X T E R N A L   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_mail_init(PRESTO_MAILBOX_T * box_p, KERNEL_FLAG_T flag) {
+
+void presto_mailbox_init(KERNEL_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger) {
    box_p->message_count=0;
    box_p->mailbox_head=NULL;
    box_p->mailbox_tail=NULL;
-   box_p->owner_tcb_p=current_tcb_p;
-   box_p->trigger_flag=flag;
+   box_p->owner_tcb_p=kernel_current_tcb_p;
+   box_p->trigger=trigger;
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
-KERNEL_MSGID_T presto_mail_send(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T payload) {
 
-   PRESTO_MESSAGE_T * new_mail_p;
+void presto_mail_send(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T payload) {
+
+   KERNEL_MESSAGE_T * new_mail_p;
    KERNEL_TCB_T * owner_tcb_p;
-   WORD lock;
+   KERNEL_LOCK_T lock;
 
    // check to see if there's room
    if(free_mail_p==NULL) {
@@ -100,9 +81,12 @@ KERNEL_MSGID_T presto_mail_send(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T payload)
       presto_fatal_error(ERROR_KERNEL_MAILSEND_TONULLBOX);
    }
    owner_tcb_p=box_p->owner_tcb_p;
+/*
+   TODO
    if((owner_tcb_p==NULL)||(owner_tcb_p->in_use!=TRUE)) {
       presto_fatal_error(ERROR_KERNEL_MAILSEND_TONOBODY);
    }
+*/
 
    // no interrupts
    presto_lock_save(lock);
@@ -112,8 +96,7 @@ KERNEL_MSGID_T presto_mail_send(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T payload)
    free_mail_p=free_mail_p->next;
 
    // fill in the blanks
-   // we never cover up new_mail_p->serial_number
-   new_mail_p->from_tid=current_tcb_p->task_id;
+   new_mail_p->from_tid=kernel_current_tcb_p->task_id;
    new_mail_p->to_box_p=box_p;
    //new_mail_p->delivery_time=kernel_clock;
    //clock_add_ms(&new_mail_p->delivery_time,delay);
@@ -143,7 +126,7 @@ KERNEL_MSGID_T presto_mail_send(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T payload)
    new_mail_p->next=NULL;
 
    // make mailbox owner ready
-   kernel_flag_set(box_p->owner_tcb_p, box_p->trigger_flag);
+   kernel_trigger_set(box_p->owner_tcb_p, box_p->trigger);
 
    // interrupts OK
    presto_unlock_restore(lock);
@@ -151,21 +134,25 @@ KERNEL_MSGID_T presto_mail_send(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T payload)
    // receiver becomes ready...
    // time to re-evaluate highest ready task
    asm("swi");
-
-   return new_mail_p->serial_number;
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
-BOOLEAN presto_mail_waiting(PRESTO_MAILBOX_T * box_p) {
+
+/*
+BOOLEAN presto_mail_test(KERNEL_MAILBOX_T * box_p) {
    return (box_p->mailbox_head==NULL)?FALSE:TRUE;
 }
+*/
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_mail_wait(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T * payload_p) {
+
+void presto_mail_wait(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T * payload_p) {
    // First, wait for mail to arrive.
-   presto_wait(box_p->trigger_flag);
+   presto_wait(box_p->trigger);
 
    // sanity check
    if(box_p->mailbox_head==NULL) {
@@ -176,11 +163,13 @@ void presto_mail_wait(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T * payload_p) {
    presto_mail_get(box_p, payload_p);
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
 
-BOOLEAN presto_mail_get(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T * payload_p) {
-   PRESTO_MESSAGE_T * msg_p;
-   WORD lock;
+
+BOOLEAN presto_mail_get(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T * payload_p) {
+   KERNEL_MESSAGE_T * msg_p;
+   KERNEL_LOCK_T lock;
 
    // We will return immediately if there are no messages in our queue
    if(box_p->mailbox_head==NULL) return FALSE;
@@ -200,7 +189,7 @@ BOOLEAN presto_mail_get(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T * payload_p) {
    #ifdef PARANOID
       // TODO - this is no longer paranoia... this is security
       // are we being paranoid?
-      if((msg_p->to_box_p->owner_tcb_p)!=current_tcb_p) {
+      if((msg_p->to_box_p->owner_tcb_p)!=kernel_current_tcb_p) {
          presto_fatal_error(ERROR_KERNEL_MAILGET_NOTFORME);
       }
    #endif
@@ -230,7 +219,26 @@ BOOLEAN presto_mail_get(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T * payload_p) {
    return TRUE;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+//   K E R N E L - O N L Y   F U N C T I O N S
+////////////////////////////////////////////////////////////////////////////////
+
+
+void kernel_mail_init(void) {
+   int count;
+   // initialize mail list
+   for(count=0;count<MAX_MESSAGES;count++) {
+      mail_list[count].next=&mail_list[count+1];  // goes past end of array - OK
+   }
+   mail_list[MAX_MESSAGES-1].next=NULL;
+   free_mail_p=&mail_list[0];
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //   S T A T I C   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
+
+
 

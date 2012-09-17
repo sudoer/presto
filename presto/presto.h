@@ -10,29 +10,34 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
+#include "error.h"
 #include "kernel/clock.h"
-#include "kernel/kernel.h"
-#include "kernel/mail.h"
-#include "kernel/timer.h"
+#include "kernel/kernel_types.h"
+#include "kernel/mail_types.h"
+#include "kernel/timer_types.h"
+#include "kernel/sem_types.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef KERNEL_TIME_T       PRESTO_TIME_T;
-typedef KERNEL_MAILBOX_T    PRESTO_MAILBOX_T;
-typedef KERNEL_TIMER_T      PRESTO_TIMER_T;
+// core kernel
 typedef KERNEL_TID_T        PRESTO_TID_T;
-typedef KERNEL_MSGID_T      PRESTO_MSGID_T;
-typedef KERNEL_FLAG_T       PRESTO_FLAG_T;
+typedef KERNEL_TRIGGER_T    PRESTO_TRIGGER_T;
+typedef KERNEL_PRIORITY_T   PRESTO_PRIORITY_T;
+
+// time
+typedef KERNEL_TIME_T       PRESTO_TIME_T;
 typedef KERNEL_INTERVAL_T   PRESTO_INTERVAL_T;
 
-////////////////////////////////////////////////////////////////////////////////
+// mail
+typedef KERNEL_MAILBOX_T    PRESTO_MAILBOX_T;
+typedef KERNEL_MAIL_T       PRESTO_MAIL_T;
 
-typedef union KERNEL_MAIL_U {
-   struct {DWORD dw1;} dw;
-   struct {WORD w1,w2;} w;
-   struct {void *p1,*p2;} p;
-   struct {BYTE b1,b2,b3,b4;} b;
-} PRESTO_MAIL_T;
+// timer
+typedef KERNEL_TIMER_T      PRESTO_TIMER_T;
+
+// semaphore
+typedef KERNEL_SEMAPHORE_T  PRESTO_SEMAPHORE_T;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //   K E R N E L
@@ -40,33 +45,58 @@ typedef union KERNEL_MAIL_U {
 
 // initialization
 extern void presto_init(void);
-extern PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_size, BYTE priority );
+extern PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_size, KERNEL_PRIORITY_T priority );
 extern void presto_start_scheduler(void);
 
 // clock
 extern void presto_get_clock(PRESTO_TIME_T * clk);
 
-// waiting / status flags
-extern KERNEL_FLAG_T presto_wait(KERNEL_FLAG_T flags);
-extern void presto_flag_clear(KERNEL_FLAG_T flag);
-extern void presto_flag_set(KERNEL_TCB_T * tcb_p, KERNEL_FLAG_T flag);
-
+// waiting / status triggers
+extern KERNEL_TRIGGER_T presto_wait(KERNEL_TRIGGER_T triggers);
+extern KERNEL_TRIGGER_T presto_trigger_poll(KERNEL_TRIGGER_T test);
+extern void presto_trigger_set(KERNEL_TRIGGER_T trigger);
+extern void presto_trigger_clear(KERNEL_TRIGGER_T trigger);
+extern void presto_trigger_send(KERNEL_TID_T tid, KERNEL_TRIGGER_T trigger);
 
 ////////////////////////////////////////////////////////////////////////////////
 //   M A I L
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_mail_init(PRESTO_MAILBOX_T * box_p, KERNEL_FLAG_T flag);
-KERNEL_MSGID_T presto_mail_send(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T payload);
-BOOLEAN presto_mail_waiting(PRESTO_MAILBOX_T * box_p);
-void presto_mail_wait(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T * payload_p);
-BOOLEAN presto_mail_get(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T * payload_p);
+extern void presto_mailbox_init(PRESTO_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger);
+extern void presto_mail_send(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T payload);
+extern BOOLEAN presto_mail_get(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T * payload_p);
+extern void presto_mail_wait(PRESTO_MAILBOX_T * box_p, PRESTO_MAIL_T * payload_p);
+/*
+extern BOOLEAN presto_mail_test(PRESTO_MAILBOX_T * box_p);
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 //   T I M E R S
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_timer(PRESTO_TIMER_T * timer_p, KERNEL_INTERVAL_T delay, KERNEL_INTERVAL_T period, KERNEL_FLAG_T flag);
+extern void presto_timer_start(PRESTO_TIMER_T * timer_p, KERNEL_INTERVAL_T delay, KERNEL_INTERVAL_T period, KERNEL_TRIGGER_T trigger);
+extern void presto_timer_wait(KERNEL_INTERVAL_T delay, KERNEL_TRIGGER_T trigger);
+extern void presto_timer_disable(PRESTO_TIMER_T * timer_p);
+
+////////////////////////////////////////////////////////////////////////////////
+//   S E M A P H O R E S
+////////////////////////////////////////////////////////////////////////////////
+
+extern void presto_semaphore_init(PRESTO_SEMAPHORE_T * sem_p, short resources, BOOLEAN use_inheritance);
+extern void presto_semaphore_request(PRESTO_SEMAPHORE_T * sem_p, KERNEL_TRIGGER_T trigger);
+extern void presto_semaphore_release(PRESTO_SEMAPHORE_T * sem_p);
+extern void presto_semaphore_wait(PRESTO_SEMAPHORE_T * sem_p, KERNEL_TRIGGER_T trigger);
+/*
+extern BOOLEAN presto_semaphore_test(PRESTO_SEMAPHORE_T * sem_p);
+*/
+
+////////////////////////////////////////////////////////////////////////////////
+//   E R R O R   H A N D L I N G
+////////////////////////////////////////////////////////////////////////////////
+
+extern void presto_fatal_error(error_number_e err);
+extern void presto_crash_address(unsigned short address);
+extern void presto_crash(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 
