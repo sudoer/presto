@@ -2,6 +2,21 @@
 //   C O M M E N T A R Y
 ////////////////////////////////////////////////////////////////////////////////
 
+// This serial driver is built as a service.  That is, it is not a part of
+// the presto kernel itself, but it uses presto functions just like an
+// application would.  To start using the serial port, serial_init() must
+// be called.  The task ID and a trigger flag that you specify will be used
+// to notify the task when data is received.  If you do not want to be
+// notified, then just use a trigger flag of 0x00.  Typically, you would
+// simply have a task that looks like this:
+
+//    serial_init(task_tid,SERIAL_FLAG);
+//    while(1) {
+//       wait(SERIAL_FLAG);
+//       serial_recv_string(mybuffer,MYBUFFERSIZE);
+//       /* act on received data here */
+//    }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D E P E N D E N C I E S
@@ -57,16 +72,16 @@ static cq_size_t cq_put_byte(circ_queue * queue, BYTE b);
 static cq_size_t cq_get_byte(circ_queue * queue, BYTE * b);
 static void cq_init(circ_queue * queue, BYTE * buffer, cq_size_t max_size);
 
-static PRESTO_TID_T     serialuser_tid;
+static PRESTO_TASKID_T     serialuser_tid;
 static PRESTO_TRIGGER_T serialuser_trigger;
 
 ////////////////////////////////////////////////////////////////////////////////
 //   E X P O R T E D   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-void serial_init(PRESTO_TID_T task, PRESTO_TRIGGER_T alert) {
-   KERNEL_LOCK_T lock;
-   presto_lock_save(lock);
+void serial_init(PRESTO_TASKID_T task, PRESTO_TRIGGER_T alert) {
+   CPU_LOCK_T lock;
+   cpu_lock_save(lock);
    // 1 start, 8 data, 1 stop bits
    // WAKE mode = idle line
    SCCR1 = 0x00;
@@ -86,7 +101,7 @@ void serial_init(PRESTO_TID_T task, PRESTO_TRIGGER_T alert) {
    serialuser_trigger=alert;
    // set serial port interrupt service routine
    set_interrupt(INTR_SCI, serial_isr);
-   presto_unlock_restore(lock);
+   cpu_unlock_restore(lock);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -189,15 +204,15 @@ static void serial_isr(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 static void cq_init(circ_queue * queue, BYTE * buffer, cq_size_t max_size) {
-   KERNEL_LOCK_T lock;
-   presto_lock_save(lock);
+   CPU_LOCK_T lock;
+   cpu_lock_save(lock);
    queue->buffer=buffer;
    queue->end=buffer+max_size-1;
    queue->head=buffer;
    queue->tail=buffer;
    queue->max_size=max_size;
    queue->current_size=0;
-   presto_unlock_restore(lock);
+   cpu_unlock_restore(lock);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,10 +220,10 @@ static void cq_init(circ_queue * queue, BYTE * buffer, cq_size_t max_size) {
 // returns the number of bytes retrieved from the queue (0 or 1)
 
 static cq_size_t cq_get_byte(circ_queue * queue, BYTE * b) {
-   KERNEL_LOCK_T lock;
+   CPU_LOCK_T lock;
    cq_size_t bytes=0;
 
-   presto_lock_save(lock);
+   cpu_lock_save(lock);
    // If the buffer is not empty
    if (queue->tail != queue->head) {
       // return the contents at tail pointer
@@ -222,7 +237,7 @@ static cq_size_t cq_get_byte(circ_queue * queue, BYTE * b) {
       }
       bytes++;
    }
-   presto_unlock_restore(lock);
+   cpu_unlock_restore(lock);
    return bytes;
 }
 
@@ -231,10 +246,10 @@ static cq_size_t cq_get_byte(circ_queue * queue, BYTE * b) {
 // returns 0 if no errors, else the number of overwritten bytes (one)
 
 static cq_size_t cq_put_byte(circ_queue * queue, BYTE b) {
-   KERNEL_LOCK_T lock;
+   CPU_LOCK_T lock;
    cq_size_t overwrite=0;
 
-   presto_lock_save(lock);
+   cpu_lock_save(lock);
    // Store byte at head pointer
    *(queue->head) = b;
 
@@ -258,7 +273,7 @@ static cq_size_t cq_put_byte(circ_queue * queue, BYTE b) {
          queue->tail = queue->buffer;
       }
    }
-   presto_unlock_restore(lock);
+   cpu_unlock_restore(lock);
    return overwrite;
 }
 

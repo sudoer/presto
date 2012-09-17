@@ -9,8 +9,8 @@
 
 #include "types.h"
 #include "presto.h"
-#include "error_codes.h"
 #include "configure.h"
+#include "cpu/error.h"
 #include "cpu/locks.h"
 #include "kernel/kernel.h"
 #include "kernel/memory.h"
@@ -40,11 +40,15 @@ typedef struct MEMORY_ITEM_S {
 } MEMORY_ITEM_T;
 
 typedef struct MEMORY_POOL_S {
-   short num_items;
+   short items_in_pool;
    short item_size;
-   short free_items;
-   short used_bytes;
+   short items_used;
    MEMORY_ITEM_T * free_list;
+   #ifdef FEATURE_MEMORY_STATISTICS
+      short total_bytes_used;
+      short max_items_used;
+      short max_item_size;
+   #endif
 } MEMORY_POOL_T;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,16 +58,10 @@ typedef struct MEMORY_POOL_S {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//   K E R N E L - O N L Y   D A T A
-///////////////////////////////////////////////////////////////////////////////
-
-
-
-////////////////////////////////////////////////////////////////////////////////
 //   S T A T I C   G L O B A L   D A T A
 ////////////////////////////////////////////////////////////////////////////////
 
-static MEMORY_POOL_T mempools[PRESTO_MEM_NUM_POOLS]
+static MEMORY_POOL_T mempools[PRESTO_MEM_NUMPOOLS]
    __attribute((section(".heap")));
 
 static BYTE membytes[PRESTO_MEM_TOTALBYTES+(PRESTO_MEM_NUM_ITEMS*sizeof(MEMORY_ITEM_T))]
@@ -78,26 +76,36 @@ static BYTE membytes[PRESTO_MEM_TOTALBYTES+(PRESTO_MEM_NUM_ITEMS*sizeof(MEMORY_I
 BYTE * presto_memory_allocate(unsigned short requested_bytes) {
    short pool;
 
-   if(requested_bytes==0) return NULL;
+   if (requested_bytes==0) return NULL;
 
-   for(pool=0;pool<PRESTO_MEM_NUM_POOLS;pool++) {
-      if(mempools[pool].item_size>=requested_bytes) {
-         if(mempools[pool].free_items>0) {
-            KERNEL_LOCK_T lock;
+   for (pool=0;pool<PRESTO_MEM_NUMPOOLS;pool++) {
+      MEMORY_POOL_T * pool_ptr;
+      pool_ptr=&mempools[pool];
+      if (pool_ptr->item_size>=requested_bytes) {
+         if (pool_ptr->free_list!=NULL) {
+            CPU_LOCK_T lock;
             MEMORY_ITEM_T * item_ptr;
-            presto_lock_save(lock);
+            cpu_lock_save(lock);
             // remove memory item from free list
-            item_ptr=mempools[pool].free_list;
-            mempools[pool].free_list=mempools[pool].free_list->point.next;
+            item_ptr=pool_ptr->free_list;
+            pool_ptr->free_list=pool_ptr->free_list->point.next;
             // keep a pointer back to the pool... we'll need it later
             item_ptr->point.pool=&mempools[pool];
             // statistics for item usage
             item_ptr->amount_requested=requested_bytes;
             // update memory pool
-            mempools[pool].free_items--;
-            mempools[pool].used_bytes+=requested_bytes;
+            pool_ptr->items_used++;
+            #ifdef FEATURE_MEMORY_STATISTICS
+               if (pool_ptr->items_used > pool_ptr->max_items_used) {
+                  pool_ptr->max_items_used=pool_ptr->items_used;
+               }
+               if (requested_bytes > pool_ptr->max_item_size) {
+                  pool_ptr->max_item_size=requested_bytes;
+               }
+               pool_ptr->total_bytes_used+=requested_bytes;
+            #endif
             // TODO - write a pattern to memory?
-            presto_unlock_restore(lock);
+            cpu_unlock_restore(lock);
             return (BYTE *)item_ptr+sizeof(MEMORY_ITEM_T);
          }
       }
@@ -111,13 +119,13 @@ BYTE * presto_memory_allocate(unsigned short requested_bytes) {
 
 
 void presto_memory_free(BYTE * free_me) {
-   KERNEL_LOCK_T lock;
+   CPU_LOCK_T lock;
    MEMORY_POOL_T * pool_ptr;
    MEMORY_ITEM_T * item_ptr;
 
-   if(free_me==NULL) return;
+   if (free_me==NULL) return;
 
-   presto_lock_save(lock);
+   cpu_lock_save(lock);
    item_ptr=(MEMORY_ITEM_T *)(free_me-sizeof(MEMORY_ITEM_T));
    // determine which memory pool this item came from
    pool_ptr=item_ptr->point.pool;
@@ -125,12 +133,14 @@ void presto_memory_free(BYTE * free_me) {
    item_ptr->point.next=pool_ptr->free_list;
    pool_ptr->free_list=item_ptr;
    // update memory pool
-   pool_ptr->free_items++;
-   pool_ptr->used_bytes-=item_ptr->amount_requested;
+   pool_ptr->items_used--;
+   #ifdef FEATURE_MEMORY_STATISTICS
+      pool_ptr->total_bytes_used-=item_ptr->amount_requested;
+   #endif
    // show that this block is unused
    item_ptr->amount_requested=0;
    // TODO - check the pattern written in memory?
-   presto_unlock_restore(lock);
+   cpu_unlock_restore(lock);
 }
 
 
@@ -145,37 +155,68 @@ void presto_memory_debug(void) {
    short count;
    MEMORY_ITEM_T * ptr;
 
-   for(pool=0;pool<PRESTO_MEM_NUM_POOLS;pool++) {
+   for (pool=0;pool<PRESTO_MEM_NUMPOOLS;pool++) {
+
       serial_send_string("pool=");
       string_IntegerToString(pool,prt,PRT);
       serial_send_string(prt);
       serial_send_string("\r\n");
 
-      serial_send_string("num_items=");
-      string_IntegerToString(mempools[pool].num_items,prt,PRT);
+
+      serial_send_string("SIZE ");
+      #ifdef FEATURE_MEMORY_STATISTICS
+         serial_send_string("max/");
+      #endif
+      serial_send_string("limit=");
+      #ifdef FEATURE_MEMORY_STATISTICS
+         string_IntegerToString(mempools[pool].max_item_size,prt,PRT);
+         serial_send_string(prt);
+         serial_send_string("/");
+      #endif
+      string_IntegerToString(mempools[pool].item_size,prt,PRT);
       serial_send_string(prt);
       serial_send_string("\r\n");
 
-      serial_send_string("free_items=");
-      string_IntegerToString(mempools[pool].free_items,prt,PRT);
+
+      serial_send_string("QTY current/");
+      #ifdef FEATURE_MEMORY_STATISTICS
+         serial_send_string("max/");
+      #endif
+      serial_send_string("limit=");
+      string_IntegerToString(mempools[pool].items_used,prt,PRT);
+      serial_send_string(prt);
+      serial_send_string("/");
+      #ifdef FEATURE_MEMORY_STATISTICS
+         string_IntegerToString(mempools[pool].max_items_used,prt,PRT);
+         serial_send_string(prt);
+         serial_send_string("/");
+      #endif
+      string_IntegerToString(mempools[pool].items_in_pool,prt,PRT);
       serial_send_string(prt);
       serial_send_string("\r\n");
 
-      serial_send_string("used_bytes=");
-      string_IntegerToString(mempools[pool].used_bytes,prt,PRT);
-      serial_send_string(prt);
-      serial_send_string("\r\n");
+
+      #ifdef FEATURE_MEMORY_STATISTICS
+         serial_send_string("total_bytes_used=");
+         string_IntegerToString(mempools[pool].total_bytes_used,prt,PRT);
+         serial_send_string(prt);
+         serial_send_string("\r\n");
+      #endif
+
 
       serial_send_string("free_list");
       serial_send_string("->");
       count=0;
       ptr=mempools[pool].free_list;
-      while(ptr!=NULL) {
+      while (ptr!=NULL) {
          string_IntegerToString(ptr->debug_item_number,prt,PRT);
          serial_send_string(prt);
          serial_send_string("->");
          ptr=ptr->point.next;
-         if(++count>8) ptr=NULL;
+         if (++count>4) {
+            serial_send_string("...->");
+            ptr=NULL;
+         }
       }
       serial_send_string("x\r\n");
       serial_send_string("\r\n");
@@ -191,15 +232,15 @@ void presto_memory_debug(void) {
 
 
 void kernel_memory_init(void) {
-   short mempools_sizes[PRESTO_MEM_NUM_POOLS]= PRESTO_MEM_POOL_SIZES;
-   short mempools_qtys[PRESTO_MEM_NUM_POOLS]=  PRESTO_MEM_POOL_QTYS;
+   short mempools_sizes[PRESTO_MEM_NUMPOOLS]= PRESTO_MEM_POOL_SIZES;
+   short mempools_qtys[PRESTO_MEM_NUMPOOLS]=  PRESTO_MEM_POOL_QTYS;
 
    short pool;
    short debug=0;
    BYTE * mem_ptr;
 
    mem_ptr=membytes;
-   for(pool=0;pool<PRESTO_MEM_NUM_POOLS;pool++) {
+   for (pool=0;pool<PRESTO_MEM_NUMPOOLS;pool++) {
       MEMORY_POOL_T * pool_ptr;
       short i;
 
@@ -207,14 +248,18 @@ void kernel_memory_init(void) {
       pool_ptr=&mempools[pool];
 
       // fill in administrative areas of pool
-      pool_ptr->num_items=mempools_qtys[pool];
+      pool_ptr->items_in_pool=mempools_qtys[pool];
       pool_ptr->item_size=mempools_sizes[pool];
-      pool_ptr->free_items=pool_ptr->num_items;
-      pool_ptr->used_bytes=0;
+      pool_ptr->items_used=0;
+      #ifdef FEATURE_MEMORY_STATISTICS
+         pool_ptr->max_items_used=0;
+         pool_ptr->max_item_size=0;
+         pool_ptr->total_bytes_used=0;
+      #endif
 
       // build the free list
       mempools[pool].free_list=(MEMORY_ITEM_T *)mem_ptr;
-      for(i=pool_ptr->num_items;i>0;i--) {
+      for (i=pool_ptr->items_in_pool;i>0;i--) {
          MEMORY_ITEM_T * item_ptr;
 
          // record the address of the memory item
@@ -232,7 +277,7 @@ void kernel_memory_init(void) {
          mem_ptr+=pool_ptr->item_size;
 
          // finish off the item by assigning the 'next' pointer
-         if(i==1) item_ptr->point.next=NULL;
+         if (i==1) item_ptr->point.next=NULL;
          else item_ptr->point.next=(MEMORY_ITEM_T *)mem_ptr;
 
       }

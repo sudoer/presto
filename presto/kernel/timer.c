@@ -3,17 +3,26 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// TODO - Be smart about when to issue a timer interrupt.  Calculate how
+// long until the next timer expires, and then don't bother interrupting
+// until then.  This problem is harder than it seems at first!
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //   D E P E N D E N C I E S
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
 #include "presto.h"
-#include "error_codes.h"
+#include "cpu/error.h"
 #include "cpu/locks.h"
 #include "cpu/misc_hw.h"
+#include "cpu/intvect.h"
+#include "cpu/hwtimer.h"
 #include "kernel/kernel.h"
 #include "kernel/timer.h"
+#include "kernel/clock.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,18 +43,15 @@
 
 static void timer_InsertIntoMasterList(KERNEL_TIMER_T * timer_p);
 static void timer_RemoveFromMasterList(KERNEL_TIMER_T * timer_p);
-
-
-////////////////////////////////////////////////////////////////////////////////
-//   K E R N E L - O N L Y   D A T A
-///////////////////////////////////////////////////////////////////////////////
+static void timer_isr(void) __attribute__((interrupt));
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S T A T I C   G L O B A L   D A T A
 ////////////////////////////////////////////////////////////////////////////////
 
-KERNEL_TIMER_T * kernel_timer_list=NULL;
+static KERNEL_TIMER_T * kernel_timer_list=NULL;
+static KERNEL_TIME_T kernel_clock;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -103,23 +109,45 @@ void presto_timer_stop(KERNEL_TIMER_T * timer_p) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
+
+
+void presto_timer_now(KERNEL_TIME_T * clk) {
+   *clk=kernel_clock;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 //   K E R N E L - O N L Y   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
 
 void kernel_timer_init(void) {
+   // initialize master clock
+   clock_reset(&kernel_clock);
+   // set up interrupt vector for TOC2
+   set_interrupt(INTR_TOC2, timer_isr);
+   // set up timer/counter 2 to tick every so often
+   hwtimer_start(PRESTO_KERNEL_MSPERTICK);
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
+//   S T A T I C   F U N C T I O N S
+////////////////////////////////////////////////////////////////////////////////
 
 
-BYTE kernel_timer_tick(void) {
+static void timer_isr(void) {
    BYTE count=0;
    KERNEL_TIMER_T * timer_p;
-   KERNEL_LOCK_T lock;
+   CPU_LOCK_T lock;
 
-   presto_lock_save(lock);
+   // update the system clock
+   clock_add_ms(&kernel_clock,PRESTO_KERNEL_MSPERTICK);
+
+   // schedule a hardware timer interrupt one tick into the future
+   hwtimer_restart(PRESTO_KERNEL_MSPERTICK);
+
+   cpu_lock_save(lock);
    while ((kernel_timer_list!=NULL)&&(clock_compare(&kernel_timer_list->delivery_time,&kernel_clock)<=0)) {
 
       // save a pointer to the first timer in the list
@@ -141,22 +169,23 @@ BYTE kernel_timer_tick(void) {
       count++;
    }
 
-   presto_unlock_restore(lock);
-   return count;
+   cpu_unlock_restore(lock);
+
+   if (count>0) {
+      asm("swi");
+   }
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//   S T A T I C   F U N C T I O N S
-////////////////////////////////////////////////////////////////////////////////
 
 
 static void timer_InsertIntoMasterList(KERNEL_TIMER_T * timer_p) {
-   KERNEL_LOCK_T lock;
+   CPU_LOCK_T lock;
    KERNEL_TIMER_T ** p0;
    KERNEL_TIMER_T * p1;
 
-   presto_lock_save(lock);
+   cpu_lock_save(lock);
    // Start at the head, look at delivery times.
    p0=&kernel_timer_list;
    p1=kernel_timer_list;
@@ -170,7 +199,7 @@ static void timer_InsertIntoMasterList(KERNEL_TIMER_T * timer_p) {
       p0=&(p1->next);
       p1=p1->next;
    }
-   presto_unlock_restore(lock);
+   cpu_unlock_restore(lock);
 }
 
 
@@ -179,9 +208,9 @@ static void timer_InsertIntoMasterList(KERNEL_TIMER_T * timer_p) {
 
 static void timer_RemoveFromMasterList(KERNEL_TIMER_T * timer_p) {
    KERNEL_TIMER_T * ptr;
-   KERNEL_LOCK_T lock;
+   CPU_LOCK_T lock;
 
-   presto_lock_save(lock);
+   cpu_lock_save(lock);
    // If the timer is at the head of the list, remove it.
    while (kernel_timer_list==timer_p) {
       kernel_timer_list=kernel_timer_list->next;
@@ -193,30 +222,11 @@ static void timer_RemoveFromMasterList(KERNEL_TIMER_T * timer_p) {
       if (ptr->next==timer_p) ptr->next=timer_p->next;
       else ptr=ptr->next;
    }
-   presto_unlock_restore(lock);
+   cpu_unlock_restore(lock);
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

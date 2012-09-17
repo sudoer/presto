@@ -26,7 +26,7 @@ extern void _start();   // entry point in crt11.s or crt0.o
 //   G L O B A L   D A T A
 ////////////////////////////////////////////////////////////////////////////////
 
-BYTE initial_stack[PRESTO_BOOT_INITIALSTACKSIZE] __attribute((section(".stack")));
+BYTE initial_stack[BOOT_INITIALSTACKSIZE] __attribute((section(".stack")));
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ BYTE initial_stack[PRESTO_BOOT_INITIALSTACKSIZE] __attribute((section(".stack"))
 
 void premain() {
 
-   presto_lock();
+   cpu_lock();
 
    // THE FOLLOWING (*) REGISTERS MAY ONLY BE ALTERED WITHIN THE FIRST 64 CLOCK CYCLES
 

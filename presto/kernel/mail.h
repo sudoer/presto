@@ -9,28 +9,27 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef union KERNEL_MAIL_U {
-   struct {DWORD dw1;} dw;
-   struct {WORD w1,w2;} w;
-   struct {void *p1,*p2;} p;
-   struct {BYTE b1,b2,b3,b4;} b;
-} KERNEL_MAILMSG_T;
+typedef unsigned short KERNEL_MAILMSG_T;
+typedef void * KERNEL_MAILPTR_T;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef struct KERNEL_MAILSORT_S {
-   KERNEL_TID_T from_tid;
-   union KERNEL_MAIL_U payload;
+typedef struct KERNEL_ENVELOPE_S {
+   KERNEL_TASKID_T from_tid;
    struct KERNEL_MAILBOX_S * to_box_p;
-   struct KERNEL_MAILSORT_S * next;
-} KERNEL_MAILSORT_T;
+   struct {
+      KERNEL_MAILMSG_T message;
+      KERNEL_MAILPTR_T payload;
+   } userdata;
+   struct KERNEL_ENVELOPE_S * next;
+} KERNEL_ENVELOPE_T;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 typedef struct KERNEL_MAILBOX_S {
    unsigned short message_count;
-   KERNEL_MAILSORT_T * mailbox_head;
-   KERNEL_MAILSORT_T * mailbox_tail;
+   KERNEL_ENVELOPE_T * mailbox_head;
+   KERNEL_ENVELOPE_T * mailbox_tail;
    KERNEL_TCB_T * owner_tcb_p;
    KERNEL_TRIGGER_T trigger;
 } KERNEL_MAILBOX_T;

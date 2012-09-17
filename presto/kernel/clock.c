@@ -4,12 +4,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void clock_add(struct KERNEL_TIME_S * clk, unsigned short sec, unsigned short msec, unsigned short usec) {
-   clk->usec+=usec;
-   while (clk->usec>=1000) {
-      clk->usec-=1000;
-      clk->msec++;
-   }
+static void clock_add(KERNEL_TIME_T * clk, unsigned short sec, unsigned short msec) {
    clk->msec+=msec;
    while (clk->msec>=1000) {
       clk->msec-=1000;
@@ -24,8 +19,7 @@ static void clock_add(struct KERNEL_TIME_S * clk, unsigned short sec, unsigned s
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void clock_reset(struct KERNEL_TIME_S * clk) {
-   clk->usec=0;
+void clock_reset(KERNEL_TIME_T * clk) {
    clk->msec=0;
    clk->sec=0;
    clk->hour=0;
@@ -33,25 +27,19 @@ void clock_reset(struct KERNEL_TIME_S * clk) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void clock_add_us(struct KERNEL_TIME_S * clk, unsigned short us) {
-   clock_add(clk,0,0,us);
+void clock_add_ms(KERNEL_TIME_T * clk, unsigned short ms) {
+   clock_add(clk,0,ms);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void clock_add_ms(struct KERNEL_TIME_S * clk, unsigned short ms) {
-   clock_add(clk,0,ms,0);
+void clock_add_sec(KERNEL_TIME_T * clk, unsigned short s) {
+   clock_add(clk,s,0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void clock_add_sec(struct KERNEL_TIME_S * clk, unsigned short s) {
-   clock_add(clk,s,0,0);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-signed char clock_compare(struct KERNEL_TIME_S * A,struct KERNEL_TIME_S * B) {
+signed char clock_compare(KERNEL_TIME_T * A,KERNEL_TIME_T * B) {
    if (A->hour < B->hour) return -1;
    if (A->hour > B->hour) return 1;
    // we now know that A->hour == B->hour
@@ -61,8 +49,6 @@ signed char clock_compare(struct KERNEL_TIME_S * A,struct KERNEL_TIME_S * B) {
    if (A->msec < B->msec) return -1;
    if (A->msec > B->msec) return 1;
    // we now know that A->msec == B->msec
-   if (A->usec < B->usec) return -1;
-   if (A->usec > B->usec) return 1;
    return 0;
 }
 

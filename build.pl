@@ -5,9 +5,7 @@
 
 # fast move/copy routines
 use File::Copy;
-
-# turn debug info on/off
-$debug=0;
+use Cwd;
 
 heading("PREPARING");
 prepare();
@@ -24,7 +22,7 @@ heading("LINKING");
 link_stage();
 
 heading("SHOW THE RESULTS");
-#show_target_file();
+show_target_file();
 generate_listing();
 show_memory_usage();
 
@@ -39,20 +37,18 @@ sub setup_project {
    $OBJ_DIR="obj";
    $TARGET="presto";
    @SRC_FILES=(
-               "presto\\cpu\\crt11.s",
+               "app\\stress_test.c",
                "presto\\cpu\\boot.c",
+               "presto\\cpu\\crt0.s",
                "presto\\cpu\\error.c",
-               "presto\\cpu\\intvect.c",
                "presto\\cpu\\hwtimer.c",
+               "presto\\cpu\\intvect.c",
                "presto\\kernel\\clock.c",
                "presto\\kernel\\kernel.c",
                "presto\\kernel\\mail.c",
-               "presto\\kernel\\timer.c",
-               "presto\\kernel\\semaphore.c",
                "presto\\kernel\\memory.c",
-               #"app\\inversion.c",
-               "app\\main.c",
-               "app\\debugger.c",
+               "presto\\kernel\\semaphore.c",
+               "presto\\kernel\\timer.c",
                "services\\serial.c",
                "services\\string.c",
    );
@@ -84,23 +80,33 @@ sub setup_linker {
 ################################################################################
 
 sub prepare {
-   # CLEANING UP OLD FILES
 
+   # turn debug info on/off
+   $DEBUG=0;
+   foreach $arg (@ARGV) {
+      if(tolower($arg) eq "debug") {
+         $DEBUG=1;
+      }
+   }
+
+   # flush after print();
+   $|=1;
+
+   # CLEAN UP OLD FILES
    print("deleting old target file...");
    unlink("$OBJ_DIR\\$TARGET.s19");
    print("OK\n");
 
-   # CREATING OBJECT DIRECTORY
-
+   # CREATE OBJECT DIRECTORY
    print("creating object directory...");
    mkdir($OBJ_DIR,0777);
    print("OK\n");
 
    # REMEMBER WHERE YOU STARTED
-
    print("remembering build directory...");
-   chop($BUILD_DIR=`cd`);
+   $BUILD_DIR=cwd();  # chop($BUILD_DIR=`cd`); was SLOW!
    $BUILD_DIR=~s/^[A-Za-z]://g;  # remove C:
+   $BUILD_DIR=~s/\//\\/g;  # change / to \
    print("OK\n");
 }
 
@@ -109,32 +115,40 @@ sub prepare {
 my %filetimes;
 
 sub source_time {
-   my $givenfile=$_[0];
-   my $prefix="  ".$_[1];
+   my ($givenfile,$prefix)=@_;
+   $prefix="  ".$prefix;
    my $src_ext=extension_of($givenfile);
    my $fullpathname;
    if($src_ext eq "c") {
-      $fullpathname="$BUILD_DIR/$givenfile";
+      $fullpathname=$givenfile;
    } elsif($src_ext eq "h") {
       # find the H file in the include path
       $fullpathname=find_include_file_in_path($givenfile);
       if(length($fullpathname)==0) {
          # H file not found in include path
-         return -M $givenfile;
+         debug("ERROR! H file (".$givenfile.") not found");
+         return 0;
       }
+   } elsif($src_ext eq "s") {
+      $fullpathname=$givenfile;
    } else {
       # not a C or H file
-      return -M $givenfile;
+      debug("ERROR! unrecognized file type");
+      return 0;
    }
+
+   #debug($prefix."SOURCE TIME OF [$fullpathname]");
 
    if(!defined($filetimes{$fullpathname})) {
       $filetimes{$fullpathname}= -M $fullpathname;
+      #debug($prefix."filetime{$fullpathname}=<".$filetimes{$fullpathname}.">");
       my @all_includes=determine_source_dependencies($fullpathname);
       my $one_include;
       foreach $one_include (@all_includes) {
          my $st=source_time($one_include,$prefix);
          if($st<$filetimes{$fullpathname}) {
             $filetimes{$fullpathname}=$st;
+            #debug($prefix."[$one_include] is newer than [$fullpathname]");
          }
       }
    }
@@ -149,10 +163,12 @@ sub determine_source_dependencies {
    my @includes=();
    open(SRCFILE,"<$source_file");
    my $line;
-   while ($line=<SRCFILE>) {
+   while($line=<SRCFILE>) {
       $line=~s/\012//g;
       $line=~s/\015//g;
-      if (index($line,"#include")>-1) {
+      $line=~s/\/\/.*//g;  # remove // comments
+      $line=~s/\//\\/g;  # change / to \
+      if(index($line,"#include")>-1) {
          $match=$line;
          $match=~s/^ *#include +\"//g;
          $match=~s/\" *$//g;
@@ -169,8 +185,13 @@ sub find_include_file_in_path {
    my $h_file=$_[0];
    my $dir;
    foreach $dir (@INCLUDE_DIRS) {
-      if(-f "$dir/$h_file") {
-         return "$dir/$h_file";
+      if($dir eq ".") {
+         $dir=cwd();
+      }
+      $dir=~s/\//\\/g;  # change / to \
+      if(-f "$dir\\$h_file") {
+         #debug("INCLUDE FILE [$h_file] is [$dir\\$h_file]");
+         return "$dir\\$h_file";
       }
    }
    return "";
@@ -180,27 +201,30 @@ sub find_include_file_in_path {
 
 sub compile_stage {
 
-   $indent="   ";
    @OBJS=();
-   $total_errors=0;
-   my $include_path="";
+   $TOTAL_ERRORS=0;
 
+   # BUILD INCLUDE PATH (to pass to compiler)
+
+   my $include_path="";
    foreach $dir (@INCLUDE_DIRS) {
       $include_path=$include_path."-I$dir "
    }
 
    # LOOPING THROUGH OBJECT FILES
 
-   foreach $src_path (@SRC_FILES) {
-      print("FILE $src_path\n");
+   foreach $src_file (@SRC_FILES) {
       $errors=0;
 
       # DETERMINE FILE NAMES, BASE NAMES, EXTENSIONS, PATHS
 
+      $src_path="$BUILD_DIR\\$src_file";
       $src_dir=directory_of($src_path);
       $src_name=basename($src_path);
       $src_base=chop_extension($src_name);
       $src_ext=extension_of($src_path);
+      debug("");
+      debug("FILE $src_path");
       debug("src_name=[$src_name]");
       debug("src_path=[$src_path]");
       debug("src_dir=[$src_dir]");
@@ -208,84 +232,80 @@ sub compile_stage {
       debug("src_ext=[$src_ext]");
 
       $obj_name="$src_base.o";
-
-      $obj_path="$OBJ_DIR\\$obj_name";
+      $obj_path="$BUILD_DIR\\$OBJ_DIR\\$obj_name";
       debug("obj_name=[$obj_name]");
       debug("obj_path=[$obj_path]");
+      $lst_path="$BUILD_DIR\\$OBJ_DIR\\$src_base.lst";
 
       # DETERMINE IF WE NEED TO DO ANYTHING FOR THIS FILE
 
+      chdir($src_dir);
+
       $work=0;
-      if ( ! -e "$obj_path" ) {
+      if( ! -e "$obj_path" ) {
          $work=1;
       } else {
          $filetime=source_time($src_path);
          $objtime= -M $obj_path;
-         if ( $filetime < $objtime ) {
+         if( $filetime < $objtime ) {
+            #debug("{$src_path} is newer than ($obj_path}");
+            #debug("{$filetime} is newer than ($objtime}");
             $work=1;
          }
       }
 
       # IF WE HAVE WORK TO DO, THEN DO IT
 
-      if ( $work == 1 ) {
-         if ($src_ext eq "c") {
-            print($indent."COMPILING...");
-            if ($debug) { print("\n"); }
-            chdir($src_dir);
-            $errors+=run("gcc.exe "
-                        ."-m68hc11 "
-                        ."-DGCC "
-                        .$include_path
-                        ."-mshort "
-                        ."-O "  # was ."O0 "  # oh-zero
-                        ."-fomit-frame-pointer "
-                        ."-msoft-reg-count=0 "
-                        ."-funsigned-char "
-                        ."-c "
-                        ."-g "
-                        ."-Wall "
-                        #."-Werror "
-                        ."-Wa,-L,-ahlns=$BUILD_DIR\\$OBJ_DIR\\$src_base.lst "
-                        ."-o $BUILD_DIR\\$OBJ_DIR\\$src_base.o "
-                        ."$src_name");
+      if( $work == 1 ) {
+         if($src_ext eq "c") {
+            print("COMPILING  $src_file...");
+            debug("");
+            $errors+=run("gcc.exe "                  # compiler
+                        ."-m68hc11 "                 # platform, hc11 or hc12
+                        ."-DGCC "                    # define GCC
+                        .$include_path               # include path
+                        ."-mshort "                  # ???
+                        ."-O "                       # optimization, was (oh-zero)
+                        ."-fomit-frame-pointer "     # ???
+                        ."-msoft-reg-count=0 "       # ???
+                        ."-funsigned-char "          # ???
+                        ."-c "                       # compile only, do not link
+                        ."-g "                       # include debug info
+                        ."-Wall "                    # enable all warnings
+                       #."-Werror "                  # treat warnings as errors
+                        ."-Wa,-L,-ahlns=$lst_path "  # generate list file
+                        ."-o $obj_path "             # output file
+                        ."$src_name");               # source file
             print("OK\n");
-            #print($indent."GENERATING LISTINGS...");
-            #if($debug) { print("\n"); }
-            #chdir("$BUILD_DIR\\$OBJ_DIR");
-            #$errors+=run("objdump.exe --source $src_base.o > $src_base.lst ");
-            #print("OK\n");
-            chdir($BUILD_DIR);
          } elsif($src_ext eq "s") {
-            print($indent."ASSEMBLING...");
-            if ($debug) { print("\n"); }
-            chdir($src_dir);
-            $errors+=run("as.exe "
-                        ."-a -L -ahlns=$BUILD_DIR\\$OBJ_DIR\\$src_base.lst "
-                        ."-o $BUILD_DIR\\$OBJ_DIR\\$src_base.o "
-                        ."$src_name");
+            print("ASSEMBLING $src_file...");
+            debug("");
+            $errors+=run("as.exe "            # assembler
+                        ."-a -L "             # ???
+                        ."-ahlns=$lst_path "  # generate list file
+                        ."-o $obj_path "      # output file
+                        ."$src_name");        # source file
             print("OK\n");
-            chdir($BUILD_DIR);
          } else {
-            print("HUH?\n");
+            print("WHAT???    $src_file\n");
          }
       } else {
-         print("OK\n");
+         print("NO WORK ON $src_file\n");
+         debug("");
       }
-
-      print("\n");
 
       # RECORD THE FILES THAT WE NEED TO LINK TOGETHER
 
       push(@OBJS,$obj_name);
 
-      $total_errors+=$errors;
-      if ($errors > 0) {
+      $TOTAL_ERRORS+=$errors;
+      if($errors > 0) {
          print("\n");
          print("ERRORS IN COMPILE ... stopping\n");
          return;
       }
 
+      chdir($BUILD_DIR);
    }
 
 }
@@ -294,7 +314,7 @@ sub compile_stage {
 
 sub link_stage {
 
-   if ($total_errors > 0) {
+   if($TOTAL_ERRORS > 0) {
       print("errors compiling, skipping the link stage\n");
       print("\n");
       return;
@@ -309,28 +329,29 @@ sub link_stage {
 
 
    print("LINKING...\n");
-   $errors+=run("ld.exe "
-      ."--script ../memory.x "
-      ."-m m68hc11elf "
-      ."--trace "
-      ."-nostdlib "
-      ."-nostartfiles "
-      ."-defsym _.tmp=0x0 "
-      ."-defsym _.z=0x2 "
-      ."-defsym _.xy=0x4 "
-      ."-Map $TARGET.map --cref "
-      ."--oformat=elf32-m68hc11 "
-      ."-o $TARGET.elf "
-      ."$ofiles "
-      ."-L$LIB_DIR -lgcc");
+   $errors+=run("ld.exe "           # linker
+      ."--script ..\\memory.x "      # memory and segment map
+      ."-m m68hc11elf "             # architecture, file format
+      ."--trace "                   # ???
+      ."-nostdlib "                 # do not include C standard library
+      ."-nostartfiles "             # do not include crt0.s
+      ."-defsym _.tmp=0x0 "         # temporary "soft" register
+      ."-defsym _.z=0x2 "           # temporary "soft" register
+      ."-defsym _.xy=0x4 "          # temporary "soft" register
+      ."-Map $TARGET.map --cref "   # create memory map file
+      ."--oformat=elf32-m68hc11 "   # output file format
+      ."-o $TARGET.elf "            # output file
+      ."$ofiles "                   # input files
+      ."-L$LIB_DIR -lgcc");         # include GCC library (should be last argument)
    print("OK\n");
    print("\n");
 
 
-   if ($errors==0) {
+   if($errors==0) {
       print("CONVERTING...\n");
       $errors+=run("objcopy.exe "
          ."--output-target=srec "
+         #."--srec-forceS3 "
          ."--strip-all "
          ."--strip-debug "
          ."$TARGET.elf $TARGET.s19");
@@ -339,7 +360,7 @@ sub link_stage {
    }
 
 
-   $total_errors+=$errors;
+   $TOTAL_ERRORS+=$errors;
    chdir($BUILD_DIR);
 }
 
@@ -347,10 +368,22 @@ sub link_stage {
 
 sub show_target_file {
 
-   if ($total_errors > 0) {
+   if($TOTAL_ERRORS > 0) {
       return;
    }
-   run("dir $OBJ_DIR\\$TARGET.s19");
+
+   my $tempfile="$TARGET.dir";
+   run("dir $OBJ_DIR\\$TARGET.S19 > $tempfile");
+
+   open(TEMP,"<$tempfile");
+   my $line;
+   while($line=<TEMP>) {
+      if(index($line,$TARGET)>-1) {
+         print($line);
+      }
+   }
+   close(TEMP);
+   unlink($tempfile);
    print("\n");
 }
 
@@ -358,7 +391,7 @@ sub show_target_file {
 
 sub generate_listing {
 
-   if ($total_errors > 0) {
+   if($TOTAL_ERRORS > 0) {
       return;
    }
 
@@ -374,7 +407,7 @@ sub generate_listing {
    print("OK\n");
    print("\n");
 
-   $total_errors+=$errors;
+   $TOTAL_ERRORS+=$errors;
    chdir($BUILD_DIR);
 }
 
@@ -382,7 +415,7 @@ sub generate_listing {
 
 sub show_memory_usage {
 
-   if ($total_errors > 0) {
+   if($TOTAL_ERRORS > 0) {
       return;
    }
 
@@ -399,15 +432,15 @@ sub show_memory_usage {
 
    open(TEMP,"<$tempfile");
    my $line;
-   while ($line=<TEMP>) {
-      if (index($line,"2**0")>-1) {
+   while($line=<TEMP>) {
+      if(index($line,"2**0")>-1) {
          # combine with next line
          $line=$line.<TEMP>;
          $line=~s/\012//g;
          $line=~s/\015//g;
       }
 
-      if (index($line,"2**0")>-1) {
+      if(index($line,"2**0")>-1) {
          my $section_name=substr($line,5,12);
          $section_name=~s/ *$//g;
          my $size=hex(substr($line,18,8));
@@ -473,6 +506,9 @@ sub section_info {
 
 sub heading {
    my $string=$_[0];
+   if($TOTAL_ERRORS > 0) {
+      return;
+   }
    my $text_width=60;
    $string=~s/\n//g;
    $string=~s/^ +//g;
@@ -487,8 +523,12 @@ sub heading {
 
 sub debug {
    my $string=$_[0];
-   if ($debug) {
-      print("   $string\n");
+   my $prefix="   ";
+   if(length($string)==0) {
+      $prefix="";
+   }
+   if($DEBUG) {
+      print($prefix.$string."\n");
    }
 }
 
@@ -506,13 +546,13 @@ sub search_and_replace {
    my $tempfile="$filename.$$";
 
    $changes=0;
-   while (($changes*2)<$#args) {
+   while(($changes*2)<$#args) {
       $search[$changes]=@args[$changes*2];
       $replace[$changes]=@args[$changes*2+1];
       $changes++;
    }
 
-   if ($debug) {
+   if($DEBUG) {
       for $count (0..$changes-1) {
          print("replace [$search[$count]] with [$replace[$count]]\n");
       }
@@ -520,15 +560,15 @@ sub search_and_replace {
 
    open(OLD,$filename);
    open(NEW,">$tempfile");
-   while ($line=<OLD>) {
+   while($line=<OLD>) {
       $replacements_made=0;
       for $count (0..$changes-1) {
-         while ($find=index($line,$search[$count])>-1) {
+         while($find=index($line,$search[$count])>-1) {
             substr($line,$find,length($search[$count]))=$replace[$count];
             $replacements_made++;
          }
       }
-      if (($debug>0)&&($replacements_made>0)) {
+      if(($DEBUG>0)&&($replacements_made>0)) {
          print("CHANGED $line");
       }
       print NEW $line;
@@ -544,7 +584,7 @@ sub search_and_replace {
 sub run {
    my $cmd=$_[0];
    my $rc;
-   if ($debug) {
+   if($DEBUG) {
       print("RUNNING [$cmd]\n");
    }
    $rc=system($cmd);
@@ -556,7 +596,7 @@ sub run {
 sub move_file {
    my $src=$_[0];
    my $dest=$_[1];
-   if ($debug) {
+   if($DEBUG) {
       print("MOVING [$src] to [$dest]\n");
    }
    move($src,$dest);
@@ -600,7 +640,7 @@ sub setenv {
 sub add_to_path {
    my $dir=tolower($_[0]);
    my $path=tolower($ENV{"PATH"});
-   if (index($dir,$path)<0) {
+   if(index($dir,$path)<0) {
       setenv("PATH",$ENV{"PATH"}.";$dir");
    }
 }

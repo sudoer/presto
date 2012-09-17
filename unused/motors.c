@@ -14,7 +14,7 @@
 //   D E P E N D E N C I E S
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "hc11regs.h"
+#include "cpu/hc11regs.h"
 #include "presto.h"
 #include "services.h"
 #include "services\motors.h"

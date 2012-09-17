@@ -21,12 +21,13 @@ typedef struct KERNEL_SEMUSER_S {
 typedef struct KERNEL_SEMAPHORE_S {
    signed int max_resources;
    signed int available_resources;
-   BOOLEAN use_inheritance;
-   //KERNEL_TCB_T * user;
+   #ifdef FEATURE_PRIORITY_INHERITANCE
+      BOOLEAN use_inheritance;
+   #endif
    struct KERNEL_SEMUSER_S * user_list;
    struct KERNEL_SEMUSER_S * wait_list;
    struct KERNEL_SEMUSER_S * free_list;
-   struct KERNEL_SEMUSER_S semuser_data[PRESTO_SEM_MAXUSERS];
+   struct KERNEL_SEMUSER_S semuser_data[PRESTO_SEM_WAITLIST];
 } KERNEL_SEMAPHORE_T;
 
 ////////////////////////////////////////////////////////////////////////////////

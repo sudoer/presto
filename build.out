@@ -1,0 +1,225 @@
+
+------------------------ PREPARING ------------------------
+
+deleting old target file...OK
+creating object directory...OK
+remembering build directory...OK
+
+---------------------- CONFIGURATION ----------------------
+
+setting up project...OK
+setting up compiler...OK
+setting up linker...OK
+
+----------------- COMPILING AND ASSEMBLING -----------------
+
+
+   FILE \alan\projects\hc11\work\app\stress_test.c
+   src_name=[stress_test.c]
+   src_path=[\alan\projects\hc11\work\app\stress_test.c]
+   src_dir=[\alan\projects\hc11\work\app]
+   src_base=[stress_test]
+   src_ext=[c]
+   obj_name=[stress_test.o]
+   obj_path=[\alan\projects\hc11\work\obj\stress_test.o]
+NO WORK ON app\stress_test.c
+
+
+   FILE \alan\projects\hc11\work\presto\cpu\boot.c
+   src_name=[boot.c]
+   src_path=[\alan\projects\hc11\work\presto\cpu\boot.c]
+   src_dir=[\alan\projects\hc11\work\presto\cpu]
+   src_base=[boot]
+   src_ext=[c]
+   obj_name=[boot.o]
+   obj_path=[\alan\projects\hc11\work\obj\boot.o]
+NO WORK ON presto\cpu\boot.c
+
+
+   FILE \alan\projects\hc11\work\presto\cpu\crt0.s
+   src_name=[crt0.s]
+   src_path=[\alan\projects\hc11\work\presto\cpu\crt0.s]
+   src_dir=[\alan\projects\hc11\work\presto\cpu]
+   src_base=[crt0]
+   src_ext=[s]
+   obj_name=[crt0.o]
+   obj_path=[\alan\projects\hc11\work\obj\crt0.o]
+NO WORK ON presto\cpu\crt0.s
+
+
+   FILE \alan\projects\hc11\work\presto\cpu\error.c
+   src_name=[error.c]
+   src_path=[\alan\projects\hc11\work\presto\cpu\error.c]
+   src_dir=[\alan\projects\hc11\work\presto\cpu]
+   src_base=[error]
+   src_ext=[c]
+   obj_name=[error.o]
+   obj_path=[\alan\projects\hc11\work\obj\error.o]
+NO WORK ON presto\cpu\error.c
+
+
+   FILE \alan\projects\hc11\work\presto\cpu\hwtimer.c
+   src_name=[hwtimer.c]
+   src_path=[\alan\projects\hc11\work\presto\cpu\hwtimer.c]
+   src_dir=[\alan\projects\hc11\work\presto\cpu]
+   src_base=[hwtimer]
+   src_ext=[c]
+   obj_name=[hwtimer.o]
+   obj_path=[\alan\projects\hc11\work\obj\hwtimer.o]
+NO WORK ON presto\cpu\hwtimer.c
+
+
+   FILE \alan\projects\hc11\work\presto\cpu\intvect.c
+   src_name=[intvect.c]
+   src_path=[\alan\projects\hc11\work\presto\cpu\intvect.c]
+   src_dir=[\alan\projects\hc11\work\presto\cpu]
+   src_base=[intvect]
+   src_ext=[c]
+   obj_name=[intvect.o]
+   obj_path=[\alan\projects\hc11\work\obj\intvect.o]
+NO WORK ON presto\cpu\intvect.c
+
+
+   FILE \alan\projects\hc11\work\presto\kernel\clock.c
+   src_name=[clock.c]
+   src_path=[\alan\projects\hc11\work\presto\kernel\clock.c]
+   src_dir=[\alan\projects\hc11\work\presto\kernel]
+   src_base=[clock]
+   src_ext=[c]
+   obj_name=[clock.o]
+   obj_path=[\alan\projects\hc11\work\obj\clock.o]
+NO WORK ON presto\kernel\clock.c
+
+
+   FILE \alan\projects\hc11\work\presto\kernel\kernel.c
+   src_name=[kernel.c]
+   src_path=[\alan\projects\hc11\work\presto\kernel\kernel.c]
+   src_dir=[\alan\projects\hc11\work\presto\kernel]
+   src_base=[kernel]
+   src_ext=[c]
+   obj_name=[kernel.o]
+   obj_path=[\alan\projects\hc11\work\obj\kernel.o]
+NO WORK ON presto\kernel\kernel.c
+
+
+   FILE \alan\projects\hc11\work\presto\kernel\mail.c
+   src_name=[mail.c]
+   src_path=[\alan\projects\hc11\work\presto\kernel\mail.c]
+   src_dir=[\alan\projects\hc11\work\presto\kernel]
+   src_base=[mail]
+   src_ext=[c]
+   obj_name=[mail.o]
+   obj_path=[\alan\projects\hc11\work\obj\mail.o]
+NO WORK ON presto\kernel\mail.c
+
+
+   FILE \alan\projects\hc11\work\presto\kernel\memory.c
+   src_name=[memory.c]
+   src_path=[\alan\projects\hc11\work\presto\kernel\memory.c]
+   src_dir=[\alan\projects\hc11\work\presto\kernel]
+   src_base=[memory]
+   src_ext=[c]
+   obj_name=[memory.o]
+   obj_path=[\alan\projects\hc11\work\obj\memory.o]
+NO WORK ON presto\kernel\memory.c
+
+
+   FILE \alan\projects\hc11\work\presto\kernel\semaphore.c
+   src_name=[semaphore.c]
+   src_path=[\alan\projects\hc11\work\presto\kernel\semaphore.c]
+   src_dir=[\alan\projects\hc11\work\presto\kernel]
+   src_base=[semaphore]
+   src_ext=[c]
+   obj_name=[semaphore.o]
+   obj_path=[\alan\projects\hc11\work\obj\semaphore.o]
+NO WORK ON presto\kernel\semaphore.c
+
+
+   FILE \alan\projects\hc11\work\presto\kernel\timer.c
+   src_name=[timer.c]
+   src_path=[\alan\projects\hc11\work\presto\kernel\timer.c]
+   src_dir=[\alan\projects\hc11\work\presto\kernel]
+   src_base=[timer]
+   src_ext=[c]
+   obj_name=[timer.o]
+   obj_path=[\alan\projects\hc11\work\obj\timer.o]
+NO WORK ON presto\kernel\timer.c
+
+
+   FILE \alan\projects\hc11\work\services\serial.c
+   src_name=[serial.c]
+   src_path=[\alan\projects\hc11\work\services\serial.c]
+   src_dir=[\alan\projects\hc11\work\services]
+   src_base=[serial]
+   src_ext=[c]
+   obj_name=[serial.o]
+   obj_path=[\alan\projects\hc11\work\obj\serial.o]
+NO WORK ON services\serial.c
+
+
+   FILE \alan\projects\hc11\work\services\string.c
+   src_name=[string.c]
+   src_path=[\alan\projects\hc11\work\services\string.c]
+   src_dir=[\alan\projects\hc11\work\services]
+   src_base=[string]
+   src_ext=[c]
+   obj_name=[string.o]
+   obj_path=[\alan\projects\hc11\work\obj\string.o]
+NO WORK ON services\string.c
+
+
+------------------------- LINKING -------------------------
+
+LINKING...
+RUNNING [ld.exe --script ..\memory.x -m m68hc11elf --trace -nostdlib -nostartfiles -defsym _.tmp=0x0 -defsym _.z=0x2 -defsym _.xy=0x4 -Map presto.map --cref --oformat=elf32-m68hc11 -o presto.elf  stress_test.o boot.o crt0.o error.o hwtimer.o intvect.o clock.o kernel.o mail.o memory.o semaphore.o timer.o serial.o string.o -Lc:\programs\hc11\gnu\lib -lgcc]
+ld.exe: mode m68hc11elf
+stress_test.o
+boot.o
+crt0.o
+error.o
+hwtimer.o
+intvect.o
+clock.o
+kernel.o
+mail.o
+memory.o
+semaphore.o
+timer.o
+serial.o
+string.o
+(c:\programs\hc11\gnu\lib\libgcc.a)_mulhi3.o
+(c:\programs\hc11\gnu\lib\libgcc.a)_memcpy.o
+(c:\programs\hc11\gnu\lib\libgcc.a)_regs_min.o
+(c:\programs\hc11\gnu\lib\libgcc.a)_regs_frame.o
+OK
+
+CONVERTING...
+RUNNING [objcopy.exe --output-target=srec --strip-all --strip-debug presto.elf presto.s19]
+OK
+
+
+--------------------- SHOW THE RESULTS ---------------------
+
+RUNNING [dir obj\presto.S19 > presto.dir]
+PRESTO   S19        25,060  06-09-03 10:24p presto.s19
+
+GENERATING LISTING...
+RUNNING [objdump.exe --disassemble-all --architecture=m68hc11 --section=.text presto.elf > presto.lst]
+OK
+
+MEMORY USAGE
+------------
+RUNNING [objdump.exe -h obj\presto.elf > headers.txt]
+ROM  code            7947
+ROM  const data      275
+ROM  data (init)     14
+ROM  strings         0
+ROM  vectors (init)  42
+RAM  data (init)     14
+RAM  data (uninit)   148
+RAM  data (zero)     2417
+RAM  heap (zero)     688
+RAM  stack (zero)    80
+RAM  vectors (zero)  42
+totals: ROM=8278, RAM=3389
+

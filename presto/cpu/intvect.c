@@ -34,8 +34,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
-#include "presto.h"
-#include "error_codes.h"
+#include "cpu/error.h"
 #include "cpu/locks.h"
 #include "cpu/intvect.h"
 
@@ -67,7 +66,7 @@ static WORD illop_address;
 
 //void inert_isr(void) __attribute__((interrupt));
 void inert_isr(void) { asm("rti"); }
-void error_isr(void) { presto_fatal_error(ERROR_INTVECT_OTHER); }
+void error_isr(void) { error_fatal(ERROR_INTVECT_OTHER); }
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -77,7 +76,7 @@ void illop_isr(void) {
    // return address would normally be).
    asm("sts illop_sp");
    illop_address=*((WORD *)(illop_sp+8));
-   presto_crash_address(illop_address);
+   error_address(illop_address);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -131,13 +130,13 @@ void set_interrupt(BYTE intr, void (*vector)(void)) {
 
 void init_interrupts(void) {
    int i;
-   KERNEL_LOCK_T lock;
-   presto_lock_save(lock);
-   for(i=INTR_SCI;i<=INTR_RESET;i++) {
+   CPU_LOCK_T lock;
+   cpu_lock_save(lock);
+   for (i=INTR_SCI;i<=INTR_RESET;i++) {
       normal_interrupt_vectors[i]=error_isr;
    }
    normal_interrupt_vectors[INTR_ILLOP]=illop_isr;
-   presto_unlock_restore(lock);
+   cpu_unlock_restore(lock);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

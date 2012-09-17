@@ -13,7 +13,7 @@
 //   S I M P L E   D A T A   T Y P E S
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef unsigned char  KERNEL_TID_T;
+typedef unsigned char  KERNEL_TASKID_T;
 typedef unsigned char  KERNEL_PRIORITY_T;
 typedef unsigned char  KERNEL_TRIGGER_T;
 typedef unsigned short KERNEL_INTERVAL_T;
@@ -23,7 +23,7 @@ typedef unsigned short KERNEL_INTERVAL_T;
 ////////////////////////////////////////////////////////////////////////////////
 
 typedef struct KERNEL_TCB_S {
-   KERNEL_TID_T task_id;
+   KERNEL_TASKID_T task_id;
    BYTE * stack_ptr;
    BYTE * stack_top;
    BYTE * stack_bottom;
@@ -38,7 +38,6 @@ typedef struct KERNEL_TCB_S {
 //   K E R N E L - O N L Y   D A T A
 ////////////////////////////////////////////////////////////////////////////////
 
-extern KERNEL_TIME_T kernel_clock;
 extern KERNEL_TCB_T * kernel_current_tcb_p;
 
 ////////////////////////////////////////////////////////////////////////////////

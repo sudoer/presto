@@ -8,10 +8,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
+#include "error_codes.h"
 #include "cpu/hc11regs.h"
 #include "cpu/locks.h"
 #include "cpu/misc_hw.h"
-#include "error_codes.h"
+#include "cpu/error.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,8 +38,8 @@ void show_one_byte(BYTE leds) {
 //   E X T E R N A L   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_fatal_error(error_number_e err) {
-   presto_lock();
+void error_fatal(error_number_e err) {
+   cpu_lock();
    while (1) {
       TOGGLE_SPEAKER();
       show_one_byte(err);
@@ -47,28 +48,28 @@ void presto_fatal_error(error_number_e err) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_crash(void) {
+void error_crash(void) {
    // This will cause an ILLEGAL OPERATION interrupt
    asm("test");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_crash_address(unsigned short address) {
+void error_address(unsigned short address) {
    BYTE delay;
-   presto_lock();
+   cpu_lock();
    while (1) {
-      for(delay=0;delay<150;delay++) {
+      for (delay=0;delay<150;delay++) {
          show_one_byte(0x00);
       }
-      for(delay=0;delay<100;delay++) {
+      for (delay=0;delay<100;delay++) {
          TOGGLE_SPEAKER();
          show_one_byte((BYTE)(address>>8));
       }
-      for(delay=0;delay<25;delay++) {
+      for (delay=0;delay<25;delay++) {
          show_one_byte(0x00);
       }
-      for(delay=0;delay<100;delay++) {
+      for (delay=0;delay<100;delay++) {
          TOGGLE_SPEAKER();
          show_one_byte((BYTE)(address&0x00FF));
       }

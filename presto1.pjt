@@ -1,0 +1,164 @@
+;Codewright Project File (do not remove or modify this line)
+[ProjInit]
+ConfigSetExtMode=2
+ProjSetConfigFlags=0x04100940
+
+[State]
+SysSetCwd='C:\alan\projects\hc11\work'
+SrchSetFlags=0x44142826
+SrchSetAgainFlags=0x40042022,0
+SrchSetAgainFlags=0x42042026,1
+SrchSetAttrElements=
+SrchSetAgainAttrElements=
+FileSortMode=0x12
+_StateView='C:\alan\projects\hc11\work\app\app_main.c',66,66,580,439,-1,-1,181,37,165,1,1,'',0x0a410058,0,80,0,0,'',0,0
+_StateView='C:\alan\projects\hc11\work\presto\configure.h',176,176,580,439,-1,-1,1,1,1,1,3,'',0x0a410048,0,80,0,0,'',0,0
+_StateView='C:\alan\projects\hc11\work\presto\kernel\kernel.c',110,110,580,439,-1,-1,427,7,393,1,2,'',0x0a410048,0,80,0,0,'',0,0
+_StateView='C:\alan\projects\hc11\work\presto\kernel\timer.c',132,132,580,439,-1,-1,18,1,1,1,4,'',0x0a410048,0,80,0,0,'',0,0
+_StateView='C:\alan\projects\hc11\work\presto\error_codes.h',88,88,580,439,-1,-1,7,1,1,1,5,'',0x0a410048,0,80,0,0,'',0,0
+_StateBuffer='C:\alan\projects\hc11\work\app\app_main.c',0x04001c82,181,37,25,'4 7','',0x0,'',1,72,1,0,'',''
+_StateBuffer='C:\alan\projects\hc11\work\presto\configure.h',0x00001c82,1,1,25,'4 7','',0x0,'',1,72,0,0,'',''
+_StateBuffer='C:\alan\projects\hc11\work\presto\kernel\kernel.c',0x04001c82,427,7,25,'4 7','',0x0,'',1,72,0,0,'',''
+_StateBuffer='C:\alan\projects\hc11\work\presto\kernel\timer.c',0x04001c82,18,1,25,'4 7','',0x0,'',1,72,0,0,'',''
+_StateBuffer='C:\alan\projects\hc11\work\presto\error_codes.h',0x04001c82,7,1,25,'4 7','',0x0,'',1,72,0,0,'',''
+_StateHistory=FILELIST,'C:\alan\projects\hc11\work\app\app_main.c','C:\alan\projects\hc11\work\obj\presto.lst','C:\alan\projects\hc11\work\presto\cpu\hwtimer.c','C:\alan\projects\hc11\work\unused\motors.c','C:\alan\projects\hc11\work\presto\error_codes.h','C:\alan\projects\hc11\work\presto\kernel\kernel.c','C:\alan\projects\hc11\work\presto\kernel\timer.c','C:\alan\projects\hc11\work\presto\cpu\error.h','C:\alan\projects\hc11\work\presto\configure.h'
+_StateHistory=SEARCH,'KERNEL_LOCK_T','presto','PRESTO','timer_isr','hwtimer_restart','president','pres_','FLAG_P_','FLAG_C_','struct MOTORSTRUCT_S'
+_StateHistory=REPLACE,'cpu/locks','cpu_lock','cpu_unlock','cpu_interruption_point','CPU_LOCK_T','motor','motor_','FLAG_MOTOR_','FLAG_CONTROL_','MOTORSTRUCT_T'
+_StateHistory=EDITFILE,'C:\sde\CC\EUSALPO_camera2\snapshot\RTPD_SwModules_001\cnh1010325_sysbus_cdma\swbp\camglue_swbp.h','C:\sde\CC\EUSALPO_camera2\snapshot\RTPD_SwModules_001\cnh1010325_sysbus_cdma\swbp\dstask_signals.h','C:\sde\CC\EUSALPO_camera2\snapshot\RTPD_SwModules_001\cnh1010325_sysbus_cdma\internsw\obex\camera_glue.h','C:\sde\CC\EUSALPO_camera2\crh1069104_carmencentral1\crh1069104_carmencentral1.dsw','C:\sde\CC\EUSALPO_camera\snapshot\RTPD_SwModules_002\cnh1010330_cdma_brew\includeg\OEMFeatures.h','C:\sde\CC\EUSALPO_camera\snapshot\alan\OEMFeatures.h','C:\sde\CC\EUSALPO_camera\snapshot\RTPD_SwModules_002\cnh1010330_cdma_brew\includeg\OEMFeatures.h','C:\sde\CC\EUSALPO_camera\snapshot\RTPD_SwModules_001\cnh1010325_sysbus_cdma\internsw\obex\camera_glue.c','C:\cw\cdma','C:\alan\projects\hc11\work\presto.psp'
+_StateHistory=DIRECTORY,'C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\LD_SwModules_003\cnh1010070_uibasic','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\RTPD_SwModules_002\cnh1010329_cdma_dmss','C:\sde\CC\EUSALPO_r1a_dev_snapshot\crh1069104_carmencentral1\cxc1122529\ADS-ARM7\inc','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_002\cnh1010329_cdma_dmss','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_002','C:\sde\CC\EUSALPO_iris1_snapshot\crh1069119_carmeniris\cxc1122529\ADS-ARM7\inc','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_002\cnh1010329_cdma_dmss\internsw','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_001\cnh1010326_test_handler','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_001\cnh1010317_coresw_cdma'
+_StateHistory=FILTER,'sort','sort /11','sort /+11','sort','sort /+50','sort','sort /r','sort'
+_StateHistory=FFIND,'p_types','p_types.h','comdef.h','nv.h'
+_StateHistory=FGREP,'GP_MN','MSM_OUTHM','GPIO_INT_TSEN_1_WH','I2C','lint','DVC_CAMERA_GPIO','DVC_WRITE_GPIO','~=s/','=~s/','presto_lock'
+_StateHistory=GREPSCOPE,' *.h',' *.c','*.h','*.c *.h','*.bat','*.*','*.c ; *.h','*.pl','*.c'
+_StateHistory=DIFFFILE,'K:\CDMA_ADMIN_t606_t608_r1a075_view\RTPD_SwModules_002\cnh1010329_cdma_dmss\internsw\siors232.c','C:\sde\CC\EUSALPO_camera\snapshot\alan\bt_sio.c','C:\WINNT\Profiles\eusalpo\Desktop\personal\phone_settings\alan\thems\alan.thm','<untitled>2','C:\WINNT\Profiles\eusalpo\Desktop\pass.txt','K:\EUSALPO_r1a_dev_view\RTPD_SwModules_001\cnh1010325_sysbus_cdma\includeg\acm_if.h','K:\EUSALPO_r1a_dev_view\RTPD_SwModules_001\cnh1010325_sysbus_cdma\internsw\acm\acm_if.c','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\LD_SwModules_006\cnh1010155_uicamera\internsw\appdesc_camera.c.keep','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\LD_SwModules_003\cnh1010041_xformat\internsw\xf.c','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\RTPD_SwModules_001\cnh1010325_sysbus_cdma\swbp\dstask_swbp.h'
+_StateHistory=PRNHEADER,'%f','acm_if.c','%b%e','%f - page %p'
+_StateHistory=DIFFTARGET,'C:\backup\cw\siors232.c','C:\sde\CC\EUSALPO_camera\snapshot\RTPD_SwModules_002\cnh1010329_cdma_dmss\internsw\bt_sio.c','C:\WINNT\Profiles\eusalpo\Desktop\personal\phone_settings\alan\thems\Metal.thm','<untitled>1','C:\WINNT\Profiles\eusalpo\Desktop\fail.txt','K:\EUSALPO_t606maint_merge_view\RTPD_SwModules_001\cnh1010325_sysbus_cdma\includeg\acm_if.h','K:\EUSALPO_t606maint_merge_view\RTPD_SwModules_001\cnh1010325_sysbus_cdma\internsw\acm\acm_if.c','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\LD_SwModules_006\cnh1010155_uicamera\internsw\appdesc_camera.c','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\alan\xf.c','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\RTPD_SwModules_001\cnh1010325_sysbus_cdma\swbp\dstask_swbp.h.keep'
+_StateHistory=FFINDDIR,'C:\sde\CC\EUSALPO_camera2\snapshot','C:\sde\CC\EUSALPO_camera2'
+_StateHistory=FGREPDIR,'C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_002\cnh1010329_cdma_dmss','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_001','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_002','C:\sde\CC\EUSALPO_iris1_snapshot\crh1069119_carmeniris\cxc1122529\ADS-ARM7\inc','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_002\cnh1010329_cdma_dmss\internsw','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_001\cnh1010326_test_handler','C:\programs\Ericsson','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_001\cnh1010317_coresw_cdma','C:\alan','C:\alan\projects\hc11\work'
+_StateHistory=DOCUMENTVISIT,'242         10          C:\alan\projects\hc11\work\app\app_main.c','7           1           C:\alan\projects\hc11\work\presto\error_codes.h','181         37          C:\alan\projects\hc11\work\app\app_main.c','427         30          C:\alan\projects\hc11\work\presto\kernel\kernel.c','18          1           C:\alan\projects\hc11\work\presto\kernel\timer.c','6           1           C:\alan\projects\hc11\work\presto\cpu\error.h','18          1           C:\alan\projects\hc11\work\presto\kernel\timer.c','181         37          C:\alan\projects\hc11\work\app\app_main.c','1           1           C:\alan\projects\hc11\work\presto\configure.h','427         7           C:\alan\projects\hc11\work\presto\kernel\kernel.c'
+_StateHistory=XOBJECTS,'OBEX_HEADERFRAME_BUFFER_MAXSIZE'
+_StateHistory=DIFFDIRREFERENCE,'C:\sde\CC\EUSALPO_camera2\snapshot\RTPD_SwModules_001\cnh1010325_sysbus_cdma\internsw\ts0710'
+_StateHistory=DIFFDIRTARGET,'K:\EUSALPO_merge_view\RTPD_SwModules_001\cnh1010325_sysbus_cdma\internsw\ts0710'
+_StateHistory=DIFFDIRSCOPE,''
+_StateDocumentVisit=10
+
+[Tools]
+ToolDeleteList 
+ToolAddCmd='$_custom_tool_$_1','API Database Editor',1342177312,'cwtedit.exe'
+ToolAddCmd='$_custom_tool_$_2','Paint',1342177312,'pbrush.exe'
+
+[Compiler]
+TagSetCmd='"${HOME}${WTAGS}" -oc -d -t"${TAGFILE}.tag" -p"${TAGFILE}.ptg"',0x8000060
+BrowseSetFile='C:\programs\CodeWright\tagfile.ptg'
+TagSetFile='C:\programs\CodeWright\tagfile.tag'
+CompilerAddCmdEx='$_cw_proj_hash_$','',1073741904,'',80,'${FTEE} nmake',176,'${FTEE} nmake',176,'${FTEE} nmake',176,'${FTEE} nmake',176,'',0,'',0,'_ErrorInfoDefault','','','proj.err','%x'
+CompilerAddResponse='$_cw_proj_hash_$',
+CompilerNewExt=.htm
+CompilerNewExt=.v
+CompilerNewExt=.awk
+CompilerNewExt=.bas
+CompilerNewExt=.adb
+CompilerNewExt=.cfml
+CompilerNewExt=.jsp
+CompilerNewExt=.pl
+CompilerNewExt=.vhd
+CompilerNewExt=.pas
+CompilerNewExt=.tk
+CompilerNewExt=.rul
+CompilerNewExt=.asp
+CompilerNewExt=.cob
+CompilerNewExt=.js
+CompilerNewExt=.php
+CompilerNewExt=.rc
+CompilerNewExt=.tcl
+CompilerNewExt=.ini
+CompilerNewExt=.bat
+CompilerNewExt=.html
+CompilerNewExt=.cs
+CompilerNewExt=.txt
+CompilerNewExt=.nrx
+CompilerNewExt=.sqlj
+CompilerNewExt=.jav
+CompilerNewExt=.java
+CompilerNewExt=.xml
+
+[Editor]
+_RestoreSysFlags=0x43097fca, 0xfffffffc, 0
+VCSProject=''
+VCSProjectPath=''
+VCSProjectLocalPath=''
+
+[VersionControl:PVCS]
+VCSSetCmd=VCS_CHECKIN_ID,'put -n -T@"%Q" -M@"%Q" "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKINLOCK_ID,'put -n -T@"%Q" -M@"%Q" -l "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKOUT_ID,'get -y "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKOUTLOCK_ID,'get -y -l "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKLOCK_ID,'vcs -y -l "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKUNLOCK_ID,'vcs -y -u "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKLABEL_ID,'vcs -y -v"${VCSLABEL}" "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKLOG_ID,'vlog "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKPROP_ID,'vlog -b "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKDIFF_ID,'vdiff -r "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKMENU_ID,'pvcsvmwn',0x8000000
+VCSSetCmd=VCS_ADD_ID,'vcs -i -t@"%Q" "%b%e"',0x8000040
+VCSSetCmd=VCS_REMOVE_ID,'del /f "%b%{??v|___}e"',0x8000040
+
+[Project]
+ConfigSetUserMakefile=''
+ConfigSetUserMakefileParser=''
+ConfigSetUserMakefileTimeStamp=0
+ConfigSetUserMakefileAutoSync=0
+ConfigSetLinkDBFilename='C:\programs\CodeWright\cwright.ldb'
+ConfigSetMarkDBFilename='C:\programs\CodeWright\cwright.mrk'
+ConfigSetSymbolDBFilename='C:\alan\projects\hc11\work\presto1.sbl'
+EditSetPath=''
+
+[Files]
+.\presto\types.h
+.\presto\presto.h
+.\presto\configure.h
+.\presto\error_codes.h
+.\presto\kernel\clock.c
+.\presto\kernel\mail.c
+.\presto\kernel\kernel.h
+.\presto\kernel\semaphore.h
+.\presto\kernel\kernel.c
+.\presto\kernel\timer.c
+.\presto\kernel\memory.h
+.\presto\kernel\mail.h
+.\presto\kernel\clock.h
+.\presto\kernel\semaphore.c
+.\presto\kernel\timer.h
+.\presto\kernel\memory.c
+.\presto\kernel\locks.h
+.\presto\cpu\intvect.c
+.\presto\cpu\boot.h
+.\presto\cpu\error.h
+.\presto\cpu\error.c
+.\presto\cpu\intvect.h
+.\presto\cpu\hc11regs.h
+.\presto\cpu\boot.c
+.\presto\cpu\hwtimer.h
+.\presto\cpu\hwtimer.c
+.\presto\cpu\misc_hw.h
+.\presto\cpu\crt0.s
+.\services\string.h
+.\services\string.c
+.\services\serial.c
+.\services\serial.h
+.\app\app_main.c
+.\presto\cpu\locks.h
+.\unused\sound.h
+.\unused\i2c.h
+.\unused\inputs.c
+.\unused\inputs.h
+.\unused\isr.h
+.\unused\lcd.c
+.\unused\lcd.h
+.\unused\motors.c
+.\unused\motors.h
+.\unused\priority.h
+.\unused\sound.c
+.\unused\i2c.c
+.\unused\services.h
+

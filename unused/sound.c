@@ -1,20 +1,26 @@
 
-#include "hc11regs.h"
 #include "types.h"
-#include "services\sound.h"
+#include "cpu/hc11regs.h"
+#include "cpu/intvect.h"
+#include "services/sound.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // FUNCTION PROTOTYPES
 
-#pragma interrupt_handler sound_isr
-void sound_isr(void);
+void sound_isr(void) __attribute__((interrupt));
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // LOCAL VARIABLES
 
-/* static */ unsigned int beep_tone;
+static unsigned int beep_tone;
+
+////////////////////////////////////////////////////////////////////////////////
+
+void sound_init(void) {
+   set_interrupt(INTR_TOC5, sound_isr);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -36,11 +42,11 @@ void sound_on(unsigned short tone) {
       TFLG1 = TFLG1_OC5F;
 
       // successful comparison toggles OC5 output line
-      TCTL1 |= TCTL1_OL5;
-      TCTL1 &= ~TCTL1_OM5;
+      MASKSET(TCTL1,TCTL1_OL5);
+      MASKCLR(TCTL1,TCTL1_OM5);
 
       // enable beeper interrupt
-      TMSK1 |= TMSK1_OC5I;
+      MASKSET(TMSK1,TMSK1_OC5I);
    }
 }
 
@@ -48,9 +54,9 @@ void sound_on(unsigned short tone) {
 
 void sound_off(void) {
    // disable beeper interrupt
-   TMSK1 &= ~TMSK1_OC1I;
+   MASKCLR(TMSK1,TMSK1_OC1I);
    // Turn off line toggling
-   TCTL1 &= ~(TCTL1_OM5|TCTL1_OL5);
+   MASKCLR(TCTL1,(TCTL1_OM5|TCTL1_OL5));
    beep_tone = 0;
 }
 
@@ -58,8 +64,8 @@ void sound_off(void) {
 
 void sound_isr(void) {
    // reset timer to go off again in a little bit
-   TOC5 = TCNT + beep_tone;
-
+   TOC5 = TOC5 + beep_tone;
+   if(TCNT>TOC5) TOC5 = TCNT + beep_tone;
    // clear the OUTPUT COMPARE flag
    // writing O's makes no change, writing 1's clears the bit
    TFLG1 = TFLG1_OC5F;

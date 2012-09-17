@@ -77,7 +77,7 @@ float string_StringToFloat(const char * string) {
    int8 sign;
 
    // skip white space
-   for(posn=0;string[posn]==' ';posn++) {
+   for (posn=0;string[posn]==' ';posn++) {
    }
 
    // determine sign
@@ -93,7 +93,7 @@ float string_StringToFloat(const char * string) {
    }
 
    // accumulate digits before the decimal point
-   for(val=0.0;((string[posn]>='0')&&(string[posn]<='9'));posn++) {
+   for (val=0.0;((string[posn]>='0')&&(string[posn]<='9'));posn++) {
       val=10.0*val+(string[posn]-'0');
    }
 
@@ -103,7 +103,7 @@ float string_StringToFloat(const char * string) {
    }
 
    // accumulate digits after the decimal (keeping track of power)
-   for(power=1.0;((string[posn]>='0')&&(string[posn]<='9'));posn++) {
+   for (power=1.0;((string[posn]>='0')&&(string[posn]<='9'));posn++) {
       val=10.0*val+(string[posn]-'0');
       power*=10.0;
    }
@@ -194,7 +194,7 @@ sint16 string_StringToInteger(const char * string) {
    sint8 sign;
 
    // skip white space
-   for(posn=0;string[posn]==' ';posn++) {
+   for (posn=0;string[posn]==' ';posn++) {
    }
 
    // determine sign
@@ -210,7 +210,7 @@ sint16 string_StringToInteger(const char * string) {
    }
 
    // accumulate digits before the decimal point
-   for(val=0;((string[posn]>='0')&&(string[posn]<='9'));posn++) {
+   for (val=0;((string[posn]>='0')&&(string[posn]<='9'));posn++) {
       val=10*val+(string[posn]-'0');
    }
 
@@ -262,7 +262,7 @@ void string_IntegerToHex(uint16 value, char * string, uint8 len) {
    uint8 digit;
 
    // go through and save each digit
-   for(count=len;count>0;count--) {
+   for (count=len;count>0;count--) {
       digit=(uint8)value&0x0F;
       string[count-1]=(char)((digit<10)?(digit+'0'):(digit-10+'A'));
       value>>=4;

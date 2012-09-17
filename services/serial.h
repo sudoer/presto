@@ -9,7 +9,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern void serial_init(PRESTO_TID_T task, PRESTO_TRIGGER_T alert);
+extern void serial_init(PRESTO_TASKID_T task, PRESTO_TRIGGER_T alert);
 extern void serial_send_byte(BYTE send);
 extern void serial_send_string(char * send);
 extern BOOLEAN serial_recv(BYTE * r);

@@ -1,6 +1,6 @@
 
-#include "hc11regs.h"
 #include "presto.h"
+#include "cpu/hc11regs.h"
 #include "services\i2c.h"
 #include "types.h"
 

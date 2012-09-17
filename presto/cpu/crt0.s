@@ -1,58 +1,47 @@
-USEHEAP = 0
-
 
    .text
    .globl _start
 
 
 _start:
+
+
+; load initial statck pointer
    lds   #__stack_end-1
+
+; call cpu-specific initialization
    jsr   premain
 
 
 ; clear BSS
    clra
    ldx   #__bss_start
-init_loop:
+bss_loop:
    cpx   #__bss_end
-   beq   init_done
+   beq   bss_done
    staa  0,x
    inx
-   bra   init_loop
-init_done:
+   bra   bss_loop
+bss_done:
 
 
 ; copy initialized idata to data
-; idata in ppage and data in dpage
    ldx   #__idata_start
    ldy   #__data_start
-copy_loop:
+idata_loop:
    cpx   #__idata_end
-   beq copy_done
+   beq idata_done
    ldab 0,x
    stab 0,y
    inx
    iny
-   bra copy_loop
-copy_done:
-
-
-; set up heap space
-.if USEHEAP
-   ldd   #heap_size
-   beq   heap_done
-   addd #__bss_end
-   pshb
-   psha
-   ldd   #__bss_end
-   jsr   __NewHeap
-   pulx
-.endif
-heap_done:
+   bra idata_loop
+idata_done:
 
 
 ; call user main routine
    jsr main
+
 
 _postmain:
    bra   _postmain
