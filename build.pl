@@ -1,5 +1,13 @@
 
-$debug=1;
+################################################################################
+#   B A S I C   I N C L U D E S   A N D   D E B U G   I N F O
+################################################################################
+
+# turn debug info on/off
+$debug=0;
+
+# fast move/copy routines
+use File::Copy;
 
 ################################################################################
 #   P I C K   A   C O M P I L E R
@@ -68,6 +76,7 @@ print("OK\n");
 print("setting up assembler...");
 if($compiler eq $icc) {
 } elsif($compiler eq $gcc) {
+   # AS6811.EXE options
    # -g undefined symbols made global
    # -a all user symbols made global
    # -l create a list output
@@ -76,15 +85,25 @@ if($compiler eq $icc) {
    # -p disable listing pagination
    # -w wide listing format for symbol table
    # -z enable case-sensitivity for symbols
-   $gnu_asm_opts="-loszgp";
+
+   #  AS.EXE Assembler V01.50  (Motorola 6811)
+   #  Usage: [-dqxgalsf] [-o ofile] file1 [file2 file3 ...]
+   #  d     decimal listing
+   #  q     octal   listing
+   #  x     hex     listing (default)
+   #  g     undefined symbols made global
+   #  u     undefined symbols made local (!g)
+   #  a     all user symbols made global
+   #  l     create list   output file1[lst]
+   #  o     create object output ofile
+   #  s     create symbol output file1[sym]
+   #  f     flag relocatable references by  `   in listing file
+   $gnu_asm_exe="as.exe";
+   $gnu_asm_opts="-xgls";
 }
 print("OK\n");
 
-
-
-
 print("setting up linker...");
-
 if($compiler eq $icc) {
    $icc11_lib="$compiler_home\\LIB";
    setenv("ICC11_LIB",$icc11_lib);
@@ -119,6 +138,8 @@ print("OK\n");
 print("creating object directory...");
 mkdir($OBJ_DIR,0777);
 print("OK\n");
+
+# REMEMBER WHERE YOU STARTED
 
 chop($base_dir=`cd`);
 $base_dir=~s/^[A-Za-z]://g;  # remove C:
@@ -193,13 +214,24 @@ foreach $src_path (@SRC_FILES) {
             # -I for include file directories
             $errors|=run("icc11 -c -l -e -I. -D$compiler -o $obj_path $src_path");
          } elsif($compiler eq $gcc) {
-            $include_dir=unix_slashes($base_dir);
-            $src_dir=directory_of($src_path);
-            print("src_dir=[$src_dir]\n");
-            print("cd to [$base_dir\\$src_dir]\n");
-            chdir("$base_dir\\$src_dir");
-            $temp=chop_extension($src_name).".s";
-            $errors|=run("xgcc -S -O2 -mlong_branch -I$include_dir -D$compiler -Wa,$gnu_asm_opts -o $temp $src_name");
+            $temp=chop_extension($src_name);
+            $errors|=run("xgcc -S -O2 -mlong_branch -I. -D$compiler -Wa,$gnu_asm_opts -o $temp.s $src_path");
+            # GCC produces some strange assembly
+            #  (1) It names the module after the full $src_path "dir\file.c"
+            #      The assembler chokes on this, so I change it to just "file.c"
+            #  (2) It uses some strange indirect addressing mode for LDD and STD
+            #      where it leaves off the offset, and just uses X as an address.
+            #      So I just add a "0," in front of the X to make the assembler
+            #      happy.
+            search_and_replace("$temp.s",
+               ".module $src_path",".module $src_name",
+               "ldd\tx","ldd 0,x",
+               "std\tx","std 0,x");
+            $errors|=run("$gnu_asm_exe $gnu_asm_opts -o$obj_path $temp.s");
+            move_file("$temp.s",$OBJ_DIR);
+            move_file("$temp.lst",$OBJ_DIR);
+            move_file("$temp.rel",$OBJ_DIR);
+            move_file("$temp.sym",$OBJ_DIR);
          }
       } elsif( $src_ext eq "asm" ) {
          print("ASSEMBLING\n");
@@ -207,7 +239,7 @@ foreach $src_path (@SRC_FILES) {
             $errors|=run("ias6811 -o $obj_path $src_path");
             move_file(chop_extension($src_path).".lis",$OBJ_DIR);
          } elsif($compiler eq $gcc) {
-            $errors|=run("as6811 $gnu_asm_opts $src_path");
+            $errors|=run("$gnu_asm_exe $gnu_asm_opts -o$obj_path $src_path");
             move_file(chop_extension($src_path).".lst",$OBJ_DIR);
             move_file(chop_extension($src_path).".rel",$OBJ_DIR);
             move_file(chop_extension($src_path).".sym",$OBJ_DIR);
@@ -233,12 +265,6 @@ foreach $src_path (@SRC_FILES) {
    $total_errors+=$errors;
 
 }
-
-# MOVING LIST FILES TO OBJ DIR
-
-print("moving list files to obj dir...");
-run("move *.lis $OBJ_DIR >&> NUL:");
-print("OK\n");
 
 # END OF --- COMPILING AND ASSEMBLING ---
 
@@ -322,7 +348,6 @@ if($total_errors gt 0) {
       print TEMP1 "-k .\\$OBJ_DIR\\\n";
       print TEMP1 "-l system\n";
       foreach $obj (@OBJS) {
-         #print TEMP1 $obj." ";
          print TEMP1 chop_extension(basename($obj))."\n";
       }
       print TEMP1 "-e\n";
@@ -376,10 +401,59 @@ print("done\n");
 #   F U N C T I O N S
 ################################################################################
 
+# search_and_replace(file,search1,replace1,search2,replace2,...)
+sub search_and_replace {
+   my @args=@_;
+   my $filename=shift @args;
+   my $count;
+   my $changes;
+   my @search=();
+   my @replace=();
+   my $replacements_made;
+   my $tempfile="$filename.$$";
+
+   $changes=0;
+   while(($changes*2)<$#args) {
+      $search[$changes]=@args[$changes*2];
+      $replace[$changes]=@args[$changes*2+1];
+      $changes++;
+   }
+
+   if($debug) {
+      for $count (0..$changes-1) {
+         print("replace [$search[$count]] with [$replace[$count]]\n");
+      }
+   }
+
+   open(OLD,$filename);
+   open(NEW,">$tempfile");
+   while($line=<OLD>) {
+      $replacements_made=0;
+      for $count (0..$changes-1) {
+         while($find=index($line,$search[$count])>-1) {
+            substr($line,$find,length($search[$count]))=$replace[$count];
+            $replacements_made++;
+         }
+      }
+      if(($debug>0)&&($replacements_made>0)) {
+         print("CHANGED $line");
+      }
+      print NEW $line;
+   }
+   close(OLD);
+   close(NEW);
+   unlink $filename;
+   move($tempfile,$filename);
+}
+
+################################################################################
+
 sub run {
    my $cmd=$_[0];
    my $rc;
-   print("RUNNING [$cmd]\n");
+   if($debug) {
+      print("RUNNING [$cmd]\n");
+   }
    $rc=system($cmd);
    return $rc;
 }
@@ -389,7 +463,10 @@ sub run {
 sub move_file {
    my $src=$_[0];
    my $dest=$_[1];
-   run("move $src $dest > NUL:");
+   if($debug) {
+      print("MOVING [$src] to [$dest]\n");
+   }
+   move($src,$dest);
 }
 
 ################################################################################
