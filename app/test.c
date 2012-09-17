@@ -1,6 +1,7 @@
 
 #include "presto.h"
 #include "types.h"
+#include "debug.h"
 //#include "services.h"
 //#include "priority.h"
 
@@ -117,7 +118,7 @@ int main(void) {
    //debugger_init();
    presto_start_scheduler();
    // we never get here
-   presto_fatal_error();
+   presto_fatal_error(0x01);
    return 0;
 }
 

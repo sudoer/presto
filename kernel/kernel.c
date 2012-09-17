@@ -2,6 +2,8 @@
 #include "hc11regs.h"
 #include "system.h"
 #include "presto.h"
+#include "intvect.h"
+#include "debug.h"
 #include "kernel\kernel.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -14,8 +16,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define DISABLE_CCR_INTERRUPT_BIT      //asm("oraa #0x10");
-#define ENABLE_CCR_INTERRUPT_BIT      //asm("anda ~#0x10");
+#define DISABLE_CCR_INTERRUPT_BIT     asm("oraa #0x10");
+#define ENABLE_CCR_INTERRUPT_BIT      asm("anda #~0x10");
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -108,7 +110,7 @@ void presto_init(void) {
 
 void presto_start_scheduler(void) {
 
-   if(presto_initialized==0) presto_fatal_error();
+   if(presto_initialized==0) presto_fatal_error(0x02);
 
    // we're about to switch to our first task... interrupts off
    INTR_OFF();
@@ -124,7 +126,7 @@ void presto_start_scheduler(void) {
    // first task in list is highest priority and is ready
    current_tcb_p=tcb_head_p;
    if(current_tcb_p==NULL) {
-      presto_fatal_error();
+      presto_fatal_error(0x03);
    }
    current_tid=current_tcb_p->task_id;
 
@@ -148,7 +150,7 @@ void presto_start_scheduler(void) {
    asm("rti");
 
    // we never get here
-   presto_fatal_error();
+   presto_fatal_error(0x04);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -159,11 +161,11 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
 
    PRESTO_TCB_T * new_tcb_p;
 
-   if(presto_initialized==0) presto_fatal_error();
+   if(presto_initialized==0) presto_fatal_error(0x05);
 
    if(free_tcb_p==NULL) {
       // There are no more TCB's left.
-      presto_fatal_error();
+      presto_fatal_error(0x06);
       return -1;
    }
 
@@ -265,7 +267,7 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
 
 void presto_kill_self(void) {
    // TODO - remove TCB from list
-   presto_fatal_error();
+   presto_fatal_error(0x07);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -288,7 +290,7 @@ void presto_system_isr(void) {
       // check to see if we've clobbered our stack
       if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
       ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
-         presto_fatal_error();
+         presto_fatal_error(0x08);
 
       // these parameters will be used in inline assembly...
       // must be put in global space, not on stack
@@ -328,7 +330,7 @@ void context_switch(void) {
    // check to see if the old task has clobbered its stack
    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
    ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
-      presto_fatal_error();
+      presto_fatal_error(0x09);
 
    // the inline asm will save old SP in old TCB
    global_old_sp_p=&(current_tcb_p->stack_ptr);
@@ -340,7 +342,7 @@ void context_switch(void) {
    // check to see if the new task has clobbered its stack
    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
    ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
-      presto_fatal_error();
+      presto_fatal_error(0x0A);
 
    // call asm routine to set up new stack
    // when we return, we'll be another process
@@ -387,7 +389,7 @@ void context_switch(void) {
       ptr=ptr->next;
    }
    // should never get here
-   presto_fatal_error();
+   presto_fatal_error(0x0B);
    return NULL;
 }
 
@@ -410,13 +412,13 @@ BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload) 
 
    // check to see if there's room
    if(free_mail_p==NULL) {
-      presto_fatal_error();
+      presto_fatal_error(0x0C);
    }
 
    // check to see that the recipient is an alive task
    tcb_ptr=tid_to_tcbptr(to);
    if(tcb_ptr==NULL) {
-      presto_fatal_error();
+      presto_fatal_error(0x0D);
    }
 
    // allocate space for a new message
@@ -491,12 +493,12 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
    // get one message from the task's mail queue
    if(msg_p==NULL) {
       // there are no messages in the task's mail list
-      presto_fatal_error();
+      presto_fatal_error(0x0E);
    }
 
    // are we being paranoid?
    if((msg_p->to_tcb_p)!=current_tcb_p) {
-      presto_fatal_error();
+      presto_fatal_error(0x0F);
    }
 
    // there is at least one message, get one
@@ -532,7 +534,7 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
    while((po_mail_p!=NULL)&&(clock_compare(po_mail_p->delivery_time,presto_master_clock)<=0)) {
       // we're going to use this a lot, so de-reference once
       tcb_p=po_mail_p->to_tcb_p;
-      if(tcb_p==NULL) presto_fatal_error();
+      if(tcb_p==NULL) presto_fatal_error(0x10);
 
       // make receiver task ready
       tcb_p->state=STATE_READY;
@@ -579,7 +581,7 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
 ////////////////////////////////////////////////////////////////////////////////
 
 /*static*/ PRESTO_TCB_T * tid_to_tcbptr(BYTE tid) {
-   if(tid>=MAX_TASKS) presto_fatal_error();
+   if(tid>=MAX_TASKS) presto_fatal_error(0x11);
    if(tcb_list[tid].state==STATE_INACTIVE) return NULL;
    return &tcb_list[tid];
 }
@@ -590,7 +592,7 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
 
 /*static*/ void presto_start_master_timer(void) {
    // store (current plus CYCLES_PER_TICK)
-   TOC2 = TCNT + CYCLES_PER_TICK;
+   TOC2 = (WORD)(TCNT + CYCLES_PER_TICK);
    // request output compare interrupt
    TMSK1 |= TMSK1_OC2I;
    // clear the OUTPUT COMPARE flag
@@ -604,7 +606,7 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
 
 /*static*/ void presto_restart_master_timer(void) {
    // store (last plus CYCLES_PER_TICK)
-   TOC2 = TOC2 + CYCLES_PER_TICK;
+   TOC2 = (WORD)(TOC2 + CYCLES_PER_TICK);
    // clear the OUTPUT COMPARE flag
    // writing O's makes no change, writing 1's clears the bit
    TFLG1 = TFLG1_OC2F;

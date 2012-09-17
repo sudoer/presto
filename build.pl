@@ -7,7 +7,7 @@
 use File::Copy;
 
 # turn debug info on/off
-$debug=1;
+$debug=0;
 
 setup_project();
 setup_compiler();
@@ -41,7 +41,8 @@ sub setup_project {
    #           "utils\\string.c",
                "kernel\\clock.c",
                "kernel\\system.c",
-               "kernel\\specvect.c",
+               "kernel\\debug.c",
+               "kernel\\intvect.c",
                "kernel\\kernel.c",
    );
 
@@ -149,7 +150,7 @@ sub compile_stage {
             print($indent."COMPILING...");
             if($debug) { print("\n"); }
             chdir($src_dir);
-            $errors|=run("gcc.exe "
+            $errors+=run("gcc.exe "
                         ."-m68hc11 "
                         ."-DGCC "
                         ."-I$build_dir -I. "
@@ -158,11 +159,12 @@ sub compile_stage {
                         ."-fomit-frame-pointer "
                         ."-msoft-reg-count=0 "
                         ."-c "
-                        #."-save-temps "
+                        #."-keep-temps "
+                        ."-Wa,-L,-ahlns=$build_dir\\$OBJ_DIR\\$src_base.lst "
                         ."-o $build_dir\\$OBJ_DIR\\$src_base.o "
                         ."$src_name");
-            chdir($build_dir);
             print("OK\n");
+            chdir($build_dir);
          } else {
             print("HUH?\n");
          }
@@ -216,30 +218,13 @@ sub link_stage {
       ."-nostartfiles "
       ."-defsym _io_ports=0x1000 "
       ."-defsym _stack=0xB5FF "
-      ."-defsym vectors_addr=0xBFC0 "
       ."-defsym _.tmp=0x0 "
       ."-defsym _.z=0x2 "
       ."-defsym _.xy=0x4 "
-      ."-Map $TARGET.map "  #"--cref "
+      ."-Map $TARGET.map " # --cref "
       #."--strip-all "
-      ."-o $TARGET.elf "
+      ."-o $TARGET.s19 "
       ."../lib/crt0.o $ofiles");
-   print("OK\n");
-   print("\n");
-
-   print("CONVERTING TO S19...\n");
-   # do not put page0 or bss into S-record file (they are initialized in crt0)
-   run("objcopy "
-      ."--only-section=.text "
-      ."--only-section=.data "
-      ."--only-section=.specvect "
-      ."--only-section=.normvect "
-      ."--only-section=.install1 "
-      ."--only-section=.install2 "
-      ."--only-section=.install4 "
-      ."--verbose "
-      ."--output-target=srec "
-      ."$TARGET.elf $TARGET.s19");
 
    chdir("$build_dir");
 
