@@ -39,6 +39,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#define CHECK_STACK_CLOBBERING
+#define PARANOID
+
+////////////////////////////////////////////////////////////////////////////////
+
 typedef struct PRESTO_MESSAGE {
    PRESTO_MSGID_T serial_number;
    PRESTO_TID_T from_tid;
@@ -119,6 +124,7 @@ STATIC void context_switch_isr(void) __attribute__((interrupt));
 // message handling
 STATIC PRESTO_MSGID_T msg_Create(PRESTO_TID_T to, unsigned short delay, unsigned short period, PRESTO_MAIL_T payload);
 STATIC void msg_InsertIntoPostOffice(PRESTO_MESSAGE_T * new_mail_p);
+STATIC void msg_InsertIntoTaskQueue(PRESTO_MESSAGE_T * msg_p, PRESTO_TCB_T * to_tcb_p);
 STATIC BYTE msg_DeliverToTasks(void);
 
 // utilities
@@ -133,7 +139,6 @@ void presto_init(void) {
    BYTE flags;
 
    if(presto_initialized) return;
-   presto_initialized=1;
 
    // initialize master clock
    clock_reset(&presto_master_clock);
@@ -154,6 +159,9 @@ void presto_init(void) {
    }
    mail_list[MAX_MESSAGES-1].next=NULL;
    free_mail_p=&mail_list[0];
+
+   // must be done before creating idle task
+   presto_initialized=1;
 
    // initialize idle task
    idle_tid=presto_create_task(idle_task,idle_stack,IDLE_STACK_SIZE,IDLE_PRIORITY);
@@ -182,7 +190,7 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
    }
 
    // we're about to mess with tasks, TCB's... interrupts off
-   lock=presto_lock();
+   presto_lock_save(lock);
 
    // allocate TCB for new task
    new_tcb_p=free_tcb_p;
@@ -243,7 +251,7 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
    }
 
    // we're done messing with the task list... interrupts back on
-   presto_restore_lock(lock);
+   presto_unlock_restore(lock);
 
    return new_tcb_p->task_id;
 }
@@ -321,19 +329,20 @@ PRESTO_MSGID_T presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
    WORD lock;
 
    // we're about to switch to a new task... interrupts off
-   // ????? lock=presto_lock();
+   // ????? presto_lock_save(lock);
 
-   // we will only sleep if there are no messages in our queue
+   // we will only block if there are no messages in our queue
    if(current_tcb_p->mailbox_head==NULL) {
-      // no mail, so we can sleep
+      // task is blocked while waiting for mail
       current_tcb_p->state=STATE_BLOCKED;
+      // time to re-evaluate highest ready task
       asm("swi");
       // When we wake up, we'll be ready to recieve our mail.
       // Interrupts will be enabled.
    }
 
    // we're about to mess with the mail list... interrupts off
-   lock=presto_lock();
+   presto_lock_save(lock);
 
    // we're going to use this a lot, so dereference now
    msg_p=current_tcb_p->mailbox_head;
@@ -369,7 +378,7 @@ PRESTO_MSGID_T presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
    free_mail_p=msg_p;
 
    // done messing with mail lists... interrupts back on
-   presto_restore_lock(lock);
+   presto_unlock_restore(lock);
 
    return msg_p->serial_number;
 }
@@ -485,11 +494,8 @@ STATIC PRESTO_TCB_T * scheduler_FindNextReadyTask(void) {
 
 STATIC PRESTO_MSGID_T msg_Create(PRESTO_TID_T to, unsigned short delay, unsigned short period, PRESTO_MAIL_T payload) {
    PRESTO_MESSAGE_T * new_mail_p;
-   PRESTO_TCB_T * tcb_ptr;
+   PRESTO_TCB_T * to_tcb_p;
    WORD lock;
-
-   // we're going to mess with the PO mail list... interrupts off
-   lock=presto_lock();
 
    // check to see if there's room
    if(free_mail_p==NULL) {
@@ -497,28 +503,38 @@ STATIC PRESTO_MSGID_T msg_Create(PRESTO_TID_T to, unsigned short delay, unsigned
    }
 
    // check to see that the recipient is an alive task
-   tcb_ptr=tid_to_tcbptr(to);
-   if(tcb_ptr==NULL) {
+   to_tcb_p=tid_to_tcbptr(to);
+   if(to_tcb_p==NULL) {
       presto_fatal_error(ERROR_TIMER_TONOBODY);
    }
 
    // allocate space for a new message
+   presto_lock_save(lock);
    new_mail_p=free_mail_p;
    free_mail_p=free_mail_p->next;
 
    // fill in the blanks
    // we never cover up new_mail_p->serial_number
    new_mail_p->from_tid=current_tcb_p->task_id;
-   new_mail_p->to_tcb_p=tcb_ptr;
+   new_mail_p->to_tcb_p=to_tcb_p;
    new_mail_p->delivery_time=presto_master_clock;
    clock_add(&new_mail_p->delivery_time,delay);
    new_mail_p->period=period;
    new_mail_p->payload=payload;
+   presto_unlock_restore(lock);
 
-   msg_InsertIntoPostOffice(new_mail_p);
-
-   // we're done messing with the PO mail list... interrupts back on
-   presto_restore_lock(lock);
+   if(delay>0) {
+      msg_InsertIntoPostOffice(new_mail_p);
+   } else {
+      msg_InsertIntoTaskQueue(new_mail_p,to_tcb_p);
+      // receiver becomes ready...
+      // if receiver is some other task than current one,
+      // WHY DO WE HAVE TO CHECK THIS?  CAN'T WE 'SWI' TO OURSELF?
+      if(to_tcb_p!=current_tcb_p) {
+         // time to re-evaluate highest ready task
+         asm("swi");
+      }
+   }
 
    return new_mail_p->serial_number;
 }
@@ -526,34 +542,52 @@ STATIC PRESTO_MSGID_T msg_Create(PRESTO_TID_T to, unsigned short delay, unsigned
 ////////////////////////////////////////////////////////////////////////////////
 
 STATIC void msg_InsertIntoPostOffice(PRESTO_MESSAGE_T * new_mail_p) {
-
+   WORD lock;
    // insert new message into list in time order
+   presto_lock_save(lock);
    if(po_mail_p==NULL) {
-
       // we are the first message in PO
       po_mail_p=new_mail_p;
       new_mail_p->next=NULL;
-
    } else if(clock_compare(&po_mail_p->delivery_time,&new_mail_p->delivery_time)>0) {
-
       // advance to the head of the class!
       new_mail_p->next=po_mail_p;
       po_mail_p=new_mail_p;
-
    } else {
-
       // we are one of many messages in the PO
       PRESTO_MESSAGE_T * msg_p=po_mail_p;
       while(msg_p->next!=NULL) {
          if(clock_compare(&msg_p->next->delivery_time,&new_mail_p->delivery_time)>0) break;
          msg_p=msg_p->next;
       }
-
       // msg_p->next is either NULL or later delivery time than us
       // either way, we want to get inserted between msg_p and msg_p->next
       new_mail_p->next=msg_p->next;
       msg_p->next=new_mail_p;
    }
+   presto_unlock_restore(lock);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+STATIC void msg_InsertIntoTaskQueue(PRESTO_MESSAGE_T * msg_p, PRESTO_TCB_T * to_tcb_p) {
+   WORD lock;
+   // move the message to the tail of the task's mail list
+   presto_lock_save(lock);
+   if(to_tcb_p->mailbox_head==NULL) {
+      // we are the only message in the list
+      to_tcb_p->mailbox_head=msg_p;
+      to_tcb_p->mailbox_tail=msg_p;
+   } else {
+      // we are one of many, add to the tail of the list
+      to_tcb_p->mailbox_tail->next=msg_p;
+      to_tcb_p->mailbox_tail=msg_p;
+   }
+   // no matter what, we are the last in the task's message list
+   msg_p->next=NULL;
+   // make receiver task ready
+   to_tcb_p->state=STATE_READY;
+   presto_unlock_restore(lock);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -561,14 +595,11 @@ STATIC void msg_InsertIntoPostOffice(PRESTO_MESSAGE_T * new_mail_p) {
 STATIC BYTE msg_DeliverToTasks(void) {
    BYTE count=0;
    PRESTO_MESSAGE_T * msg_p;
-   PRESTO_TCB_T * tcb_p;
+   PRESTO_TCB_T * temp_tcb_p;
    while((po_mail_p!=NULL)&&(clock_compare(&po_mail_p->delivery_time,&presto_master_clock)<=0)) {
       // we're going to use this a lot, so de-reference once
-      tcb_p=po_mail_p->to_tcb_p;
-      if(tcb_p==NULL) presto_fatal_error(ERROR_DELIVER_TCBPNULL);
-
-      // make receiver task ready
-      tcb_p->state=STATE_READY;
+      temp_tcb_p=po_mail_p->to_tcb_p;
+      if(temp_tcb_p==NULL) presto_fatal_error(ERROR_DELIVER_TCBPNULL);
 
       // remove message from PO list
       msg_p=po_mail_p;                      // we know that po_mail_p!=NULL
@@ -578,7 +609,7 @@ STATIC BYTE msg_DeliverToTasks(void) {
          // this message is a repeating timer
          // create a copy of the message and re-insert it into the post office
 
-         PRESTO_MESSAGE_T * new_mail_p;
+         PRESTO_MESSAGE_T * duplicate_mail_p;
 
          // check to see if there's room
          if(free_mail_p==NULL) {
@@ -586,37 +617,22 @@ STATIC BYTE msg_DeliverToTasks(void) {
          }
 
          // allocate space for a new message
-         new_mail_p=free_mail_p;
+         duplicate_mail_p=free_mail_p;
          free_mail_p=free_mail_p->next;
 
          // fill in the blanks
-         // new_mail_p->serial_number;   already set
-         new_mail_p->from_tid=msg_p->from_tid;
-         new_mail_p->to_tcb_p=msg_p->to_tcb_p;
-         new_mail_p->delivery_time=msg_p->delivery_time;
-         clock_add(&new_mail_p->delivery_time,msg_p->period);
-         new_mail_p->period=msg_p->period;
-         new_mail_p->payload=msg_p->payload;
+         // duplicate_mail_p->serial_number;   already set
+         duplicate_mail_p->from_tid=msg_p->from_tid;
+         duplicate_mail_p->to_tcb_p=msg_p->to_tcb_p;
+         duplicate_mail_p->delivery_time=msg_p->delivery_time;
+         clock_add(&duplicate_mail_p->delivery_time,msg_p->period);
+         duplicate_mail_p->period=msg_p->period;
+         duplicate_mail_p->payload=msg_p->payload;
 
-         msg_InsertIntoPostOffice(new_mail_p);
+         msg_InsertIntoPostOffice(duplicate_mail_p);
       }
 
-      // move the message to the task's mail list
-      if(tcb_p->mailbox_head==NULL) {
-
-         // we are the only message in the list
-         tcb_p->mailbox_head=msg_p;
-         tcb_p->mailbox_tail=msg_p;
-
-      } else {
-
-         // we are one of many, add to the tail of the list
-         tcb_p->mailbox_tail->next=msg_p;
-         tcb_p->mailbox_tail=msg_p;
-
-      }
-      // no matter what, we are the last in the task's message list
-      msg_p->next=NULL;
+      msg_InsertIntoTaskQueue(msg_p, temp_tcb_p);
 
       // indicate that we moved one mail message
       count++;

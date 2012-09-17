@@ -4,10 +4,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-unsigned short presto_lock(void);
-void presto_unlock_all(void);
-void presto_restore_lock(unsigned short mask);
-void presto_interruption_point(void);
+#define presto_lock(x)                asm("sei");
+#define presto_unlock(x)              asm("cli");
+#define presto_interruption_point(x)  asm("cli\nnop\nsei");
+#define presto_lock_save(mask)        asm volatile ("tpa\n\tsei" : "=d"(mask));
+#define presto_unlock_restore(mask)   asm volatile ("tap" : : "d"(mask));
 
 ////////////////////////////////////////////////////////////////////////////////
 

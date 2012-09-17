@@ -41,104 +41,100 @@ Linker script and memory map
  .normvect      0x0000ffd6       0x2a intvect.o
                 0x00010000                __normvect_end = .
 
-.text           0x00008000     0x1103
+.text           0x00008000      0xb27
                 0x00008000                __text_start = .
  *(.text)
- .text          0x00008000      0x1bf test.o
-                0x00008038                Two
-                0x00008072                Four
-                0x00008000                assert_lights
-                0x00008055                Three
-                0x00008090                main
-                0x0000801b                One
- .text          0x000081bf       0x2f crt11.o
-                0x000081bf                _start
- .text          0x000081ee      0x25d clock.o
-                0x00008304                clock_add_us
-                0x00008345                clock_add_sec
-                0x000082e0                clock_reset
-                0x000081ee                clock_add
-                0x00008368                clock_compare
-                0x00008327                clock_add_ms
- .text          0x0000844b       0x12 locks.o
-                0x00008459                presto_interruption_point
-                0x0000844b                presto_lock
-                0x00008457                presto_restore_lock
-                0x00008455                presto_unlock_all
- .text          0x0000845d       0x48 system.o
-                0x0000845d                premain
-                0x0000849f                exit
- .text          0x000084a5       0x44 error.o
-                0x000084a5                presto_fatal_error
- .text          0x000084e9       0x23 intvect.o
-                0x000084e9                inert_isr
-                0x000084eb                set_interrupt
- .text          0x0000850c      0xbf7 kernel.o
-                0x00008cb3                systimer_ISR
-                0x00008b93                presto_wait_for_message
-                0x00008c7a                systimer_Start
-                0x0000850c                presto_init
-                0x00008c5b                presto_get_clock
-                0x00008d1b                scheduler_FindNextReadyTask
-                0x00008d54                msg_Create
-                0x00008b73                presto_mail_waiting
-                0x00008a96                presto_start_scheduler
-                0x000090ca                tid_to_tcbptr
-                0x00008b13                presto_timer
-                0x00008b43                presto_repeating_timer
-                0x000090c7                idle_task
-                0x0000860d                presto_create_task
-                0x00008ae4                presto_send_message
-                0x00008eff                msg_DeliverToTasks
-                0x00008e11                msg_InsertIntoPostOffice
-                0x00008ca1                systimer_Restart
-                0x00008cdc                context_switch_isr
+ .text          0x00008000      0x7a5 kernel.o
+                0x00008441                systimer_ISR
+                0x0000834d                presto_wait_for_message
+                0x0000840e                systimer_Start
+                0x00008000                presto_init
+                0x000083f8                presto_get_clock
+                0x000084cb                scheduler_FindNextReadyTask
+                0x000084e3                msg_Create
+                0x00008342                presto_mail_waiting
+                0x0000827d                presto_start_scheduler
+                0x00008773                tid_to_tcbptr
+                0x000082ea                presto_timer
+                0x00008316                presto_repeating_timer
+                0x00008771                idle_task
+                0x000080dd                presto_create_task
+                0x000082c4                presto_send_message
+                0x0000866c                msg_DeliverToTasks
+                0x000085a2                msg_InsertIntoPostOffice
+                0x0000842f                systimer_Restart
+                0x00008638                msg_InsertIntoTaskQueue
+                0x00008469                context_switch_isr
+ .text          0x000087a5       0x44 system.o
+                0x000087a5                premain
+                0x000087e7                exit
+ .text          0x000087e9       0x2f crt11.o
+                0x000087e9                _start
+ .text          0x00008818      0x12a clock.o
+                0x000088a7                clock_add_us
+                0x000088ca                clock_add_sec
+                0x0000889b                clock_reset
+                0x00008818                clock_add
+                0x000088da                clock_compare
+                0x000088b7                clock_add_ms
+ .text          0x00008942       0x59 error.o
+                0x00008942                presto_fatal_error
+ .text          0x0000899b       0x14 intvect.o
+                0x0000899b                inert_isr
+                0x0000899d                set_interrupt
+ .text          0x000089af      0x178 test.o
+                0x000089f7                Two
+                0x00008a2d                Four
+                0x000089af                assert_lights
+                0x00008a12                Three
+                0x00008a9c                main
+                0x000089c3                One
  *(.strings)
-                0x00009103                __text_end = .
+                0x00008b27                __text_end = .
 
-.data           0x0000c000       0x18 load address 0x00009103
+.data           0x0000c000       0x18 load address 0x00008b27
                 0x0000c000                __data_start = .
  *(.data)
- .data          0x0000c000        0x8 test.o
-                0x0000c007                light4
-                0x0000c006                light3
-                0x0000c002                three_tid
-                0x0000c004                light1
-                0x0000c005                light2
-                0x0000c001                two_tid
-                0x0000c000                one_tid
-                0x0000c003                four_tid
- .data          0x0000c008       0x10 kernel.o
-                0x0000c00b                tcb_head_p
-                0x0000c010                free_mail_p
-                0x0000c012                po_mail_p
-                0x0000c014                global_new_sp
-                0x0000c00f                presto_initialized
-                0x0000c00d                free_tcb_p
-                0x0000c008                current_tcb_p
-                0x0000c016                global_old_sp
-                0x0000c00a                current_tid
+ .data          0x0000c000       0x10 kernel.o
+                0x0000c003                tcb_head_p
+                0x0000c008                free_mail_p
+                0x0000c00a                po_mail_p
+                0x0000c00c                global_new_sp
+                0x0000c007                presto_initialized
+                0x0000c005                free_tcb_p
+                0x0000c000                current_tcb_p
+                0x0000c00e                global_old_sp
+                0x0000c002                current_tid
+ .data          0x0000c010        0x8 test.o
+                0x0000c017                light4
+                0x0000c016                light3
+                0x0000c012                three_tid
+                0x0000c014                light1
+                0x0000c015                light2
+                0x0000c011                two_tid
+                0x0000c010                one_tid
+                0x0000c013                four_tid
                 0x0000c018                __data_end = .
 
 .bss            0x0000c018      0x82f
                 0x0000c018                __bss_start = .
  *(.bss)
  *(COMMON)
- COMMON         0x0000c018      0x400 test.o
+ COMMON         0x0000c018      0x42f kernel.o
                                   0x0 (size before relaxing)
-                0x0000c018                task_one_stack
-                0x0000c118                task_four_stack
-                0x0000c218                task_three_stack
-                0x0000c318                task_two_stack
- COMMON         0x0000c418      0x42f kernel.o
+                0x0000c018                presto_master_clock
+                0x0000c020                old_task_stack_pointer_p
+                0x0000c022                idle_tid
+                0x0000c023                idle_stack
+                0x0000c055                idle_tcb_p
+                0x0000c057                tcb_list
+                0x0000c127                mail_list
+ COMMON         0x0000c447      0x400 test.o
                                   0x0 (size before relaxing)
-                0x0000c418                presto_master_clock
-                0x0000c420                old_task_stack_pointer_p
-                0x0000c422                idle_tid
-                0x0000c423                idle_stack
-                0x0000c455                idle_tcb_p
-                0x0000c457                tcb_list
-                0x0000c527                mail_list
+                0x0000c447                task_one_stack
+                0x0000c547                task_four_stack
+                0x0000c647                task_three_stack
+                0x0000c747                task_two_stack
                 0x0000c847                __bss_end = .
 
 .stack          0x0000c847        0x0
@@ -146,91 +142,82 @@ Linker script and memory map
  *(.stack)
                 0x0000c847                __stack_end = .
 
-.comment        0x0000c847       0xf5
+.comment        0x0000c847       0xd2
                 0x0000c847                __comment_start = .
  *(.comment)
- .comment       0x0000c847       0x23 test.o
- .comment       0x0000c86a       0x23 clock.o
- .comment       0x0000c88d       0x23 locks.o
- .comment       0x0000c8b0       0x23 system.o
- .comment       0x0000c8d3       0x23 error.o
- .comment       0x0000c8f6       0x23 intvect.o
- .comment       0x0000c919       0x23 kernel.o
-                0x0000c93c                __comment_end = .
+ .comment       0x0000c847       0x23 kernel.o
+ .comment       0x0000c86a       0x23 system.o
+ .comment       0x0000c88d       0x23 clock.o
+ .comment       0x0000c8b0       0x23 error.o
+ .comment       0x0000c8d3       0x23 intvect.o
+ .comment       0x0000c8f6       0x23 test.o
+                0x0000c919                __comment_end = .
 
-.debug          0x00000100     0x3f3a
+.debug          0x00000100     0x3e1f
                 0x00000100                __debug_start = .
  *(.debug_abbrev)
- .debug_abbrev  0x00000100       0xf0 test.o
- .debug_abbrev  0x000001f0       0xd4 clock.o
- .debug_abbrev  0x000002c4       0xa0 locks.o
- .debug_abbrev  0x00000364       0xc5 system.o
- .debug_abbrev  0x00000429       0xc1 error.o
- .debug_abbrev  0x000004ea       0xf2 intvect.o
- .debug_abbrev  0x000005dc      0x1cc kernel.o
+ .debug_abbrev  0x00000100      0x1c4 kernel.o
+ .debug_abbrev  0x000002c4       0xc5 system.o
+ .debug_abbrev  0x00000389       0xd4 clock.o
+ .debug_abbrev  0x0000045d       0xc1 error.o
+ .debug_abbrev  0x0000051e       0xf2 intvect.o
+ .debug_abbrev  0x00000610       0xfd test.o
  *(.debug_info)
- .debug_info    0x000007a8      0x7a3 test.o
- .debug_info    0x00000f4b      0x45b clock.o
- .debug_info    0x000013a6      0x13b locks.o
- .debug_info    0x000014e1      0x2cf system.o
- .debug_info    0x000017b0      0x480 error.o
- .debug_info    0x00001c30      0x512 intvect.o
- .debug_info    0x00002142      0xf35 kernel.o
+ .debug_info    0x0000070d      0xfc3 kernel.o
+ .debug_info    0x000016d0      0x2ce system.o
+ .debug_info    0x0000199e      0x454 clock.o
+ .debug_info    0x00001df2      0x49a error.o
+ .debug_info    0x0000228c      0x52b intvect.o
+ .debug_info    0x000027b7      0x7c8 test.o
  *(.debug_line)
- .debug_line    0x00003077      0x197 test.o
- .debug_line    0x0000320e      0x145 clock.o
- .debug_line    0x00003353       0x7b locks.o
- .debug_line    0x000033ce       0xab system.o
- .debug_line    0x00003479       0x7f error.o
- .debug_line    0x000034f8       0x7b intvect.o
- .debug_line    0x00003573      0x59b kernel.o
+ .debug_line    0x00002f7f      0x5fb kernel.o
+ .debug_line    0x0000357a       0xab system.o
+ .debug_line    0x00003625      0x177 clock.o
+ .debug_line    0x0000379c       0x85 error.o
+ .debug_line    0x00003821       0x7b intvect.o
+ .debug_line    0x0000389c      0x1a9 test.o
  *(.debug_pubnames)
  .debug_pubnames
-                0x00003b0e       0xfe test.o
+                0x00003a45      0x2e4 kernel.o
  .debug_pubnames
-                0x00003c0c       0x76 clock.o
+                0x00003d29       0x27 system.o
  .debug_pubnames
-                0x00003c82       0x6e locks.o
+                0x00003d50       0x76 clock.o
  .debug_pubnames
-                0x00003cf0       0x27 system.o
+                0x00003dc6       0x29 error.o
  .debug_pubnames
-                0x00003d17       0x29 error.o
+                0x00003def       0x32 intvect.o
  .debug_pubnames
-                0x00003d40       0x32 intvect.o
- .debug_pubnames
-                0x00003d72      0x2c8 kernel.o
-                0x0000403a                __debug_end = .
-                0x00009103                __idata_start = __text_end
-                0x0000911b                __idata_end = ((__data_end - __data_start) + __idata_start)
+                0x00003e21       0xfe test.o
+                0x00003f1f                __debug_end = .
+                0x00008b27                __idata_start = __text_end
+                0x00008b3f                __idata_end = ((__data_end - __data_start) + __idata_start)
                 0x0000b5ff                init_sp = 0xb5ff
                 0x00000000                _.tmp = 0x0
                 0x00000002                _.z = 0x2
                 0x00000004                _.xy = 0x4
-LOAD test.o
+LOAD kernel.o
+LOAD system.o
 LOAD crt11.o
 LOAD clock.o
-LOAD locks.o
-LOAD system.o
 LOAD error.o
 LOAD intvect.o
-LOAD kernel.o
+LOAD test.o
 OUTPUT(presto.elf elf32-m68hc11)
 
-.debug_aranges  0x00000040       0x8c
+.debug_aranges  0x00000040       0x78
  .debug_aranges
-                0x00000040       0x14 test.o
+                0x00000040       0x14 kernel.o
  .debug_aranges
-                0x00000054       0x14 clock.o
+                0x00000054       0x14 system.o
  .debug_aranges
-                0x00000068       0x14 locks.o
+                0x00000068       0x14 clock.o
  .debug_aranges
-                0x0000007c       0x14 system.o
+                0x0000007c       0x14 error.o
  .debug_aranges
-                0x00000090       0x14 error.o
+                0x00000090       0x14 intvect.o
  .debug_aranges
-                0x000000a4       0x14 intvect.o
- .debug_aranges
-                0x000000b8       0x14 kernel.o
+                0x000000a4       0x14 test.o
 
 Cross Reference Table
 
@@ -240,11 +227,12 @@ One                                               test.o
 Three                                             test.o
 Two                                               test.o
 _.tmp                                             kernel.o
-                                                  intvect.o
-_.xy                                              kernel.o
+_.xy                                              error.o
                                                   clock.o
-_.z                                               kernel.o
+                                                  kernel.o
+_.z                                               error.o
                                                   clock.o
+                                                  kernel.o
 __bss_end                                         crt11.o
 __bss_start                                       crt11.o
 __data_start                                      crt11.o
@@ -287,6 +275,7 @@ main                                              test.o
 msg_Create                                        kernel.o
 msg_DeliverToTasks                                kernel.o
 msg_InsertIntoPostOffice                          kernel.o
+msg_InsertIntoTaskQueue                           kernel.o
 old_task_stack_pointer_p                          kernel.o
 one_tid                                           test.o
 po_mail_p                                         kernel.o
@@ -295,28 +284,22 @@ premain                                           system.o
 presto_create_task                                kernel.o
                                                   test.o
 presto_fatal_error                                error.o
-                                                  kernel.o
                                                   test.o
+                                                  kernel.o
 presto_get_clock                                  kernel.o
 presto_init                                       kernel.o
                                                   test.o
 presto_initialized                                kernel.o
-presto_interruption_point                         locks.o
-presto_lock                                       locks.o
-                                                  kernel.o
-                                                  error.o
-                                                  system.o
 presto_mail_waiting                               kernel.o
 presto_master_clock                               kernel.o
 presto_repeating_timer                            kernel.o
                                                   test.o
-presto_restore_lock                               locks.o
-                                                  kernel.o
 presto_send_message                               kernel.o
+                                                  test.o
 presto_start_scheduler                            kernel.o
                                                   test.o
 presto_timer                                      kernel.o
-presto_unlock_all                                 locks.o
+                                                  test.o
 presto_wait_for_message                           kernel.o
                                                   test.o
 scheduler_FindNextReadyTask                       kernel.o

@@ -1,3 +1,19 @@
+2002.10.22
+
+Bug in locks.c - inline functions were not inline.  So premain() was
+taking too long to initialize the three time-sensitive registers.  Last
+register did not make it before 64 clocks.  Lock functions now macros.
+
+Sending a message directly to a task (with no delay) used to go to the
+post office, then wait for a clock tick, then get delivered.  Now, the
+messages are sent directly to the task's mail queue.  It's fast, but I
+am seeing some problems with the SWI task switch after delivering the
+mail.
+
+In the process of sending messages directly to a task, some functions
+were tidied up nicely.  Common routines are now functions.
+
+---
 
 2002.10.19
 

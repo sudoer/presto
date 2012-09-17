@@ -5,10 +5,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define TIMER1    200 // 175
-#define TIMER2    200 // 250
-#define TIMER3    200 // 333
-#define TIMER4    200 // 500
+#define TIMER1    200
+#define TIMER2    200
+#define TIMER3     50
+#define TIMER4    200
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -48,6 +48,7 @@ void assert_lights(void) {
 void One(void) {
    PRESTO_MAIL_T msg;
    msg.dw.dw1=0;
+   presto_repeating_timer(one_tid,TIMER1,TIMER1,msg);
    while(1) {
       presto_wait_for_message(&msg);
       light1=light1^0x01;
@@ -84,10 +85,15 @@ void Three(void) {
 void Four(void) {
    PRESTO_MAIL_T msg;
    msg.dw.dw1=0;
+   int counter=0;
+   presto_send_message(four_tid,msg);
    while(1) {
       presto_wait_for_message(&msg);
       light4=light4^0x08;
       assert_lights();
+      presto_send_message(two_tid,msg);
+      presto_send_message(three_tid,msg);
+      presto_timer(four_tid,100,msg); // BUG IF - presto_send_message(four_tid,msg);
    }
 }
 
@@ -111,23 +117,19 @@ int main(void) {
    one_tid=presto_create_task(One, task_one_stack, STACK_SIZE, 35);
 #endif
 #if TIMER2 != 0
-   two_tid=presto_create_task(Two, task_two_stack, STACK_SIZE, 40);
+   two_tid=presto_create_task(Two, task_two_stack, STACK_SIZE, 30);
 #endif
 #if TIMER3 != 0
-   three_tid=presto_create_task(Three, task_three_stack, STACK_SIZE, 45);
+   three_tid=presto_create_task(Three, task_three_stack, STACK_SIZE, 20);
 #endif
 #if TIMER4 != 0
-   four_tid=presto_create_task(Four, task_four_stack, STACK_SIZE, 50);
+   four_tid=presto_create_task(Four, task_four_stack, STACK_SIZE, 5);
 #endif
 
    //motor_init();
    //lcd_init();
    //serial_init(9600);
    //debugger_init();
-   presto_repeating_timer(one_tid,TIMER1,TIMER1,msg);
-   presto_repeating_timer(two_tid,TIMER2,TIMER2,msg);
-   presto_repeating_timer(three_tid,TIMER3,TIMER3,msg);
-   presto_repeating_timer(four_tid,TIMER4,TIMER4,msg);
    presto_start_scheduler();
    // we never get here
    presto_fatal_error(ERROR_MAIN_END);

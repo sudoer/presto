@@ -30,14 +30,13 @@ sub setup_project {
    $OBJ_DIR="obj";
    $TARGET="presto";
    @SRC_FILES=(
-               "app\\test.c",
+               "kernel\\kernel.c",
+               "kernel\\system.c",
                "kernel\\crt11.s",
                "kernel\\clock.c",
-               "kernel\\locks.c",
-               "kernel\\system.c",
                "kernel\\error.c",
                "kernel\\intvect.c",
-               "kernel\\kernel.c",
+               "app\\test.c",
    );
 
    print("OK\n");
@@ -144,7 +143,7 @@ sub compile_stage {
                         ."-DGCC "
                         ."-I$build_dir -I. "
                         ."-mshort "
-                        ."-O0 " # oh zero
+                        ."-O "  # was ."O0 "  # oh-zero
                         ."-fomit-frame-pointer "
                         ."-msoft-reg-count=0 "
                         ."-c "
