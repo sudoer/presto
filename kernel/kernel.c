@@ -8,11 +8,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define CYCLES_PER_MS     2000
-#define MS_PER_TICK       100
-#define CYCLES_PER_TICK   CYCLES_PER_MS*MS_PER_TICK
-#define IDLE_PRIORITY     0
-#define IDLE_STACK_SIZE   50
+#define CYCLES_PER_MS       2000        // based on hardware
+#define CYCLES_PER_CLOCK    2           // based on hardware
+#define CLOCK_PRESCALE      16          // set in TMSK2 register
+#define MS_PER_TICK         100         // how often do you want?
+#define CLOCKS_PER_MS       CYCLES_PER_MS*CYCLES_PER_CLOCK/CLOCK_PRESCALE
+#define CLOCKS_PER_TICK     CLOCKS_PER_MS*MS_PER_TICK
+#define IDLE_PRIORITY       0
+#define IDLE_STACK_SIZE     50
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -22,13 +25,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // GLOBAL VARIABLES
-// These are used to pass arguments to inline assembly routines
 
 BYTE flag_mirror;
-/*static*/ BYTE * global_new_sp=NULL;
-/*static*/ BYTE ** global_old_sp_p=NULL;
-/*static*/ void (*global_new_fn)(void)=NULL;
-/*static*/ BYTE * global_save_sp;     // do not put this on the stack (BOOM)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +39,6 @@ BYTE flag_mirror;
 /*static*/ PRESTO_TCB_T tcb_list[MAX_TASKS];
 
 /*static*/ PRESTO_TIME_T presto_master_clock;
-/*static*/ BYTE presto_initialized=0;
 
 // idle task stuff
 /*static*/ BYTE idle_stack[IDLE_STACK_SIZE];
@@ -52,6 +49,12 @@ BYTE flag_mirror;
 /*static*/ PRESTO_MESSAGE_T * free_mail_p=NULL;
 /*static*/ PRESTO_MESSAGE_T * po_mail_p=NULL;
 /*static*/ PRESTO_MESSAGE_T mail_list[MAX_MESSAGES];
+
+// These are used to pass arguments to inline assembly routines
+/*static*/ BYTE * global_new_sp=NULL;
+/*static*/ BYTE ** global_old_sp_p=NULL;
+/*static*/ void (*global_new_fn)(void)=NULL;
+/*static*/ BYTE * global_save_sp;     // do not put this on the stack (BOOM)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -81,10 +84,6 @@ void presto_init(void) {
    INTR_SAVE(flags);
    INTR_RESTORE(flags);
 
-   // initialize once and only once
-   if(presto_initialized) return;
-   presto_initialized++;
-
    // initialize master clock
    presto_master_clock=clock_reset();
 
@@ -106,7 +105,6 @@ void presto_init(void) {
    free_mail_p=&mail_list[0];
 
    // initialize idle task
-   // must be done after presto_initialized++ because of initialization check
    idle_tid=presto_create_task(idle_task,idle_stack,IDLE_STACK_SIZE,IDLE_PRIORITY);
    idle_tcb_p=tid_to_tcbptr(idle_tid);
 }
@@ -121,8 +119,6 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
    BYTE * sp;
    MISCWORD xlate;    // to split a word into two bytes
    BYTE flags;
-
-   if(presto_initialized==0) presto_fatal_error(0x05);
 
    if(free_tcb_p==NULL) {
       // There are no more TCB's left.
@@ -202,7 +198,6 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
 ////////////////////////////////////////////////////////////////////////////////
 
 void presto_start_scheduler(void) {
-   if(presto_initialized==0) presto_fatal_error(0x02);
 
    // we're about to switch to our first task... interrupts off
    INTR_OFF();
@@ -547,7 +542,7 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
 
 /*static*/ void presto_start_master_timer(void) {
    // store (current plus CYCLES_PER_TICK)
-   TOC2 = (WORD)(TCNT + CYCLES_PER_TICK);
+   TOC2 = (WORD)(TCNT + CLOCKS_PER_TICK);
    // request output compare interrupt
    TMSK1 |= TMSK1_OC2I;
    // clear the OUTPUT COMPARE flag
@@ -560,8 +555,8 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
 ////////////////////////////////////////////////////////////////////////////////
 
 /*static*/ void presto_restart_master_timer(void) {
-   // store (last plus CYCLES_PER_TICK)
-   TOC2 = (WORD)(TOC2 + CYCLES_PER_TICK);
+   // store (last plus CLOCKS_PER_TICK)
+   TOC2 = (WORD)(TOC2 + CLOCKS_PER_TICK);
    // clear the OUTPUT COMPARE flag
    // writing O's makes no change, writing 1's clears the bit
    TFLG1 = TFLG1_OC2F;

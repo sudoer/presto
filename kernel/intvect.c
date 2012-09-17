@@ -3,23 +3,28 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 // The handyboard boots up in a mode called "SPECIAL TEST" operating mode.
-// This is because certain pins are asserted high or low (when the STOP button
-// button is pressed, it boots up into SPECIAL BOOTSTRAP mode instead).
+// The designers of the Handyboard made sure that certain pins were asserted
+// high or low at boot time, and when the HC11 wakes up, it checks these pins
+// to determine which of the four operating modes it should work in.  The
+// Handyboard designers also arranged it so that if you press the STOP button
+// during bootup, it will come up into SPECIAL BOOTSTRAP mode instead of
+// SPECIAL TEST mode.
 //
 // One of the side effects of booting in one of these two so-called "special"
 // modes is that the interrupt vector table is stored at 0xBFD6 instead of the
 // normal 0xFFD6.  Therefore, if we want to boot properly, we need to initialize
-// an interrupt vector table at this address.
+// an interrupt vector table at this 0xBFD6 address.
 //
-// However, we won't use this table for long.  We tend to test our software
-// using simulators as well as actual hardware, and most of these simulators
-// make the assumption that we are running in normal mode, so they expect the
-// interrupt vector table to be at 0xFFD6.  So we'll go ahead and make another
-// vector table there, and as soon as we've booted up, we'll start using the
-// normal one.
-//
-// So this table is only used to get us up and running.  In _HC11Setup(), we'll
-// switch to normal mode, and start using the "normal" table.
+// However, we won't use this table at 0xBFD6 for long.  Regardless of the mode
+// that we boot up in, I want to run the board in NORMAL mode.  So shortly
+// after bootup, I set a value in the HPRIO register that changes the mode of
+// the processor.  When we change modes, we will start using the interrupt
+// vector table at the normal address.
+
+// The bottom line is that we need two interrupt vector tables.  The one at
+// 0xBFD6 is used for the first hundred CPU cycles or so.  And then we switch
+// into normal mode and use the other vector table for the rest of our
+// operation.
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -132,32 +137,6 @@ void set_interrupt(BYTE intr, void (*vector)(void)) {
    if(intr<=INTR_RESET) {
       normal_interrupt_vectors[intr]=vector;
    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void default_interrupts(void) {
-   normal_interrupt_vectors[INTR_SCI]=  inert_sci_isr;
-   normal_interrupt_vectors[INTR_SPI]=  inert_spi_isr;
-   normal_interrupt_vectors[INTR_PAIE]= inert_paie_isr;
-   normal_interrupt_vectors[INTR_PAO]=  inert_pao_isr;
-   normal_interrupt_vectors[INTR_TOF]=  inert_tof_isr;
-   normal_interrupt_vectors[INTR_TOC5]= inert_toc5_isr;
-   normal_interrupt_vectors[INTR_TOC4]= inert_toc4_isr;
-   normal_interrupt_vectors[INTR_TOC3]= inert_toc3_isr;
-   normal_interrupt_vectors[INTR_TOC2]= inert_toc2_isr;
-   normal_interrupt_vectors[INTR_TOC1]= inert_toc1_isr;
-   normal_interrupt_vectors[INTR_TIC3]= inert_tic3_isr;
-   normal_interrupt_vectors[INTR_TIC2]= inert_tic2_isr;
-   normal_interrupt_vectors[INTR_TIC1]= inert_tic1_isr;
-   normal_interrupt_vectors[INTR_RTI]=  inert_rti_isr;
-   normal_interrupt_vectors[INTR_IRQ]=  inert_irq_isr;
-   normal_interrupt_vectors[INTR_XIRQ]= inert_xirq_isr;
-   normal_interrupt_vectors[INTR_SWI]=  inert_swi_isr;
-   normal_interrupt_vectors[INTR_ILLOP]=inert_illop_isr;    // presto_fatal_error;
-   normal_interrupt_vectors[INTR_COP]=  inert_cop_isr;
-   normal_interrupt_vectors[INTR_CLM]=  inert_clm_isr;
-   normal_interrupt_vectors[INTR_RESET]=_start;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

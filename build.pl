@@ -31,14 +31,6 @@ sub setup_project {
    $TARGET="presto";
    @SRC_FILES=(
                "app\\test.c",
-   #           "services\\debugger.c",
-   #           "services\\lcd.c",
-   #           "services\\i2c.c",
-   #           "services\\inputs.c",
-   #           "services\\motors.c",
-   #           "services\\serial.c",
-   #           "services\\sound.c",
-   #           "utils\\string.c",
                "kernel\\clock.c",
                "kernel\\system.c",
                "kernel\\debug.c",

@@ -7,11 +7,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// system crashes after 21 seconds (42*500=21000,35*600=21000,30*700=21000)
-#define TIMER1    5000
-#define TIMER2    600
-#define TIMER3    1000
-#define TIMER4    1200
+#define TIMER1    175
+#define TIMER2    250
+#define TIMER3    333
+#define TIMER4    500
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -97,6 +96,16 @@ void Four(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 int main(void) {
+
+   // initialization
+   one_tid=0;
+   two_tid=0;
+   three_tid=0;
+   four_tid=0;
+   light1=0x00;
+   light2=0x00;
+   light3=0x00;
+   light4=0x00;
 
    presto_init();
 #if TIMER1 != 0

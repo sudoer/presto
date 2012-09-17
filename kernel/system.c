@@ -48,50 +48,62 @@ void __premain() {
 
    INTR_OFF();
 
-   // RAM would start at $0000 if it were enabled
-   // control registers are mapped to locations $1000-$103F (default)
-   // (must be within first 64 clocks or in special mode)
+   // THE FOLLOWING (*) REGISTERS MAY ONLY BE ALTERED WITHIN THE FIRST 64 CLOCK CYCLES
+
+   // 11110000 * map internal 1k RAM to $0000-$00FF (default)
+   // 00001111 * map control registers to $1000-$103F (default)
    INIT=0x01;
+
+   // 11110000 - disable TOF, RTIF, PAOVF, PAIF interrupts
+   // 00000011 * set prescaler for timer to 16
+   TMSK2=0x06;
 
    // turn on the A2D subsystem (wait 100 usec before using)
    // use "E clock" to drive the A2D
    // disable COP clock monitor (interrupt)
-   // (must be within first 64 clocks or in special mode)
-   OPTION=0xA0;  // OPTION_ADPU=1,OPTION_CSEL=0
+   // 10000000 - A/D system powered up
+   // 01000000 - A/D and EE use E-clock
+   // 00100000 * IRQ is edge-sensitive
+   // 00010000 * no startup delay
+   // 00001000 - disable clock monitor
+   // 00000011 * watchdog rate
+   OPTION=0xA3;  // OPTION_ADPU=1,OPTION_CSEL=0
+
+
+   // THIS REGISTER MUST BE WRITTEN LIKE AN EEPROM LOCATION
+
+   // disable SECURITY, enable COP, disable ROM and EEPROM
+   // CONFIG=0x0C;
+
+
+   // ALL OTHER REGISTERS MAY BE ALTERED AT ANY TIME
+
+   // disable parallel I/O (and strobe A interrupt)
+   PIOC=0x03;
+
+   // disable all serial interrupts
+   SCCR2=0x00;
+
+   // disable SPI subsystem, disable SPI interrupt
+   SPCR=0x04;
+
+   // timers 2-5 disconnected from output pin logic
+   TCTL1=0x00;
+
+   // timers 1-3 capture disabled
+   TCTL2=0x00;
 
    // disable output compare interrupts for TOC1,TOC2,TOC3,TOC4,TOC5
    // disable input capture interrupts for TIC1,TIC2,TIC3
-   // (OK at any time)
    TMSK1=0x00;
 
-   // set prescaler for timer to 1
-   // disable TOF, RTIF, PAOVF, PAIF interrupts
-   // (OK at any time)
-   TMSK2=0x00;
-
-   // disable SPI subsystem, disable SPI interrupt
-   // (OK at any time)
-   SPCR=0x04;
-
-   // disable all serial interrupts
-   // (OK at any time)
-   SCCR2=0x00;
-
-   // disable parallel I/O (and strobe A interrupt)
-   // (OK at any time)
-   PIOC=0x00;
-
-   // disable SECURITY and COP, disable ROM and EEPROM
-   // (OK at any time)
-   CONFIG=0x0C;
-
-   //default_interrupts();
-
    // get out of SPECIAL TEST operating mode
-   // go into EXPANDED MULTIPLEXED operating mode
+   // go into NORMAL EXPANDED MULTIPLEXED operating mode
+   // no bootstrap ROM, no visibility of internal reads
    // promote IRQ interrupt priority
-   // (must be in special mode, more or less)
+   // (must be in special mode to change this)
    HPRIO=0x25;
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
