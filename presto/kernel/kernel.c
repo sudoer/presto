@@ -21,7 +21,7 @@
 
 // In order to tell if a task is ready to run or not, Presto uses "ready
 // bits" which I call "triggers".  Each task has eight triggers (this can
-// be changed in kernel.h if needed).  If a task is waiting, then its
+// be changed in configure.h if needed).  If a task is waiting, then its
 // wait_flag will be set to something other than zero.  When one or more
 // of the triggers that it is waiting for becomes set, then that task will
 // become ready.
@@ -63,7 +63,7 @@
 #define IDLE_PRIORITY       0
 #define IDLE_STACK_SIZE     0x100
 
-#define WAIT_MASK_READY     0x00
+#define WAIT_MASK_READY     ((KERNEL_TRIGGER_T)0)
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D A T A   T Y P E S
@@ -150,8 +150,9 @@ void presto_init(void) {
    tcb_list[MAX_TASKS-1].next=&tcb_list[0];
    tcb_list[MAX_TASKS-2].next=NULL;
 
-   kernel_mail_init();
+   // initialize other kernel subsystems
    kernel_timer_init();
+   kernel_mail_init();
    kernel_semaphore_init();
    kernel_memory_init();
 
@@ -200,7 +201,7 @@ KERNEL_TASKID_T presto_task_create(void (*func)(void), BYTE * stack, short stack
    new_tcb_p->current_priority=priority;
    new_tcb_p->natural_priority=priority;
    new_tcb_p->wait_mask=WAIT_MASK_READY;
-   new_tcb_p->triggers=0x00;
+   new_tcb_p->triggers=(KERNEL_TRIGGER_T)0;
 
    // SET UP NEW STACK (stack grows down)
 
@@ -230,13 +231,64 @@ KERNEL_TASKID_T presto_task_create(void (*func)(void), BYTE * stack, short stack
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+
+
+void presto_scheduler_start(void) {
+
+   // we're about to switch to our first task... interrupts off
+   cpu_lock();
+
+   set_interrupt(INTR_SWI, context_switch_isr);
+
+   kernel_master_clock_start();
+
+   // pick next task to run
+   // first task in list is highest priority and is ready
+   current_tcb_p=tcb_head_p;
+   if (current_tcb_p==NULL) {
+      error_fatal(ERROR_KERNEL_NOTASKTOSTART);
+   }
+
+   // SET UP A NEW STACK AND START EXECUTION USING IT
+
+   // these parameters will be used in inline assembly...
+   // must be put in global space, not on stack
+   global_new_sp=current_tcb_p->stack_ptr;
+
+   asm("lds global_new_sp");
+   asm("pulx");  // _.xy
+   asm("pulx");  // _.z
+   asm("pulx");  // _.tmp
+   asm("rti");
+
+   // we never get here
+   error_fatal(ERROR_KERNEL_STARTAFTERRTI);
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 
 KERNEL_PRIORITY_T presto_priority_get(KERNEL_TASKID_T tid) {
    KERNEL_TCB_T * tcb_p;
    tcb_p=tid_to_tcbptr(tid);
-   return tcb_p->natural_priority;
+   return tcb_p->current_priority;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+void presto_priority_set(PRESTO_TASKID_T tid, PRESTO_PRIORITY_T new_priority) {
+   KERNEL_TCB_T * tcb_p;
+   tcb_p=tid_to_tcbptr(tid);
+   if (tcb_p->current_priority!=new_priority) {
+      priority_queue_remove_tcb(tcb_p);
+      tcb_p->natural_priority=new_priority;
+      tcb_p->current_priority=new_priority;
+      priority_queue_insert_tcb(tcb_p, new_priority);
+   }
 }
 
 
@@ -268,46 +320,12 @@ void presto_priority_restore(KERNEL_TASKID_T tid) {
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-
-
-void presto_scheduler_start(void) {
-
-   // we're about to switch to our first task... interrupts off
-   cpu_lock();
-
-   set_interrupt(INTR_SWI, context_switch_isr);
-
-   // pick next task to run
-   // first task in list is highest priority and is ready
-   current_tcb_p=tcb_head_p;
-   if (current_tcb_p==NULL) {
-      error_fatal(ERROR_KERNEL_NOTASKTOSTART);
-   }
-
-   // SET UP A NEW STACK AND START EXECUTION USING IT
-
-   // these parameters will be used in inline assembly...
-   // must be put in global space, not on stack
-   global_new_sp=current_tcb_p->stack_ptr;
-
-   asm("lds global_new_sp");
-   asm("pulx");  // _.xy
-   asm("pulx");  // _.z
-   asm("pulx");  // _.tmp
-   asm("rti");
-
-   // we never get here
-   error_fatal(ERROR_KERNEL_STARTAFTERRTI);
-}
-
-
 ////////////////////////////////////////////////////////////////////////////////
 
 
 KERNEL_TRIGGER_T presto_wait(KERNEL_TRIGGER_T wait_for) {
    CPU_LOCK_T lock;
-   BYTE fired_triggers;
+   KERNEL_TRIGGER_T fired_triggers;
 
    // Save wait_for for later.
    current_tcb_p->wait_mask=wait_for;

@@ -257,31 +257,34 @@ sub compile_stage {
          if($src_ext eq "c") {
             print("COMPILING  $src_file...");
             debug("");
-            $errors+=run($GNU_PREFIX."gcc.exe "      # compiler
-                        ."-m68hc11 "                 # platform, hc11 or hc12
-                        ."-DGCC "                    # define GCC
-                        .$include_path               # include path
-                        ."-mshort "                  # ???
-                        ."-O1 "                      # optimization, was (oh-zero)
-                        ."-fomit-frame-pointer "     # ???
-                        ."-msoft-reg-count=0 "       # ???
-                        ."-funsigned-char "          # ???
-                        ."-c "                       # compile only, do not link
-                        ."-g "                       # include debug info
-                        ."-Wall "                    # enable all warnings
-                       #."-Werror "                  # treat warnings as errors
-                        ."-Wa,-L,-ahlns=$lst_path "  # generate list file
-                        ."-o $obj_path "             # output file
-                        ."$src_name");               # source file
+            $errors+=run($GNU_PREFIX."gcc.exe "   # compiler
+               ."-m68hc11 "                       # platform, hc11 or hc12
+               ."-DGCC "                          # define GCC
+               .$include_path                     # include path
+               ."-mshort "                        # use short ints
+               ."-O1 "                            # optimization, was (oh-zero)
+               ."-fomit-frame-pointer "           # When possible do not generate stack frames
+               ."-fwritable-strings "             # store strings in "strings" section, not inline
+               ."-msoft-reg-count=0 "             # the number of soft registers available
+               ."-funsigned-char "                # chars are unsigned
+               ."-c "                             # compile only, do not link
+               ."-g "                             # include debug info
+               ."-Wall "                          # enable all warnings
+               ."-Werror "                        # treat warnings as errors
+               #."-pass-exit-codes "
+               #."-Wp,-pass-exit-codes "
+               ."-Wa,-L,-ahlns=$lst_path "        # generate list file
+               ."-o $obj_path "                   # output file
+               ."$src_name");                     # source file
             print("OK\n");
          } elsif($src_ext eq "s") {
             print("ASSEMBLING $src_file...");
             debug("");
-            $errors+=run($GNU_PREFIX."as.exe "       # assembler
-                        ."-L "                       # include local symbols in debug table
-                        ."-ahlns=$lst_path "         # generate list file
-                        ."-o $obj_path "             # output file
-                        ."$src_name");               # source file
+            $errors+=run($GNU_PREFIX."as.exe "   # assembler
+               ."-L "                            # include local symbols in debug table
+               ."-ahlns=$lst_path "              # generate list file
+               ."-o $obj_path "                  # output file
+               ."$src_name");                    # source file
             print("OK\n");
          } else {
             print("WHAT???    $src_file\n");

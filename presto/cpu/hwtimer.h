@@ -6,7 +6,7 @@
 
 // system timer
 extern void hwtimer_start(unsigned short ms);
-extern void hwtimer_restart(unsigned short ms);
+extern void hwtimer_restart(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 

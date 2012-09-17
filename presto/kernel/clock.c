@@ -25,53 +25,46 @@
 //   S T A T I C   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-static void clock_add(KERNEL_TIME_T * clk, unsigned short sec, unsigned short msec) {
-   clk->msec+=msec;
-   while (clk->msec>=1000) {
-      clk->msec-=1000;
-      clk->sec++;
-   }
-   clk->sec+=sec;
-   while (clk->sec>=3600) {
-      clk->sec-=3600;
-      clk->hour++;
-   }
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 //   E X P O R T E D   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
 void clock_reset(KERNEL_TIME_T * clk) {
-   clk->msec=0;
-   clk->sec=0;
-   clk->hour=0;
+   clk->t[0]=0;
+   clk->t[1]=0;
+   clk->t[2]=0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void clock_add_ms(KERNEL_TIME_T * clk, unsigned short ms) {
-   clock_add(clk,0,ms);
+   unsigned short was;
+   was=clk->t[0];
+   clk->t[0]+=ms;
+   if ((clk->t[0]<was)||(clk->t[0]<ms)) {
+      clk->t[1]++;
+      if (clk->t[1]==0) {
+         clk->t[2]++;
+      }
+   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void clock_add_sec(KERNEL_TIME_T * clk, unsigned short s) {
-   clock_add(clk,s,0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 signed char clock_compare(KERNEL_TIME_T * A,KERNEL_TIME_T * B) {
-   if (A->hour < B->hour) return -1;
-   if (A->hour > B->hour) return 1;
-   // we now know that A->hour == B->hour
-   if (A->sec < B->sec) return -1;
-   if (A->sec > B->sec) return 1;
-   // we now know that A->sec == B->sec
-   if (A->msec < B->msec) return -1;
-   if (A->msec > B->msec) return 1;
-   // we now know that A->msec == B->msec
+   int x;
+   x=3;
+   do {
+      x--;
+      if (A->t[x] < B->t[x]) return -1;
+      if (A->t[x] > B->t[x]) return 1;
+   } while(x>0);
    return 0;
 }
 

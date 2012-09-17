@@ -27,6 +27,8 @@
 // TASKS
 #define PRESTO_KERNEL_MAXUSERTASKS     12
 
+// TRIGGERS
+#define PRESTO_KERNEL_TRIGGERBITS       8
 
 ////////////////////////////////////////////////////////////////////////////////
 //   M A I L   M E S S A G E S

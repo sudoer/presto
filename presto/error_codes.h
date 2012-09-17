@@ -6,24 +6,45 @@
 
 typedef enum {
 
-     // KERNEL ERRORS
-     ERROR_KERNEL_CONTEXTSWITCH_STACKCLOBBERED,    // 00
-     ERROR_KERNEL_CREATEBEFOREINIT,                // 01
-     ERROR_KERNEL_NOMORETCBS,                      // 02
-     ERROR_KERNEL_NOTASKTOSTART,                   // 03
-     ERROR_KERNEL_SCHEDULERERROR,                  // 04
-     ERROR_KERNEL_STARTAFTERRTI,                   // 05
-     ERROR_KERNEL_TIDTOTCB_RANGE,                  // 06
-     ERROR_MAIL_SENDNULLENVELOPE,
-     ERROR_MAIL_SENDTONULLBOX,                     // 07
-     ERROR_MEMORY_CLOBBEREDMEMBLOCK,               // 08
-     ERROR_SEMAPHORE_TOOMANYWAITERS,               // 09
+   // KERNEL ERRORS
+   ERROR_KERNEL_CONTEXTSWITCH_STACKCLOBBERED,    // 00
+   ERROR_KERNEL_CREATEBEFOREINIT,                // 01
+   ERROR_KERNEL_NOMORETCBS,                      // 02
+   ERROR_KERNEL_NOTASKTOSTART,                   // 03
+   ERROR_KERNEL_SCHEDULERERROR,                  // 04
+   ERROR_KERNEL_STARTAFTERRTI,                   // 05
+   ERROR_KERNEL_TIDTOTCB_RANGE,                  // 06
+   ERROR_MAIL_SENDNULLENVELOPE,                  // 07
+   ERROR_MAIL_SENDTONULLBOX,                     // 08
+   ERROR_MEMORY_CLOBBEREDMEMBLOCK,               // 09
+   ERROR_SEMAPHORE_TOOMANYWAITERS,               // 0A
 
-     // CPU-SPECIFIC ERRORS
-     ERROR_INTVECT_OTHER,                          // 0A
+   // CPU-SPECIFIC ERRORS
+   ERROR_INTVECT_SCI,                            // 0B
+   ERROR_INTVECT_SPI,                            // 0C
+   ERROR_INTVECT_PAIE,                           // 0D
+   ERROR_INTVECT_PAO,                            // 0E
+   ERROR_INTVECT_TOF,                            // 0F
+   ERROR_INTVECT_TOC5,                           // 10
+   ERROR_INTVECT_TOC4,                           // 11
+   ERROR_INTVECT_TOC3,                           // 12
+   ERROR_INTVECT_TOC2,                           // 13
+   ERROR_INTVECT_TOC1,                           // 14
+   ERROR_INTVECT_TIC3,                           // 15
+   ERROR_INTVECT_TIC2,                           // 16
+   ERROR_INTVECT_TIC1,                           // 17
+   ERROR_INTVECT_RTI,                            // 18
+   ERROR_INTVECT_IRQ,                            // 19
+   ERROR_INTVECT_XIRQ,                           // 1A
+   ERROR_INTVECT_SWI,                            // 1B
+   ERROR_INTVECT_COP,                            // 1C
+   ERROR_INTVECT_ILLOP,                          // 1D
+   ERROR_INTVECT_CLM,                            // 1E
+   ERROR_INTVECT_RESET,                          // 1F
+   ERROR_INTVECT_OTHER,                          // 20
 
-     // APPLICATION ERRORS
-     ERROR_MAIN_AFTERSTART,                        // 0B
+   // APPLICATION ERRORS
+   ERROR_MAIN_AFTERSTART,                        // 21
 
 } error_number_e;
 

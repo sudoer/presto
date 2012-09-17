@@ -30,7 +30,6 @@ typedef KERNEL_TRIGGER_T      PRESTO_TRIGGER_T;
 typedef KERNEL_PRIORITY_T     PRESTO_PRIORITY_T;
 
 // time
-typedef KERNEL_TIME_T         PRESTO_TIME_T;
 typedef KERNEL_INTERVAL_T     PRESTO_INTERVAL_T;
 
 // mail
@@ -59,6 +58,7 @@ extern void presto_scheduler_start(void);
 ////////////////////////////////////////////////////////////////////////////////
 
 extern PRESTO_PRIORITY_T presto_priority_get(PRESTO_TASKID_T tid);
+extern void presto_priority_set(PRESTO_TASKID_T tid, PRESTO_PRIORITY_T new_priority);
 extern void presto_priority_override(PRESTO_TASKID_T tid, PRESTO_PRIORITY_T new_priority);
 extern void presto_priority_restore(PRESTO_TASKID_T tid);
 
@@ -98,7 +98,6 @@ extern PRESTO_ENVELOPE_T * presto_mail_wait(PRESTO_MAILBOX_T * box_p);
 //   T I M E R S
 ////////////////////////////////////////////////////////////////////////////////
 
-extern void presto_timer_now(PRESTO_TIME_T * clk);
 extern void presto_timer_start(PRESTO_TIMER_T * timer_p, PRESTO_INTERVAL_T delay, PRESTO_INTERVAL_T period, PRESTO_TRIGGER_T trigger);
 extern void presto_timer_wait(PRESTO_INTERVAL_T delay, PRESTO_TRIGGER_T trigger);
 extern void presto_timer_stop(PRESTO_TIMER_T * timer_p);

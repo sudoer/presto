@@ -1,0 +1,623 @@
+Archive member included because of file (symbol)
+
+c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_mulhi3.o)
+                              string.o (___mulhi3)
+c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_memcpy.o)
+                              timer.o (memcpy)
+c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_regs_min.o)
+                              stress_test.o (_.tmp)
+c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_regs_frame.o)
+                              serial.o (_.frame)
+
+Allocating common symbols
+Common symbol       size              file
+
+prt                 0x14              stress_test.o
+copier              0x3e              stress_test.o
+empl_tid            0x1               stress_test.o
+ctrl_tid            0x1               stress_test.o
+poolstats           0xc               stress_test.o
+pres_tid            0x1               stress_test.o
+stud_tid            0x1               stress_test.o
+dbug_tid            0x1               stress_test.o
+mngr_tid            0x1               stress_test.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+page0            0x00000040         0x000000c0         rw
+nothing1         0x00000100         0x00000f00
+registers        0x00001000         0x00000040         rw
+nothing2         0x00001040         0x00006fc0
+rom              0x00008000         0x00003fd6         xrw
+specvect         0x0000bfd6         0x0000002a         r
+ram              0x0000c000         0x00003fd6         rw
+normvect         0x0000ffd6         0x0000002a         rw
+trash            0x00010000         0x00010000
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+
+.specvect       0x0000bfd6       0x2a
+                0x0000bfd6                __specvect_start = .
+ *(.specvect)
+ .specvect      0x0000bfd6       0x2a intvect.o
+                0x0000c000                __specvect_end = .
+
+.normvect       0x0000ffd6       0x2a
+                0x0000ffd6                __normvect_start = .
+ *(.normvect)
+ .normvect      0x0000ffd6       0x2a intvect.o
+                0x00010000                __normvect_end = .
+
+.text           0x00008000     0x1fe5
+                0x00008000                __text_start = .
+ *(.text)
+ .text          0x00008000      0x80c stress_test.o
+                0x000080b6                control
+                0x000081a4                president
+                0x00008244                manager
+                0x000082ba                employee
+                0x00008091                use_copier
+                0x00008000                assert_lights
+                0x00008330                student
+                0x00008764                main
+                0x00008009                busy_work
+ .text          0x0000880c       0x47 boot.o
+                0x0000880c                premain
+                0x00008851                exit
+ .text          0x00008853       0x2f crt0.o
+                0x00008853                _start
+ .text          0x00008882       0xaa error.o
+                0x000088bb                error_fatal
+                0x000088d0                error_crash
+                0x00008882                show_one_byte
+                0x000088d2                error_address
+ .text          0x0000892c       0x4e hwtimer.o
+                0x00008968                hwtimer_restart
+                0x0000892c                hwtimer_start
+ .text          0x0000897a       0xf7 intvect.o
+                0x000089b4                error_TOC3_isr
+                0x000089c2                error_TOC1_isr
+                0x000089bb                error_TOC2_isr
+                0x0000897c                error_isr
+                0x000089fa                error_COP_isr
+                0x00008991                error_PAIE_isr
+                0x00008a01                error_ILLOP_isr
+                0x000089ec                error_XIRQ_isr
+                0x00008983                error_SCI_isr
+                0x00008a16                illop_isr
+                0x000089ad                error_TOC4_isr
+                0x00008a37                init_interrupts
+                0x000089e5                error_IRQ_isr
+                0x0000899f                error_TOF_isr
+                0x000089d0                error_TIC2_isr
+                0x000089de                error_RTI_isr
+                0x000089d7                error_TIC1_isr
+                0x0000897a                inert_isr
+                0x0000898a                error_SPI_isr
+                0x000089a6                error_TOC5_isr
+                0x00008a25                set_interrupt
+                0x000089f3                error_SWI_isr
+                0x00008a0f                error_RESET_isr
+                0x000089c9                error_TIC3_isr
+                0x00008a08                error_CLM_isr
+                0x00008998                error_PAO_isr
+ .text          0x00008a71       0xc4 clock.o
+                0x00008ab4                clock_add_sec
+                0x00008a71                clock_reset
+                0x00008ab5                clock_compare
+                0x00008a7b                clock_add_ms
+ .text          0x00008b35      0x41d kernel.o
+                0x00008dcf                kernel_trigger_set_noswitch
+                0x00008b35                presto_init
+                0x00008c9f                presto_scheduler_start
+                0x00008dad                presto_trigger_poll
+                0x00008bb7                presto_task_create
+                0x00008cda                presto_priority_set
+                0x00008da4                presto_trigger_clear
+                0x00008cd2                presto_priority_get
+                0x00008d9c                presto_trigger_set
+                0x00008de2                kernel_current_task
+                0x00008d37                presto_priority_restore
+                0x00008de9                kernel_context_switch
+                0x00008d0b                presto_priority_override
+                0x00008d61                presto_wait
+                0x00008db4                presto_trigger_send
+ .text          0x00008f52      0x1f6 mail.o
+                0x00008fd3                presto_mail_send_to_box
+                0x00009080                presto_mail_wait
+                0x00008fae                presto_mail_send_to_task
+                0x00008f52                presto_mailbox_init
+                0x00008f89                presto_mailbox_default
+                0x00009091                presto_mail_get
+                0x00008fa1                presto_envelope_message
+                0x00008fa5                presto_envelope_payload
+                0x00008fa9                presto_envelope_sender
+                0x00009128                kernel_mail_init
+ .text          0x00009148      0x2e3 memory.o
+                0x00009148                presto_memory_allocate
+                0x0000929b                memory_debug
+                0x0000921f                presto_memory_free
+                0x00009303                kernel_memory_init
+ .text          0x0000942b      0x302 semaphore.o
+                0x00009599                presto_semaphore_wait
+                0x000094a6                presto_semaphore_request
+                0x00009651                kernel_semaphore_init
+                0x0000942b                presto_semaphore_init
+                0x000095ae                presto_semaphore_release
+ .text          0x0000972d      0x1fa timer.o
+                0x000097de                presto_timer_stop
+                0x000097e3                kernel_master_clock_start
+                0x0000972d                presto_timer_start
+                0x000097aa                presto_timer_wait
+                0x000097e2                kernel_timer_init
+ .text          0x00009927      0x29e serial.o
+                0x000099ef                serial_recv_string
+                0x000099de                serial_recv
+                0x000099b7                serial_send_string
+                0x00009927                serial_init
+                0x000099ae                serial_send_byte
+ .text          0x00009bc5      0x3e3 string.o
+                0x00009bfa                string_IsHexDigit
+                0x00009d1b                string_IntegerToString
+                0x00009e71                string_HexToInteger
+                0x00009f77                string_SkipSpaces
+                0x00009c1d                string_DigitToInteger
+                0x00009bd0                string_IsNumber
+                0x00009c28                string_StringToInteger
+                0x00009bed                string_IsDigit
+                0x00009f1d                string_NextWord
+                0x00009e40                string_HexDigitToInteger
+                0x00009ddc                string_IntegerToHex
+                0x00009bc5                string_IsSpace
+                0x00009eaa                string_Copy
+ .text          0x00009fa8       0x18 c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_mulhi3.o)
+                0x00009fa8                ___mulhi3
+ .text          0x00009fc0       0x25 c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_memcpy.o)
+                0x00009fc0                memcpy
+                0x00009fc0                __memcpy
+                0x00009fe5                __text_end = .
+
+.strings        0x00009fe5        0x0
+                0x00009fe5                __strings_start = .
+ *(.strings)
+                0x00009fe5                __strings_end = .
+
+.rodata         0x00009fe5        0xc
+                0x00009fe5                __rodata_start = .
+ *(.rodata)
+ .rodata        0x00009fe5        0xc stress_test.o
+                0x00009ff1                __rodata_end = .
+
+.end_of_rom     0x00009ff1        0x0
+                0x00009ff1                __idata_start = .
+
+.data           0x0000c000      0x140 load address 0x00009ff1
+                0x0000c000                __data_start = .
+ *(.data)
+ .data          0x0000c000      0x133 stress_test.o
+                0x0000c000                lights
+ .data          0x0000c133        0xb kernel.o
+ .data          0x0000c13e        0x2 timer.o
+                0x0000c140                __data_end = .
+
+.bss            0x0000c140      0x6e1
+                0x0000c140                __bss_start = .
+ *(.bss)
+ .bss           0x0000c140      0x3e8 stress_test.o
+ .bss           0x0000c528        0x2 hwtimer.o
+ .bss           0x0000c52a        0x4 intvect.o
+ .bss           0x0000c52e      0x1b0 kernel.o
+ .bss           0x0000c6de       0x18 mail.o
+ .bss           0x0000c6f6        0x6 timer.o
+ .bss           0x0000c6fc      0x125 serial.o
+                0x0000c821                __bss_end = .
+
+.softregs       0x00000040        0x8
+ .softregs      0x00000040        0x6 c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_regs_min.o)
+ .softregs      0x00000046        0x2 c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_regs_frame.o)
+                0x00000046                _.frame
+
+.common         0x0000c821       0x64
+                0x0000c821                __common_start = .
+ *(COMMON)
+ COMMON         0x0000c821       0x64 stress_test.o
+                                  0x0 (size before relaxing)
+                0x0000c821                prt
+                0x0000c835                copier
+                0x0000c873                empl_tid
+                0x0000c874                ctrl_tid
+                0x0000c875                poolstats
+                0x0000c881                pres_tid
+                0x0000c882                stud_tid
+                0x0000c883                dbug_tid
+                0x0000c884                mngr_tid
+                0x0000c885                __common_end = .
+
+.stack          0x0000c885       0x50
+                0x0000c885                __stack_start = .
+ *(.stack)
+ .stack         0x0000c885       0x50 boot.o
+                0x0000c885                initial_stack
+                0x0000c8d5                __stack_end = .
+
+.heap           0x0000c8d5      0x26a
+                0x0000c8d5                __heap_start = .
+ *(.heap)
+ .heap          0x0000c8d5      0x26a memory.o
+                0x0000cb3f                __heap_end = .
+
+.comment        0x00010000      0x1c7
+                0x00010000                __comment_start = .
+ *(.comment)
+ .comment       0x00010000       0x23 stress_test.o
+ .comment       0x00010023       0x23 boot.o
+ .comment       0x00010046       0x23 error.o
+ .comment       0x00010069       0x23 hwtimer.o
+ .comment       0x0001008c       0x23 intvect.o
+ .comment       0x000100af       0x23 clock.o
+ .comment       0x000100d2       0x23 kernel.o
+ .comment       0x000100f5       0x23 mail.o
+ .comment       0x00010118       0x23 memory.o
+ .comment       0x0001013b       0x23 semaphore.o
+ .comment       0x0001015e       0x23 timer.o
+ .comment       0x00010181       0x23 serial.o
+ .comment       0x000101a4       0x23 string.o
+                0x000101c7                __comment_end = .
+
+.debug          0x000101c7     0xdd86
+                0x000101c7                __debug_start = .
+ *(.debug_abbrev)
+ .debug_abbrev  0x000101c7      0x197 stress_test.o
+ .debug_abbrev  0x0001035e       0xd6 boot.o
+ .debug_abbrev  0x00010434       0xd6 error.o
+ .debug_abbrev  0x0001050a       0xd6 hwtimer.o
+ .debug_abbrev  0x000105e0       0xed intvect.o
+ .debug_abbrev  0x000106cd       0xf2 clock.o
+ .debug_abbrev  0x000107bf      0x1db kernel.o
+ .debug_abbrev  0x0001099a      0x11f mail.o
+ .debug_abbrev  0x00010ab9      0x118 memory.o
+ .debug_abbrev  0x00010bd1      0x176 semaphore.o
+ .debug_abbrev  0x00010d47      0x10a timer.o
+ .debug_abbrev  0x00010e51      0x16d serial.o
+ .debug_abbrev  0x00010fbe      0x152 string.o
+ *(.debug_aranges)
+ .debug_aranges
+                0x00011110       0x20 stress_test.o
+ .debug_aranges
+                0x00011130       0x20 boot.o
+ .debug_aranges
+                0x00011150       0x20 error.o
+ .debug_aranges
+                0x00011170       0x20 hwtimer.o
+ .debug_aranges
+                0x00011190       0x20 intvect.o
+ .debug_aranges
+                0x000111b0       0x20 clock.o
+ .debug_aranges
+                0x000111d0       0x20 kernel.o
+ .debug_aranges
+                0x000111f0       0x20 mail.o
+ .debug_aranges
+                0x00011210       0x20 memory.o
+ .debug_aranges
+                0x00011230       0x20 semaphore.o
+ .debug_aranges
+                0x00011250       0x20 timer.o
+ .debug_aranges
+                0x00011270       0x20 serial.o
+ .debug_aranges
+                0x00011290       0x20 string.o
+ *(.debug_info)
+ .debug_info    0x000112b0     0x134e stress_test.o
+ .debug_info    0x000125fe      0x321 boot.o
+ .debug_info    0x0001291f      0x6d6 error.o
+ .debug_info    0x00012ff5      0x30e hwtimer.o
+ .debug_info    0x00013303      0x9fb intvect.o
+ .debug_info    0x00013cfe      0x3f1 clock.o
+ .debug_info    0x000140ef     0x153d kernel.o
+ .debug_info    0x0001562c      0xef3 mail.o
+ .debug_info    0x0001651f     0x1098 memory.o
+ .debug_info    0x000175b7      0xf50 semaphore.o
+ .debug_info    0x00018507      0xe66 timer.o
+ .debug_info    0x0001936d     0x10ba serial.o
+ .debug_info    0x0001a427      0x73d string.o
+ *(.debug_line)
+ .debug_line    0x0001ab64      0x85d stress_test.o
+ .debug_line    0x0001b3c1       0xf0 boot.o
+ .debug_line    0x0001b4b1      0x16a error.o
+ .debug_line    0x0001b61b       0xb4 hwtimer.o
+ .debug_line    0x0001b6cf      0x25d intvect.o
+ .debug_line    0x0001b92c      0x124 clock.o
+ .debug_line    0x0001ba50      0x6ad kernel.o
+ .debug_line    0x0001c0fd      0x33b mail.o
+ .debug_line    0x0001c438      0x33b memory.o
+ .debug_line    0x0001c773      0x3d8 semaphore.o
+ .debug_line    0x0001cb4b      0x2ec timer.o
+ .debug_line    0x0001ce37      0x3d5 serial.o
+ .debug_line    0x0001d20c      0x36b string.o
+ *(.debug_pubnames)
+ .debug_pubnames
+                0x0001d577      0x103 stress_test.o
+ .debug_pubnames
+                0x0001d67a       0x39 boot.o
+ .debug_pubnames
+                0x0001d6b3       0x56 error.o
+ .debug_pubnames
+                0x0001d709       0x38 hwtimer.o
+ .debug_pubnames
+                0x0001d741      0x1ea intvect.o
+ .debug_pubnames
+                0x0001d92b       0x57 clock.o
+ .debug_pubnames
+                0x0001d982      0x17f kernel.o
+ .debug_pubnames
+                0x0001db01      0x10f mail.o
+ .debug_pubnames
+                0x0001dc10       0x6c memory.o
+ .debug_pubnames
+                0x0001dc7c       0x9a semaphore.o
+ .debug_pubnames
+                0x0001dd16       0x89 timer.o
+ .debug_pubnames
+                0x0001dd9f       0x75 serial.o
+ .debug_pubnames
+                0x0001de14      0x139 string.o
+                0x0001df4d                __debug_end = .
+                0x0000a131                __idata_end = ((__data_end - __data_start) + __idata_start)
+                0x00000000                _.tmp = 0x0
+                0x00000002                _.z = 0x2
+                0x00000004                _.xy = 0x4
+LOAD stress_test.o
+LOAD boot.o
+LOAD crt0.o
+LOAD error.o
+LOAD hwtimer.o
+LOAD intvect.o
+LOAD clock.o
+LOAD kernel.o
+LOAD mail.o
+LOAD memory.o
+LOAD semaphore.o
+LOAD timer.o
+LOAD serial.o
+LOAD string.o
+LOAD c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a
+OUTPUT(presto.elf elf32-m68hc11)
+LOAD linker stubs
+
+Cross Reference Table
+
+Symbol                                            File
+_.frame                                           c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_regs_frame.o)
+                                                  serial.o
+_.tmp                                             c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_regs_min.o)
+                                                  c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_mulhi3.o)
+                                                  string.o
+                                                  serial.o
+                                                  timer.o
+                                                  semaphore.o
+                                                  memory.o
+                                                  mail.o
+                                                  kernel.o
+                                                  clock.o
+                                                  intvect.o
+                                                  stress_test.o
+_.xy                                              c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_regs_min.o)
+                                                  string.o
+                                                  serial.o
+                                                  timer.o
+                                                  semaphore.o
+                                                  memory.o
+                                                  mail.o
+                                                  kernel.o
+                                                  clock.o
+                                                  intvect.o
+_.z                                               c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_regs_min.o)
+                                                  string.o
+                                                  serial.o
+                                                  timer.o
+                                                  semaphore.o
+                                                  memory.o
+                                                  mail.o
+                                                  kernel.o
+                                                  clock.o
+                                                  intvect.o
+___mulhi3                                         c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_mulhi3.o)
+                                                  string.o
+__bss_end                                         crt0.o
+__bss_start                                       crt0.o
+__data_start                                      crt0.o
+__idata_end                                       crt0.o
+__idata_start                                     crt0.o
+__memcpy                                          c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_memcpy.o)
+__stack_end                                       crt0.o
+_start                                            crt0.o
+                                                  intvect.o
+assert_lights                                     stress_test.o
+busy_work                                         stress_test.o
+clock_add_ms                                      clock.o
+                                                  timer.o
+clock_add_sec                                     clock.o
+clock_compare                                     clock.o
+                                                  timer.o
+clock_reset                                       clock.o
+                                                  timer.o
+control                                           stress_test.o
+copier                                            stress_test.o
+ctrl_tid                                          stress_test.o
+dbug_tid                                          stress_test.o
+empl_tid                                          stress_test.o
+employee                                          stress_test.o
+error_CLM_isr                                     intvect.o
+error_COP_isr                                     intvect.o
+error_ILLOP_isr                                   intvect.o
+error_IRQ_isr                                     intvect.o
+error_PAIE_isr                                    intvect.o
+error_PAO_isr                                     intvect.o
+error_RESET_isr                                   intvect.o
+error_RTI_isr                                     intvect.o
+error_SCI_isr                                     intvect.o
+error_SPI_isr                                     intvect.o
+error_SWI_isr                                     intvect.o
+error_TIC1_isr                                    intvect.o
+error_TIC2_isr                                    intvect.o
+error_TIC3_isr                                    intvect.o
+error_TOC1_isr                                    intvect.o
+error_TOC2_isr                                    intvect.o
+error_TOC3_isr                                    intvect.o
+error_TOC4_isr                                    intvect.o
+error_TOC5_isr                                    intvect.o
+error_TOF_isr                                     intvect.o
+error_XIRQ_isr                                    intvect.o
+error_address                                     error.o
+                                                  intvect.o
+error_crash                                       error.o
+error_fatal                                       error.o
+                                                  semaphore.o
+                                                  memory.o
+                                                  mail.o
+                                                  kernel.o
+                                                  intvect.o
+                                                  stress_test.o
+error_isr                                         intvect.o
+exit                                              boot.o
+hwtimer_restart                                   hwtimer.o
+                                                  timer.o
+hwtimer_start                                     hwtimer.o
+                                                  timer.o
+illop_isr                                         intvect.o
+inert_isr                                         intvect.o
+init_interrupts                                   intvect.o
+                                                  boot.o
+initial_stack                                     boot.o
+                                                  stress_test.o
+kernel_context_switch                             kernel.o
+                                                  timer.o
+                                                  semaphore.o
+                                                  mail.o
+kernel_current_task                               kernel.o
+                                                  timer.o
+                                                  semaphore.o
+                                                  mail.o
+kernel_mail_init                                  mail.o
+                                                  kernel.o
+kernel_master_clock_start                         timer.o
+                                                  kernel.o
+kernel_memory_init                                memory.o
+                                                  kernel.o
+kernel_semaphore_init                             semaphore.o
+                                                  kernel.o
+kernel_timer_init                                 timer.o
+                                                  kernel.o
+kernel_trigger_set_noswitch                       kernel.o
+                                                  timer.o
+                                                  semaphore.o
+                                                  mail.o
+lights                                            stress_test.o
+main                                              stress_test.o
+                                                  crt0.o
+manager                                           stress_test.o
+memcpy                                            c:\programs\hc11\gnu\lib\gcc-lib\m6811-elf\3.0.4\libgcc.a(_memcpy.o)
+                                                  timer.o
+memory_debug                                      memory.o
+                                                  stress_test.o
+mngr_tid                                          stress_test.o
+poolstats                                         stress_test.o
+premain                                           boot.o
+                                                  crt0.o
+pres_tid                                          stress_test.o
+president                                         stress_test.o
+presto_envelope_message                           mail.o
+                                                  stress_test.o
+presto_envelope_payload                           mail.o
+presto_envelope_sender                            mail.o
+presto_init                                       kernel.o
+                                                  stress_test.o
+presto_mail_get                                   mail.o
+                                                  stress_test.o
+presto_mail_send_to_box                           mail.o
+presto_mail_send_to_task                          mail.o
+                                                  stress_test.o
+presto_mail_wait                                  mail.o
+                                                  stress_test.o
+presto_mailbox_default                            mail.o
+presto_mailbox_init                               mail.o
+                                                  stress_test.o
+presto_memory_allocate                            memory.o
+                                                  stress_test.o
+presto_memory_free                                memory.o
+                                                  stress_test.o
+presto_priority_get                               kernel.o
+                                                  timer.o
+                                                  semaphore.o
+presto_priority_override                          kernel.o
+                                                  semaphore.o
+presto_priority_restore                           kernel.o
+                                                  semaphore.o
+presto_priority_set                               kernel.o
+presto_scheduler_start                            kernel.o
+                                                  stress_test.o
+presto_semaphore_init                             semaphore.o
+                                                  stress_test.o
+presto_semaphore_release                          semaphore.o
+                                                  stress_test.o
+presto_semaphore_request                          semaphore.o
+presto_semaphore_wait                             semaphore.o
+                                                  stress_test.o
+presto_task_create                                kernel.o
+                                                  stress_test.o
+presto_timer_start                                timer.o
+                                                  stress_test.o
+presto_timer_stop                                 timer.o
+                                                  stress_test.o
+presto_timer_wait                                 timer.o
+                                                  stress_test.o
+presto_trigger_clear                              kernel.o
+                                                  serial.o
+                                                  stress_test.o
+presto_trigger_poll                               kernel.o
+                                                  stress_test.o
+presto_trigger_send                               kernel.o
+                                                  serial.o
+                                                  stress_test.o
+presto_trigger_set                                kernel.o
+presto_wait                                       kernel.o
+                                                  serial.o
+                                                  timer.o
+                                                  semaphore.o
+                                                  mail.o
+                                                  stress_test.o
+prt                                               stress_test.o
+serial_init                                       serial.o
+                                                  stress_test.o
+serial_recv                                       serial.o
+serial_recv_string                                serial.o
+serial_send_byte                                  serial.o
+serial_send_string                                serial.o
+                                                  stress_test.o
+set_interrupt                                     intvect.o
+                                                  serial.o
+                                                  timer.o
+                                                  kernel.o
+show_one_byte                                     error.o
+string_Copy                                       string.o
+string_DigitToInteger                             string.o
+string_HexDigitToInteger                          string.o
+string_HexToInteger                               string.o
+string_IntegerToHex                               string.o
+                                                  stress_test.o
+string_IntegerToString                            string.o
+                                                  stress_test.o
+string_IsDigit                                    string.o
+string_IsHexDigit                                 string.o
+string_IsNumber                                   string.o
+string_IsSpace                                    string.o
+string_NextWord                                   string.o
+string_SkipSpaces                                 string.o
+string_StringToInteger                            string.o
+stud_tid                                          stress_test.o
+student                                           stress_test.o
+use_copier                                        stress_test.o

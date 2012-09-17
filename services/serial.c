@@ -87,9 +87,6 @@ void serial_init(PRESTO_TASKID_T task, PRESTO_TRIGGER_T tx_alert, PRESTO_TRIGGER
    // 1 start, 8 data, 1 stop bits
    // WAKE mode = idle line
    SCCR1 = 0x00;
-   // transmit interrupt enable, receive interrupt enable
-   // transmit enable, receive enable
-   SCCR2= SCCR2_TIE|SCCR2_RIE|SCCR2_TE|SCCR2_RE;
    // For 8 MHz system clock, and therefore 2 MHz E-clock)
    // BAUD=BAUD_SCP1|BAUD_SCP0|BAUD_SCR1|BAUD_SCR0; // 1200 baud
    // BAUD=BAUD_SCP1|BAUD_SCP0|BAUD_SCR1; // 2400 baud
@@ -104,6 +101,9 @@ void serial_init(PRESTO_TASKID_T task, PRESTO_TRIGGER_T tx_alert, PRESTO_TRIGGER
    serialuser_rx_trigger=rx_alert;
    // set serial port interrupt service routine
    set_interrupt(INTR_SCI, serial_isr);
+   // transmit interrupt enable, receive interrupt enable
+   // transmit enable, receive enable
+   SCCR2= SCCR2_TIE|SCCR2_RIE|SCCR2_TE|SCCR2_RE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

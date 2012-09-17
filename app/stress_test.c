@@ -11,12 +11,12 @@
 
 #define STACK_SIZE 0xA0
 
-/*static*/ BYTE stud_stack[STACK_SIZE];
-/*static*/ BYTE empl_stack[STACK_SIZE];
-/*static*/ BYTE mngr_stack[STACK_SIZE];
-/*static*/ BYTE pres_stack[STACK_SIZE];
-/*static*/ BYTE ctrl_stack[STACK_SIZE];
-/*static*/ BYTE dbug_stack[STACK_SIZE];
+static BYTE stud_stack[STACK_SIZE];
+static BYTE empl_stack[STACK_SIZE];
+static BYTE mngr_stack[STACK_SIZE];
+static BYTE pres_stack[STACK_SIZE];
+static BYTE ctrl_stack[STACK_SIZE];
+static BYTE dbug_stack[STACK_SIZE];
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -74,7 +74,7 @@ PRESTO_TASKID_T dbug_tid;
 
 #define FLAG_S_LOOP        0x04
 #define FLAG_S_MAIL        0x02
-#define FLAG_S_TIMER       0x01
+#define FLAG_S_TIMER       0x10
 
 #define FLAG_D_SERIALRX    0x01
 #define FLAG_D_SERIALTX    0x02
@@ -82,7 +82,7 @@ PRESTO_TASKID_T dbug_tid;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define PRT  80
+#define PRT  20
 char prt[PRT];
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -322,7 +322,7 @@ void student(void) {
    presto_wait(FLAG_ALL_INIT);
    // initialize here
    presto_mailbox_init(&stud_mbox,FLAG_S_MAIL);
-   presto_timer_start(&ticker1,0,250,FLAG_S_TIMER);
+   presto_timer_start(&ticker1,1,125,FLAG_S_TIMER);
    // done initializing
    presto_trigger_send(ctrl_tid,FLAG_ALL_INIT);
 
@@ -338,6 +338,8 @@ void student(void) {
 
       MASKNOT(lights,0x08);
       assert_lights();
+
+      MASKNOT(PORTD,0x3C);
 
       if(++count==25) {
          count=0;
@@ -522,6 +524,7 @@ static void debugger(void) {
 
 int main(void) {
 
+   DDRD=0x3F;
    assert_lights();
    presto_init();
    pres_tid=presto_task_create(president,  pres_stack,  STACK_SIZE, 14);

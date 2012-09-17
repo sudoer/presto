@@ -80,7 +80,8 @@ void presto_timer_start(KERNEL_TIMER_T * timer_p, KERNEL_INTERVAL_T delay, KERNE
    timer_p->trigger=trigger;
 
    if (delay==0) {
-      // This timer fires immediately.
+      // This timer fires immediately.  Since we are already the
+      // running task, there is no need to switch contexts.
       kernel_trigger_set_noswitch(kernel_current_task(), trigger);
       if (period==0) {
          // This timer is a one-shot timer.
@@ -120,19 +121,18 @@ void presto_timer_stop(KERNEL_TIMER_T * timer_p) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-
-
-void presto_timer_now(KERNEL_TIME_T * clk) {
-   *clk=system_clock;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
 //   K E R N E L - O N L Y   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
 
 void kernel_timer_init(void) {
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+void kernel_master_clock_start(void) {
    // initialize master clock
    clock_reset(&system_clock);
    // set up interrupt vector for TOC2
@@ -150,15 +150,17 @@ void kernel_timer_init(void) {
 static void timer_isr(void) {
    BYTE count=0;
    KERNEL_TIMER_T * timer_p;
-   CPU_LOCK_T lock;
+   PRESTO_PRIORITY_T current_pri;
 
    // update the system clock
    clock_add_ms(&system_clock,PRESTO_KERNEL_MSPERTICK);
 
    // schedule a hardware timer interrupt one tick into the future
-   hwtimer_restart(PRESTO_KERNEL_MSPERTICK);
+   hwtimer_restart();
 
-   cpu_lock_save(lock);
+   // find out the priority of the current running task
+   current_pri=presto_priority_get(kernel_current_task());
+
    while ((timer_list!=NULL)&&(clock_compare(&timer_list->delivery_time,&system_clock)<=0)) {
 
       // save a pointer to the first timer in the list
@@ -176,10 +178,9 @@ static void timer_isr(void) {
          timer_insert_into_master_list(timer_p);
       }
 
-      // indicate that a timer expired
-      count++;
+      // indicate that a timer expired, and that it made a high priority task ready
+      if(presto_priority_get(timer_p->owner_tid)>current_pri) count++;
    }
-   cpu_unlock_restore(lock);
 
    if (count>0) {
       kernel_context_switch();

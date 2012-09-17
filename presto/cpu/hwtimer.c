@@ -27,32 +27,39 @@
 #define TIMER_PRESCALE      16          // set in TMSK2 register (see boot.c)
 
 // timing, computed from values in configure.h
-#define ECLOCKS_PER_MS       CYCLES_PER_MS/CYCLES_PER_ECLOCK/TIMER_PRESCALE
+#define ECLOCKS_PER_MS      CYCLES_PER_MS/CYCLES_PER_ECLOCK/TIMER_PRESCALE
+
+////////////////////////////////////////////////////////////////////////////////
+//   S T A T I C   D A T A
+////////////////////////////////////////////////////////////////////////////////
+
+static unsigned short eclocks_per_tick;
 
 ////////////////////////////////////////////////////////////////////////////////
 //   E X P O R T E D   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
 void hwtimer_start(unsigned short ms) {
+   eclocks_per_tick=ECLOCKS_PER_MS*ms;
    // counter disconnected from output pin logic
-   TCTL1 &= ~(TCTL1_OM2|TCTL1_OL2);
+   MASKCLR(TCTL1,TCTL1_OM2|TCTL1_OL2);
+   // store ("current time" plus eclocks_per_tick)
+   TOC2 = (WORD)(TCNT + eclocks_per_tick);
    // clear the OUTPUT COMPARE trigger
    // writing O's makes no change, writing 1's clears the bit
    TFLG1 = TFLG1_OC2F;
-   // store ("current time" plus ECLOCKS_PER_TICK)
-   TOC2 = (WORD)(TCNT + (ECLOCKS_PER_MS*ms));
    // request output compare interrupt
-   TMSK1 |= TMSK1_OC2I;
+   MASKSET(TMSK1,TMSK1_OC2I);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void hwtimer_restart(unsigned short ms) {
-   // store ("last compare time" plus ECLOCKS_PER_TICK)
-   TOC2 = (WORD)(TOC2 + (ECLOCKS_PER_MS*ms));
+void hwtimer_restart(void) {
    // clear the OUTPUT COMPARE trigger
    // writing O's makes no change, writing 1's clears the bit
    TFLG1 = TFLG1_OC2F;
+   // store ("last compare time" plus eclocks_per_tick)
+   TOC2 = (WORD)(TOC2 + eclocks_per_tick);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

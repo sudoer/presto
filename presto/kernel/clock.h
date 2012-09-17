@@ -11,12 +11,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// note - clock rolls over after seven years
+// note - clock rolls over after 8919 years
 typedef struct KERNEL_TIME_S {
-   //unsigned short usec;
-   unsigned short msec;
-   unsigned short sec;
-   unsigned short hour;
+   unsigned short t[3];
 } KERNEL_TIME_T;
 
 ////////////////////////////////////////////////////////////////////////////////

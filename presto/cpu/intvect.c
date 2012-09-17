@@ -63,9 +63,31 @@ static WORD illop_address;
 //   S I M P L E   I N T E R R U P T   S E R V I C E   R O U T I N E ( S )
 ////////////////////////////////////////////////////////////////////////////////
 
-//void inert_isr(void) __attribute__((interrupt));
-void inert_isr(void) { asm("rti"); }
-void error_isr(void) { error_fatal(ERROR_INTVECT_OTHER); }
+//void inert_isr(void) __attribute_((interrupt));
+void inert_isr(void)       { asm("rti"); }
+void error_isr(void)       { error_fatal(ERROR_INTVECT_OTHER); }
+
+void error_SCI_isr(void)   { error_fatal(ERROR_INTVECT_SCI); }
+void error_SPI_isr(void)   { error_fatal(ERROR_INTVECT_SPI); }
+void error_PAIE_isr(void)  { error_fatal(ERROR_INTVECT_PAIE); }
+void error_PAO_isr(void)   { error_fatal(ERROR_INTVECT_PAO); }
+void error_TOF_isr(void)   { error_fatal(ERROR_INTVECT_TOF); }
+void error_TOC5_isr(void)  { error_fatal(ERROR_INTVECT_TOC5); }
+void error_TOC4_isr(void)  { error_fatal(ERROR_INTVECT_TOC4); }
+void error_TOC3_isr(void)  { error_fatal(ERROR_INTVECT_TOC3); }
+void error_TOC2_isr(void)  { error_fatal(ERROR_INTVECT_TOC2); }
+void error_TOC1_isr(void)  { error_fatal(ERROR_INTVECT_TOC1); }
+void error_TIC3_isr(void)  { error_fatal(ERROR_INTVECT_TIC3); }
+void error_TIC2_isr(void)  { error_fatal(ERROR_INTVECT_TIC2); }
+void error_TIC1_isr(void)  { error_fatal(ERROR_INTVECT_TIC1); }
+void error_RTI_isr(void)   { error_fatal(ERROR_INTVECT_RTI); }
+void error_IRQ_isr(void)   { error_fatal(ERROR_INTVECT_IRQ); }
+void error_XIRQ_isr(void)  { error_fatal(ERROR_INTVECT_XIRQ); }
+void error_SWI_isr(void)   { error_fatal(ERROR_INTVECT_SWI); }
+void error_COP_isr(void)   { error_fatal(ERROR_INTVECT_COP); }
+void error_ILLOP_isr(void) { error_fatal(ERROR_INTVECT_ILLOP); }
+void error_CLM_isr(void)   { error_fatal(ERROR_INTVECT_CLM); }
+void error_RESET_isr(void) { error_fatal(ERROR_INTVECT_RESET); }
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -85,27 +107,27 @@ void illop_isr(void) {
 //static void (*special_interrupt_vectors[NUM_INTERRUPTS])()
 static interrupt_vector const special_interrupt_vectors[NUM_INTERRUPTS]
    __attribute((section(".specvect"))) = {
-   error_isr,     // SCI
-   error_isr,     // SPI
-   error_isr,     // PAIE
-   error_isr,     // PAO
-   error_isr,     // TOF
-   error_isr,     // TOC5
-   error_isr,     // TOC4
-   error_isr,     // TOC3
-   error_isr,     // TOC2
-   error_isr,     // TOC1
-   error_isr,     // TIC3
-   error_isr,     // TIC2
-   error_isr,     // TIC1
-   error_isr,     // RTI
-   error_isr,     // IRQ
-   error_isr,     // XIRQ
-   error_isr,     // SWI
-   error_isr,     // ILLOP
-   error_isr,     // COP
-   error_isr,     // CLM
-   _start         // RESET
+   error_SCI_isr,   // SCI
+   error_SPI_isr,   // SPI
+   error_PAIE_isr,  // PAIE
+   error_PAO_isr,   // PAO
+   error_TOF_isr,   // TOF
+   error_TOC5_isr,  // TOC5
+   error_TOC4_isr,  // TOC4
+   error_TOC3_isr,  // TOC3
+   error_TOC2_isr,  // TOC2
+   error_TOC1_isr,  // TOC1
+   error_TIC3_isr,  // TIC3
+   error_TIC2_isr,  // TIC2
+   error_TIC1_isr,  // TIC1
+   error_RTI_isr,   // RTI
+   error_IRQ_isr,   // IRQ
+   error_XIRQ_isr,  // XIRQ
+   error_SWI_isr,   // SWI
+   error_ILLOP_isr, // ILLOP
+   error_COP_isr,   // COP
+   error_CLM_isr,   // CLM
+   _start           // RESET
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,10 +140,9 @@ static interrupt_vector normal_interrupt_vectors[NUM_INTERRUPTS]
 //   I N T E R F A C E   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-void set_interrupt(BYTE intr, void (*vector)(void)) {
-   NOT_USED(special_interrupt_vectors);
+void set_interrupt(BYTE intr, void (*function_p)(void)) {
    if (intr<=INTR_RESET) {
-      normal_interrupt_vectors[intr]=vector;
+      normal_interrupt_vectors[intr]=function_p;
    }
 }
 
@@ -129,8 +150,10 @@ void set_interrupt(BYTE intr, void (*vector)(void)) {
 
 void init_interrupts(void) {
    int i;
+   //NOT_USED(special_interrupt_vectors);
    for (i=INTR_SCI;i<INTR_RESET;i++) {
-      normal_interrupt_vectors[i]=error_isr;
+      //normal_interrupt_vectors[i]=error_isr;
+      normal_interrupt_vectors[i]=special_interrupt_vectors[i];
    }
    normal_interrupt_vectors[INTR_ILLOP]=illop_isr;
    normal_interrupt_vectors[INTR_RESET]=_start;

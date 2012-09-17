@@ -1,3 +1,13 @@
+2003.07.21
+
+Subsections are documented.
+
+API is clean.
+
+Kernel supports either 8- or 16-bit trigger fields.
+
+---
+
 2003.06.01
 
 Build script now recursively looks at includes to determine affected

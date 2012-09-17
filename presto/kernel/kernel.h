@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
+#include "configure.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //   C O N S T A N T S
@@ -20,7 +21,19 @@
 
 typedef unsigned char  KERNEL_TASKID_T;
 typedef unsigned char  KERNEL_PRIORITY_T;
-typedef unsigned char  KERNEL_TRIGGER_T;
+
+#if ( PRESTO_KERNEL_TRIGGERBITS == 8 )
+   typedef unsigned char KERNEL_TRIGGER_T;
+#elif ( PRESTO_KERNEL_TRIGGERBITS == 16 )
+   typedef unsigned short KERNEL_TRIGGER_T;
+#else
+   #error PRESTO_KERNEL_TRIGGERBITS must be either 8 or 16
+   // The following line suppresses a screenful of errors that would
+   // otherwise be printed AFTER the #error above, helping the programmer
+   // to see the #error.
+   typedef unsigned char KERNEL_TRIGGER_T;
+#endif
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //   K E R N E L - O N L Y   F U N C T I O N S
