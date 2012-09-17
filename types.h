@@ -45,15 +45,15 @@ typedef union MISCLONG {
 
 // BITWISE OPERATIONS
 
-#define BITSET(name,bitn)  ((name)|=(1<<(bitn)))
-#define BITCLR(name,bitn)  ((name)&=~(1<<(bitn)))
-#define BITTST(name,bitn)  ((unsigned char) name & (1<<(bitn)))
-#define BITNOT(name,bitn)  ((name)^=(1<<(bitn)))
+#define BITSET(name,bitn)  ((unsigned char)(name)|=(0x01<<(bitn)))
+#define BITCLR(name,bitn)  ((unsigned char)(name)&=~(0x01<<(bitn)))
+#define BITTST(name,bitn)  ((unsigned char)(name) & (0x01<<(bitn)))
+#define BITNOT(name,bitn)  ((unsigned char)(name)^=(0x01<<(bitn)))
 
-#define MASKSET(name,mask)  ((name)|=(mask))
-#define MASKCLR(name,mask)  ((name)&=~(mask))
-#define MASKTST(name,mask)  ((unsigned char) name & (mask))
-#define MASKNOT(name,mask)  ((name)^=(mask))
+#define MASKSET(name,mask)  ((unsigned char)(name)|=(mask))
+#define MASKCLR(name,mask)  ((unsigned char)(name)&=~(mask))
+#define MASKTST(name,mask)  ((unsigned char)(name) & (mask))
+#define MASKNOT(name,mask)  ((unsigned char)(name)^=(mask))
 
 ////////////////////////////////////////////////////////////////////////////////
 

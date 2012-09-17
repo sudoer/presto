@@ -74,12 +74,16 @@ sub prepare {
    # CLEANING UP OLD FILES
 
    print("deleting old intermediate files...");
-   unlink <*.bak>;
-   unlink <*.aaa>;
-   unlink <*.s>;
-   unlink <*.i>;
+   #unlink <*.bak>;
+   #unlink <*.aaa>;
+   #unlink <*.s>;
+   #unlink <*.i>;
    #rem del /s/y/x/q %OBJ_DIR% >&> NUL:
    #rem del /s/q *.s19 >&> NUL:
+   print("OK\n");
+
+   print("deleting old target file...");
+   unlink("$OBJ_DIR\\$TARGET.s19");
    print("OK\n");
 
    # CREATING OBJECT DIRECTORY
@@ -155,7 +159,7 @@ sub compile_stage {
                         ."-DGCC "
                         ."-I$build_dir -I. "
                         ."-mshort "
-                        ."-Os "
+                        ."-O0 " # oh zero
                         ."-fomit-frame-pointer "
                         ."-msoft-reg-count=0 "
                         ."-c "
@@ -238,7 +242,7 @@ sub link_stage {
 sub show_results {
    print("done\n");
    print("--- SHOW THE RESULTS ---\n");
-   run("dir $OBJ_DIR\\*.s19");
+   run("dir $OBJ_DIR\\$TARGET.s19");
    print("\n");
 }
 
@@ -247,10 +251,8 @@ sub show_results {
 sub cleanup {
    print("--- CLEAN UP ---\n");
    print("removing intermediate files...");
-   unlink <*.aaa>;
-   unlink <*.aaa>;
-   unlink <*.s>;
-   unlink <*.i>;
+   #unlink <*.s>;
+   #unlink <*.i>;
    print("OK\n");
 
 }
@@ -451,3 +453,4 @@ sub dec2hex {
 }
 
 ################################################################################
+

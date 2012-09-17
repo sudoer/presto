@@ -107,6 +107,137 @@ void presto_init(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+//   T A S K   M A N A G E M E N T
+////////////////////////////////////////////////////////////////////////////////
+
+PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_size, BYTE priority ) {
+
+   PRESTO_TCB_T * new_tcb_p;
+
+   if(presto_initialized==0) presto_fatal_error(0x05);
+
+   if(free_tcb_p==NULL) {
+      // There are no more TCB's left.
+      presto_fatal_error(0x06);
+      return -1;
+   }
+
+   // we're about to mess with tasks, TCB's... interrupts off
+   INTR_OFF();
+
+   // allocate TCB for new task
+   new_tcb_p=free_tcb_p;
+   free_tcb_p=free_tcb_p->next;
+
+   // initialize TCB elements
+   // new_tcb_p->task_id is already assigned
+   new_tcb_p->stack_top=stack+stack_size-1;
+   new_tcb_p->stack_bottom=stack;
+   new_tcb_p->stack_ptr=new_tcb_p->stack_top;
+   new_tcb_p->priority=priority;
+   new_tcb_p->state=STATE_READY;
+   new_tcb_p->mailbox_head=NULL;
+   new_tcb_p->mailbox_tail=NULL;
+
+   // SET UP NEW STACK USING ASSEMBLY LANGUAGE
+
+   // these parameters will be used in inline assembly...
+   // must be put in global space, not on stack
+   global_new_sp=new_tcb_p->stack_ptr;
+   global_new_fn=func;
+
+
+   // does GCC need these same registers below (after inline asm)?
+   asm("pshy");  // 2 bytes (Low, then High)
+   asm("pshx");  // 2 bytes (Low, then High)
+   asm("psha");  // 1 byte
+   asm("pshb");  // 1 byte
+
+
+   // store our own SP so we can work on the new task
+   asm("sts global_save_sp");
+
+   // load empty SP from task so we can initialize it
+   asm("lds global_new_sp");
+
+/*
+   // Set presto_fatal_error as the "return pc" of a new task.  If some bozo
+   // tries to return out of his task's main function, we will cause an alarm.
+   asm("ldd #_presto_fatal_error");
+   asm("pshb");
+   asm("psha");
+*/
+
+   // push one byte of trash on the stack... sometimes I pull/clear/push
+   asm("ldaa #88");
+   asm("psha");
+
+   // push the actual function call on the stack
+   asm("ldd global_new_fn");
+   asm("pshb");
+   asm("psha");
+
+   // push any old stinkin' registers onto the stack
+   // they'll be pulled off when we start running
+   // we push in interrupt-stack order
+   asm("ldaa #0");
+   asm("psha"); // Y(L) register
+   asm("psha"); // Y(H) register
+   asm("psha"); // X(L) register
+   asm("psha"); // X(H) register
+   asm("psha"); // A register
+   asm("psha"); // B register
+   asm("tpa");  // do not push $00 here, use actual condition codes
+   ENABLE_CCR_INTERRUPT_BIT;  // enable interrupts in pushed CC register (I bit cleared)
+   asm("psha");  // 1 byte, the condition codes
+
+   // save task SP in TCB
+   asm("sts global_new_sp");
+   // re-load our own SP so we can return
+   asm("lds global_save_sp");
+
+   // restore registers from top of this C function
+   asm("pulb");  // 1 byte
+   asm("pula");  // 1 byte
+   asm("pulx");  // 2 bytes (Low, then High)
+   asm("puly");  // 2 bytes (Low, then High)
+
+
+   // recover the altered stack pointer and save it in the TCB
+   new_tcb_p->stack_ptr=global_new_sp;
+
+   // INSERT NEW TCB INTO LIST IN PRIORITY ORDER
+
+   if(tcb_head_p==NULL) {
+      // we are the first TCB in the list
+      tcb_head_p=new_tcb_p;
+      new_tcb_p->next=NULL;
+   } else if((new_tcb_p->priority)>(tcb_head_p->priority)) {
+      // advance to the head of the class!
+      new_tcb_p->next=tcb_head_p;
+      tcb_head_p=new_tcb_p;
+   } else {
+      PRESTO_TCB_T * ptr=tcb_head_p;
+      while(ptr->next!=NULL) {
+         if((new_tcb_p->priority)>(ptr->next->priority)) break;
+         ptr=ptr->next;
+      }
+
+      // ptr->next is either NULL or lower priority than us
+      // either way, we want to get inserted between ptr and ptr->next
+      new_tcb_p->next=ptr->next;
+      ptr->next=new_tcb_p;
+   }
+
+   // we're done messing with the task list... interrupts back on
+   INTR_ON();
+
+   return new_tcb_p->task_id;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//   S T A R T   M U L T I - T A S K I N G
+////////////////////////////////////////////////////////////////////////////////
 
 void presto_start_scheduler(void) {
 
@@ -151,123 +282,6 @@ void presto_start_scheduler(void) {
 
    // we never get here
    presto_fatal_error(0x04);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//   T A S K   M A N A G E M E N T
-////////////////////////////////////////////////////////////////////////////////
-
-PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_size, BYTE priority ) {
-
-   PRESTO_TCB_T * new_tcb_p;
-
-   if(presto_initialized==0) presto_fatal_error(0x05);
-
-   if(free_tcb_p==NULL) {
-      // There are no more TCB's left.
-      presto_fatal_error(0x06);
-      return -1;
-   }
-
-   // we're about to mess with tasks, TCB's... interrupts off
-   INTR_OFF();
-
-   // allocate TCB for new task
-   new_tcb_p=free_tcb_p;
-   free_tcb_p=free_tcb_p->next;
-
-   // initialize TCB elements
-   // new_tcb_p->task_id is already assigned
-   new_tcb_p->stack_top=stack+stack_size-1;
-   new_tcb_p->stack_bottom=stack;
-   new_tcb_p->stack_ptr=new_tcb_p->stack_top;
-   new_tcb_p->priority=priority;
-   new_tcb_p->state=STATE_READY;
-   new_tcb_p->mailbox_head=NULL;
-   new_tcb_p->mailbox_tail=NULL;
-
-   // SET UP NEW STACK USING ASSEMBLY LANGUAGE
-
-   // these parameters will be used in inline assembly...
-   // must be put in global space, not on stack
-   global_new_sp=new_tcb_p->stack_ptr;
-   global_new_fn=func;
-
-   // store our own SP so we can work on the new task
-   asm("sts global_save_sp");
-
-   // load empty SP from task so we can initialize it
-   asm("lds global_new_sp");
-
-/*
-   // Set presto_fatal_error as the "return pc" of a new task.  If some bozo
-   // tries to return out of his task's main function, we will cause an alarm.
-   asm("ldd #_presto_fatal_error");
-   asm("pshb");
-   asm("psha");
-*/
-
-   // push the actual function call on the stack
-   asm("ldd global_new_fn");
-   asm("pshb");
-   asm("psha");
-
-   // push any old stinkin' registers onto the stack
-   // they'll be pulled off when we start running
-   // we push in interrupt-stack order
-   asm("ldaa #0");
-   asm("psha"); // Y(L) register
-   asm("psha"); // Y(H) register
-   asm("psha"); // X(L) register
-   asm("psha"); // X(H) register
-   asm("psha"); // A register
-   asm("psha"); // B register
-   asm("tpa");  // do not push $00 here, use actual condition codes
-   ENABLE_CCR_INTERRUPT_BIT;  // enable interrupts in pushed CC register (I bit cleared)
-   asm("psha");  // 1 byte, the condition codes
-
-   // save task SP in TCB
-   asm("sts global_new_sp");
-   // re-load our own SP so we can return
-   asm("lds global_save_sp");
-
-   // recover the altered stack pointer and save it in the TCB
-   new_tcb_p->stack_ptr=global_new_sp;
-
-   // INSERT NEW TCB INTO LIST IN PRIORITY ORDER
-
-   if(tcb_head_p==NULL) {
-      // we are the first TCB in the list
-      tcb_head_p=new_tcb_p;
-      new_tcb_p->next=NULL;
-   } else if((new_tcb_p->priority)>(tcb_head_p->priority)) {
-      // advance to the head of the class!
-      new_tcb_p->next=tcb_head_p;
-      tcb_head_p=new_tcb_p;
-   } else {
-      PRESTO_TCB_T * ptr=tcb_head_p;
-      while(ptr->next!=NULL) {
-         if((new_tcb_p->priority)>(ptr->next->priority)) break;
-         ptr=ptr->next;
-      }
-
-      // ptr->next is either NULL or lower priority than us
-      // either way, we want to get inserted between ptr and ptr->next
-      new_tcb_p->next=ptr->next;
-      ptr->next=new_tcb_p;
-   }
-
-   // we're done messing with the task list... interrupts back on
-   INTR_ON();
-
-   return new_tcb_p->task_id;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void presto_kill_self(void) {
-   // TODO - remove TCB from list
-   presto_fatal_error(0x07);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

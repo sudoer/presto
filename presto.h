@@ -30,7 +30,6 @@ typedef union {
 void presto_init(void);
 PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_size, BYTE priority );
 void presto_start_scheduler(void);
-void presto_kill_self(void);
 void presto_sleep(void);
 BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload);
 BYTE presto_send_message(PRESTO_TID_T to, PRESTO_MAIL_T payload);

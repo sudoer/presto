@@ -61,15 +61,22 @@
 void presto_fatal_error(BYTE err) {
    // should never get here
    BYTE delay;
+   //BYTE temp_reg;
    INTR_OFF();
 
-   // reload the original stack pointer, so we don't trash anything else
-   asm("lds _stack");         // TODO - use init_sp instead
+   // Reload the original stack pointer, so we don't trash anything else.
+   // Oops, by doing this, the compiler references STACK+something, and we
+   // trash eeprom memory, and we read false values for passed parameters!
+   //asm("lds #_stack");         // TODO - use init_sp instead
 
    // speaker is always an output
    //BITSET(DDRD,4);         // LED is an output
    while(1) {
-      BITNOT(PORTA,3);       // toggle speaker
+      // toggle speaker
+      BITNOT(PORTA,3);
+      //temp_reg=PORTA;
+      //temp_reg^=(1<<3);
+      //PORTA=temp_reg;
       //BITCLR(PORTD,4);     // LED on
       while(--delay>0) {
          // This will force the motor lights to blink so fast
