@@ -1,3 +1,26 @@
+2003.05.29
+
+Dynamic memory allocation works.  Very configurable and fast.
+
+Serial service added, not part of the kernel.  Has bugs.  Skips some
+characters if you send a lot of data at once.  ???
+
+Changes made to memory.x.  I think the area of initial values for
+initialized data might have been mis-placed.
+
+Special interrupt vectors are treated like ROM (initialized, frozen).
+Normal interrupt vectors are treated like RAM (static, zeroes, then
+initialized manually in boot.c before switching modes).
+
+Lots of work done to the build script.  Now gives a summary of memory
+usage.  Verified what each section means (BSS is static data initialized
+to zero, etc).  Also links in libgcc, which has functions like memcpy
+and multiply, divide, etc.
+
+Semaphores need work to support more than one resource (and inheritance).
+
+---
+
 2003.05.13
 
 Semaphores work, with and without priority inheritance.  I need to

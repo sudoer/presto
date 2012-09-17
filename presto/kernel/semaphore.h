@@ -1,15 +1,12 @@
 
-#ifndef _SEM_TYPES_H_
-#define _SEM_TYPES_H_
+#ifndef _SEMAPHORE_H_
+#define _SEMAPHORE_H_
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
-#include "kernel/kernel_types.h"
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define MAX_SEM_USERS  10
+#include "configure.h"
+#include "kernel/kernel.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -29,8 +26,12 @@ typedef struct KERNEL_SEMAPHORE_S {
    struct KERNEL_SEMUSER_S * user_list;
    struct KERNEL_SEMUSER_S * wait_list;
    struct KERNEL_SEMUSER_S * free_list;
-   struct KERNEL_SEMUSER_S semuser_data[MAX_SEM_USERS];
+   struct KERNEL_SEMUSER_S semuser_data[PRESTO_SEM_MAXUSERS];
 } KERNEL_SEMAPHORE_T;
+
+////////////////////////////////////////////////////////////////////////////////
+
+extern void kernel_semaphore_init(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 

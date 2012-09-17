@@ -4,19 +4,19 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static clock_add(struct KERNEL_TIME_S * clk, unsigned short sec, unsigned short msec, unsigned short usec) {
+static void clock_add(struct KERNEL_TIME_S * clk, unsigned short sec, unsigned short msec, unsigned short usec) {
    clk->usec+=usec;
-   while(clk->usec>=1000) {
+   while (clk->usec>=1000) {
       clk->usec-=1000;
       clk->msec++;
    }
    clk->msec+=msec;
-   while(clk->msec>=1000) {
+   while (clk->msec>=1000) {
       clk->msec-=1000;
       clk->sec++;
    }
    clk->sec+=sec;
-   while(clk->sec>=3600) {
+   while (clk->sec>=3600) {
       clk->sec-=3600;
       clk->hour++;
    }
@@ -52,17 +52,17 @@ void clock_add_sec(struct KERNEL_TIME_S * clk, unsigned short s) {
 ////////////////////////////////////////////////////////////////////////////////
 
 signed char clock_compare(struct KERNEL_TIME_S * A,struct KERNEL_TIME_S * B) {
-   if(A->hour < B->hour) return -1;
-   if(A->hour > B->hour) return 1;
+   if (A->hour < B->hour) return -1;
+   if (A->hour > B->hour) return 1;
    // we now know that A->hour == B->hour
-   if(A->sec < B->sec) return -1;
-   if(A->sec > B->sec) return 1;
+   if (A->sec < B->sec) return -1;
+   if (A->sec > B->sec) return 1;
    // we now know that A->sec == B->sec
-   if(A->msec < B->msec) return -1;
-   if(A->msec > B->msec) return 1;
+   if (A->msec < B->msec) return -1;
+   if (A->msec > B->msec) return 1;
    // we now know that A->msec == B->msec
-   if(A->usec < B->usec) return -1;
-   if(A->usec > B->usec) return 1;
+   if (A->usec < B->usec) return -1;
+   if (A->usec > B->usec) return 1;
    return 0;
 }
 

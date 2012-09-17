@@ -8,10 +8,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
-#include "chip/hc11regs.h"
-#include "chip/locks.h"
-#include "chip/misc_hw.h"
-#include "error.h"
+#include "cpu/hc11regs.h"
+#include "cpu/locks.h"
+#include "cpu/misc_hw.h"
+#include "error_codes.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -27,8 +27,8 @@
 void show_one_byte(BYTE leds) {
    BYTE delay=0;
    // assert LED's 256 times (high nibble 128 times, low nibble 128 times)
-   while(--delay>0) {
-      if(delay&0x01) MOTOR_LED_PORT=0xF0&((leds&0x0F)<<4);
+   while (--delay>0) {
+      if (delay&0x01) MOTOR_LED_PORT=0xF0&((leds&0x0F)<<4);
       else MOTOR_LED_PORT=0x0F|(leds&0xF0);
    }
 }
@@ -39,7 +39,7 @@ void show_one_byte(BYTE leds) {
 
 void presto_fatal_error(error_number_e err) {
    presto_lock();
-   while(1) {
+   while (1) {
       TOGGLE_SPEAKER();
       show_one_byte(err);
    }
@@ -57,7 +57,7 @@ void presto_crash(void) {
 void presto_crash_address(unsigned short address) {
    BYTE delay;
    presto_lock();
-   while(1) {
+   while (1) {
       for(delay=0;delay<150;delay++) {
          show_one_byte(0x00);
       }

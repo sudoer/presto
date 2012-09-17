@@ -1,23 +1,30 @@
+#ifndef _TIMER_H_
+#define _TIMER_H_
 
-#ifndef _KERNEL_DATA_H_
-#define _KERNEL_DATA_H_
-
-////////////////////////////////////////////////////////////////////////////////
-//   D E P E N D E N C I E S
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
 #include "kernel/clock.h"
-#include "kernel/kernel_types.h"
+#include "kernel/kernel.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-//   K E R N E L - O N L Y   D A T A
+
+typedef struct KERNEL_TIMER_S {
+   KERNEL_TIME_T delivery_time;
+   KERNEL_INTERVAL_T timer_period;
+   KERNEL_TCB_T * owner_tcb_p;
+   KERNEL_TRIGGER_T trigger;
+   struct KERNEL_TIMER_S * next;
+} KERNEL_TIMER_T;
+
 ////////////////////////////////////////////////////////////////////////////////
 
-extern KERNEL_TIME_T kernel_clock;
-extern KERNEL_TCB_T * kernel_current_tcb_p;
+extern void kernel_timer_init(void);
+extern BYTE kernel_timer_tick(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #endif
+
+
 

@@ -1,12 +1,14 @@
 
-#ifndef _MAIL_FUNCS_H_
-#define _MAIL_FUNCS_H_
+#ifndef PRIORITY_H
+#define PRIORITY_H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern void kernel_mail_init(void);
+#define LCD_PRIORITY     100
+#define ONE_PRIORITY      20
+#define TWO_PRIORITY      30
+#define MOTOR_PRIORITY    35
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #endif
-

@@ -9,19 +9,19 @@
 
 #include "types.h"
 #include "presto.h"
-#include "error.h"
-#include "chip/boot.h"
-#include "chip/intvect.h"
-#include "chip/locks.h"
-#include "chip/misc_hw.h"
+#include "error_codes.h"
+#include "cpu/boot.h"
+#include "cpu/intvect.h"
+#include "cpu/locks.h"
+#include "cpu/misc_hw.h"
+#include "cpu/hwtimer.h"
 #include "kernel/clock.h"
-#include "config.h"
-#include "kernel/kernel_types.h"
-#include "kernel/kernel_funcs.h"
-#include "kernel/mail_types.h"
-#include "kernel/mail_funcs.h"
-#include "kernel/timer_types.h"
-#include "kernel/timer_funcs.h"
+#include "configure.h"
+#include "kernel/kernel.h"
+#include "kernel/mail.h"
+#include "kernel/timer.h"
+#include "kernel/semaphore.h"
+#include "kernel/memory.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // CONFIGURATION
-#define MAX_TASKS           MAX_USER_TASKS+1
+#define MAX_TASKS           PRESTO_KERNEL_MAXUSERTASKS+1
 #define IDLE_PRIORITY       0
 #define IDLE_STACK_SIZE     50
 
@@ -103,9 +103,8 @@ static BYTE ** old_task_stack_pointer_p;
 
 void presto_init(void) {
    BYTE count;
-   BYTE triggers;
 
-   if(presto_initialized) return;
+   if (presto_initialized) return;
 
    // initialize master clock
    clock_reset(&kernel_clock);
@@ -123,12 +122,13 @@ void presto_init(void) {
    kernel_mail_init();
    kernel_timer_init();
    kernel_semaphore_init();
+   kernel_memory_init();
 
    // must be done before creating idle task
    presto_initialized=1;
 
    // initialize idle task
-   idle_tid=presto_create_task(idle_task,idle_stack,IDLE_STACK_SIZE,IDLE_PRIORITY);
+   idle_tid=presto_task_create(idle_task,idle_stack,IDLE_STACK_SIZE,IDLE_PRIORITY);
    idle_tcb_p=tid_to_tcbptr(idle_tid);
 }
 
@@ -136,18 +136,18 @@ void presto_init(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-KERNEL_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_size, KERNEL_PRIORITY_T priority ) {
+KERNEL_TID_T presto_task_create(void (*func)(void), BYTE * stack, short stack_size, KERNEL_PRIORITY_T priority) {
 
    KERNEL_TCB_T * new_tcb_p;
    BYTE * sp;
    MISCWORD xlate;    // to split a word into two bytes
    KERNEL_LOCK_T lock;
 
-   if(!presto_initialized) {
+   if (!presto_initialized) {
       presto_fatal_error(ERROR_KERNEL_CREATE_BEFORE_INIT);
    }
 
-   if(free_tcb_p==NULL) {
+   if (free_tcb_p==NULL) {
       // There are no more TCB's left.
       presto_fatal_error(ERROR_KERNEL_CREATE_NO_MORE_TCBS);
       return -1;
@@ -218,7 +218,7 @@ void presto_start_scheduler(void) {
    // pick next task to run
    // first task in list is highest priority and is ready
    kernel_current_tcb_p=tcb_head_p;
-   if(kernel_current_tcb_p==NULL) {
+   if (kernel_current_tcb_p==NULL) {
       presto_fatal_error(ERROR_KERNEL_START_NOTASKS);
    }
 
@@ -248,7 +248,7 @@ KERNEL_TRIGGER_T presto_wait(KERNEL_TRIGGER_T wait_for) {
    kernel_current_tcb_p->wait_mask=wait_for;
 
    // If we do not need to wait, then keep going.
-   if((wait_for & kernel_current_tcb_p->triggers)==0) {
+   if ((wait_for & kernel_current_tcb_p->triggers)==0) {
       // Current task must wait.
       // We should re-evaluate priorities and swap tasks.
       asm("swi");
@@ -324,9 +324,11 @@ void kernel_trigger_set(KERNEL_TCB_T * tcb_p, KERNEL_TRIGGER_T trigger) {
 
 
 void kernel_priority_override(KERNEL_TCB_T * tcb_p, KERNEL_PRIORITY_T new_priority) {
-   priority_queue_remove_tcb(tcb_p);
-   tcb_p->current_priority=new_priority;
-   priority_queue_insert_tcb(tcb_p, new_priority);
+   if (tcb_p->current_priority!=new_priority) {
+      priority_queue_remove_tcb(tcb_p);
+      tcb_p->current_priority=new_priority;
+      priority_queue_insert_tcb(tcb_p, new_priority);
+   }
 }
 
 
@@ -334,9 +336,11 @@ void kernel_priority_override(KERNEL_TCB_T * tcb_p, KERNEL_PRIORITY_T new_priori
 
 
 void kernel_priority_restore(KERNEL_TCB_T * tcb_p) {
-   priority_queue_remove_tcb(tcb_p);
-   tcb_p->current_priority=tcb_p->natural_priority;
-   priority_queue_insert_tcb(tcb_p, tcb_p->natural_priority);
+   if (tcb_p->current_priority!=tcb_p->natural_priority) {
+      priority_queue_remove_tcb(tcb_p);
+      tcb_p->current_priority=tcb_p->natural_priority;
+      priority_queue_insert_tcb(tcb_p, tcb_p->natural_priority);
+   }
 }
 
 
@@ -349,43 +353,20 @@ static void priority_queue_insert_tcb(KERNEL_TCB_T * new_tcb_p, BYTE new_priorit
 
    // INSERT NEW TCB INTO LIST IN PRIORITY ORDER
 
-/*
-   if(tcb_head_p==NULL) {
-      // we are the only TCB in the list
-      tcb_head_p=new_tcb_p;
-      new_tcb_p->next=NULL;
-   } else if(new_priority>(tcb_head_p->current_priority)) {
-      // we are the first TCB in the list
-      new_tcb_p->next=tcb_head_p;
-      tcb_head_p=new_tcb_p;
-   } else {
-      KERNEL_TCB_T * ptr=tcb_head_p;
-      while(ptr->next!=NULL) {
-         if(new_priority>(ptr->next->current_priority)) break;
-         ptr=ptr->next;
-      }
-      // ptr->next is either NULL or lower current_priority than us
-      // either way, we want to get inserted between ptr and ptr->next
-      new_tcb_p->next=ptr->next;
-      ptr->next=new_tcb_p;
-   }
-*/
-
    KERNEL_TCB_T ** p0;
    KERNEL_TCB_T * p1;
-   KERNEL_TCB_T * temp;
    KERNEL_LOCK_T lock;
 
    presto_lock_save(lock);
    // Start at the head, look at priorities.
    p0=&tcb_head_p;
    p1=tcb_head_p;
-   while(1) {
-      if((p1==NULL)||((p1->current_priority)<new_priority)) {
+   while (1) {
+      if ((p1==NULL)||((p1->current_priority)<new_priority)) {
          // Insert our item between p0 and p1
          new_tcb_p->next=p1;
          *p0=new_tcb_p;
-         break; // out of the while(1) loop
+         break; // out of the while (1) loop
       }
       p0=&(p1->next);
       p1=p1->next;
@@ -403,14 +384,14 @@ static void priority_queue_remove_tcb(KERNEL_TCB_T * old_tcb_p) {
 
    presto_lock_save(lock);
    // If the old TCB is at the head of the list, remove it.
-   while(tcb_head_p==old_tcb_p) {
+   while (tcb_head_p==old_tcb_p) {
       tcb_head_p=tcb_head_p->next;
    }
    // First TCB in the list is not the old TCB.
    // Go through the list, looking for the old TCB.
    ptr=tcb_head_p;
-   while(ptr!=NULL) {
-      if(ptr->next==old_tcb_p) ptr->next=old_tcb_p->next;
+   while (ptr!=NULL) {
+      if (ptr->next==old_tcb_p) ptr->next=old_tcb_p->next;
       else ptr=ptr->next;
    }
    presto_unlock_restore(lock);
@@ -423,9 +404,9 @@ static void priority_queue_remove_tcb(KERNEL_TCB_T * old_tcb_p) {
 static KERNEL_TCB_T * scheduler_FindNextReadyTask(void) {
    // pick highest priority ready task to run
    KERNEL_TCB_T * ptr=tcb_head_p;
-   while(ptr!=NULL) {
-      if(ptr->wait_mask==WAIT_MASK_READY) return ptr;
-      if(ptr->wait_mask & ptr->triggers) return ptr;
+   while (ptr!=NULL) {
+      if (ptr->wait_mask==WAIT_MASK_READY) return ptr;
+      if (ptr->wait_mask & ptr->triggers) return ptr;
       ptr=ptr->next;
    }
    // should never get here
@@ -438,12 +419,11 @@ static KERNEL_TCB_T * scheduler_FindNextReadyTask(void) {
 
 
 static void systimer_isr(void) {
-   KERNEL_LOCK_T lock;
    // take care of clock things
-   clock_add_ms(&kernel_clock,MS_PER_TICK);
+   clock_add_ms(&kernel_clock,PRESTO_KERNEL_MSPERTICK);
    hwtimer_Restart();
    // check timers
-   if(kernel_timer_tick()>0) {
+   if (kernel_timer_tick()>0) {
       asm("swi");
    }
 }
@@ -458,7 +438,7 @@ static void context_switch_isr(void) {
 
    #ifdef CHECK_STACK_CLOBBERING
       // check to see if the old task has clobbered its stack
-      if(((kernel_current_tcb_p->stack_ptr)>(kernel_current_tcb_p->stack_top))
+      if (((kernel_current_tcb_p->stack_ptr)>(kernel_current_tcb_p->stack_top))
       ||((kernel_current_tcb_p->stack_ptr)<(kernel_current_tcb_p->stack_bottom)))
          presto_fatal_error(ERROR_KERNEL_CONTEXTSWITCH_STACKCLOBBERED);
    #endif // CHECK_STACK_CLOBBERING
@@ -472,7 +452,7 @@ static void context_switch_isr(void) {
 
    // check to see if the same task won...
    // only manipulate stacks if there is a context SWITCH
-   if(kernel_current_tcb_p!=old_tcb_p) {
+   if (kernel_current_tcb_p!=old_tcb_p) {
 
       // there's a new "highest priority ready task"
 
@@ -480,7 +460,7 @@ static void context_switch_isr(void) {
 
       #ifdef CHECK_STACK_CLOBBERING
          // check to see if the new task has clobbered its stack
-         if(((kernel_current_tcb_p->stack_ptr)>(kernel_current_tcb_p->stack_top))
+         if (((kernel_current_tcb_p->stack_ptr)>(kernel_current_tcb_p->stack_top))
          ||((kernel_current_tcb_p->stack_ptr)<(kernel_current_tcb_p->stack_bottom)))
             presto_fatal_error(ERROR_KERNEL_CONTEXTSWITCH_STACKCLOBBERED);
       #endif // CHECK_STACK_CLOBBERING
@@ -508,7 +488,7 @@ static void context_switch_isr(void) {
 
 
 static void idle_task(void) {
-   while(1) {
+   while (1) {
       // do nothing
    }
 }
@@ -518,19 +498,11 @@ static void idle_task(void) {
 
 
 static KERNEL_TCB_T * tid_to_tcbptr(KERNEL_TID_T tid) {
-/*
-   if(tid>=MAX_TASKS) {
+   if (tid>=MAX_TASKS) {
       presto_fatal_error(ERROR_KERNEL_TIDTOTCB_RANGE);
    }
-   // TODO ??? if(tcb_list[tid].in_use==FALSE) return NULL;
+   // TODO ??? if (tcb_list[tid].in_use==FALSE) return NULL;
    return &tcb_list[tid];
-*/
-   KERNEL_TCB_T * ptr=tcb_head_p;
-   while(ptr!=NULL) {
-      if(ptr->task_id==tid) return ptr;
-      ptr=ptr->next;
-   }
-   return NULL;
 }
 
 

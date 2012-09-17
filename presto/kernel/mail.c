@@ -9,14 +9,11 @@
 
 #include "types.h"
 #include "presto.h"
-#include "error.h"
-#include "chip/locks.h"
-#include "config.h"
-#include "kernel/kernel_types.h"
-#include "kernel/kernel_funcs.h"
-#include "kernel/kernel_data.h"
-#include "kernel/mail_types.h"
-#include "kernel/mail_funcs.h"
+#include "error_codes.h"
+#include "cpu/locks.h"
+#include "configure.h"
+#include "kernel/kernel.h"
+#include "kernel/mail.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,8 +42,8 @@
 //   S T A T I C   G L O B A L   D A T A
 ////////////////////////////////////////////////////////////////////////////////
 
-static KERNEL_MESSAGE_T * free_mail_p=NULL;
-static KERNEL_MESSAGE_T mail_list[MAX_MESSAGES];
+static KERNEL_MAILSORT_T * free_mail_p=NULL;
+static KERNEL_MAILSORT_T mail_list[PRESTO_MAIL_MAXMSGS];
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,24 +63,24 @@ void presto_mailbox_init(KERNEL_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-void presto_mail_send(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T payload) {
+void presto_mail_send(KERNEL_MAILBOX_T * box_p, KERNEL_MAILMSG_T payload) {
 
-   KERNEL_MESSAGE_T * new_mail_p;
+   KERNEL_MAILSORT_T * new_mail_p;
    KERNEL_TCB_T * owner_tcb_p;
    KERNEL_LOCK_T lock;
 
    // check to see if there's room
-   if(free_mail_p==NULL) {
+   if (free_mail_p==NULL) {
       presto_fatal_error(ERROR_KERNEL_MAILSEND_NOFREE);
    }
    // check to see that the recipient is a live mailbox
-   if(box_p==NULL) {
+   if (box_p==NULL) {
       presto_fatal_error(ERROR_KERNEL_MAILSEND_TONULLBOX);
    }
    owner_tcb_p=box_p->owner_tcb_p;
 /*
    TODO
-   if((owner_tcb_p==NULL)||(owner_tcb_p->in_use!=TRUE)) {
+   if ((owner_tcb_p==NULL)||(owner_tcb_p->in_use!=TRUE)) {
       presto_fatal_error(ERROR_KERNEL_MAILSEND_TONOBODY);
    }
 */
@@ -110,7 +107,7 @@ void presto_mail_send(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T payload) {
    presto_lock_save(lock);
 
    // move the message to the tail of the task's mail list
-   if(box_p->mailbox_head==NULL) {
+   if (box_p->mailbox_head==NULL) {
       // we are the only message in the list
       box_p->mailbox_head=new_mail_p;
       box_p->mailbox_tail=new_mail_p;
@@ -150,12 +147,12 @@ BOOLEAN presto_mail_test(KERNEL_MAILBOX_T * box_p) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-void presto_mail_wait(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T * payload_p) {
+void presto_mail_wait(KERNEL_MAILBOX_T * box_p, KERNEL_MAILMSG_T * payload_p) {
    // First, wait for mail to arrive.
    presto_wait(box_p->trigger);
 
    // sanity check
-   if(box_p->mailbox_head==NULL) {
+   if (box_p->mailbox_head==NULL) {
       presto_fatal_error(ERROR_KERNEL_MAILWAIT_NOMAIL);
    }
 
@@ -167,12 +164,12 @@ void presto_mail_wait(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T * payload_p) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-BOOLEAN presto_mail_get(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T * payload_p) {
-   KERNEL_MESSAGE_T * msg_p;
+BOOLEAN presto_mail_get(KERNEL_MAILBOX_T * box_p, KERNEL_MAILMSG_T * payload_p) {
+   KERNEL_MAILSORT_T * msg_p;
    KERNEL_LOCK_T lock;
 
    // We will return immediately if there are no messages in our queue
-   if(box_p->mailbox_head==NULL) return FALSE;
+   if (box_p->mailbox_head==NULL) return FALSE;
 
    // we're about to mess with the mail list... interrupts off
    presto_lock_save(lock);
@@ -181,7 +178,7 @@ BOOLEAN presto_mail_get(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T * payload_p) {
    msg_p=box_p->mailbox_head;
 
    // get one message from the task's mail queue
-   if(msg_p==NULL) {
+   if (msg_p==NULL) {
       // there are no messages in the box's mail list
       presto_fatal_error(ERROR_KERNEL_MAILGET_NOMESSAGES);
    }
@@ -189,7 +186,7 @@ BOOLEAN presto_mail_get(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T * payload_p) {
    #ifdef PARANOID
       // TODO - this is no longer paranoia... this is security
       // are we being paranoid?
-      if((msg_p->to_box_p->owner_tcb_p)!=kernel_current_tcb_p) {
+      if ((msg_p->to_box_p->owner_tcb_p)!=kernel_current_tcb_p) {
          presto_fatal_error(ERROR_KERNEL_MAILGET_NOTFORME);
       }
    #endif
@@ -207,7 +204,7 @@ BOOLEAN presto_mail_get(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T * payload_p) {
    }
 
    // read the contents of the message before we can get interrupted
-   if(payload_p!=NULL) *payload_p=msg_p->payload;
+   if (payload_p!=NULL) *payload_p=msg_p->payload;
 
    // return the message to the free list
    msg_p->next=free_mail_p;
@@ -228,10 +225,10 @@ BOOLEAN presto_mail_get(KERNEL_MAILBOX_T * box_p, KERNEL_MAIL_T * payload_p) {
 void kernel_mail_init(void) {
    int count;
    // initialize mail list
-   for(count=0;count<MAX_MESSAGES;count++) {
+   for(count=0;count<PRESTO_MAIL_MAXMSGS;count++) {
       mail_list[count].next=&mail_list[count+1];  // goes past end of array - OK
    }
-   mail_list[MAX_MESSAGES-1].next=NULL;
+   mail_list[PRESTO_MAIL_MAXMSGS-1].next=NULL;
    free_mail_p=&mail_list[0];
 }
 

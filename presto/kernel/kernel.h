@@ -1,6 +1,6 @@
 
-#ifndef _KERNEL_TYPES_H_
-#define _KERNEL_TYPES_H_
+#ifndef _KERNEL_H_
+#define _KERNEL_H_
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D E P E N D E N C I E S
@@ -13,7 +13,7 @@
 //   S I M P L E   D A T A   T Y P E S
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef signed char    KERNEL_TID_T;
+typedef unsigned char  KERNEL_TID_T;
 typedef unsigned char  KERNEL_PRIORITY_T;
 typedef unsigned char  KERNEL_TRIGGER_T;
 typedef unsigned short KERNEL_INTERVAL_T;
@@ -33,6 +33,21 @@ typedef struct KERNEL_TCB_S {
    KERNEL_TRIGGER_T triggers;
    struct KERNEL_TCB_S * next;
 } KERNEL_TCB_T;
+
+////////////////////////////////////////////////////////////////////////////////
+//   K E R N E L - O N L Y   D A T A
+////////////////////////////////////////////////////////////////////////////////
+
+extern KERNEL_TIME_T kernel_clock;
+extern KERNEL_TCB_T * kernel_current_tcb_p;
+
+////////////////////////////////////////////////////////////////////////////////
+//   K E R N E L - O N L Y   F U N C T I O N S
+////////////////////////////////////////////////////////////////////////////////
+
+extern void kernel_trigger_set(KERNEL_TCB_T * tcb_p, KERNEL_TRIGGER_T trigger);
+extern void kernel_priority_override(KERNEL_TCB_T * tcb_p, KERNEL_PRIORITY_T new_priority);
+extern void kernel_priority_restore(KERNEL_TCB_T * tcb_p);
 
 ////////////////////////////////////////////////////////////////////////////////
 

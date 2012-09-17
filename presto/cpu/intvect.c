@@ -34,8 +34,16 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
-#include "error.h"
-#include "intvect.h"
+#include "presto.h"
+#include "error_codes.h"
+#include "cpu/locks.h"
+#include "cpu/intvect.h"
+
+////////////////////////////////////////////////////////////////////////////////
+//   D A T A   T Y P E S
+////////////////////////////////////////////////////////////////////////////////
+
+typedef void (*interrupt_vector)(void);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +84,8 @@ void illop_isr(void) {
 //   I N T E R R U P T   V E C T O R   T A B L E S
 ////////////////////////////////////////////////////////////////////////////////
 
-static void (*special_interrupt_vectors[])()
+//static void (*special_interrupt_vectors[NUM_INTERRUPTS])()
+static interrupt_vector const special_interrupt_vectors[NUM_INTERRUPTS]
    __attribute((section(".specvect"))) = {
    error_isr,     // SCI
    error_isr,     // SPI
@@ -103,40 +112,32 @@ static void (*special_interrupt_vectors[])()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void (*normal_interrupt_vectors[])()
-   __attribute((section(".normvect"))) = {
-   error_isr,     // SCI
-   error_isr,     // SPI
-   error_isr,     // PAIE
-   error_isr,     // PAO
-   error_isr,     // TOF
-   error_isr,     // TOC5
-   error_isr,     // TOC4
-   error_isr,     // TOC3
-   error_isr,     // TOC2
-   error_isr,     // TOC1
-   error_isr,     // TIC3
-   error_isr,     // TIC2
-   error_isr,     // TIC1
-   error_isr,     // RTI
-   error_isr,     // IRQ
-   error_isr,     // XIRQ
-   error_isr,     // SWI
-   illop_isr,     // ILLOP
-   error_isr,     // COP
-   error_isr,     // CLM
-   error_isr      // RESET
-};
+//static void (*normal_interrupt_vectors[NUM_INTERRUPTS])()
+static interrupt_vector normal_interrupt_vectors[NUM_INTERRUPTS]
+   __attribute((section(".normvect")));
 
 ////////////////////////////////////////////////////////////////////////////////
 //   I N T E R F A C E   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-//extern void os_set_irq(int number, void (*fn)() );
 void set_interrupt(BYTE intr, void (*vector)(void)) {
-   if(intr<=INTR_RESET) {
+   NOT_USED(special_interrupt_vectors);
+   if (intr<=INTR_RESET) {
       normal_interrupt_vectors[intr]=vector;
    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void init_interrupts(void) {
+   int i;
+   KERNEL_LOCK_T lock;
+   presto_lock_save(lock);
+   for(i=INTR_SCI;i<=INTR_RESET;i++) {
+      normal_interrupt_vectors[i]=error_isr;
+   }
+   normal_interrupt_vectors[INTR_ILLOP]=illop_isr;
+   presto_unlock_restore(lock);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

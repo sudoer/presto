@@ -7,11 +7,11 @@
 //   D E P E N D E N C I E S
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "config.h"
-#include "chip/hc11regs.h"
-#include "chip/locks.h"
-#include "chip/intvect.h"
-#include "chip/boot.h"
+#include "configure.h"
+#include "cpu/hc11regs.h"
+#include "cpu/locks.h"
+#include "cpu/intvect.h"
+#include "cpu/boot.h"
 
 extern void _start();   // entry point in crt11.s or crt0.o
 
@@ -26,7 +26,7 @@ extern void _start();   // entry point in crt11.s or crt0.o
 //   G L O B A L   D A T A
 ////////////////////////////////////////////////////////////////////////////////
 
-BYTE initial_stack[INITIAL_STACK_SIZE] __attribute((section(".stack")));
+BYTE initial_stack[PRESTO_BOOT_INITIALSTACKSIZE] __attribute((section(".stack")));
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ void premain() {
 
    // 11110000 - disable TOF, RTIF, PAOVF, PAIF interrupts
    // 00000011 * set prescaler for timer to 16
-   TMSK2=0x06;
+   TMSK2=0x03;
 
    // turn on the A2D subsystem (wait 100 usec before using)
    // use "E clock" to drive the A2D
@@ -89,11 +89,14 @@ void premain() {
    // disable input capture interrupts for TIC1,TIC2,TIC3
    TMSK1=0x00;
 
+   // initialize "normal mode" interrupt table
+   init_interrupts();
+
    // get out of SPECIAL TEST operating mode
    // go into NORMAL EXPANDED MULTIPLEXED operating mode
    // no bootstrap ROM, no visibility of internal reads
    // promote IRQ interrupt priority
-   // (must be in special mode to change this)
+   // (must be in a SPECIAL mode to change this)
    HPRIO=0x25;
 
 }
@@ -101,7 +104,7 @@ void premain() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void __attribute__((noreturn)) exit(int code) {
-   while(1) { }
+   while (1) { }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

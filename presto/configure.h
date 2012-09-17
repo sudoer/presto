@@ -1,0 +1,75 @@
+
+#ifndef _CONFIGURE_H_
+#define _CONFIGURE_H_
+
+////////////////////////////////////////////////////////////////////////////////
+//   D E B U G G I N G
+////////////////////////////////////////////////////////////////////////////////
+
+#define CHECK_STACK_CLOBBERING
+#define PARANOID
+
+////////////////////////////////////////////////////////////////////////////////
+//   F E A T U R E S
+////////////////////////////////////////////////////////////////////////////////
+
+#define PRIORITY_INHERITANCE
+
+////////////////////////////////////////////////////////////////////////////////
+//   K E R N E L   C O N F I G U R A T I O N
+////////////////////////////////////////////////////////////////////////////////
+
+// INITIAL STACK
+#define PRESTO_BOOT_INITIALSTACKSIZE  50
+
+// TASKS
+#define PRESTO_KERNEL_MAXUSERTASKS      12
+
+// TIMING
+#define PRESTO_KERNEL_MSPERTICK  5
+
+////////////////////////////////////////////////////////////////////////////////
+//   M A I L   M E S S A G E S
+////////////////////////////////////////////////////////////////////////////////
+
+#define PRESTO_MAIL_MAXMSGS        40
+
+////////////////////////////////////////////////////////////////////////////////
+//   S E M A P H O R E S
+////////////////////////////////////////////////////////////////////////////////
+
+#define PRESTO_SEM_MAXUSERS  10
+
+////////////////////////////////////////////////////////////////////////////////
+//   M E M O R Y   P O O L S
+////////////////////////////////////////////////////////////////////////////////
+
+#define PRESTO_MEM_NUM_POOLS     3
+
+// The memory pools should be defined in increasing size order.
+// For each pool, there is a SIZE and a QTY.  That is, there are
+// QTY number of SIZE-sized items in a single pool.
+
+#define PRESTO_MEM_ITEMSIZ1     10
+#define PRESTO_MEM_ITEMQTY1      5
+
+#define PRESTO_MEM_ITEMSIZ2     20
+#define PRESTO_MEM_ITEMQTY2      2
+
+#define PRESTO_MEM_ITEMSIZ3     35
+#define PRESTO_MEM_ITEMQTY3      3
+
+// These should be updated to reflect the number of memory pools.
+
+#define PRESTO_MEM_POOL_SIZES  { PRESTO_MEM_ITEMSIZ1, PRESTO_MEM_ITEMSIZ2, PRESTO_MEM_ITEMSIZ3 }
+#define PRESTO_MEM_POOL_QTYS   { PRESTO_MEM_ITEMQTY1, PRESTO_MEM_ITEMQTY2, PRESTO_MEM_ITEMQTY3 }
+#define PRESTO_MEM_NUM_ITEMS   ( PRESTO_MEM_ITEMQTY1+ PRESTO_MEM_ITEMQTY2+ PRESTO_MEM_ITEMQTY3 )
+
+#define PRESTO_MEM_TOTALBYTES (( PRESTO_MEM_ITEMQTY1 * PRESTO_MEM_ITEMSIZ1 )+ \
+                               ( PRESTO_MEM_ITEMQTY2 * PRESTO_MEM_ITEMSIZ2 )+ \
+                               ( PRESTO_MEM_ITEMQTY3 * PRESTO_MEM_ITEMSIZ3 ))
+
+////////////////////////////////////////////////////////////////////////////////
+
+#endif
+

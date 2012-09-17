@@ -58,10 +58,3 @@ _postmain:
    bra   _postmain
 
 
-;    ; __idata_start MUST follow text area for it to be in ROM
-;   .area idata
-;__idata_start::
-;   .data
-;__data_start::
-;   .area bss
-;__bss_start::
