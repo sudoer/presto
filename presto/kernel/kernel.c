@@ -44,18 +44,14 @@
 #include "presto.h"
 #include "configure.h"
 #include "error.h"
-#include "locks.h"
-#include "kernel_magic.h"
+#include "cpu_locks.h"
+#include "cpu_magic.h"
+#include "cpu_debug.h"
 #include "kernel/kernel.h"
 #include "kernel/mail.h"
 #include "kernel/timer.h"
 #include "kernel/semaphore.h"
 #include "kernel/memory.h"
-
-#ifdef CPU_AVR8515
-   #include "avr_regs.h"
-   #include <avr/io.h>
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //   C O N S T A N T S
@@ -95,7 +91,7 @@ static void priority_queue_insert_tcb(KERNEL_TCB_T * tcb_p, KERNEL_PRIORITY_T pr
 static void priority_queue_remove_tcb(KERNEL_TCB_T * tcb_p);
 
 // context switching
-KERNEL_MAGIC_DECLARE_SWI(context_switch_isr);
+CPU_MAGIC_DECLARE_SWI(context_switch_isr);
 
 // utilities
 static KERNEL_TCB_T * tid_to_tcbptr(KERNEL_TASKID_T tid);
@@ -120,7 +116,9 @@ static BYTE presto_initialized=0;
 
 // These are used to pass arguments to inline assembly routines.
 // Do not put these on the stack (BOOM).
-static KERNEL_TCB_T * old_tcb_p;
+static KERNEL_TCB_T * swi_old_tcb_p;
+static BYTE * swi_new_sp;
+static BYTE ** swi_old_spp;
 
 ////////////////////////////////////////////////////////////////////////////////
 //   E X T E R N A L   F U N C T I O N S
@@ -151,16 +149,16 @@ void presto_init(void) {
    // initialize other kernel subsystems
    #ifdef FEATURE_KERNEL_TIMER
       kernel_timer_init();
-   #endif
+   #endif // FEATURE_KERNEL_TIMER
    #ifdef FEATURE_KERNEL_MAIL
       kernel_mail_init();
-   #endif
+   #endif // FEATURE_KERNEL_MAIL
    #ifdef FEATURE_KERNEL_SEMAPHORE
       kernel_semaphore_init();
-   #endif
+   #endif // FEATURE_KERNEL_SEMAPHORE
    #ifdef FEATURE_KERNEL_MEMORY
       kernel_memory_init();
-   #endif
+   #endif // FEATURE_KERNEL_MEMORY
 
    // must be done before creating idle task
    presto_initialized=1;
@@ -208,7 +206,7 @@ KERNEL_TASKID_T presto_task_create(void (*func)(void), BYTE * stack, short stack
    new_tcb_p->triggers=(KERNEL_TRIGGER_T)0;
 
    // SET UP NEW STACK
-   new_tcb_p->stack_ptr=KERNEL_MAGIC_SETUP_STACK(new_tcb_p->stack_top,func);
+   new_tcb_p->stack_ptr=CPU_MAGIC_SETUP_STACK(new_tcb_p->stack_top,func);
 
    priority_queue_insert_tcb(new_tcb_p,priority);
 
@@ -224,11 +222,11 @@ void presto_scheduler_start(void) {
    // we're about to switch to our first task... interrupts off
    cpu_lock();
 
-   KERNEL_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(context_switch_isr);
+   CPU_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(context_switch_isr);
 
    #ifdef FEATURE_KERNEL_TIMER
       kernel_master_clock_start();
-   #endif
+   #endif // FEATURE_KERNEL_TIMER
 
    // pick next task to run
    // first task in list is highest priority and is ready
@@ -238,8 +236,8 @@ void presto_scheduler_start(void) {
    }
 
    // SET UP A NEW STACK AND START EXECUTION USING IT
-   KERNEL_MAGIC_LOAD_STACK_PTR(current_tcb_p->stack_ptr);
-   KERNEL_MAGIC_RUN_FIRST_TASK();
+   CPU_MAGIC_LOAD_STACK_PTR(current_tcb_p->stack_ptr);
+   CPU_MAGIC_RUN_FIRST_TASK();
 
    // we never get here
    error_fatal(ERROR_KERNEL_STARTAFTERRTI);
@@ -399,7 +397,7 @@ KERNEL_TASKID_T kernel_current_task(void) {
 
 
 void kernel_context_switch(void) {
-   KERNEL_MAGIC_SOFTWARE_INTERRUPT();
+   CPU_MAGIC_SOFTWARE_INTERRUPT();
 }
 
 
@@ -489,9 +487,6 @@ static KERNEL_TCB_T * scheduler_next_ready(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-static BYTE * alans_new_sp;
-static BYTE ** alans_old_spp;
-
 void context_switch_isr(void) {
 
    // M68HC11
@@ -502,52 +497,52 @@ void context_switch_isr(void) {
    // CPU pushes PC (that's all!)
    // compiler pushes several registers and SREG
 
-   KERNEL_MAGIC_START_OF_SWI();
-   KERNEL_MAGIC_INDICATE_SWI_START();
+   CPU_MAGIC_START_OF_SWI();
+   CPU_DEBUG_SWI_START();
 
-   #ifdef SANITYCHECK_KERNEL_CLOBBEREDSTACK
+   #ifdef SANITY_KERNEL_CLOBBEREDSTACK
       // check to see if the old task has clobbered its stack
       if (((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
       ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
          error_fatal(ERROR_KERNEL_CONTEXTSWITCH_STACKCLOBBERED);
-   #endif // SANITYCHECK_KERNEL_CLOBBEREDSTACK
+   #endif // SANITY_KERNEL_CLOBBEREDSTACK
 
    // the inline asm will save old SP in old TCB
-   alans_old_spp=&(current_tcb_p->stack_ptr);
+   swi_old_spp=&(current_tcb_p->stack_ptr);
 
    // remember which task was running... we may not need to switch
-   old_tcb_p=current_tcb_p;
+   swi_old_tcb_p=current_tcb_p;
 
    // pick next task to run
    current_tcb_p=scheduler_next_ready();
 
    // check to see if the same task won...
    // only manipulate stacks if there is a context SWITCH
-   if (current_tcb_p!=old_tcb_p) {
+   if (current_tcb_p!=swi_old_tcb_p) {
 
-      KERNEL_MAGIC_INDICATE_TASK_SWITCH();
+      CPU_DEBUG_TASK_SWITCH();
 
       // there's a new "highest priority ready task"
 
-      #ifdef SANITYCHECK_KERNEL_CLOBBEREDSTACK
+      #ifdef SANITY_KERNEL_CLOBBEREDSTACK
          // check to see if the new task has clobbered its stack
          if (((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
          ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
             error_fatal(ERROR_KERNEL_CONTEXTSWITCH_STACKCLOBBERED);
-      #endif // SANITYCHECK_KERNEL_CLOBBEREDSTACK
+      #endif // SANITY_KERNEL_CLOBBEREDSTACK
 
       // call asm routine to set up new stack
       // when we return, we'll be another process
       // the asm routine will re-enable interrupts
-      alans_new_sp=current_tcb_p->stack_ptr;
+      swi_new_sp=current_tcb_p->stack_ptr;
 
-      KERNEL_MAGIC_SWAP_STACK_POINTERS(alans_old_spp,alans_new_sp);
+      CPU_MAGIC_SWAP_STACK_POINTERS(swi_old_spp,swi_new_sp);
 
    }
 
-   KERNEL_MAGIC_INDICATE_SWI_END();
+   CPU_DEBUG_SWI_END();
 
-   KERNEL_MAGIC_END_OF_SWI();
+   CPU_MAGIC_END_OF_SWI();
 }
 
 
@@ -556,7 +551,7 @@ void context_switch_isr(void) {
 
 static void idle_task(void) {
    while (1) {
-      KERNEL_MAGIC_INDICATE_IDLE_WORK();
+      CPU_MAGIC_IDLE_WORK();
    }
 }
 

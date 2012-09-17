@@ -16,10 +16,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
-#include "error_codes.h"
-#include "hc11_regs.h"
-#include "locks.h"
-#include "handyboard.h"
+#include "error.h"
+#include "registers.h"
+#include "cpu_locks.h"
+#include "board.h"
 #include "error.h"
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -126,7 +126,7 @@ float string_StringToFloat(const char * string) {
 
    return sign*val/power;
 }
-#endif
+#endif // FLOAT
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -191,7 +191,7 @@ void string_FloatToString(float value, uint8 decimals, char * string, uint8 len)
    if (posn<len) string[posn]=0;
    string[len]=0;
 }
-#endif
+#endif // FLOAT
 
 ////////////////////////////////////////////////////////////////////////////////
 //   INTEGERS

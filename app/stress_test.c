@@ -2,7 +2,7 @@
 #include "presto.h"
 #include "types.h"
 #include "error.h"
-#include "handyboard.h"
+#include "board.h"
 #include "services/serial.h"
 #include "services/string.h"
 #include "kernel/memory.h"
@@ -163,7 +163,7 @@ void control(void) {
          presto_semaphore_init(&copier,1,tf);
       #else
          presto_semaphore_init(&copier,1);
-      #endif
+      #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 
       // president is notified by mail
       send_p=(PRESTO_ENVELOPE_T *)presto_memory_allocate(sizeof(PRESTO_ENVELOPE_T));
@@ -372,7 +372,7 @@ static void memdump(BYTE * start, int size) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-KERNEL_MEMORYPOOLSTATS_T poolstats;
+KERNEL_MEMORYPOOLINFO_T poolstats;
 
 static void mempool_info(void) {
 
@@ -389,13 +389,13 @@ static void mempool_info(void) {
       serial_send_string("SIZE ");
       #ifdef FEATURE_MEMORY_STATISTICS
          serial_send_string("max/");
-      #endif
+      #endif // FEATURE_MEMORY_STATISTICS
       serial_send_string("limit=");
       #ifdef FEATURE_MEMORY_STATISTICS
          string_IntegerToString(poolstats.max_requested_size,prt,PRT);
          serial_send_string(prt);
          serial_send_string("/");
-      #endif
+      #endif // FEATURE_MEMORY_STATISTICS
       string_IntegerToString(poolstats.mempool_item_size,prt,PRT);
       serial_send_string(prt);
       serial_send_string("\r\n");
@@ -404,7 +404,7 @@ static void mempool_info(void) {
       serial_send_string("QTY current/");
       #ifdef FEATURE_MEMORY_STATISTICS
          serial_send_string("max/");
-      #endif
+      #endif // FEATURE_MEMORY_STATISTICS
       serial_send_string("limit=");
       string_IntegerToString(poolstats.current_used_items,prt,PRT);
       serial_send_string(prt);
@@ -413,7 +413,7 @@ static void mempool_info(void) {
          string_IntegerToString(poolstats.max_used_items,prt,PRT);
          serial_send_string(prt);
          serial_send_string("/");
-      #endif
+      #endif // FEATURE_MEMORY_STATISTICS
       string_IntegerToString(poolstats.mempool_num_items,prt,PRT);
       serial_send_string(prt);
       serial_send_string("\r\n");
@@ -424,7 +424,7 @@ static void mempool_info(void) {
          string_IntegerToString(poolstats.current_total_bytes,prt,PRT);
          serial_send_string(prt);
          serial_send_string("\r\n");
-      #endif
+      #endif // FEATURE_MEMORY_STATISTICS
 
       serial_send_string("\r\n");
    }
@@ -474,11 +474,14 @@ static void debugger(void) {
    serial_send_string("initial_stack:\r\n");
    memdump(initial_stack,BOOT_INITIALSTACKSIZE);
 
+/*
    int stack=0;
+*/
    while (1) {
       mempool_info();
       presto_timer_wait(500,FLAG_D_TIMER);
 
+/*
       switch(stack++) {
          case 0:
             serial_send_string("pres stack:\r\n");
@@ -516,6 +519,7 @@ static void debugger(void) {
             break;
       }
       presto_timer_wait(500,FLAG_D_TIMER);
+*/
 
    }
 }

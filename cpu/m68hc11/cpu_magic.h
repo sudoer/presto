@@ -1,11 +1,11 @@
 
-#ifndef _KERNEL_MAGIC_H_
-#define _KERNEL_MAGIC_H_
+#ifndef _CPU_MAGIC_H_
+#define _CPU_MAGIC_H_
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "hc11_regs.h"
-#include "handyboard.h"
+#include "registers.h"
+#include "board.h"
 #include "vectors.h"
 #include "types.h"
 
@@ -13,7 +13,7 @@
 //   I N I T I A L I Z E
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline BYTE * KERNEL_MAGIC_SETUP_STACK(BYTE * sp, void (*func)()) {
+static inline BYTE * CPU_MAGIC_SETUP_STACK(BYTE * sp, void (*func)()) {
    MISCWORD xlate;
    xlate.w=(WORD)func;   // split a word into two bytes
    *sp--=xlate.b.l;      // function pointer(L)
@@ -36,20 +36,21 @@ static inline BYTE * KERNEL_MAGIC_SETUP_STACK(BYTE * sp, void (*func)()) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void KERNEL_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(void (*func)()) {
+static inline void CPU_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(void (*func)()) {
    set_interrupt(INTR_SWI, func);
+   MASKSET(DDRD,0x3C);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S T A C K   P O I N T E R S
 ////////////////////////////////////////////////////////////////////////////////
 
-#define KERNEL_MAGIC_LOAD_STACK_PTR(task_sp)    \
+#define CPU_MAGIC_LOAD_STACK_PTR(task_sp)    \
    asm volatile ("lds %0" : : "m"(task_sp) );
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define KERNEL_MAGIC_SWAP_STACK_POINTERS(old_stack_ptr_p,new_sp) \
+#define CPU_MAGIC_SWAP_STACK_POINTERS(old_stack_ptr_p,new_sp) \
    asm volatile ("sts %0" : "=m"(*old_stack_ptr_p) );            \
    asm volatile ("lds %0" : : "m"(new_sp) );
 
@@ -57,7 +58,7 @@ static inline void KERNEL_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(void (*func)()) {
 //   T R I G G E R I N G   S W I
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void KERNEL_MAGIC_SOFTWARE_INTERRUPT() {
+static inline void CPU_MAGIC_SOFTWARE_INTERRUPT() {
    asm volatile ("swi");
 }
 
@@ -65,11 +66,11 @@ static inline void KERNEL_MAGIC_SOFTWARE_INTERRUPT() {
 //   S W I   E N T R Y / E X I T
 ////////////////////////////////////////////////////////////////////////////////
 
-#define KERNEL_MAGIC_DECLARE_SWI(x) void x (void) __attribute__((interrupt));
+#define CPU_MAGIC_DECLARE_SWI(x) void x (void) __attribute__((interrupt));
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void KERNEL_MAGIC_START_OF_SWI() {
+static inline void CPU_MAGIC_START_OF_SWI() {
 /*
    asm volatile("ldx *_.tmp");
    asm volatile("pshx");
@@ -82,7 +83,7 @@ static inline void KERNEL_MAGIC_START_OF_SWI() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void KERNEL_MAGIC_END_OF_SWI() {
+static inline void CPU_MAGIC_END_OF_SWI() {
 /*
    asm volatile("pulx");
    asm volatile("stx *_.xy");
@@ -96,7 +97,7 @@ static inline void KERNEL_MAGIC_END_OF_SWI() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void KERNEL_MAGIC_RUN_FIRST_TASK() {
+static inline void CPU_MAGIC_RUN_FIRST_TASK() {
    asm volatile("pulx");
    asm volatile("pulx");
    asm volatile("pulx");
@@ -107,7 +108,7 @@ static inline void KERNEL_MAGIC_RUN_FIRST_TASK() {
 //   I D L E   W O R K
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void KERNEL_MAGIC_INDICATE_IDLE_WORK() {
+static inline void CPU_MAGIC_IDLE_WORK() {
    // Wait for an interrupt.  The WAI instruction places the CPU in
    // a low power "wait" mode.  Plus, it pre-stacks the registers for
    // a slightly faster interrupt response time.
@@ -115,24 +116,8 @@ static inline void KERNEL_MAGIC_INDICATE_IDLE_WORK() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//   I N D I C A T I O N S / F E E D B A C K
-////////////////////////////////////////////////////////////////////////////////
 
-#define KERNEL_MAGIC_INDICATE_SWI_START()  ;
-#define KERNEL_MAGIC_INDICATE_SWI_END()    ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define KERNEL_MAGIC_INDICATE_TASK_SWITCH()  TOGGLE_SPEAKER();
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define KERNEL_MAGIC_INDICATE_TICK_START()  ;
-#define KERNEL_MAGIC_INDICATE_TICK_END()    ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-#endif
+#endif // _CPU_MAGIC_H_
 
 
 

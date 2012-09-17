@@ -43,7 +43,7 @@ typedef unsigned long DWORD;
       struct {WORD h,l;} w;
       BYTE b[4];
    } MISCLONG;
-#endif
+#endif // CPU_M68HC11
 
 #ifdef CPU_AVR8515
    typedef union MISCWORD {
@@ -56,24 +56,12 @@ typedef unsigned long DWORD;
       struct {WORD l,h;} w;
       BYTE b[4];
    } MISCLONG;
-#endif
+#endif // CPU_AVR8515
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // BITWISE OPERATIONS
-
-/*
-#define BITSET(name,bitn)  ((unsigned char)(name)|=(0x01<<(bitn)))
-#define BITCLR(name,bitn)  ((unsigned char)(name)&=~(0x01<<(bitn)))
-#define BITTST(name,bitn)  ((unsigned char)(name) & (0x01<<(bitn)))
-#define BITNOT(name,bitn)  ((unsigned char)(name)^=(0x01<<(bitn)))
-
-#define MASKSET(name,mask)  ((unsigned char)(name)|=(mask))
-#define MASKCLR(name,mask)  ((unsigned char)(name)&=~(mask))
-#define MASKTST(name,mask)  ((unsigned char)(name) & (mask))
-#define MASKNOT(name,mask)  ((unsigned char)(name)^=(mask))
-*/
 
 #define BITSET(name,bitn)  ((name)|=(0x01<<(bitn)))
 #define BITCLR(name,bitn)  ((name)&=~(0x01<<(bitn)))
@@ -93,5 +81,5 @@ typedef unsigned long DWORD;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif
+#endif // _TYPES_H_
 

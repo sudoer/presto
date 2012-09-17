@@ -26,14 +26,15 @@ SECTIONS
    /* interrupt vectors */
    .vectors : {
      __vectors_start = . ;
-     vectors.o(.text)
+     vectors.o(.vectors)
      __vectors_end = . ;
    } > vectors
 
-
+   /*
    not_used : {
      *(.vectors)
    } > rom
+   */
 
   /***************************************************************************/
 
@@ -42,6 +43,7 @@ SECTIONS
    * them put them in the .text section above */
   /DISCARD/ :
   {
+     *(.vectors)
      *(.fini)
      *(.fini7)
      *(.fini6)

@@ -37,7 +37,7 @@ extern BOOLEAN string_IsHexDigit(char c);
 #ifdef FLOAT
 extern float string_StringToFloat(const char * string);
 extern void string_FloatToString(float value, uint8 decimals, char * string, uint8 len);
-#endif
+#endif // FLOAT
 
 // integers
 extern uint8 string_DigitToInteger(char digit);
@@ -58,6 +58,6 @@ extern char * string_SkipSpaces( char * String );
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif
+#endif // STRING_H
 
 

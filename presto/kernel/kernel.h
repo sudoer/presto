@@ -32,7 +32,7 @@ typedef unsigned char  KERNEL_PRIORITY_T;
    // otherwise be printed AFTER the #error above, helping the programmer
    // to see the #error.
    typedef unsigned char KERNEL_TRIGGER_T;
-#endif
+#endif // PRESTO_KERNEL_TRIGGERBITS
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,5 +45,5 @@ extern void kernel_trigger_set_noswitch(KERNEL_TASKID_T tid, KERNEL_TRIGGER_T tr
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif
+#endif // _KERNEL_H_
 

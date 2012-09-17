@@ -8,7 +8,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef struct KERNEL_MEMORYPOOLSTATS_S {
+typedef struct KERNEL_MEMORYPOOLINFO_S {
    unsigned short mempool_num_items;
    unsigned short mempool_item_size;
    unsigned short current_used_items;
@@ -16,17 +16,17 @@ typedef struct KERNEL_MEMORYPOOLSTATS_S {
       unsigned short current_total_bytes;
       unsigned short max_used_items;
       unsigned short max_requested_size;
-   #endif
-} KERNEL_MEMORYPOOLSTATS_T;
+   #endif // FEATURE_MEMORY_STATISTICS
+} KERNEL_MEMORYPOOLINFO_T;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 extern void kernel_memory_init(void);
-extern void memory_debug(unsigned short pool, KERNEL_MEMORYPOOLSTATS_T * stats);
+extern void memory_debug(unsigned short pool, KERNEL_MEMORYPOOLINFO_T * stats);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif
+#endif // _MEMORY_H_
 
 
 

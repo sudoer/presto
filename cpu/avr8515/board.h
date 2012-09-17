@@ -1,12 +1,15 @@
 
-#ifndef _BOOT_H_
-#define _BOOT_H_
+#ifndef _BOARD_H_
+#define _BOARD_H_
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern void reset_vector();
+//#define LED_SWAP  7
+#define LED_IDLE  7
+#define LED_TIMER 6
+#define LED_SWI   5
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // _BOOT_H_
+#endif // _BOARD_H_
 

@@ -16,20 +16,22 @@
    #define FEATURE_MEMORY_STATISTICS
    #define FEATURE_SEMAPHORE_PRIORITYINHERITANCE
    #define FEATURE_MAIL_NOSTEALING
-   #define SANITYCHECK_KERNEL_CLOBBEREDSTACK
-   #define SANITYCHECK_MEMORY_WROTETOOFAR
-#endif
+   #define SANITY_KERNEL_CLOBBEREDSTACK
+   #define SANITY_MEMORY_WROTETOOFAR
+#endif // CPU_M68HC11
+
 #ifdef CPU_AVR8515
+   #define SANITY_KERNEL_CLOBBEREDSTACK
    //#define FEATURE_KERNEL_MAIL
+   //#define FEATURE_MAIL_NOSTEALING
    #define FEATURE_KERNEL_TIMER
    //#define FEATURE_KERNEL_MEMORY
-   //#define FEATURE_KERNEL_SEMAPHORE
    //#define FEATURE_MEMORY_STATISTICS
+   //#define SANITY_MEMORY_WROTETOOFAR
+   //#define FEATURE_KERNEL_SEMAPHORE
    //#define FEATURE_SEMAPHORE_PRIORITYINHERITANCE
-   //#define FEATURE_MAIL_NOSTEALING
-   //#define SANITYCHECK_KERNEL_CLOBBEREDSTACK
-   //#define SANITYCHECK_MEMORY_WROTETOOFAR
-#endif
+
+#endif // CPU_AVR8515
 
 ////////////////////////////////////////////////////////////////////////////////
 //   K E R N E L   C O N F I G U R A T I O N
@@ -38,18 +40,18 @@
 // INITIAL STACK
 #ifdef CPU_M68HC11
    #define BOOT_INITIALSTACKSIZE            64
-#endif
+#endif // CPU_M68HC11
 #ifdef CPU_AVR8515
    #define BOOT_INITIALSTACKSIZE            64
-#endif
+#endif // CPU_AVR8515
 
 // IDLE STACK
 #ifdef CPU_M68HC11
    #define PRESTO_KERNEL_IDLESTACKSIZE      64
-#endif
+#endif // CPU_M68HC11
 #ifdef CPU_AVR8515
    #define PRESTO_KERNEL_IDLESTACKSIZE      64
-#endif
+#endif // CPU_AVR8515
 
 // TASKS
 #define PRESTO_KERNEL_MAXUSERTASKS           6
@@ -67,7 +69,7 @@
 //   T I M E R S
 ////////////////////////////////////////////////////////////////////////////////
 
-#define PRESTO_KERNEL_MSPERTICK              1
+#define PRESTO_KERNEL_MSPERTICK              2
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S E M A P H O R E S
@@ -91,14 +93,14 @@
 
    #define PRESTO_MEM_ITEMSIZ2              24
    #define PRESTO_MEM_ITEMQTY2              12
-#endif
+#endif // CPU_M68HC11
 #ifdef CPU_AVR8515
    #define PRESTO_MEM_ITEMSIZ1              16
    #define PRESTO_MEM_ITEMQTY1               2
 
    #define PRESTO_MEM_ITEMSIZ2              20
    #define PRESTO_MEM_ITEMQTY2               0
-#endif
+#endif // CPU_AVR8515
 
 
 // These should be updated to reflect the number of memory pools.
@@ -112,5 +114,5 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif
+#endif // _CONFIGURE_H_
 

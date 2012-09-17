@@ -6,7 +6,8 @@
 // This is the main header file for the presto operating system.
 // Below you will find the complete API for the O/S.  You should
 // not have to include any of the header files from the "kernel"
-// directory in your application.
+// directory in your application.  Instead, you should just include
+// this file, "presto.h".
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -89,7 +90,7 @@ extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
    extern PRESTO_ENVELOPE_T * presto_mail_get(PRESTO_MAILBOX_T * box_p);
    extern PRESTO_ENVELOPE_T * presto_mail_wait(PRESTO_MAILBOX_T * box_p);
 
-#endif
+#endif // FEATURE_KERNEL_MAIL
 
 ////////////////////////////////////////////////////////////////////////////////
 //   T I M E R S
@@ -103,7 +104,7 @@ extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
    extern void presto_timer_wait(PRESTO_INTERVAL_T delay, PRESTO_TRIGGER_T trigger);
    extern void presto_timer_stop(PRESTO_TIMER_T * timer_p);
 
-#endif
+#endif // FEATURE_KERNEL_TIMER
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S E M A P H O R E S
@@ -117,12 +118,12 @@ extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
       extern void presto_semaphore_init(PRESTO_SEMAPHORE_T * sem_p, short resources, BOOLEAN use_inheritance);
    #else
       extern void presto_semaphore_init(PRESTO_SEMAPHORE_T * sem_p, short resources);
-   #endif
+   #endif // 
    extern BOOLEAN presto_semaphore_request(PRESTO_SEMAPHORE_T * sem_p, PRESTO_TRIGGER_T trigger);
    extern void presto_semaphore_release(PRESTO_SEMAPHORE_T * sem_p);
    extern void presto_semaphore_wait(PRESTO_SEMAPHORE_T * sem_p, PRESTO_TRIGGER_T trigger);
 
-#endif
+#endif // FEATURE_KERNEL_SEMAPHORE
 
 ////////////////////////////////////////////////////////////////////////////////
 //   M E M O R Y
@@ -133,9 +134,9 @@ extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
    extern BYTE * presto_memory_allocate(unsigned short requested_bytes);
    extern void presto_memory_free(BYTE * free_me);
 
-#endif
+#endif // FEATURE_KERNEL_MEMORY
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif
+#endif // _PRESTO_H_
 

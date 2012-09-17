@@ -1,11 +1,11 @@
 
-#ifndef _HANDYBOARD_H_
-#define _HANDYBOARD_H_
+#ifndef _BOARD_H_
+#define _BOARD_H_
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
-#include "hc11_regs.h"
+#include "registers.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -16,9 +16,14 @@
 //   0x10 - motor 0 on    0x01 - motor 0 reverse
 #define MOTOR_LED_PORT *(unsigned char *)(0x7FFF)
 
-#define TOGGLE_SPEAKER()  BITNOT(PORTA,3);  // toggle speaker
+#define TOGGLE_SPEAKER()  BITNOT(PORTA,3)   // toggle speaker
+
+#define PIN_SWAP  2
+#define PIN_IDLE  3
+#define PIN_TIMER 4
+#define PIN_SWI   5
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif
+#endif // _BOARD_H_
 

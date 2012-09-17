@@ -38,7 +38,7 @@
 #include "presto.h"
 #include "configure.h"
 #include "error.h"
-#include "locks.h"
+#include "cpu_locks.h"
 #include "kernel/kernel.h"
 #include "kernel/memory.h"
 
@@ -73,7 +73,7 @@ typedef struct MEMORY_POOL_S {
       unsigned short current_total_bytes;
       unsigned short max_used_items;
       unsigned short max_requested_size;
-   #endif
+   #endif // FEATURE_MEMORY_STATISTICS
 } MEMORY_POOL_T;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -132,13 +132,13 @@ BYTE * presto_memory_allocate(unsigned short requested_bytes) {
                   pool_ptr->max_requested_size=requested_bytes;
                }
                pool_ptr->current_total_bytes+=requested_bytes;
-            #endif
-            #ifdef SANITYCHECK_MEMORY_WROTETOOFAR
+            #endif // FEATURE_MEMORY_STATISTICS
+            #ifdef SANITY_MEMORY_WROTETOOFAR
                // write a pattern to memory... will be checked on free
                if (requested_bytes < pool_ptr->mempool_item_size) {
                   *(mem_ptr+requested_bytes)=SPECIAL_MARKER;
                }
-            #endif
+            #endif // SANITY_MEMORY_WROTETOOFAR
             return (BYTE *)item_ptr+sizeof(MEMORY_ITEM_T);
          }
       }
@@ -164,13 +164,13 @@ void presto_memory_free(BYTE * free_me) {
    // determine which memory pool this item came from
    pool_ptr=item_ptr->point.pool;
 
-   #ifdef SANITYCHECK_MEMORY_WROTETOOFAR
+   #ifdef SANITY_MEMORY_WROTETOOFAR
        if (item_ptr->requested_bytes < pool_ptr->mempool_item_size) {
           if (*(free_me+item_ptr->requested_bytes) != SPECIAL_MARKER ) {
              error_fatal(ERROR_MEMORY_CLOBBEREDMEMBLOCK);
           }
        }
-   #endif
+   #endif // SANITY_MEMORY_WROTETOOFAR
 
    cpu_lock_save(lock);
    // add memory item to free list
@@ -182,7 +182,7 @@ void presto_memory_free(BYTE * free_me) {
 
    #ifdef FEATURE_MEMORY_STATISTICS
       pool_ptr->current_total_bytes-=item_ptr->requested_bytes;
-   #endif
+   #endif // FEATURE_MEMORY_STATISTICS
    // show that this block is unused
    item_ptr->requested_bytes=0;
 }
@@ -191,7 +191,7 @@ void presto_memory_free(BYTE * free_me) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-void memory_debug(unsigned short pool, KERNEL_MEMORYPOOLSTATS_T * stats) {
+void memory_debug(unsigned short pool, KERNEL_MEMORYPOOLINFO_T * stats) {
    if((pool<0)||(pool>=PRESTO_MEM_NUMPOOLS)) return;
    stats->mempool_num_items=mempools[pool].mempool_num_items;
    stats->mempool_item_size=mempools[pool].mempool_item_size;
@@ -200,7 +200,7 @@ void memory_debug(unsigned short pool, KERNEL_MEMORYPOOLSTATS_T * stats) {
       stats->current_total_bytes=mempools[pool].current_total_bytes;
       stats->max_used_items=mempools[pool].max_used_items;
       stats->max_requested_size=mempools[pool].max_requested_size;
-   #endif
+   #endif // FEATURE_MEMORY_STATISTICS
 }
 
 
@@ -233,7 +233,7 @@ void kernel_memory_init(void) {
          pool_ptr->max_used_items=0;
          pool_ptr->max_requested_size=0;
          pool_ptr->current_total_bytes=0;
-      #endif
+      #endif // FEATURE_MEMORY_STATISTICS
 
       // build the free list
       mempools[pool].free_list=(MEMORY_ITEM_T *)mem_ptr;
@@ -263,13 +263,7 @@ void kernel_memory_init(void) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//   S T A T I C   F U N C T I O N S
-////////////////////////////////////////////////////////////////////////////////
 
+#endif // FEATURE_KERNEL_MEMORY
 
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-#endif  // FEATURE_KERNEL_MEMORY
 

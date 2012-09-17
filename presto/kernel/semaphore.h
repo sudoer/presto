@@ -10,6 +10,16 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/*
+typedef enum {
+   SEMAPHORE_NORMAL,
+   SEMAPHORE_PRIORITY_INHERITANCE,
+   SEMAPHORE_PRIORITY_CEILING,
+} KERNEL_SEMPROTOCOL_T;
+*/
+
+////////////////////////////////////////////////////////////////////////////////
+
 typedef struct KERNEL_SEMUSER_S {
    KERNEL_TASKID_T tid;
    KERNEL_TRIGGER_T trigger;
@@ -24,7 +34,7 @@ typedef struct KERNEL_SEMAPHORE_S {
    signed int available_resources;
    #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
       BOOLEAN use_inheritance;
-   #endif
+   #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
    struct KERNEL_SEMUSER_S * user_list;
    struct KERNEL_SEMUSER_S * wait_list;
    struct KERNEL_SEMUSER_S * free_list;
@@ -37,5 +47,5 @@ extern void kernel_semaphore_init(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif
+#endif // _SEMAPHORE_H_
 

@@ -1,13 +1,14 @@
 
 #include "presto.h"
 #include "types.h"
-#include "locks.h"
+#include "cpu_locks.h"
+#include "error.h"
 
-#include "avr_regs.h"
+#include "registers.h"
 #include <avr/io.h>
 
 
-#define STACK_SIZE  60
+#define STACK_SIZE  65
 
 PRESTO_TASKID_T led_tid;
 PRESTO_TASKID_T hgh_tid;
@@ -32,57 +33,73 @@ void led(void) {
    PRESTO_TRIGGER_T t;
    while(1) {
       t=presto_wait(0xFF);
-      if(t&LED0_ON)  { cbi(PORTB,0); }
-      if(t&LED0_OFF) { sbi(PORTB,0); }
-      if(t&LED1_ON)  { cbi(PORTB,1); }
-      if(t&LED1_OFF) { sbi(PORTB,1); }
-      if(t&LED2_ON)  { cbi(PORTB,2); }
-      if(t&LED2_OFF) { sbi(PORTB,2); }
+      if(t&LED0_ON)  cbi(PORTB,0);
+      if(t&LED0_OFF) sbi(PORTB,0);
+      if(t&LED1_ON)  cbi(PORTB,1);
+      if(t&LED1_OFF) sbi(PORTB,1);
+      if(t&LED2_ON)  cbi(PORTB,2);
+      if(t&LED2_OFF) sbi(PORTB,2);
    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-static PRESTO_TIMER_T hit;
 
 void hgh(void) {
-   presto_timer_start(&hit,100,100,0x80);
+   static PRESTO_TIMER_T hgh_t;
    while(1) {
       presto_trigger_send(led_tid,LED0_ON);
+      //for(y=0;y<10000;y++) { }
+      presto_timer_start(&hgh_t,50,0,0x80);
       presto_wait(0x80);
+
       presto_trigger_send(led_tid,LED0_OFF);
+      //for(y=0;y<10000;y++) { }
+      presto_timer_start(&hgh_t,450,0,0x80);
       presto_wait(0x80);
    }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-static PRESTO_TIMER_T mdt;
 
 void med(void) {
+   static PRESTO_TIMER_T med_t;
+   presto_timer_start(&med_t,100,100,0x80);
    while(1) {
       presto_trigger_send(led_tid,LED1_ON);
-      presto_timer_start(&mdt,500,0,0x80);
       presto_wait(0x80);
       presto_trigger_send(led_tid,LED1_OFF);
-      presto_timer_start(&mdt,225,0,0x80);
       presto_wait(0x80);
    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static PRESTO_TIMER_T lot;
-
 void low(void) {
-   presto_timer_start(&lot,125,250,0x80);
-   presto_wait(0x80);
+   static PRESTO_TIMER_T low_t;
    while(1) {
       presto_trigger_send(led_tid,LED2_ON);
+      presto_timer_start(&low_t,500,0,0x80);
       presto_wait(0x80);
       presto_trigger_send(led_tid,LED2_OFF);
+      presto_timer_start(&low_t,250,0,0x80);
       presto_wait(0x80);
    }
+
+/*
+   //volatile unsigned short y;
+   while(1) {
+      presto_trigger_send(led_tid,LED2_ON);
+      //for(y=0;y<10000;y++) { }
+      presto_timer_start(&low_t,50,0,0x80);
+      presto_wait(0x80);
+
+      presto_trigger_send(led_tid,LED2_OFF);
+      //for(y=0;y<10000;y++) { }
+      presto_timer_start(&low_t,450,0,0x80);
+      presto_wait(0x80);
+   }
+*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////

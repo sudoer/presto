@@ -23,8 +23,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "types.h"
-#include "hc11_regs.h"
-#include "locks.h"
+#include "registers.h"
+#include "cpu_locks.h"
 #include "vectors.h"
 #include "presto.h"
 #include "services/serial.h"

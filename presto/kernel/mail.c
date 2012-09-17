@@ -61,7 +61,7 @@
 #include "types.h"
 #include "presto.h"
 #include "error.h"
-#include "locks.h"
+#include "cpu_locks.h"
 #include "configure.h"
 #include "kernel/kernel.h"
 #include "kernel/mail.h"
@@ -230,7 +230,7 @@ KERNEL_ENVELOPE_T * presto_mail_get(KERNEL_MAILBOX_T * box_p) {
       // Someone can easily read mail from someone else's box.
       // Check ownership, and give anyone else nothing.
       if ((env_p->to_box_p->owner_tid)!=kernel_current_task()) return NULL;
-   #endif
+   #endif // FEATURE_MAIL_NOSTEALING
 
    // we're about to mess with the mail list... interrupts off
    cpu_lock_save(lock);
@@ -274,12 +274,6 @@ void kernel_mail_init(void) {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//   S T A T I C   F U N C T I O N S
-////////////////////////////////////////////////////////////////////////////////
 
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-#endif  // FEATURE_KERNEL_MAIL
+#endif // FEATURE_KERNEL_MAIL
 

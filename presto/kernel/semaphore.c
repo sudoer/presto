@@ -38,7 +38,7 @@
 #include "types.h"
 #include "presto.h"
 #include "error.h"
-#include "locks.h"
+#include "cpu_locks.h"
 #include "configure.h"
 #include "kernel/kernel.h"
 #include "kernel/semaphore.h"
@@ -53,7 +53,7 @@ static void insert_simuser_into_linked_list(KERNEL_SEMUSER_T ** ptr_to_head, KER
 static int remove_simuser_from_linked_list(KERNEL_SEMUSER_T ** ptr_to_head, KERNEL_SEMUSER_T * item);
 #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 static void promote_runners_to_top_waiter_priority(KERNEL_SEMAPHORE_T * sem_p);
-#endif
+#endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 
 ////////////////////////////////////////////////////////////////////////////////
 //   E X T E R N A L   F U N C T I O N S
@@ -64,7 +64,7 @@ static void promote_runners_to_top_waiter_priority(KERNEL_SEMAPHORE_T * sem_p);
 void presto_semaphore_init(KERNEL_SEMAPHORE_T * sem_p, short resources, BOOLEAN use_inheritance) {
 #else
 void presto_semaphore_init(KERNEL_SEMAPHORE_T * sem_p, short resources) {
-#endif
+#endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
    int x;
    sem_p->max_resources=resources;
    sem_p->available_resources=resources;
@@ -79,7 +79,7 @@ void presto_semaphore_init(KERNEL_SEMAPHORE_T * sem_p, short resources) {
    sem_p->semuser_data[PRESTO_SEM_WAITLIST-1].next=NULL;
    #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
       sem_p->use_inheritance=use_inheritance;
-   #endif
+   #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 }
 
 
@@ -139,7 +139,7 @@ BOOLEAN presto_semaphore_request(KERNEL_SEMAPHORE_T * sem_p, KERNEL_TRIGGER_T tr
                presto_priority_restore(old_runner_p->tid);
             }
          }
-      #endif
+      #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 
    } else {
 
@@ -157,7 +157,7 @@ BOOLEAN presto_semaphore_request(KERNEL_SEMAPHORE_T * sem_p, KERNEL_TRIGGER_T tr
       if (sem_p->use_inheritance) {
          promote_runners_to_top_waiter_priority(sem_p);
       }
-   #endif
+   #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 
    cpu_unlock_restore(lock);
    return gotit;
@@ -195,7 +195,7 @@ void presto_semaphore_release(KERNEL_SEMAPHORE_T * sem_p) {
          // restore our original current_priority
          presto_priority_restore(kernel_current_task());
       }
-   #endif
+   #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 
    // See if anyone is waiting for our resource.
    first_in_line=sem_p->wait_list;
@@ -216,7 +216,7 @@ void presto_semaphore_release(KERNEL_SEMAPHORE_T * sem_p) {
             // TODO - What should we do if there are more than one runner?
             promote_runners_to_top_waiter_priority(sem_p);
          }
-      #endif
+      #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
    }
 
    cpu_unlock_restore(lock);
@@ -307,10 +307,10 @@ static void promote_runners_to_top_waiter_priority(KERNEL_SEMAPHORE_T * sem_p) {
       }
    }
 }
-#endif
+#endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif  // FEATURE_KERNEL_SEMAPHORE
+#endif // FEATURE_KERNEL_SEMAPHORE
 

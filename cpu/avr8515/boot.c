@@ -10,9 +10,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "configure.h"
-#include "locks.h"
+#include "cpu_locks.h"
 #include "boot.h"
-#include "avr_regs.h"
+#include "registers.h"
 #include <avr/io.h>
 
 

@@ -8,10 +8,10 @@
 //   D E P E N D E N C I E S
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "avr_regs.h"
+#include "registers.h"
 #include <avr/io.h>
 #include "types.h"
-#include "hwtimer.h"
+#include "cpu_timer.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,10 +45,8 @@ void hwtimer_start(unsigned short ms, void (*func)(void)) {
    outw(OCR1AL,(unsigned short)(CLOCKS_PER_MS*ms));
    // enable OC1A interrupt
    sbi(TIMSK,B_OCIE1A);
-#ifdef FEATURE_DEBUG
-   // PORTD.5 (OC1A) is output
-   sbi(DDRD,B_DDD5);   // DEBUG ONLY
-#endif
+   // PORTD.5 (OC1A) must be an output
+   sbi(DDRD,B_DDD5);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

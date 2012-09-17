@@ -26,9 +26,9 @@
 
 #include "types.h"
 #include "presto.h"
-#include "locks.h"
-#include "hwtimer.h"
-#include "kernel_magic.h"
+#include "cpu_locks.h"
+#include "cpu_timer.h"
+#include "cpu_debug.h"
 #include "kernel/kernel.h"
 #include "kernel/timer.h"
 #include "kernel/clock.h"
@@ -135,7 +135,7 @@ void kernel_master_clock_start(void) {
    // initialize master clock
    clock_reset(&system_clock);
    // do hardware timer magic
-   hwtimer_start(PRESTO_KERNEL_MSPERTICK,(void (*)(void))timer_isr);
+   CPU_TIMER_START(PRESTO_KERNEL_MSPERTICK,(void (*)(void))timer_isr);
 }
 
 
@@ -146,7 +146,7 @@ void kernel_master_clock_start(void) {
 
 void timer_isr(void) {
 
-   KERNEL_MAGIC_INDICATE_TICK_START();
+   CPU_DEBUG_TICK_START();
 
    BYTE count=0;
    KERNEL_TIMER_T * timer_p;
@@ -156,7 +156,7 @@ void timer_isr(void) {
    clock_add_ms(&system_clock,PRESTO_KERNEL_MSPERTICK);
 
    // schedule a hardware timer interrupt one tick into the future
-   hwtimer_restart();
+   CPU_TIMER_RESTART();
 
    // find out the priority of the current running task
    current_pri=presto_priority_get(kernel_current_task());
@@ -182,7 +182,7 @@ void timer_isr(void) {
       if(presto_priority_get(timer_p->owner_tid)>current_pri) count++;
    }
 
-   KERNEL_MAGIC_INDICATE_TICK_END();
+   CPU_DEBUG_TICK_END();
 
    if (count>0) {
       kernel_context_switch();
@@ -241,6 +241,6 @@ static void timer_remove_from_master_list(KERNEL_TIMER_T * timer_p) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif  // FEATURE_KERNEL_TIMER
+#endif // FEATURE_KERNEL_TIMER
 
 

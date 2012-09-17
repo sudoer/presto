@@ -1,25 +1,19 @@
 
-#ifndef _KERNEL_MAGIC_H_
-#define _KERNEL_MAGIC_H_
+#ifndef _CPU_MAGIC_H_
+#define _CPU_MAGIC_H_
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <avr/io.h>
-#include "avr_regs.h"
+#include "registers.h"
 #include "types.h"
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define LED_SWAP  7
-#define LED_IDLE  6
-#define LED_TIMER 5
-#define LED_SWI   4
+#include "board.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //   I N I T I A L I Z E
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline BYTE * KERNEL_MAGIC_SETUP_STACK(BYTE * stack_ptr, void (*func)(void)) {
+static inline BYTE * CPU_MAGIC_SETUP_STACK(BYTE * stack_ptr, void (*func)(void)) {
    MISCWORD xlate;     // to split a word into two bytes
    xlate.w=(WORD)func;
    *stack_ptr--=xlate.b.l;    // function pointer(L)
@@ -33,7 +27,7 @@ static inline BYTE * KERNEL_MAGIC_SETUP_STACK(BYTE * stack_ptr, void (*func)(voi
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void KERNEL_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(void (*func)(void)) {
+static inline void CPU_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(void (*func)(void)) {
    NOT_USED(func);
    cbi(GIMSK,B_INT0);                      // disable INT0
    outb(MCUCR,inb(MCUCR)|M_ISC01|M_ISC00); // INT0 on rising edge
@@ -46,12 +40,12 @@ static inline void KERNEL_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(void (*func)(void)
 //   S T A C K   P O I N T E R S
 ////////////////////////////////////////////////////////////////////////////////
 
-#define KERNEL_MAGIC_LOAD_STACK_PTR(task_sp)  \
+#define CPU_MAGIC_LOAD_STACK_PTR(task_sp)  \
    outw(SPL,(unsigned short)(task_sp));
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define KERNEL_MAGIC_SWAP_STACK_POINTERS(old_stack_ptr_p,new_sp)  \
+#define CPU_MAGIC_SWAP_STACK_POINTERS(old_stack_ptr_p,new_sp)  \
    *old_stack_ptr_p=(BYTE *)inw(SPL);                             \
    outw(SPL,(unsigned short)(new_sp));
 
@@ -59,20 +53,22 @@ static inline void KERNEL_MAGIC_INITIALIZE_SOFTWARE_INTERRUPT(void (*func)(void)
 //   T R I G G E R I N G   S W I
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void KERNEL_MAGIC_SOFTWARE_INTERRUPT(void) {
-   cbi(PORTD,2);   // drive INT0 low
-   sbi(PORTD,2);   // drive INT0 high
+static inline void CPU_MAGIC_SOFTWARE_INTERRUPT(void) {
+   cbi(PORTD,2);          // drive INT0 low
+   sbi(PORTD,2);          // drive INT0 high
+   asm volatile ("sei");  // enable interrupts
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S W I   E N T R Y / E X I T
 ////////////////////////////////////////////////////////////////////////////////
 
-#define KERNEL_MAGIC_DECLARE_SWI(x) void x (void) __attribute__((naked));
+#define CPU_MAGIC_DECLARE_SWI(x) void x (void) __attribute__((naked));
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define KERNEL_MAGIC_START_OF_SWI()            \
+//static inline void CPU_MAGIC_START_OF_SWI(void) {
+#define CPU_MAGIC_START_OF_SWI()            \
    asm volatile ("push __zero_reg__");         \
    asm volatile ("push __tmp_reg__");          \
    asm volatile ("in __tmp_reg__,__SREG__");   \
@@ -108,79 +104,63 @@ static inline void KERNEL_MAGIC_SOFTWARE_INTERRUPT(void) {
    asm volatile ("push r29");                  \
    asm volatile ("push r30");                  \
    asm volatile ("push r31");                  \
-   cbi(PORTD,2);         /* drive INT0 low */  \
-   sbi(GIMSK,B_INT0);    /* re-enable INT0 */
+   cbi(PORTD,2);       /* drive INT0 low */    \
+   sbi(GIMSK,B_INT0);  /* re-enable INT0 */
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define KERNEL_MAGIC_END_OF_SWI()                       \
-   asm volatile ("pop r31");                          \
-   asm volatile ("pop r30");                          \
-   asm volatile ("pop r29");                          \
-   asm volatile ("pop r28");                          \
-   asm volatile ("pop r27");                          \
-   asm volatile ("pop r26");                          \
-   asm volatile ("pop r25");                          \
-   asm volatile ("pop r24");                          \
-   asm volatile ("pop r23");                          \
-   asm volatile ("pop r22");                          \
-   asm volatile ("pop r21");                          \
-   asm volatile ("pop r20");                          \
-   asm volatile ("pop r19");                          \
-   asm volatile ("pop r18");                          \
-   asm volatile ("pop r17");                          \
-   asm volatile ("pop r16");                          \
-   asm volatile ("pop r15");                          \
-   asm volatile ("pop r14");                          \
-   asm volatile ("pop r13");                          \
-   asm volatile ("pop r12");                          \
-   asm volatile ("pop r11");                          \
-   asm volatile ("pop r10");                          \
-   asm volatile ("pop r9");                           \
-   asm volatile ("pop r8");                           \
-   asm volatile ("pop r7");                           \
-   asm volatile ("pop r6");                           \
-   asm volatile ("pop r5");                           \
-   asm volatile ("pop r4");                           \
-   asm volatile ("pop r3");                           \
-   asm volatile ("pop r2");                           \
-   asm volatile ("pop __tmp_reg__");                  \
-   asm volatile ("out __SREG__,__tmp_reg__");         \
-   asm volatile ("pop __tmp_reg__");                  \
-   asm volatile ("pop __zero_reg__");                 \
-   /* let the CPU pop the PC, and start running! */   \
+//static inline void CPU_MAGIC_END_OF_SWI(void) {
+#define CPU_MAGIC_END_OF_SWI()                   \
+   asm volatile ("pop r31");                        \
+   asm volatile ("pop r30");                        \
+   asm volatile ("pop r29");                        \
+   asm volatile ("pop r28");                        \
+   asm volatile ("pop r27");                        \
+   asm volatile ("pop r26");                        \
+   asm volatile ("pop r25");                        \
+   asm volatile ("pop r24");                        \
+   asm volatile ("pop r23");                        \
+   asm volatile ("pop r22");                        \
+   asm volatile ("pop r21");                        \
+   asm volatile ("pop r20");                        \
+   asm volatile ("pop r19");                        \
+   asm volatile ("pop r18");                        \
+   asm volatile ("pop r17");                        \
+   asm volatile ("pop r16");                        \
+   asm volatile ("pop r15");                        \
+   asm volatile ("pop r14");                        \
+   asm volatile ("pop r13");                        \
+   asm volatile ("pop r12");                        \
+   asm volatile ("pop r11");                        \
+   asm volatile ("pop r10");                        \
+   asm volatile ("pop r9");                         \
+   asm volatile ("pop r8");                         \
+   asm volatile ("pop r7");                         \
+   asm volatile ("pop r6");                         \
+   asm volatile ("pop r5");                         \
+   asm volatile ("pop r4");                         \
+   asm volatile ("pop r3");                         \
+   asm volatile ("pop r2");                         \
+   asm volatile ("pop __tmp_reg__");                \
+   asm volatile ("out __SREG__,__tmp_reg__");       \
+   asm volatile ("pop __tmp_reg__");                \
+   asm volatile ("pop __zero_reg__");               \
+   /* let the CPU pop the PC and start running! */  \
    asm volatile ("reti");
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define KERNEL_MAGIC_RUN_FIRST_TASK  KERNEL_MAGIC_END_OF_SWI
+#define CPU_MAGIC_RUN_FIRST_TASK() CPU_MAGIC_END_OF_SWI();
 
 ////////////////////////////////////////////////////////////////////////////////
 //   I D L E   W O R K
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline void KERNEL_MAGIC_INDICATE_IDLE_WORK(void) {
-   cbi(PORTB,LED_IDLE);
-   sbi(PORTB,LED_IDLE);
+static inline void CPU_MAGIC_IDLE_WORK(void) {
+   cbi(PORTB,LED_IDLE);  // LED on
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//   I N D I C A T I O N S / F E E D B A C K
-////////////////////////////////////////////////////////////////////////////////
 
-#define KERNEL_MAGIC_INDICATE_SWI_START()  cbi(PORTB,LED_SWI);  // LED on
-#define KERNEL_MAGIC_INDICATE_SWI_END()    sbi(PORTB,LED_SWI);  // LED off
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define KERNEL_MAGIC_INDICATE_TASK_SWITCH() outb(PORTB,inb(PORTB)^(1<<LED_SWAP));
-
-////////////////////////////////////////////////////////////////////////////////
-
-#define KERNEL_MAGIC_INDICATE_TICK_START()  cbi(PORTB,LED_TIMER);  // LED on
-#define KERNEL_MAGIC_INDICATE_TICK_END()    sbi(PORTB,LED_TIMER);  // LED off
-
-////////////////////////////////////////////////////////////////////////////////
-
-#endif
+#endif // _CPU_MAGIC_H_
 

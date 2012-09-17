@@ -74,12 +74,10 @@ sub setup_project {
 
       "$cpu_dir\\boot.c",
       "$cpu_dir\\error.c",
-      "$cpu_dir\\hwtimer.c",
+      "$cpu_dir\\cpu_timer.c",
+      "$cpu_dir\\vectors.c",
 
       ifcpu($CPU_M68HC11,"$cpu_dir\\crt0.s"),
-      ifcpu($CPU_M68HC11,"$cpu_dir\\vectors.c"),
-
-      ifcpu($CPU_AVR8515,"$cpu_dir\\vectors.s"),
 
    );
 
@@ -524,17 +522,20 @@ sub show_memory_usage {
    my @memusage_romsections;
    my %memusage_used;
 
+   if($DEBUG) { dump_file($tempfile); }
+   debug("");
+
    open(TEMP,"<$tempfile");
    my $line;
    while($line=<TEMP>) {
-      if(index($line,"2**0")>-1) {
+      if(index($line,"2**")>-1) {
          # combine with next line
          $line=$line.<TEMP>;
          $line=~s/\012//g;
          $line=~s/\015//g;
       }
 
-      if(index($line,"2**0")>-1) {
+      if(index($line,"2**")>-1) {
          my $section_name=substr($line,5,12);
          $section_name=~s/ *$//g;
          my $size=hex(substr($line,18,8));
@@ -815,6 +816,20 @@ sub copy_file {
       print("COPYING [$src] => [$dest]\n");
    }
    copy($src,$dest);
+}
+
+################################################################################
+
+sub dump_file {
+   my $file=$_[0];
+   open(DUMP,"<$file");
+   my $line;
+   while($line=<DUMP>) {
+      $line=~s/\012//g;
+      $line=~s/\015//g;
+      print("$line\n");
+   }
+   close(DUMP);
 }
 
 ################################################################################
