@@ -30,13 +30,13 @@ sub setup_project {
    $OBJ_DIR="obj";
    $TARGET="presto";
    @SRC_FILES=(
+               "app\\test.c",
                "kernel\\kernel.c",
                "kernel\\system.c",
                "kernel\\crt11.s",
                "kernel\\clock.c",
                "kernel\\error.c",
                "kernel\\intvect.c",
-               "app\\test.c",
    );
 
    print("OK\n");

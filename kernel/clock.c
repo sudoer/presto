@@ -4,23 +4,23 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define STATIC      // static
+#define STATIC //static
 
 ////////////////////////////////////////////////////////////////////////////////
 
 STATIC clock_add(PRESTO_TIME_T * clk, unsigned short sec, unsigned short msec, unsigned short usec) {
    clk->usec+=usec;
-   if(clk->usec>=1000) {
+   while(clk->usec>=1000) {
       clk->usec-=1000;
       clk->msec++;
    }
    clk->msec+=msec;
-   if(clk->msec>=1000) {
+   while(clk->msec>=1000) {
       clk->msec-=1000;
       clk->sec++;
    }
    clk->sec+=sec;
-   if(clk->sec>=3600) {
+   while(clk->sec>=3600) {
       clk->sec-=3600;
       clk->hour++;
    }

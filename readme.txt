@@ -1,3 +1,17 @@
+2002.10.30
+
+Previous problem with task switching seems to be gone.  In the context
+switch ISR, if we were switching from one task to the same task, this
+caused a problem with the stack pointers.
+
+Raw messages (without timers) are damn fast.  :-)
+
+Would like to clean up (reduce,rename) global variables.
+
+Starting a repeating timer with initial time of zero does not work.
+
+---
+
 2002.10.22
 
 Bug in locks.c - inline functions were not inline.  So premain() was

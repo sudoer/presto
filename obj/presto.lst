@@ -3,2122 +3,2158 @@ presto.elf:     file format elf32-m68hc11
 
 Disassembly of section .text:
 
-00008000 <presto_init>:
-    8000:	3c          	pshx
-    8001:	3c          	pshx
-    8002:	34          	des
+00008000 <assert_lights>:
+    8000:	f6 c8 35    	ldab	c835 <light1>
+    8003:	fa c8 36    	orab	c836 <light2>
+    8006:	fa c8 37    	orab	c837 <light3>
+    8009:	fa c8 38    	orab	c838 <light4>
 
-00008003 <.LM2>:
-    8003:	7d c0 07    	tst	c007 <presto_initialized>
-    8006:	27 03       	beq	800b <.LM3>
-    8008:	7e 80 d9    	jmp	80d9 <.L1>
+0000800c <.LM3>:
+    800c:	ce 7f ff    	ldx	#7fff <__debug_end+0x3ffa>
+    800f:	ca f0       	orab	#240
+    8011:	e7 00       	stab	0,x
 
-0000800b <.LM3>:
-    800b:	cc c0 18    	ldd	#c018 <__data_end>
-    800e:	bd 88 9b    	jsr	889b <clock_reset>
+00008013 <.LM4>:
+    8013:	39          	rts
 
-00008011 <.LM4>:
-    8011:	30          	tsx
-    8012:	6f 00       	clr	0,x
+00008014 <One>:
+    8014:	3c          	pshx
+    8015:	3c          	pshx
 
-00008014 <.L7>:
-    8014:	18 30       	tsy
-    8016:	4f          	clra
-    8017:	18 e6 00    	ldab	0,y
-    801a:	05          	asld
-    801b:	05          	asld
-    801c:	05          	asld
-    801d:	05          	asld
-    801e:	18 ed 03    	std	3,y
-    8021:	dd 00       	std	*0 <_.tmp>
-    8023:	18 de 00    	ldy	*0 <_.tmp>
-    8026:	c3 c0 61    	addd	#c061 <tcb_list+0xa>
-    8029:	18 8f       	xgdy
-    802b:	37          	pshb
-    802c:	36          	psha
-    802d:	38          	pulx
-    802e:	c3 c0 67    	addd	#c067 <tcb_list+0x10>
-    8031:	8f          	xgdx
-    8032:	cd ef 00    	stx	0,y
+00008016 <.LM6>:
+    8016:	18 30       	tsy
+    8018:	4f          	clra
+    8019:	5f          	clrb
+    801a:	18 ed 02    	std	2,y
+    801d:	18 ed 00    	std	0,y
 
-00008035 <.LM6>:
-    8035:	c3 c0 57    	addd	#c057 <tcb_list>
+00008020 <.LM7>:
+    8020:	37          	pshb
+    8021:	36          	psha
+    8022:	18 ec 00    	ldd	0,y
+    8025:	37          	pshb
+    8026:	36          	psha
+    8027:	ce 03 e8    	ldx	#3e8 <.Ldebug_abbrev0+0x30>
+    802a:	3c          	pshx
+    802b:	3c          	pshx
+    802c:	f6 c8 31    	ldab	c831 <__bss_end>
+    802f:	bd 84 b3    	jsr	84b3 <presto_repeating_timer>
+
+00008032 <.LM8>:
+    8032:	38          	pulx
+    8033:	38          	pulx
+    8034:	38          	pulx
+    8035:	38          	pulx
+
+00008036 <.L6>:
+    8036:	8f          	xgdx
+    8037:	30          	tsx
     8038:	8f          	xgdx
-    8039:	18 30       	tsy
-    803b:	18 e6 00    	ldab	0,y
-    803e:	e7 00       	stab	0,x
+    8039:	bd 84 ea    	jsr	84ea <presto_wait_for_message>
 
-00008040 <.LM7>:
-    8040:	18 ec 03    	ldd	3,y
-    8043:	c3 c0 5f    	addd	#c05f <tcb_list+0x8>
-    8046:	ce 00 02    	ldx	#2 <_.z>
-    8049:	dd 02       	std	*2 <_.z>
-    804b:	18 df 04    	sty	*4 <_.xy>
-    804e:	18 de 02    	ldy	*2 <_.z>
-    8051:	cd ef 00    	stx	0,y
-    8054:	18 de 04    	ldy	*4 <_.xy>
+0000803c <.LM10>:
+    803c:	f6 c8 35    	ldab	c835 <light1>
+    803f:	c8 01       	eorb	#1
+    8041:	f7 c8 35    	stab	c835 <light1>
 
-00008057 <.LM8>:
-    8057:	18 6c 00    	inc	0,y
-    805a:	18 e6 00    	ldab	0,y
-    805d:	c1 0c       	cmpb	#12
-    805f:	23 b3       	bls	8014 <.L7>
+00008044 <.LM11>:
+    8044:	8d ba       	bsr	8000 <assert_lights>
+    8046:	20 ee       	bra	8036 <.L6>
 
-00008061 <.LM9>:
-    8061:	4f          	clra
-    8062:	5f          	clrb
-    8063:	fd c1 21    	std	c121 <tcb_list+0xca>
+00008048 <Two>:
+    8048:	3c          	pshx
+    8049:	3c          	pshx
 
-00008066 <.LM10>:
-    8066:	18 ce c0 57 	ldy	#c057 <tcb_list>
-    806a:	18 ff c0 05 	sty	c005 <free_tcb_p>
+0000804a <.LM14>:
+    804a:	18 30       	tsy
+    804c:	4f          	clra
+    804d:	5f          	clrb
+    804e:	18 ed 02    	std	2,y
+    8051:	18 ed 00    	std	0,y
 
-0000806e <.LM11>:
-    806e:	30          	tsx
-    806f:	e7 00       	stab	0,x
+00008054 <.LM15>:
+    8054:	37          	pshb
+    8055:	36          	psha
+    8056:	18 ec 00    	ldd	0,y
+    8059:	37          	pshb
+    805a:	36          	psha
+    805b:	ce 02 bc    	ldx	#2bc <.Ldebug_abbrev0+0xbf>
+    805e:	3c          	pshx
+    805f:	3c          	pshx
+    8060:	f6 c8 32    	ldab	c832 <two_tid>
+    8063:	bd 84 b3    	jsr	84b3 <presto_repeating_timer>
 
-00008071 <.L12>:
-    8071:	c6 14       	ldab	#20
-    8073:	30          	tsx
-    8074:	a6 00       	ldaa	0,x
-    8076:	3d          	mul
-    8077:	ed 01       	std	1,x
-    8079:	37          	pshb
-    807a:	36          	psha
-    807b:	38          	pulx
-    807c:	c3 c1 39    	addd	#c139 <mail_list+0x12>
-    807f:	8f          	xgdx
-    8080:	18 df 04    	sty	*4 <_.xy>
-    8083:	18 30       	tsy
-    8085:	c3 c1 3b    	addd	#c13b <mail_list+0x14>
-    8088:	ed 00       	std	0,x
+00008066 <.L12>:
+    8066:	18 38       	puly
+    8068:	18 38       	puly
+    806a:	18 38       	puly
+    806c:	18 38       	puly
 
-0000808a <.LM13>:
-    808a:	18 df 02    	sty	*2 <_.z>
-    808d:	18 ee 01    	ldy	1,y
-    8090:	18 8f       	xgdy
-    8092:	c3 c1 27    	addd	#c127 <mail_list>
-    8095:	18 8f       	xgdy
-    8097:	de 02       	ldx	*2 <_.z>
-    8099:	e6 00       	ldab	0,x
-    809b:	18 e7 00    	stab	0,y
+0000806e <.LM17>:
+    806e:	8f          	xgdx
+    806f:	30          	tsx
+    8070:	8f          	xgdx
+    8071:	bd 84 ea    	jsr	84ea <presto_wait_for_message>
 
-0000809e <.LM14>:
-    809e:	5c          	incb
-    809f:	e7 00       	stab	0,x
-    80a1:	c1 27       	cmpb	#39
-    80a3:	23 cc       	bls	8071 <.L12>
+00008074 <.LM18>:
+    8074:	f6 c8 36    	ldab	c836 <light2>
+    8077:	c8 02       	eorb	#2
+    8079:	f7 c8 36    	stab	c836 <light2>
 
-000080a5 <.LM15>:
-    80a5:	18 ce 00 00 	ldy	#0 <_.tmp>
-    80a9:	18 ff c4 45 	sty	c445 <mail_list+0x31e>
+0000807c <.LM19>:
+    807c:	8d 82       	bsr	8000 <assert_lights>
 
-000080ad <.LM16>:
-    80ad:	cc c1 27    	ldd	#c127 <mail_list>
-    80b0:	fd c0 08    	std	c008 <free_mail_p>
+0000807e <.LM20>:
+    807e:	18 30       	tsy
+    8080:	18 ec 02    	ldd	2,y
+    8083:	37          	pshb
+    8084:	36          	psha
+    8085:	18 ec 00    	ldd	0,y
+    8088:	37          	pshb
+    8089:	36          	psha
+    808a:	f6 c8 31    	ldab	c831 <__bss_end>
+    808d:	bd 84 61    	jsr	8461 <presto_send_message>
 
-000080b3 <.LM17>:
-    80b3:	c6 01       	ldab	#1
-    80b5:	f7 c0 07    	stab	c007 <presto_initialized>
+00008090 <.LM21>:
+    8090:	18 30       	tsy
+    8092:	18 ec 06    	ldd	6,y
+    8095:	37          	pshb
+    8096:	36          	psha
+    8097:	18 ec 04    	ldd	4,y
+    809a:	37          	pshb
+    809b:	36          	psha
+    809c:	f6 c8 33    	ldab	c833 <three_tid>
+    809f:	bd 84 61    	jsr	8461 <presto_send_message>
+    80a2:	20 c2       	bra	8066 <.L12>
 
-000080b8 <.LM18>:
-    80b8:	18 8f       	xgdy
-    80ba:	37          	pshb
-    80bb:	18 8f       	xgdy
-    80bd:	34          	des
-    80be:	18 ce 00 32 	ldy	#32 <_.xy+0x2e>
-    80c2:	18 3c       	pshy
-    80c4:	ce c0 23    	ldx	#c023 <idle_stack>
-    80c7:	3c          	pshx
-    80c8:	cc 87 71    	ldd	#8771 <idle_task>
-    80cb:	8d 10       	bsr	80dd <presto_create_task>
-    80cd:	f7 c0 22    	stab	c022 <idle_tid>
+000080a4 <Three>:
+    80a4:	3c          	pshx
+    80a5:	3c          	pshx
 
-000080d0 <.LM19>:
-    80d0:	bd 87 73    	jsr	8773 <tid_to_tcbptr>
-    80d3:	fd c0 55    	std	c055 <idle_tcb_p>
+000080a6 <.LM24>:
+    80a6:	30          	tsx
+    80a7:	4f          	clra
+    80a8:	5f          	clrb
+    80a9:	ed 02       	std	2,x
+    80ab:	ed 00       	std	0,x
 
-000080d6 <.LBE2>:
-    80d6:	38          	pulx
-    80d7:	38          	pulx
-    80d8:	38          	pulx
+000080ad <.L17>:
+    80ad:	8f          	xgdx
+    80ae:	30          	tsx
+    80af:	8f          	xgdx
+    80b0:	bd 84 ea    	jsr	84ea <presto_wait_for_message>
 
-000080d9 <.L1>:
+000080b3 <.LM26>:
+    80b3:	f6 c8 37    	ldab	c837 <light3>
+    80b6:	c8 04       	eorb	#4
+    80b8:	f7 c8 37    	stab	c837 <light3>
+
+000080bb <.LM27>:
+    80bb:	bd 80 00    	jsr	8000 <assert_lights>
+    80be:	20 ed       	bra	80ad <.L17>
+
+000080c0 <Four>:
+    80c0:	3c          	pshx
+    80c1:	3c          	pshx
+
+000080c2 <.LM30>:
+    80c2:	18 30       	tsy
+    80c4:	4f          	clra
+    80c5:	5f          	clrb
+    80c6:	18 ed 02    	std	2,y
+    80c9:	18 ed 00    	std	0,y
+
+000080cc <.LM31>:
+    80cc:	37          	pshb
+    80cd:	36          	psha
+    80ce:	18 ec 00    	ldd	0,y
+    80d1:	37          	pshb
+    80d2:	36          	psha
+    80d3:	f6 c8 34    	ldab	c834 <four_tid>
+    80d6:	bd 84 61    	jsr	8461 <presto_send_message>
+
+000080d9 <.LM32>:
     80d9:	38          	pulx
     80da:	38          	pulx
-    80db:	31          	ins
-    80dc:	39          	rts
-
-000080dd <presto_create_task>:
-    80dd:	30          	tsx
-    80de:	8f          	xgdx
-    80df:	c3 ff f6    	addd	#fff6 <__normvect_start+0x20>
-    80e2:	8f          	xgdx
-    80e3:	35          	txs
-    80e4:	30          	tsx
-    80e5:	ed 00       	std	0,x
-
-000080e7 <.LBB3>:
-    80e7:	f6 c0 07    	ldab	c007 <presto_initialized>
-    80ea:	26 06       	bne	80f2 <.L16>
-
-000080ec <.LM23>:
-    80ec:	cc 00 01    	ldd	#1 <_.tmp+0x1>
-    80ef:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-000080f2 <.L16>:
-    80f2:	fc c0 05    	ldd	c005 <free_tcb_p>
-    80f5:	26 0c       	bne	8103 <.L17>
-
-000080f7 <.LM25>:
-    80f7:	cc 00 07    	ldd	#7 <_.xy+0x3>
-    80fa:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-000080fd <.LM26>:
-    80fd:	cc ff ff    	ldd	#ffff <__normvect_start+0x29>
-    8100:	7e 82 75    	jmp	8275 <.L15>
-
-00008103 <.L17>:
-    8103:	07          	tpa
-    8104:	0f          	sei
-    8105:	18 30       	tsy
-    8107:	18 ed 02    	std	2,y
-
-0000810a <.LM28>:
-    810a:	18 df 04    	sty	*4 <_.xy>
-    810d:	18 fe c0 05 	ldy	c005 <free_tcb_p>
-
-00008111 <.LM29>:
-    8111:	cd ee 0a    	ldx	10,y
-    8114:	ff c0 05    	stx	c005 <free_tcb_p>
-
-00008117 <.LM30>:
-    8117:	18 df 02    	sty	*2 <_.z>
-    811a:	18 de 04    	ldy	*4 <_.xy>
-    811d:	18 ec 0c    	ldd	12,y
-    8120:	18 e3 0e    	addd	14,y
-    8123:	18 ed 06    	std	6,y
-    8126:	8f          	xgdx
-    8127:	09          	dex
-    8128:	18 de 02    	ldy	*2 <_.z>
-    812b:	cd ef 03    	stx	3,y
-
-0000812e <.LM31>:
-    812e:	18 de 04    	ldy	*4 <_.xy>
-    8131:	18 ec 0c    	ldd	12,y
-    8134:	df 04       	stx	*4 <_.xy>
-    8136:	de 02       	ldx	*2 <_.z>
-    8138:	ed 05       	std	5,x
-
-0000813a <.LM32>:
-    813a:	18 e6 11    	ldab	17,y
-    813d:	e7 07       	stab	7,x
-
-0000813f <.LM33>:
-    813f:	18 ce 00 00 	ldy	#0 <_.tmp>
-    8143:	1a ef 08    	sty	8,x
-
-00008146 <.LM34>:
-    8146:	1a ef 0c    	sty	12,x
-
-00008149 <.LM35>:
-    8149:	1a ef 0e    	sty	14,x
-
-0000814c <.LM36>:
-    814c:	18 30       	tsy
-    814e:	18 e6 01    	ldab	1,y
-    8151:	de 04       	ldx	*4 <_.xy>
-    8153:	e7 00       	stab	0,x
-    8155:	cd ee 06    	ldx	6,y
-    8158:	09          	dex
-    8159:	09          	dex
-
-0000815a <.LM37>:
-    815a:	4f          	clra
-    815b:	18 e6 00    	ldab	0,y
-    815e:	e7 00       	stab	0,x
-    8160:	cd ee 06    	ldx	6,y
-    8163:	09          	dex
-    8164:	09          	dex
-    8165:	09          	dex
-
-00008166 <.LM38>:
-    8166:	c6 66       	ldab	#102
-    8168:	e7 00       	stab	0,x
-    816a:	cd ee 06    	ldx	6,y
-    816d:	09          	dex
-    816e:	09          	dex
-    816f:	09          	dex
-    8170:	09          	dex
-
-00008171 <.LM39>:
-    8171:	c6 55       	ldab	#85
-    8173:	e7 00       	stab	0,x
-    8175:	cd ee 06    	ldx	6,y
-    8178:	8f          	xgdx
-    8179:	c3 ff fb    	addd	#fffb <__normvect_start+0x25>
-    817c:	8f          	xgdx
-
-0000817d <.LM40>:
-    817d:	c6 44       	ldab	#68
-    817f:	e7 00       	stab	0,x
-    8181:	cd ee 06    	ldx	6,y
-    8184:	8f          	xgdx
-    8185:	c3 ff fa    	addd	#fffa <__normvect_start+0x24>
-    8188:	8f          	xgdx
-
-00008189 <.LM41>:
-    8189:	c6 33       	ldab	#51
-    818b:	e7 00       	stab	0,x
-    818d:	cd ee 06    	ldx	6,y
-    8190:	8f          	xgdx
-    8191:	c3 ff f9    	addd	#fff9 <__normvect_start+0x23>
-    8194:	8f          	xgdx
-
-00008195 <.LM42>:
-    8195:	c6 11       	ldab	#17
-    8197:	e7 00       	stab	0,x
-    8199:	cd ee 06    	ldx	6,y
-    819c:	8f          	xgdx
-    819d:	c3 ff f8    	addd	#fff8 <__normvect_start+0x22>
-    81a0:	8f          	xgdx
-
-000081a1 <.LM43>:
-    81a1:	c6 22       	ldab	#34
-    81a3:	e7 00       	stab	0,x
-    81a5:	cd ee 06    	ldx	6,y
-    81a8:	8f          	xgdx
-    81a9:	c3 ff f7    	addd	#fff7 <__normvect_start+0x21>
-    81ac:	8f          	xgdx
-
-000081ad <.LM44>:
-    81ad:	5f          	clrb
-    81ae:	e7 00       	stab	0,x
-    81b0:	cd ee 06    	ldx	6,y
-    81b3:	8f          	xgdx
-    81b4:	c3 ff f6    	addd	#fff6 <__normvect_start+0x20>
-    81b7:	8f          	xgdx
-
-000081b8 <.LM45>:
-    81b8:	c6 ff       	ldab	#255
-    81ba:	e7 00       	stab	0,x
-    81bc:	cd ee 06    	ldx	6,y
-    81bf:	8f          	xgdx
-    81c0:	c3 ff f5    	addd	#fff5 <__normvect_start+0x1f>
-    81c3:	8f          	xgdx
-
-000081c4 <.LM46>:
-    81c4:	c6 ee       	ldab	#238
-    81c6:	e7 00       	stab	0,x
-    81c8:	cd ee 06    	ldx	6,y
-    81cb:	8f          	xgdx
-    81cc:	c3 ff f4    	addd	#fff4 <__normvect_start+0x1e>
-    81cf:	8f          	xgdx
-
-000081d0 <.LM47>:
-    81d0:	c6 dd       	ldab	#221
-    81d2:	e7 00       	stab	0,x
-    81d4:	cd ee 06    	ldx	6,y
-    81d7:	8f          	xgdx
-    81d8:	c3 ff f3    	addd	#fff3 <__normvect_start+0x1d>
-    81db:	8f          	xgdx
-
-000081dc <.LM48>:
-    81dc:	c6 cc       	ldab	#204
-    81de:	e7 00       	stab	0,x
-    81e0:	cd ee 06    	ldx	6,y
-    81e3:	8f          	xgdx
-    81e4:	c3 ff f2    	addd	#fff2 <__normvect_start+0x1c>
-    81e7:	8f          	xgdx
-
-000081e8 <.LM49>:
-    81e8:	c6 bb       	ldab	#187
-    81ea:	e7 00       	stab	0,x
-    81ec:	cd ee 06    	ldx	6,y
-    81ef:	8f          	xgdx
-    81f0:	c3 ff f1    	addd	#fff1 <__normvect_start+0x1b>
-    81f3:	8f          	xgdx
-
-000081f4 <.LM50>:
-    81f4:	c6 aa       	ldab	#170
-    81f6:	e7 00       	stab	0,x
-    81f8:	cd ee 06    	ldx	6,y
-    81fb:	8f          	xgdx
-    81fc:	c3 ff f0    	addd	#fff0 <__normvect_start+0x1a>
-    81ff:	8f          	xgdx
-
-00008200 <.LM51>:
-    8200:	18 de 02    	ldy	*2 <_.z>
-    8203:	cd ef 01    	stx	1,y
-
-00008206 <.LM52>:
-    8206:	fe c0 03    	ldx	c003 <tcb_head_p>
-    8209:	26 0b       	bne	8216 <.L18>
-
-0000820b <.LM53>:
-    820b:	de 02       	ldx	*2 <_.z>
-    820d:	ff c0 03    	stx	c003 <tcb_head_p>
-
-00008210 <.LM54>:
-    8210:	4f          	clra
-    8211:	5f          	clrb
-    8212:	ed 0a       	std	10,x
-    8214:	20 4d       	bra	8263 <.L19>
-
-00008216 <.L18>:
-    8216:	fe c0 03    	ldx	c003 <tcb_head_p>
-    8219:	df 04       	stx	*4 <_.xy>
-    821b:	de 02       	ldx	*2 <_.z>
-    821d:	e6 07       	ldab	7,x
-    821f:	de 04       	ldx	*4 <_.xy>
-    8221:	e1 07       	cmpb	7,x
-    8223:	23 12       	bls	8237 <.L20>
-
-00008225 <.LM56>:
-    8225:	18 df 04    	sty	*4 <_.xy>
-    8228:	18 de 02    	ldy	*2 <_.z>
-    822b:	cd ef 0a    	stx	10,y
-
-0000822e <.LM57>:
-    822e:	18 ff c0 03 	sty	c003 <tcb_head_p>
-    8232:	18 de 04    	ldy	*4 <_.xy>
-    8235:	20 2c       	bra	8263 <.L19>
-
-00008237 <.L20>:
-    8237:	18 fe c0 03 	ldy	c003 <tcb_head_p>
-
-0000823b <.LM59>:
-    823b:	cd ee 0a    	ldx	10,y
-    823e:	27 15       	beq	8255 <.L23>
-    8240:	de 02       	ldx	*2 <_.z>
-    8242:	e6 07       	ldab	7,x
-
-00008244 <.L26>:
-    8244:	cd ee 0a    	ldx	10,y
-    8247:	e1 07       	cmpb	7,x
-    8249:	22 0a       	bhi	8255 <.L23>
-
-0000824b <.LM61>:
-    824b:	df 00       	stx	*0 <_.tmp>
-    824d:	18 de 00    	ldy	*0 <_.tmp>
-    8250:	cd ee 0a    	ldx	10,y
-    8253:	26 ef       	bne	8244 <.L26>
-
-00008255 <.L23>:
-    8255:	18 ec 0a    	ldd	10,y
-    8258:	df 04       	stx	*4 <_.xy>
-    825a:	de 02       	ldx	*2 <_.z>
-    825c:	ed 0a       	std	10,x
-
-0000825e <.LM63>:
-    825e:	cd ef 0a    	stx	10,y
-
-00008261 <.LBE4>:
-    8261:	de 04       	ldx	*4 <_.xy>
-
-00008263 <.L19>:
-    8263:	18 30       	tsy
-    8265:	18 ec 02    	ldd	2,y
-    8268:	06          	tap
-
-00008269 <.LM65>:
-    8269:	df 04       	stx	*4 <_.xy>
-    826b:	de 02       	ldx	*2 <_.z>
-    826d:	4f          	clra
-    826e:	e6 00       	ldab	0,x
-    8270:	2a 01       	bpl	8273 <.L27>
-    8272:	4a          	deca
-
-00008273 <.L27>:
-    8273:	de 04       	ldx	*4 <_.xy>
-
-00008275 <.L15>:
-    8275:	30          	tsx
-    8276:	8f          	xgdx
-    8277:	c3 00 0a    	addd	#a <_.xy+0x6>
-    827a:	8f          	xgdx
-    827b:	35          	txs
-    827c:	39          	rts
-
-0000827d <presto_start_scheduler>:
-    827d:	0f          	sei
-
-0000827e <.LM69>:
-    827e:	ce 84 41    	ldx	#8441 <systimer_ISR>
-    8281:	3c          	pshx
-    8282:	c6 08       	ldab	#8
-    8284:	bd 89 9d    	jsr	899d <set_interrupt>
-
-00008287 <.LM70>:
-    8287:	18 ce 84 69 	ldy	#8469 <context_switch_isr>
-    828b:	18 3c       	pshy
-    828d:	c6 10       	ldab	#16
-    828f:	bd 89 9d    	jsr	899d <set_interrupt>
-
-00008292 <.LM71>:
-    8292:	bd 84 0e    	jsr	840e <systimer_Start>
-
-00008295 <.LM72>:
-    8295:	fe c0 03    	ldx	c003 <tcb_head_p>
-    8298:	ff c0 00    	stx	c000 <__specvect_end>
-
-0000829b <.LM73>:
-    829b:	18 38       	puly
-    829d:	18 38       	puly
-    829f:	26 06       	bne	82a7 <.L29>
-
-000082a1 <.LM74>:
-    82a1:	cc 00 0b    	ldd	#b <_.xy+0x7>
-    82a4:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-000082a7 <.L29>:
-    82a7:	fe c0 00    	ldx	c000 <__specvect_end>
-    82aa:	e6 00       	ldab	0,x
-    82ac:	f7 c0 02    	stab	c002 <current_tid>
-
-000082af <.LM76>:
-    82af:	1a ee 01    	ldy	1,x
-    82b2:	18 ff c0 0c 	sty	c00c <global_new_sp>
-
-000082b6 <.LM77>:
-    82b6:	be c0 0c    	lds	c00c <global_new_sp>
-
-000082b9 <.LM78>:
-    82b9:	38          	pulx
-
-000082ba <.LM79>:
-    82ba:	38          	pulx
-
-000082bb <.LM80>:
-    82bb:	38          	pulx
-
-000082bc <.LM81>:
-    82bc:	3b          	rti
-
-000082bd <.LM82>:
-    82bd:	cc 00 08    	ldd	#8 <_.xy+0x4>
-    82c0:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-000082c3 <.LM83>:
-    82c3:	39          	rts
-
-000082c4 <presto_send_message>:
-    82c4:	34          	des
-    82c5:	30          	tsx
-    82c6:	e7 00       	stab	0,x
-
-000082c8 <.LM85>:
-    82c8:	18 30       	tsy
-    82ca:	18 ec 05    	ldd	5,y
-    82cd:	37          	pshb
-    82ce:	36          	psha
-    82cf:	18 ec 03    	ldd	3,y
-    82d2:	37          	pshb
-    82d3:	36          	psha
-    82d4:	ce 00 00    	ldx	#0 <_.tmp>
-    82d7:	3c          	pshx
-    82d8:	3c          	pshx
-    82d9:	30          	tsx
-    82da:	e6 08       	ldab	8,x
-    82dc:	bd 84 e3    	jsr	84e3 <msg_Create>
-    82df:	4f          	clra
-    82e0:	5d          	tstb
-    82e1:	2a 01       	bpl	82e4 <.L31>
-    82e3:	4a          	deca
-
-000082e4 <.L31>:
-    82e4:	38          	pulx
-    82e5:	38          	pulx
-    82e6:	38          	pulx
-    82e7:	38          	pulx
-
-000082e8 <.LM86>:
-    82e8:	31          	ins
-    82e9:	39          	rts
-
-000082ea <presto_timer>:
-    82ea:	34          	des
-    82eb:	30          	tsx
-    82ec:	e7 00       	stab	0,x
-
-000082ee <.LM88>:
-    82ee:	18 30       	tsy
-    82f0:	18 ec 07    	ldd	7,y
-    82f3:	37          	pshb
-    82f4:	36          	psha
-    82f5:	18 ec 05    	ldd	5,y
-    82f8:	37          	pshb
-    82f9:	36          	psha
-    82fa:	ce 00 00    	ldx	#0 <_.tmp>
-    82fd:	3c          	pshx
-    82fe:	18 30       	tsy
-    8300:	18 ee 09    	ldy	9,y
-    8303:	18 3c       	pshy
-    8305:	30          	tsx
-    8306:	e6 08       	ldab	8,x
-    8308:	bd 84 e3    	jsr	84e3 <msg_Create>
-    830b:	4f          	clra
-    830c:	5d          	tstb
-    830d:	2a 01       	bpl	8310 <.L33>
-    830f:	4a          	deca
-
-00008310 <.L33>:
-    8310:	38          	pulx
-    8311:	38          	pulx
-    8312:	38          	pulx
-    8313:	38          	pulx
-
-00008314 <.LM89>:
-    8314:	31          	ins
-    8315:	39          	rts
-
-00008316 <presto_repeating_timer>:
-    8316:	34          	des
-    8317:	30          	tsx
-    8318:	e7 00       	stab	0,x
-
-0000831a <.LM91>:
-    831a:	18 30       	tsy
-    831c:	18 ec 09    	ldd	9,y
-    831f:	37          	pshb
-    8320:	36          	psha
-    8321:	18 ec 07    	ldd	7,y
-    8324:	37          	pshb
-    8325:	36          	psha
-    8326:	30          	tsx
-    8327:	ee 09       	ldx	9,x
-    8329:	3c          	pshx
-    832a:	18 30       	tsy
-    832c:	18 ee 09    	ldy	9,y
-    832f:	18 3c       	pshy
-    8331:	30          	tsx
-    8332:	e6 08       	ldab	8,x
-    8334:	bd 84 e3    	jsr	84e3 <msg_Create>
-    8337:	4f          	clra
-    8338:	5d          	tstb
-    8339:	2a 01       	bpl	833c <.L35>
-    833b:	4a          	deca
-
-0000833c <.L35>:
-    833c:	38          	pulx
-    833d:	38          	pulx
-    833e:	38          	pulx
-    833f:	38          	pulx
-
-00008340 <.LM92>:
-    8340:	31          	ins
-    8341:	39          	rts
-
-00008342 <presto_mail_waiting>:
-    8342:	fe c0 00    	ldx	c000 <__specvect_end>
-    8345:	ec 0c       	ldd	12,x
-    8347:	27 03       	beq	834c <.L37>
-    8349:	cc 00 01    	ldd	#1 <_.tmp+0x1>
-
-0000834c <.L37>:
-    834c:	39          	rts
-
-0000834d <presto_wait_for_message>:
-    834d:	3c          	pshx
-    834e:	3c          	pshx
-    834f:	3c          	pshx
-    8350:	30          	tsx
-    8351:	ed 00       	std	0,x
-
-00008353 <.LBB5>:
-    8353:	fe c0 00    	ldx	c000 <__specvect_end>
-    8356:	ec 0c       	ldd	12,x
-    8358:	26 08       	bne	8362 <.L39>
-
-0000835a <.LM98>:
-    835a:	18 ce 00 01 	ldy	#1 <_.tmp+0x1>
-    835e:	1a ef 08    	sty	8,x
-
-00008361 <.LM99>:
-    8361:	3f          	swi
-
-00008362 <.L39>:
-    8362:	07          	tpa
-    8363:	0f          	sei
-    8364:	18 30       	tsy
-    8366:	18 ed 04    	std	4,y
-
-00008369 <.LM101>:
-    8369:	fe c0 00    	ldx	c000 <__specvect_end>
-    836c:	ec 0c       	ldd	12,x
-    836e:	18 ed 02    	std	2,y
-    8371:	dd 02       	std	*2 <_.z>
-
-00008373 <.LM102>:
-    8373:	de 02       	ldx	*2 <_.z>
-    8375:	26 06       	bne	837d <.L40>
-
-00008377 <.LM103>:
-    8377:	cc 00 0f    	ldd	#f <_.xy+0xb>
-    837a:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-0000837d <.L40>:
-    837d:	18 30       	tsy
-    837f:	18 ee 02    	ldy	2,y
-    8382:	18 ec 02    	ldd	2,y
-    8385:	1a b3 c0 00 	cpd	c000 <__specvect_end>
-    8389:	27 06       	beq	8391 <.L41>
-
-0000838b <.LM105>:
-    838b:	cc 00 10    	ldd	#10 <_.xy+0xc>
-    838e:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-00008391 <.L41>:
-    8391:	fe c0 00    	ldx	c000 <__specvect_end>
-    8394:	18 30       	tsy
-    8396:	18 ec 02    	ldd	2,y
-    8399:	1a a3 0e    	cpd	14,x
-    839c:	26 0b       	bne	83a9 <.L42>
-
-0000839e <.LM107>:
-    839e:	4f          	clra
-    839f:	5f          	clrb
-    83a0:	ed 0c       	std	12,x
-
-000083a2 <.LM108>:
-    83a2:	fe c0 00    	ldx	c000 <__specvect_end>
-    83a5:	ed 0e       	std	14,x
-    83a7:	20 14       	bra	83bd <.L43>
-
-000083a9 <.L42>:
-    83a9:	fe c0 00    	ldx	c000 <__specvect_end>
-    83ac:	18 df 04    	sty	*4 <_.xy>
-    83af:	18 30       	tsy
-    83b1:	18 ee 02    	ldy	2,y
-    83b4:	18 ee 12    	ldy	18,y
-    83b7:	1a ef 0c    	sty	12,x
-    83ba:	18 de 04    	ldy	*4 <_.xy>
-
-000083bd <.L43>:
-    83bd:	30          	tsx
-    83be:	ee 00       	ldx	0,x
-    83c0:	27 14       	beq	83d6 <.L44>
-    83c2:	18 30       	tsy
-    83c4:	df 02       	stx	*2 <_.z>
-    83c6:	cd ee 02    	ldx	2,y
-    83c9:	ec 10       	ldd	16,x
-    83cb:	18 de 02    	ldy	*2 <_.z>
-    83ce:	18 ed 02    	std	2,y
-    83d1:	ec 0e       	ldd	14,x
-    83d3:	18 ed 00    	std	0,y
-
-000083d6 <.L44>:
-    83d6:	fc c0 08    	ldd	c008 <free_mail_p>
-    83d9:	18 30       	tsy
-    83db:	18 ee 02    	ldy	2,y
-    83de:	18 ed 12    	std	18,y
-
-000083e1 <.LM112>:
-    83e1:	18 ff c0 08 	sty	c008 <free_mail_p>
-
-000083e5 <.LM113>:
-    83e5:	18 30       	tsy
-    83e7:	18 ec 04    	ldd	4,y
-    83ea:	06          	tap
-
-000083eb <.LM114>:
-    83eb:	cd ee 02    	ldx	2,y
-    83ee:	4f          	clra
-    83ef:	e6 00       	ldab	0,x
-    83f1:	2a 01       	bpl	83f4 <.L45>
-    83f3:	4a          	deca
-
-000083f4 <.L45>:
-    83f4:	38          	pulx
-    83f5:	38          	pulx
-    83f6:	38          	pulx
-    83f7:	39          	rts
-
-000083f8 <presto_get_clock>:
-    83f8:	8f          	xgdx
-
-000083f9 <.LM117>:
-    83f9:	fc c0 1e    	ldd	c01e <__data_end+0x6>
-    83fc:	ed 06       	std	6,x
-    83fe:	fc c0 1c    	ldd	c01c <__data_end+0x4>
-    8401:	ed 04       	std	4,x
-    8403:	fc c0 1a    	ldd	c01a <__data_end+0x2>
-    8406:	ed 02       	std	2,x
-    8408:	fc c0 18    	ldd	c018 <__data_end>
-    840b:	ed 00       	std	0,x
-
-0000840d <.LM118>:
-    840d:	39          	rts
-
-0000840e <systimer_Start>:
-    840e:	ce 10 0e    	ldx	#100e <.Ldebug_info0+0x901>
-    8411:	ec 00       	ldd	0,x
-    8413:	c3 13 88    	addd	#1388 <.Ldebug_info0+0xc7b>
-    8416:	ce 10 18    	ldx	#1018 <.Ldebug_info0+0x90b>
-    8419:	ed 00       	std	0,x
-
-0000841b <.LM121>:
-    841b:	ce 10 22    	ldx	#1022 <.Ldebug_info0+0x915>
-    841e:	1c 00 40    	bset	0,x #$40
-
-00008421 <.LM122>:
-    8421:	ce 10 23    	ldx	#1023 <.Ldebug_info0+0x916>
-    8424:	c6 40       	ldab	#64
-    8426:	e7 00       	stab	0,x
-
-00008428 <.LM123>:
-    8428:	ce 10 20    	ldx	#1020 <.Ldebug_info0+0x913>
-    842b:	1d 00 c0    	bclr	0,x #$c0
-
-0000842e <.LM124>:
-    842e:	39          	rts
-
-0000842f <systimer_Restart>:
-    842f:	ce 10 18    	ldx	#1018 <.Ldebug_info0+0x90b>
-    8432:	ec 00       	ldd	0,x
-    8434:	c3 13 88    	addd	#1388 <.Ldebug_info0+0xc7b>
-    8437:	ed 00       	std	0,x
-
-00008439 <.LM127>:
-    8439:	ce 10 23    	ldx	#1023 <.Ldebug_info0+0x916>
-    843c:	c6 40       	ldab	#64
-    843e:	e7 00       	stab	0,x
-
-00008440 <.LM128>:
-    8440:	39          	rts
-
-00008441 <systimer_ISR>:
-    8441:	de 00       	ldx	*0 <_.tmp>
-    8443:	3c          	pshx
-    8444:	de 02       	ldx	*2 <_.z>
-    8446:	3c          	pshx
-    8447:	de 04       	ldx	*4 <_.xy>
-    8449:	3c          	pshx
-
-0000844a <.LM130>:
-    844a:	ce 00 14    	ldx	#14 <_.xy+0x10>
-    844d:	3c          	pshx
-    844e:	cc c0 18    	ldd	#c018 <__data_end>
-    8451:	bd 88 18    	jsr	8818 <clock_add>
-
-00008454 <.LM131>:
-    8454:	8d d9       	bsr	842f <systimer_Restart>
-
-00008456 <.LM132>:
-    8456:	bd 86 6c    	jsr	866c <msg_DeliverToTasks>
-    8459:	31          	ins
-    845a:	31          	ins
-    845b:	5d          	tstb
-    845c:	27 01       	beq	845f <.L50>
-
-0000845e <.LM133>:
-    845e:	3f          	swi
-
-0000845f <.L50>:
-    845f:	38          	pulx
-    8460:	df 04       	stx	*4 <_.xy>
-    8462:	38          	pulx
-    8463:	df 02       	stx	*2 <_.z>
-    8465:	38          	pulx
-    8466:	df 00       	stx	*0 <_.tmp>
-    8468:	3b          	rti
-
-00008469 <context_switch_isr>:
-    8469:	de 00       	ldx	*0 <_.tmp>
-    846b:	3c          	pshx
-    846c:	de 02       	ldx	*2 <_.z>
-    846e:	3c          	pshx
-    846f:	de 04       	ldx	*4 <_.xy>
-    8471:	3c          	pshx
-
-00008472 <.LM136>:
-    8472:	fe c0 00    	ldx	c000 <__specvect_end>
-    8475:	ec 01       	ldd	1,x
-    8477:	1a a3 03    	cpd	3,x
-    847a:	22 05       	bhi	8481 <.L53>
-    847c:	1a a3 05    	cpd	5,x
-    847f:	24 05       	bcc	8486 <.L52>
-
-00008481 <.L53>:
-    8481:	4f          	clra
-    8482:	5f          	clrb
-    8483:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-00008486 <.L52>:
-    8486:	fc c0 00    	ldd	c000 <__specvect_end>
-    8489:	c3 00 01    	addd	#1 <_.tmp+0x1>
-    848c:	fd c0 20    	std	c020 <old_task_stack_pointer_p>
-
-0000848f <.LM139>:
-    848f:	8d 3a       	bsr	84cb <scheduler_FindNextReadyTask>
-    8491:	8f          	xgdx
-    8492:	ff c0 00    	stx	c000 <__specvect_end>
-
-00008495 <.LM140>:
-    8495:	e6 00       	ldab	0,x
-    8497:	f7 c0 02    	stab	c002 <current_tid>
-
-0000849a <.LM141>:
-    849a:	ec 01       	ldd	1,x
-    849c:	1a a3 03    	cpd	3,x
-    849f:	22 05       	bhi	84a6 <.L55>
-    84a1:	1a a3 05    	cpd	5,x
-    84a4:	24 05       	bcc	84ab <.L54>
-
-000084a6 <.L55>:
-    84a6:	4f          	clra
-    84a7:	5f          	clrb
-    84a8:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-000084ab <.L54>:
-    84ab:	fe c0 00    	ldx	c000 <__specvect_end>
-    84ae:	ec 01       	ldd	1,x
-    84b0:	fd c0 0c    	std	c00c <global_new_sp>
-
-000084b3 <.LM144>:
-    84b3:	bf c0 0e    	sts	c00e <global_old_sp>
-
-000084b6 <.LM145>:
-    84b6:	fe c0 20    	ldx	c020 <old_task_stack_pointer_p>
-    84b9:	fc c0 0e    	ldd	c00e <global_old_sp>
-    84bc:	ed 00       	std	0,x
-
-000084be <.LM146>:
-    84be:	be c0 0c    	lds	c00c <global_new_sp>
-
-000084c1 <.LM147>:
-    84c1:	38          	pulx
-    84c2:	df 04       	stx	*4 <_.xy>
-    84c4:	38          	pulx
-    84c5:	df 02       	stx	*2 <_.z>
-    84c7:	38          	pulx
-    84c8:	df 00       	stx	*0 <_.tmp>
-    84ca:	3b          	rti
-
-000084cb <scheduler_FindNextReadyTask>:
-    84cb:	fe c0 03    	ldx	c003 <tcb_head_p>
-
-000084ce <.LM150>:
-    84ce:	27 0a       	beq	84da <.L62>
-
-000084d0 <.L61>:
-    84d0:	ec 08       	ldd	8,x
-    84d2:	26 02       	bne	84d6 <.L60>
-    84d4:	8f          	xgdx
-
-000084d5 <.LM152>:
-    84d5:	39          	rts
-
-000084d6 <.L60>:
-    84d6:	ee 0a       	ldx	10,x
-    84d8:	26 f6       	bne	84d0 <.L61>
-
-000084da <.L62>:
-    84da:	cc 00 06    	ldd	#6 <_.xy+0x2>
-    84dd:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-000084e0 <.LM155>:
-    84e0:	4f          	clra
-    84e1:	5f          	clrb
-
-000084e2 <.LBE7>:
-    84e2:	39          	rts
-
-000084e3 <msg_Create>:
-    84e3:	3c          	pshx
-    84e4:	3c          	pshx
-    84e5:	3c          	pshx
-    84e6:	34          	des
-    84e7:	30          	tsx
-    84e8:	e7 00       	stab	0,x
-
-000084ea <.LBB8>:
-    84ea:	fc c0 08    	ldd	c008 <free_mail_p>
-    84ed:	26 06       	bne	84f5 <.L64>
-
-000084ef <.LM159>:
-    84ef:	cc 00 0d    	ldd	#d <_.xy+0x9>
-    84f2:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-000084f5 <.L64>:
-    84f5:	18 30       	tsy
-    84f7:	18 e6 00    	ldab	0,y
-    84fa:	bd 87 73    	jsr	8773 <tid_to_tcbptr>
-    84fd:	30          	tsx
-    84fe:	ed 03       	std	3,x
-
-00008500 <.LM161>:
-    8500:	26 06       	bne	8508 <.L65>
-
-00008502 <.LM162>:
-    8502:	cc 00 0e    	ldd	#e <_.xy+0xa>
-    8505:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-00008508 <.L65>:
-    8508:	07          	tpa
-    8509:	0f          	sei
-    850a:	18 30       	tsy
-    850c:	18 ed 05    	std	5,y
-
-0000850f <.LM164>:
-    850f:	fe c0 08    	ldx	c008 <free_mail_p>
-    8512:	cd ef 01    	stx	1,y
-
-00008515 <.LM165>:
-    8515:	ec 12       	ldd	18,x
-    8517:	fd c0 08    	std	c008 <free_mail_p>
-
-0000851a <.LM166>:
-    851a:	fe c0 00    	ldx	c000 <__specvect_end>
-    851d:	e6 00       	ldab	0,x
-    851f:	18 ee 01    	ldy	1,y
-    8522:	18 e7 01    	stab	1,y
-
-00008525 <.LM167>:
-    8525:	30          	tsx
-    8526:	ec 03       	ldd	3,x
-    8528:	18 ed 02    	std	2,y
-
-0000852b <.LM168>:
-    852b:	fc c0 1e    	ldd	c01e <__data_end+0x6>
-    852e:	18 ed 0a    	std	10,y
-    8531:	fc c0 1c    	ldd	c01c <__data_end+0x4>
-    8534:	18 ed 08    	std	8,y
-    8537:	fc c0 1a    	ldd	c01a <__data_end+0x2>
-    853a:	18 ed 06    	std	6,y
-    853d:	fc c0 18    	ldd	c018 <__data_end>
-    8540:	18 ed 04    	std	4,y
-
-00008543 <.LM169>:
-    8543:	ec 01       	ldd	1,x
-    8545:	c3 00 04    	addd	#4 <_.xy>
-    8548:	1a ee 09    	ldy	9,x
-    854b:	18 3c       	pshy
-    854d:	bd 88 18    	jsr	8818 <clock_add>
-
-00008550 <.LM170>:
-    8550:	30          	tsx
-    8551:	ec 0d       	ldd	13,x
-    8553:	ee 03       	ldx	3,x
-    8555:	ed 0c       	std	12,x
-
-00008557 <.LM171>:
-    8557:	18 30       	tsy
-    8559:	cd ee 03    	ldx	3,y
-    855c:	18 ec 11    	ldd	17,y
-    855f:	ed 10       	std	16,x
-    8561:	18 ec 0f    	ldd	15,y
-    8564:	ed 0e       	std	14,x
-
-00008566 <.LM172>:
-    8566:	18 ec 07    	ldd	7,y
-    8569:	06          	tap
-
-0000856a <.LM173>:
-    856a:	31          	ins
-    856b:	31          	ins
-    856c:	30          	tsx
-    856d:	ee 09       	ldx	9,x
-    856f:	27 09       	beq	857a <.L66>
-
-00008571 <.LM174>:
-    8571:	18 30       	tsy
-    8573:	18 ec 01    	ldd	1,y
-    8576:	8d 2a       	bsr	85a2 <msg_InsertIntoPostOffice>
-    8578:	20 1a       	bra	8594 <.L67>
-
-0000857a <.L66>:
-    857a:	30          	tsx
-    857b:	ee 03       	ldx	3,x
-    857d:	3c          	pshx
-    857e:	18 30       	tsy
-    8580:	18 ec 03    	ldd	3,y
-    8583:	bd 86 38    	jsr	8638 <msg_InsertIntoTaskQueue>
-
-00008586 <.LM176>:
-    8586:	31          	ins
-    8587:	31          	ins
-    8588:	18 30       	tsy
-    858a:	18 ec 03    	ldd	3,y
-    858d:	1a b3 c0 00 	cpd	c000 <__specvect_end>
-    8591:	27 01       	beq	8594 <.L67>
-
-00008593 <.LM177>:
-    8593:	3f          	swi
-
-00008594 <.L67>:
-    8594:	30          	tsx
-    8595:	ee 01       	ldx	1,x
-    8597:	4f          	clra
-    8598:	e6 00       	ldab	0,x
-    859a:	2a 01       	bpl	859d <.L69>
-    859c:	4a          	deca
-
-0000859d <.L69>:
-    859d:	38          	pulx
-    859e:	38          	pulx
-    859f:	38          	pulx
-    85a0:	31          	ins
-    85a1:	39          	rts
-
-000085a2 <msg_InsertIntoPostOffice>:
-    85a2:	3c          	pshx
-    85a3:	3c          	pshx
-    85a4:	3c          	pshx
-    85a5:	30          	tsx
-    85a6:	ed 00       	std	0,x
-
-000085a8 <.LBB9>:
-    85a8:	07          	tpa
-    85a9:	0f          	sei
-    85aa:	ed 02       	std	2,x
-
-000085ac <.LM182>:
-    85ac:	fe c0 0a    	ldx	c00a <po_mail_p>
-    85af:	26 11       	bne	85c2 <.L71>
-
-000085b1 <.LM183>:
-    85b1:	18 30       	tsy
-    85b3:	18 ee 00    	ldy	0,y
-    85b6:	18 ff c0 0a 	sty	c00a <po_mail_p>
-
-000085ba <.LM184>:
-    85ba:	18 6f 13    	clr	19,y
-    85bd:	18 6f 12    	clr	18,y
-    85c0:	20 6c       	bra	862e <.L72>
-
-000085c2 <.L71>:
-    85c2:	fc c0 0a    	ldd	c00a <po_mail_p>
-    85c5:	c3 00 04    	addd	#4 <_.xy>
-    85c8:	18 30       	tsy
-    85ca:	cd ee 00    	ldx	0,y
-    85cd:	08          	inx
-    85ce:	08          	inx
-    85cf:	08          	inx
-    85d0:	08          	inx
-    85d1:	3c          	pshx
-    85d2:	bd 88 da    	jsr	88da <clock_compare>
-    85d5:	31          	ins
-    85d6:	31          	ins
-    85d7:	5d          	tstb
-    85d8:	2b 0f       	bmi	85e9 <.L73>
-    85da:	27 0d       	beq	85e9 <.L73>
-
-000085dc <.LM186>:
-    85dc:	fc c0 0a    	ldd	c00a <po_mail_p>
-    85df:	30          	tsx
-    85e0:	ee 00       	ldx	0,x
-    85e2:	ed 12       	std	18,x
-
-000085e4 <.LM187>:
-    85e4:	ff c0 0a    	stx	c00a <po_mail_p>
-    85e7:	20 45       	bra	862e <.L72>
-
-000085e9 <.L73>:
-    85e9:	fc c0 0a    	ldd	c00a <po_mail_p>
-
-000085ec <.LM189>:
-    85ec:	20 21       	bra	860f <.L80>
-
-000085ee <.L79>:
-    85ee:	30          	tsx
-    85ef:	1a ee 04    	ldy	4,x
-    85f2:	18 ec 12    	ldd	18,y
-    85f5:	c3 00 04    	addd	#4 <_.xy>
-    85f8:	18 30       	tsy
-    85fa:	cd ee 00    	ldx	0,y
-    85fd:	08          	inx
-    85fe:	08          	inx
-    85ff:	08          	inx
-    8600:	08          	inx
-    8601:	3c          	pshx
-    8602:	bd 88 da    	jsr	88da <clock_compare>
-    8605:	31          	ins
-    8606:	31          	ins
-    8607:	5d          	tstb
-    8608:	2e 0f       	bgt	8619 <.L76>
-
-0000860a <.LM191>:
-    860a:	30          	tsx
-    860b:	ee 04       	ldx	4,x
-    860d:	ec 12       	ldd	18,x
-
-0000860f <.L80>:
-    860f:	30          	tsx
-    8610:	ed 04       	std	4,x
-    8612:	18 8f       	xgdy
-    8614:	cd ee 12    	ldx	18,y
-    8617:	26 d5       	bne	85ee <.L79>
-
-00008619 <.L76>:
-    8619:	30          	tsx
-    861a:	ee 04       	ldx	4,x
-    861c:	ec 12       	ldd	18,x
-    861e:	30          	tsx
-    861f:	ee 00       	ldx	0,x
-    8621:	ed 12       	std	18,x
-
-00008623 <.LM193>:
-    8623:	18 30       	tsy
-    8625:	cd ee 00    	ldx	0,y
-    8628:	18 ee 04    	ldy	4,y
-    862b:	cd ef 12    	stx	18,y
-
-0000862e <.L72>:
-    862e:	18 30       	tsy
-    8630:	18 ec 02    	ldd	2,y
-    8633:	06          	tap
-
-00008634 <.LM195>:
-    8634:	38          	pulx
-    8635:	38          	pulx
-    8636:	38          	pulx
-    8637:	39          	rts
-
-00008638 <msg_InsertIntoTaskQueue>:
-    8638:	3c          	pshx
-    8639:	dd 02       	std	*2 <_.z>
-    863b:	30          	tsx
-    863c:	1a ee 04    	ldy	4,x
-
-0000863f <.LBB11>:
-    863f:	07          	tpa
-    8640:	0f          	sei
-    8641:	ed 00       	std	0,x
-
-00008643 <.LM198>:
-    8643:	cd ee 0c    	ldx	12,y
-    8646:	26 07       	bne	864f <.L82>
-
-00008648 <.LM199>:
-    8648:	dc 02       	ldd	*2 <_.z>
-    864a:	18 ed 0c    	std	12,y
-
-0000864d <.LM200>:
-    864d:	20 0b       	bra	865a <.L84>
-
-0000864f <.L82>:
-    864f:	cd ee 0e    	ldx	14,y
-    8652:	dd 04       	std	*4 <_.xy>
-    8654:	dc 02       	ldd	*2 <_.z>
-    8656:	ed 12       	std	18,x
-
-00008658 <.LM202>:
-    8658:	dc 04       	ldd	*4 <_.xy>
-
-0000865a <.L84>:
-    865a:	de 02       	ldx	*2 <_.z>
-    865c:	cd ef 0e    	stx	14,y
-
-0000865f <.LM203>:
-    865f:	4f          	clra
-    8660:	5f          	clrb
-    8661:	ed 12       	std	18,x
-
-00008663 <.LM204>:
-    8663:	18 ed 08    	std	8,y
-
-00008666 <.LM205>:
-    8666:	30          	tsx
-    8667:	ec 00       	ldd	0,x
-    8669:	06          	tap
-
-0000866a <.LM206>:
-    866a:	38          	pulx
-    866b:	39          	rts
-
-0000866c <msg_DeliverToTasks>:
-    866c:	3c          	pshx
-    866d:	3c          	pshx
-    866e:	3c          	pshx
-    866f:	34          	des
-
-00008670 <.LM208>:
-    8670:	30          	tsx
-    8671:	6f 00       	clr	0,x
-
-00008673 <.LM209>:
-    8673:	7e 87 4a    	jmp	874a <.L86>
-
-00008676 <.L93>:
-    8676:	fe c0 0a    	ldx	c00a <po_mail_p>
-    8679:	dd 04       	std	*4 <_.xy>
-    867b:	ec 02       	ldd	2,x
-    867d:	18 30       	tsy
-    867f:	dd 02       	std	*2 <_.z>
-    8681:	dc 04       	ldd	*4 <_.xy>
-    8683:	de 02       	ldx	*2 <_.z>
-    8685:	cd ef 03    	stx	3,y
-
-00008688 <.LM211>:
-    8688:	26 06       	bne	8690 <.L90>
-    868a:	cc 00 03    	ldd	#3 <_.z+0x1>
-    868d:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-00008690 <.L90>:
-    8690:	df 04       	stx	*4 <_.xy>
-    8692:	fe c0 0a    	ldx	c00a <po_mail_p>
-    8695:	18 30       	tsy
-    8697:	cd ef 01    	stx	1,y
-
-0000869a <.LM213>:
-    869a:	df 02       	stx	*2 <_.z>
-    869c:	ee 12       	ldx	18,x
-    869e:	ff c0 0a    	stx	c00a <po_mail_p>
-
-000086a1 <.LM214>:
-    86a1:	de 02       	ldx	*2 <_.z>
-    86a3:	ec 0c       	ldd	12,x
-    86a5:	26 03       	bne	86aa <.LBB13>
-    86a7:	7e 87 34    	jmp	8734 <.L91>
-
-000086aa <.LBB13>:
-    86aa:	fe c0 08    	ldx	c008 <free_mail_p>
-    86ad:	26 06       	bne	86b5 <.L92>
-
-000086af <.LM216>:
-    86af:	cc 00 02    	ldd	#2 <_.z>
-    86b2:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-000086b5 <.L92>:
-    86b5:	df 04       	stx	*4 <_.xy>
-    86b7:	fe c0 08    	ldx	c008 <free_mail_p>
-    86ba:	18 30       	tsy
-    86bc:	cd ef 05    	stx	5,y
-
-000086bf <.LM218>:
-    86bf:	df 02       	stx	*2 <_.z>
-    86c1:	ee 12       	ldx	18,x
-    86c3:	ff c0 08    	stx	c008 <free_mail_p>
-
-000086c6 <.LM219>:
-    86c6:	18 ee 01    	ldy	1,y
-    86c9:	18 e6 01    	ldab	1,y
-    86cc:	de 02       	ldx	*2 <_.z>
-    86ce:	e7 01       	stab	1,x
-
-000086d0 <.LM220>:
-    86d0:	cd ee 02    	ldx	2,y
-    86d3:	18 df 04    	sty	*4 <_.xy>
-    86d6:	18 de 02    	ldy	*2 <_.z>
-    86d9:	cd ef 02    	stx	2,y
-
-000086dc <.LM221>:
-    86dc:	18 de 04    	ldy	*4 <_.xy>
-    86df:	18 ec 0a    	ldd	10,y
-    86e2:	de 02       	ldx	*2 <_.z>
-    86e4:	ed 0a       	std	10,x
-    86e6:	18 ec 08    	ldd	8,y
-    86e9:	ed 08       	std	8,x
-    86eb:	18 ec 06    	ldd	6,y
-    86ee:	ed 06       	std	6,x
-    86f0:	18 ec 04    	ldd	4,y
-    86f3:	ed 04       	std	4,x
-
-000086f5 <.LM222>:
-    86f5:	18 30       	tsy
-    86f7:	18 ec 05    	ldd	5,y
-    86fa:	c3 00 04    	addd	#4 <_.xy>
-    86fd:	cd ee 01    	ldx	1,y
-    8700:	ee 0c       	ldx	12,x
-    8702:	3c          	pshx
-    8703:	bd 88 18    	jsr	8818 <clock_add>
-
-00008706 <.LM223>:
-    8706:	18 30       	tsy
-    8708:	18 ee 03    	ldy	3,y
-    870b:	18 ec 0c    	ldd	12,y
-    870e:	18 30       	tsy
-    8710:	18 ee 07    	ldy	7,y
-    8713:	18 ed 0c    	std	12,y
-
-00008716 <.LM224>:
+
+000080db <.L22>:
+    80db:	8f          	xgdx
+    80dc:	30          	tsx
+    80dd:	8f          	xgdx
+    80de:	bd 84 ea    	jsr	84ea <presto_wait_for_message>
+
+000080e1 <.LM34>:
+    80e1:	f6 c8 38    	ldab	c838 <light4>
+    80e4:	c8 08       	eorb	#8
+    80e6:	f7 c8 38    	stab	c838 <light4>
+
+000080e9 <.LM35>:
+    80e9:	bd 80 00    	jsr	8000 <assert_lights>
+
+000080ec <.LM36>:
+    80ec:	18 30       	tsy
+    80ee:	18 ec 02    	ldd	2,y
+    80f1:	37          	pshb
+    80f2:	36          	psha
+    80f3:	18 ec 00    	ldd	0,y
+    80f6:	37          	pshb
+    80f7:	36          	psha
+    80f8:	f6 c8 33    	ldab	c833 <three_tid>
+    80fb:	bd 84 61    	jsr	8461 <presto_send_message>
+
+000080fe <.LM37>:
+    80fe:	18 30       	tsy
+    8100:	18 ec 06    	ldd	6,y
+    8103:	37          	pshb
+    8104:	36          	psha
+    8105:	18 ec 04    	ldd	4,y
+    8108:	37          	pshb
+    8109:	36          	psha
+    810a:	f6 c8 34    	ldab	c834 <four_tid>
+    810d:	bd 84 61    	jsr	8461 <presto_send_message>
+    8110:	18 38       	puly
+    8112:	18 38       	puly
+    8114:	18 38       	puly
+    8116:	18 38       	puly
+    8118:	20 c1       	bra	80db <.L22>
+
+0000811a <main>:
+    811a:	5f          	clrb
+    811b:	f7 c8 31    	stab	c831 <__bss_end>
+
+0000811e <.LM41>:
+    811e:	f7 c8 32    	stab	c832 <two_tid>
+
+00008121 <.LM42>:
+    8121:	f7 c8 33    	stab	c833 <three_tid>
+
+00008124 <.LM43>:
+    8124:	f7 c8 34    	stab	c834 <four_tid>
+
+00008127 <.LM44>:
+    8127:	f7 c8 35    	stab	c835 <light1>
+
+0000812a <.LM45>:
+    812a:	f7 c8 36    	stab	c836 <light2>
+
+0000812d <.LM46>:
+    812d:	f7 c8 37    	stab	c837 <light3>
+
+00008130 <.LM47>:
+    8130:	f7 c8 38    	stab	c838 <light4>
+
+00008133 <.LM48>:
+    8133:	bd 81 a4    	jsr	81a4 <presto_init>
+
+00008136 <.LM49>:
+    8136:	c6 23       	ldab	#35
+    8138:	37          	pshb
+    8139:	34          	des
+    813a:	18 ce 01 00 	ldy	#100 <__debug_start>
+    813e:	18 3c       	pshy
+    8140:	ce c0 00    	ldx	#c000 <__specvect_end>
+    8143:	3c          	pshx
+    8144:	cc 80 14    	ldd	#8014 <One>
+    8147:	bd 82 81    	jsr	8281 <presto_create_task>
+    814a:	f7 c8 31    	stab	c831 <__bss_end>
+
+0000814d <.LM50>:
+    814d:	c6 1e       	ldab	#30
+    814f:	37          	pshb
+    8150:	34          	des
+    8151:	18 ce 01 00 	ldy	#100 <__debug_start>
+    8155:	18 3c       	pshy
+    8157:	ce c3 00    	ldx	#c300 <task_two_stack>
+    815a:	3c          	pshx
+    815b:	cc 80 48    	ldd	#8048 <Two>
+    815e:	bd 82 81    	jsr	8281 <presto_create_task>
+    8161:	f7 c8 32    	stab	c832 <two_tid>
+
+00008164 <.LM51>:
+    8164:	c6 14       	ldab	#20
+    8166:	37          	pshb
+    8167:	34          	des
+    8168:	18 ce 01 00 	ldy	#100 <__debug_start>
+    816c:	18 3c       	pshy
+    816e:	ce c2 00    	ldx	#c200 <task_three_stack>
+    8171:	3c          	pshx
+    8172:	cc 80 a4    	ldd	#80a4 <Three>
+    8175:	bd 82 81    	jsr	8281 <presto_create_task>
+    8178:	f7 c8 33    	stab	c833 <three_tid>
+
+0000817b <.LM52>:
+    817b:	c6 05       	ldab	#5
+    817d:	37          	pshb
+    817e:	34          	des
+    817f:	18 ce 01 00 	ldy	#100 <__debug_start>
+    8183:	18 3c       	pshy
+    8185:	ce c1 00    	ldx	#c100 <task_four_stack>
+    8188:	3c          	pshx
+    8189:	cc 80 c0    	ldd	#80c0 <Four>
+    818c:	bd 82 81    	jsr	8281 <presto_create_task>
+    818f:	f7 c8 34    	stab	c834 <four_tid>
+
+00008192 <.LM53>:
+    8192:	bd 84 21    	jsr	8421 <presto_start_scheduler>
+
+00008195 <.LM54>:
+    8195:	4f          	clra
+    8196:	5f          	clrb
+    8197:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+0000819a <.LM55>:
+    819a:	4f          	clra
+    819b:	5f          	clrb
+    819c:	30          	tsx
+    819d:	8f          	xgdx
+    819e:	c3 00 18    	addd	#18 <_.xy+0x14>
+    81a1:	8f          	xgdx
+    81a2:	35          	txs
+
+000081a3 <.LBE7>:
+    81a3:	39          	rts
+
+000081a4 <presto_init>:
+    81a4:	3c          	pshx
+    81a5:	3c          	pshx
+    81a6:	34          	des
+
+000081a7 <.LM2>:
+    81a7:	7d c8 3f    	tst	c83f <presto_initialized>
+    81aa:	27 03       	beq	81af <.LM3>
+    81ac:	7e 82 7d    	jmp	827d <.L1>
+
+000081af <.LM3>:
+    81af:	cc c4 00    	ldd	#c400 <presto_master_clock>
+    81b2:	bd 8a 37    	jsr	8a37 <clock_reset>
+
+000081b5 <.LM4>:
+    81b5:	30          	tsx
+    81b6:	6f 00       	clr	0,x
+
+000081b8 <.L7>:
+    81b8:	18 30       	tsy
+    81ba:	4f          	clra
+    81bb:	18 e6 00    	ldab	0,y
+    81be:	05          	asld
+    81bf:	05          	asld
+    81c0:	05          	asld
+    81c1:	05          	asld
+    81c2:	18 ed 03    	std	3,y
+    81c5:	dd 00       	std	*0 <_.tmp>
+    81c7:	18 de 00    	ldy	*0 <_.tmp>
+    81ca:	c3 c4 49    	addd	#c449 <tcb_list+0xa>
+    81cd:	18 8f       	xgdy
+    81cf:	37          	pshb
+    81d0:	36          	psha
+    81d1:	38          	pulx
+    81d2:	c3 c4 4f    	addd	#c44f <tcb_list+0x10>
+    81d5:	8f          	xgdx
+    81d6:	cd ef 00    	stx	0,y
+
+000081d9 <.LM6>:
+    81d9:	c3 c4 3f    	addd	#c43f <tcb_list>
+    81dc:	8f          	xgdx
+    81dd:	18 30       	tsy
+    81df:	18 e6 00    	ldab	0,y
+    81e2:	e7 00       	stab	0,x
+
+000081e4 <.LM7>:
+    81e4:	18 ec 03    	ldd	3,y
+    81e7:	c3 c4 47    	addd	#c447 <tcb_list+0x8>
+    81ea:	ce 00 02    	ldx	#2 <_.z>
+    81ed:	dd 02       	std	*2 <_.z>
+    81ef:	18 df 04    	sty	*4 <_.xy>
+    81f2:	18 de 02    	ldy	*2 <_.z>
+    81f5:	cd ef 00    	stx	0,y
+    81f8:	18 de 04    	ldy	*4 <_.xy>
+
+000081fb <.LM8>:
+    81fb:	18 6c 00    	inc	0,y
+    81fe:	18 e6 00    	ldab	0,y
+    8201:	c1 0c       	cmpb	#12
+    8203:	23 b3       	bls	81b8 <.L7>
+
+00008205 <.LM9>:
+    8205:	4f          	clra
+    8206:	5f          	clrb
+    8207:	fd c5 09    	std	c509 <tcb_list+0xca>
+
+0000820a <.LM10>:
+    820a:	18 ce c4 3f 	ldy	#c43f <tcb_list>
+    820e:	18 ff c8 3d 	sty	c83d <free_tcb_p>
+
+00008212 <.LM11>:
+    8212:	30          	tsx
+    8213:	e7 00       	stab	0,x
+
+00008215 <.L12>:
+    8215:	c6 14       	ldab	#20
+    8217:	30          	tsx
+    8218:	a6 00       	ldaa	0,x
+    821a:	3d          	mul
+    821b:	ed 01       	std	1,x
+    821d:	37          	pshb
+    821e:	36          	psha
+    821f:	38          	pulx
+    8220:	c3 c5 21    	addd	#c521 <mail_list+0x12>
+    8223:	8f          	xgdx
+    8224:	18 df 04    	sty	*4 <_.xy>
+    8227:	18 30       	tsy
+    8229:	c3 c5 23    	addd	#c523 <mail_list+0x14>
+    822c:	ed 00       	std	0,x
+
+0000822e <.LM13>:
+    822e:	18 df 02    	sty	*2 <_.z>
+    8231:	18 ee 01    	ldy	1,y
+    8234:	18 8f       	xgdy
+    8236:	c3 c5 0f    	addd	#c50f <mail_list>
+    8239:	18 8f       	xgdy
+    823b:	de 02       	ldx	*2 <_.z>
+    823d:	e6 00       	ldab	0,x
+    823f:	18 e7 00    	stab	0,y
+
+00008242 <.LM14>:
+    8242:	5c          	incb
+    8243:	e7 00       	stab	0,x
+    8245:	c1 27       	cmpb	#39
+    8247:	23 cc       	bls	8215 <.L12>
+
+00008249 <.LM15>:
+    8249:	18 ce 00 00 	ldy	#0 <_.tmp>
+    824d:	18 ff c8 2d 	sty	c82d <mail_list+0x31e>
+
+00008251 <.LM16>:
+    8251:	cc c5 0f    	ldd	#c50f <mail_list>
+    8254:	fd c8 40    	std	c840 <free_mail_p>
+
+00008257 <.LM17>:
+    8257:	c6 01       	ldab	#1
+    8259:	f7 c8 3f    	stab	c83f <presto_initialized>
+
+0000825c <.LM18>:
+    825c:	18 8f       	xgdy
+    825e:	37          	pshb
+    825f:	18 8f       	xgdy
+    8261:	34          	des
+    8262:	18 ce 00 32 	ldy	#32 <_.xy+0x2e>
+    8266:	18 3c       	pshy
+    8268:	ce c4 0b    	ldx	#c40b <idle_stack>
+    826b:	3c          	pshx
+    826c:	cc 89 1b    	ldd	#891b <idle_task>
+    826f:	8d 10       	bsr	8281 <presto_create_task>
+    8271:	f7 c4 0a    	stab	c40a <idle_tid>
+
+00008274 <.LM19>:
+    8274:	bd 89 1d    	jsr	891d <tid_to_tcbptr>
+    8277:	fd c4 3d    	std	c43d <idle_tcb_p>
+
+0000827a <.LBE2>:
+    827a:	38          	pulx
+    827b:	38          	pulx
+    827c:	38          	pulx
+
+0000827d <.L1>:
+    827d:	38          	pulx
+    827e:	38          	pulx
+    827f:	31          	ins
+    8280:	39          	rts
+
+00008281 <presto_create_task>:
+    8281:	30          	tsx
+    8282:	8f          	xgdx
+    8283:	c3 ff f6    	addd	#fff6 <__normvect_start+0x20>
+    8286:	8f          	xgdx
+    8287:	35          	txs
+    8288:	30          	tsx
+    8289:	ed 00       	std	0,x
+
+0000828b <.LBB3>:
+    828b:	f6 c8 3f    	ldab	c83f <presto_initialized>
+    828e:	26 06       	bne	8296 <.L16>
+
+00008290 <.LM23>:
+    8290:	cc 00 02    	ldd	#2 <_.z>
+    8293:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+00008296 <.L16>:
+    8296:	fc c8 3d    	ldd	c83d <free_tcb_p>
+    8299:	26 0c       	bne	82a7 <.L17>
+
+0000829b <.LM25>:
+    829b:	cc 00 08    	ldd	#8 <_.xy+0x4>
+    829e:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+000082a1 <.LM26>:
+    82a1:	cc ff ff    	ldd	#ffff <__normvect_start+0x29>
+    82a4:	7e 84 19    	jmp	8419 <.L15>
+
+000082a7 <.L17>:
+    82a7:	07          	tpa
+    82a8:	0f          	sei
+    82a9:	18 30       	tsy
+    82ab:	18 ed 02    	std	2,y
+
+000082ae <.LM28>:
+    82ae:	18 df 04    	sty	*4 <_.xy>
+    82b1:	18 fe c8 3d 	ldy	c83d <free_tcb_p>
+
+000082b5 <.LM29>:
+    82b5:	cd ee 0a    	ldx	10,y
+    82b8:	ff c8 3d    	stx	c83d <free_tcb_p>
+
+000082bb <.LM30>:
+    82bb:	18 df 02    	sty	*2 <_.z>
+    82be:	18 de 04    	ldy	*4 <_.xy>
+    82c1:	18 ec 0c    	ldd	12,y
+    82c4:	18 e3 0e    	addd	14,y
+    82c7:	18 ed 06    	std	6,y
+    82ca:	8f          	xgdx
+    82cb:	09          	dex
+    82cc:	18 de 02    	ldy	*2 <_.z>
+    82cf:	cd ef 03    	stx	3,y
+
+000082d2 <.LM31>:
+    82d2:	18 de 04    	ldy	*4 <_.xy>
+    82d5:	18 ec 0c    	ldd	12,y
+    82d8:	df 04       	stx	*4 <_.xy>
+    82da:	de 02       	ldx	*2 <_.z>
+    82dc:	ed 05       	std	5,x
+
+000082de <.LM32>:
+    82de:	18 e6 11    	ldab	17,y
+    82e1:	e7 07       	stab	7,x
+
+000082e3 <.LM33>:
+    82e3:	18 ce 00 00 	ldy	#0 <_.tmp>
+    82e7:	1a ef 08    	sty	8,x
+
+000082ea <.LM34>:
+    82ea:	1a ef 0c    	sty	12,x
+
+000082ed <.LM35>:
+    82ed:	1a ef 0e    	sty	14,x
+
+000082f0 <.LM36>:
+    82f0:	18 30       	tsy
+    82f2:	18 e6 01    	ldab	1,y
+    82f5:	de 04       	ldx	*4 <_.xy>
+    82f7:	e7 00       	stab	0,x
+    82f9:	cd ee 06    	ldx	6,y
+    82fc:	09          	dex
+    82fd:	09          	dex
+
+000082fe <.LM37>:
+    82fe:	4f          	clra
+    82ff:	18 e6 00    	ldab	0,y
+    8302:	e7 00       	stab	0,x
+    8304:	cd ee 06    	ldx	6,y
+    8307:	09          	dex
+    8308:	09          	dex
+    8309:	09          	dex
+
+0000830a <.LM38>:
+    830a:	c6 66       	ldab	#102
+    830c:	e7 00       	stab	0,x
+    830e:	cd ee 06    	ldx	6,y
+    8311:	09          	dex
+    8312:	09          	dex
+    8313:	09          	dex
+    8314:	09          	dex
+
+00008315 <.LM39>:
+    8315:	c6 55       	ldab	#85
+    8317:	e7 00       	stab	0,x
+    8319:	cd ee 06    	ldx	6,y
+    831c:	8f          	xgdx
+    831d:	c3 ff fb    	addd	#fffb <__normvect_start+0x25>
+    8320:	8f          	xgdx
+
+00008321 <.LM40>:
+    8321:	c6 44       	ldab	#68
+    8323:	e7 00       	stab	0,x
+    8325:	cd ee 06    	ldx	6,y
+    8328:	8f          	xgdx
+    8329:	c3 ff fa    	addd	#fffa <__normvect_start+0x24>
+    832c:	8f          	xgdx
+
+0000832d <.LM41>:
+    832d:	c6 33       	ldab	#51
+    832f:	e7 00       	stab	0,x
+    8331:	cd ee 06    	ldx	6,y
+    8334:	8f          	xgdx
+    8335:	c3 ff f9    	addd	#fff9 <__normvect_start+0x23>
+    8338:	8f          	xgdx
+
+00008339 <.LM42>:
+    8339:	c6 11       	ldab	#17
+    833b:	e7 00       	stab	0,x
+    833d:	cd ee 06    	ldx	6,y
+    8340:	8f          	xgdx
+    8341:	c3 ff f8    	addd	#fff8 <__normvect_start+0x22>
+    8344:	8f          	xgdx
+
+00008345 <.LM43>:
+    8345:	c6 22       	ldab	#34
+    8347:	e7 00       	stab	0,x
+    8349:	cd ee 06    	ldx	6,y
+    834c:	8f          	xgdx
+    834d:	c3 ff f7    	addd	#fff7 <__normvect_start+0x21>
+    8350:	8f          	xgdx
+
+00008351 <.LM44>:
+    8351:	5f          	clrb
+    8352:	e7 00       	stab	0,x
+    8354:	cd ee 06    	ldx	6,y
+    8357:	8f          	xgdx
+    8358:	c3 ff f6    	addd	#fff6 <__normvect_start+0x20>
+    835b:	8f          	xgdx
+
+0000835c <.LM45>:
+    835c:	c6 bb       	ldab	#187
+    835e:	e7 00       	stab	0,x
+    8360:	cd ee 06    	ldx	6,y
+    8363:	8f          	xgdx
+    8364:	c3 ff f5    	addd	#fff5 <__normvect_start+0x1f>
+    8367:	8f          	xgdx
+
+00008368 <.LM46>:
+    8368:	c6 aa       	ldab	#170
+    836a:	e7 00       	stab	0,x
+    836c:	cd ee 06    	ldx	6,y
+    836f:	8f          	xgdx
+    8370:	c3 ff f4    	addd	#fff4 <__normvect_start+0x1e>
+    8373:	8f          	xgdx
+
+00008374 <.LM47>:
+    8374:	c6 dd       	ldab	#221
+    8376:	e7 00       	stab	0,x
+    8378:	cd ee 06    	ldx	6,y
+    837b:	8f          	xgdx
+    837c:	c3 ff f3    	addd	#fff3 <__normvect_start+0x1d>
+    837f:	8f          	xgdx
+
+00008380 <.LM48>:
+    8380:	c6 cc       	ldab	#204
+    8382:	e7 00       	stab	0,x
+    8384:	cd ee 06    	ldx	6,y
+    8387:	8f          	xgdx
+    8388:	c3 ff f2    	addd	#fff2 <__normvect_start+0x1c>
+    838b:	8f          	xgdx
+
+0000838c <.LM49>:
+    838c:	c6 ff       	ldab	#255
+    838e:	e7 00       	stab	0,x
+    8390:	cd ee 06    	ldx	6,y
+    8393:	8f          	xgdx
+    8394:	c3 ff f1    	addd	#fff1 <__normvect_start+0x1b>
+    8397:	8f          	xgdx
+
+00008398 <.LM50>:
+    8398:	c6 ee       	ldab	#238
+    839a:	e7 00       	stab	0,x
+    839c:	cd ee 06    	ldx	6,y
+    839f:	8f          	xgdx
+    83a0:	c3 ff f0    	addd	#fff0 <__normvect_start+0x1a>
+    83a3:	8f          	xgdx
+
+000083a4 <.LM51>:
+    83a4:	18 de 02    	ldy	*2 <_.z>
+    83a7:	cd ef 01    	stx	1,y
+
+000083aa <.LM52>:
+    83aa:	fe c8 3b    	ldx	c83b <tcb_head_p>
+    83ad:	26 0b       	bne	83ba <.L18>
+
+000083af <.LM53>:
+    83af:	de 02       	ldx	*2 <_.z>
+    83b1:	ff c8 3b    	stx	c83b <tcb_head_p>
+
+000083b4 <.LM54>:
+    83b4:	4f          	clra
+    83b5:	5f          	clrb
+    83b6:	ed 0a       	std	10,x
+    83b8:	20 4d       	bra	8407 <.L19>
+
+000083ba <.L18>:
+    83ba:	fe c8 3b    	ldx	c83b <tcb_head_p>
+    83bd:	df 04       	stx	*4 <_.xy>
+    83bf:	de 02       	ldx	*2 <_.z>
+    83c1:	e6 07       	ldab	7,x
+    83c3:	de 04       	ldx	*4 <_.xy>
+    83c5:	e1 07       	cmpb	7,x
+    83c7:	23 12       	bls	83db <.L20>
+
+000083c9 <.LM56>:
+    83c9:	18 df 04    	sty	*4 <_.xy>
+    83cc:	18 de 02    	ldy	*2 <_.z>
+    83cf:	cd ef 0a    	stx	10,y
+
+000083d2 <.LM57>:
+    83d2:	18 ff c8 3b 	sty	c83b <tcb_head_p>
+    83d6:	18 de 04    	ldy	*4 <_.xy>
+    83d9:	20 2c       	bra	8407 <.L19>
+
+000083db <.L20>:
+    83db:	18 fe c8 3b 	ldy	c83b <tcb_head_p>
+
+000083df <.LM59>:
+    83df:	cd ee 0a    	ldx	10,y
+    83e2:	27 15       	beq	83f9 <.L23>
+    83e4:	de 02       	ldx	*2 <_.z>
+    83e6:	e6 07       	ldab	7,x
+
+000083e8 <.L26>:
+    83e8:	cd ee 0a    	ldx	10,y
+    83eb:	e1 07       	cmpb	7,x
+    83ed:	22 0a       	bhi	83f9 <.L23>
+
+000083ef <.LM61>:
+    83ef:	df 00       	stx	*0 <_.tmp>
+    83f1:	18 de 00    	ldy	*0 <_.tmp>
+    83f4:	cd ee 0a    	ldx	10,y
+    83f7:	26 ef       	bne	83e8 <.L26>
+
+000083f9 <.L23>:
+    83f9:	18 ec 0a    	ldd	10,y
+    83fc:	df 04       	stx	*4 <_.xy>
+    83fe:	de 02       	ldx	*2 <_.z>
+    8400:	ed 0a       	std	10,x
+
+00008402 <.LM63>:
+    8402:	cd ef 0a    	stx	10,y
+
+00008405 <.LBE4>:
+    8405:	de 04       	ldx	*4 <_.xy>
+
+00008407 <.L19>:
+    8407:	18 30       	tsy
+    8409:	18 ec 02    	ldd	2,y
+    840c:	06          	tap
+
+0000840d <.LM65>:
+    840d:	df 04       	stx	*4 <_.xy>
+    840f:	de 02       	ldx	*2 <_.z>
+    8411:	4f          	clra
+    8412:	e6 00       	ldab	0,x
+    8414:	2a 01       	bpl	8417 <.L27>
+    8416:	4a          	deca
+
+00008417 <.L27>:
+    8417:	de 04       	ldx	*4 <_.xy>
+
+00008419 <.L15>:
+    8419:	30          	tsx
+    841a:	8f          	xgdx
+    841b:	c3 00 0a    	addd	#a <_.xy+0x6>
+    841e:	8f          	xgdx
+    841f:	35          	txs
+    8420:	39          	rts
+
+00008421 <presto_start_scheduler>:
+    8421:	0f          	sei
+
+00008422 <.LM69>:
+    8422:	ce 85 de    	ldx	#85de <systimer_ISR>
+    8425:	3c          	pshx
+    8426:	c6 08       	ldab	#8
+    8428:	bd 8b 47    	jsr	8b47 <set_interrupt>
+
+0000842b <.LM70>:
+    842b:	18 ce 86 06 	ldy	#8606 <context_switch_isr>
+    842f:	18 3c       	pshy
+    8431:	c6 10       	ldab	#16
+    8433:	bd 8b 47    	jsr	8b47 <set_interrupt>
+
+00008436 <.LM71>:
+    8436:	bd 85 ab    	jsr	85ab <systimer_Start>
+
+00008439 <.LM72>:
+    8439:	fe c8 3b    	ldx	c83b <tcb_head_p>
+    843c:	ff c8 39    	stx	c839 <current_tcb_p>
+
+0000843f <.LM73>:
+    843f:	18 38       	puly
+    8441:	18 38       	puly
+    8443:	26 06       	bne	844b <.L29>
+
+00008445 <.LM74>:
+    8445:	cc 00 0c    	ldd	#c <_.xy+0x8>
+    8448:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+0000844b <.L29>:
+    844b:	fe c8 39    	ldx	c839 <current_tcb_p>
+    844e:	ec 01       	ldd	1,x
+    8450:	fd c8 44    	std	c844 <global_new_sp>
+
+00008453 <.LM76>:
+    8453:	be c8 44    	lds	c844 <global_new_sp>
+
+00008456 <.LM77>:
+    8456:	38          	pulx
+
+00008457 <.LM78>:
+    8457:	38          	pulx
+
+00008458 <.LM79>:
+    8458:	38          	pulx
+
+00008459 <.LM80>:
+    8459:	3b          	rti
+
+0000845a <.LM81>:
+    845a:	cc 00 09    	ldd	#9 <_.xy+0x5>
+    845d:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+00008460 <.LM82>:
+    8460:	39          	rts
+
+00008461 <presto_send_message>:
+    8461:	34          	des
+    8462:	30          	tsx
+    8463:	e7 00       	stab	0,x
+
+00008465 <.LM84>:
+    8465:	18 30       	tsy
+    8467:	18 ec 05    	ldd	5,y
+    846a:	37          	pshb
+    846b:	36          	psha
+    846c:	18 ec 03    	ldd	3,y
+    846f:	37          	pshb
+    8470:	36          	psha
+    8471:	ce 00 00    	ldx	#0 <_.tmp>
+    8474:	3c          	pshx
+    8475:	3c          	pshx
+    8476:	30          	tsx
+    8477:	e6 08       	ldab	8,x
+    8479:	bd 86 88    	jsr	8688 <msg_Create>
+    847c:	4f          	clra
+    847d:	5d          	tstb
+    847e:	2a 01       	bpl	8481 <.L31>
+    8480:	4a          	deca
+
+00008481 <.L31>:
+    8481:	38          	pulx
+    8482:	38          	pulx
+    8483:	38          	pulx
+    8484:	38          	pulx
+
+00008485 <.LM85>:
+    8485:	31          	ins
+    8486:	39          	rts
+
+00008487 <presto_timer>:
+    8487:	34          	des
+    8488:	30          	tsx
+    8489:	e7 00       	stab	0,x
+
+0000848b <.LM87>:
+    848b:	18 30       	tsy
+    848d:	18 ec 07    	ldd	7,y
+    8490:	37          	pshb
+    8491:	36          	psha
+    8492:	18 ec 05    	ldd	5,y
+    8495:	37          	pshb
+    8496:	36          	psha
+    8497:	ce 00 00    	ldx	#0 <_.tmp>
+    849a:	3c          	pshx
+    849b:	18 30       	tsy
+    849d:	18 ee 09    	ldy	9,y
+    84a0:	18 3c       	pshy
+    84a2:	30          	tsx
+    84a3:	e6 08       	ldab	8,x
+    84a5:	bd 86 88    	jsr	8688 <msg_Create>
+    84a8:	4f          	clra
+    84a9:	5d          	tstb
+    84aa:	2a 01       	bpl	84ad <.L33>
+    84ac:	4a          	deca
+
+000084ad <.L33>:
+    84ad:	38          	pulx
+    84ae:	38          	pulx
+    84af:	38          	pulx
+    84b0:	38          	pulx
+
+000084b1 <.LM88>:
+    84b1:	31          	ins
+    84b2:	39          	rts
+
+000084b3 <presto_repeating_timer>:
+    84b3:	34          	des
+    84b4:	30          	tsx
+    84b5:	e7 00       	stab	0,x
+
+000084b7 <.LM90>:
+    84b7:	18 30       	tsy
+    84b9:	18 ec 09    	ldd	9,y
+    84bc:	37          	pshb
+    84bd:	36          	psha
+    84be:	18 ec 07    	ldd	7,y
+    84c1:	37          	pshb
+    84c2:	36          	psha
+    84c3:	30          	tsx
+    84c4:	ee 09       	ldx	9,x
+    84c6:	3c          	pshx
+    84c7:	18 30       	tsy
+    84c9:	18 ee 09    	ldy	9,y
+    84cc:	18 3c       	pshy
+    84ce:	30          	tsx
+    84cf:	e6 08       	ldab	8,x
+    84d1:	bd 86 88    	jsr	8688 <msg_Create>
+    84d4:	4f          	clra
+    84d5:	5d          	tstb
+    84d6:	2a 01       	bpl	84d9 <.L35>
+    84d8:	4a          	deca
+
+000084d9 <.L35>:
+    84d9:	38          	pulx
+    84da:	38          	pulx
+    84db:	38          	pulx
+    84dc:	38          	pulx
+
+000084dd <.LM91>:
+    84dd:	31          	ins
+    84de:	39          	rts
+
+000084df <presto_mail_waiting>:
+    84df:	fe c8 39    	ldx	c839 <current_tcb_p>
+    84e2:	ec 0c       	ldd	12,x
+    84e4:	27 03       	beq	84e9 <.L37>
+    84e6:	cc 00 01    	ldd	#1 <_.tmp+0x1>
+
+000084e9 <.L37>:
+    84e9:	39          	rts
+
+000084ea <presto_wait_for_message>:
+    84ea:	3c          	pshx
+    84eb:	3c          	pshx
+    84ec:	3c          	pshx
+    84ed:	30          	tsx
+    84ee:	ed 00       	std	0,x
+
+000084f0 <.LBB5>:
+    84f0:	fe c8 39    	ldx	c839 <current_tcb_p>
+    84f3:	ec 0c       	ldd	12,x
+    84f5:	26 08       	bne	84ff <.L39>
+
+000084f7 <.LM97>:
+    84f7:	18 ce 00 01 	ldy	#1 <_.tmp+0x1>
+    84fb:	1a ef 08    	sty	8,x
+
+000084fe <.LM98>:
+    84fe:	3f          	swi
+
+000084ff <.L39>:
+    84ff:	07          	tpa
+    8500:	0f          	sei
+    8501:	18 30       	tsy
+    8503:	18 ed 04    	std	4,y
+
+00008506 <.LM100>:
+    8506:	fe c8 39    	ldx	c839 <current_tcb_p>
+    8509:	ec 0c       	ldd	12,x
+    850b:	18 ed 02    	std	2,y
+    850e:	dd 02       	std	*2 <_.z>
+
+00008510 <.LM101>:
+    8510:	de 02       	ldx	*2 <_.z>
+    8512:	26 06       	bne	851a <.L40>
+
+00008514 <.LM102>:
+    8514:	cc 00 10    	ldd	#10 <_.xy+0xc>
+    8517:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+0000851a <.L40>:
+    851a:	18 30       	tsy
+    851c:	18 ee 02    	ldy	2,y
+    851f:	18 ec 02    	ldd	2,y
+    8522:	1a b3 c8 39 	cpd	c839 <current_tcb_p>
+    8526:	27 06       	beq	852e <.L41>
+
+00008528 <.LM104>:
+    8528:	cc 00 11    	ldd	#11 <_.xy+0xd>
+    852b:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+0000852e <.L41>:
+    852e:	fe c8 39    	ldx	c839 <current_tcb_p>
+    8531:	18 30       	tsy
+    8533:	18 ec 02    	ldd	2,y
+    8536:	1a a3 0e    	cpd	14,x
+    8539:	26 0b       	bne	8546 <.L42>
+
+0000853b <.LM106>:
+    853b:	4f          	clra
+    853c:	5f          	clrb
+    853d:	ed 0c       	std	12,x
+
+0000853f <.LM107>:
+    853f:	fe c8 39    	ldx	c839 <current_tcb_p>
+    8542:	ed 0e       	std	14,x
+    8544:	20 14       	bra	855a <.L43>
+
+00008546 <.L42>:
+    8546:	fe c8 39    	ldx	c839 <current_tcb_p>
+    8549:	18 df 04    	sty	*4 <_.xy>
+    854c:	18 30       	tsy
+    854e:	18 ee 02    	ldy	2,y
+    8551:	18 ee 12    	ldy	18,y
+    8554:	1a ef 0c    	sty	12,x
+    8557:	18 de 04    	ldy	*4 <_.xy>
+
+0000855a <.L43>:
+    855a:	30          	tsx
+    855b:	ee 00       	ldx	0,x
+    855d:	27 14       	beq	8573 <.L44>
+    855f:	18 30       	tsy
+    8561:	df 02       	stx	*2 <_.z>
+    8563:	cd ee 02    	ldx	2,y
+    8566:	ec 10       	ldd	16,x
+    8568:	18 de 02    	ldy	*2 <_.z>
+    856b:	18 ed 02    	std	2,y
+    856e:	ec 0e       	ldd	14,x
+    8570:	18 ed 00    	std	0,y
+
+00008573 <.L44>:
+    8573:	fc c8 40    	ldd	c840 <free_mail_p>
+    8576:	18 30       	tsy
+    8578:	18 ee 02    	ldy	2,y
+    857b:	18 ed 12    	std	18,y
+
+0000857e <.LM111>:
+    857e:	18 ff c8 40 	sty	c840 <free_mail_p>
+
+00008582 <.LM112>:
+    8582:	18 30       	tsy
+    8584:	18 ec 04    	ldd	4,y
+    8587:	06          	tap
+
+00008588 <.LM113>:
+    8588:	cd ee 02    	ldx	2,y
+    858b:	4f          	clra
+    858c:	e6 00       	ldab	0,x
+    858e:	2a 01       	bpl	8591 <.L45>
+    8590:	4a          	deca
+
+00008591 <.L45>:
+    8591:	38          	pulx
+    8592:	38          	pulx
+    8593:	38          	pulx
+    8594:	39          	rts
+
+00008595 <presto_get_clock>:
+    8595:	8f          	xgdx
+
+00008596 <.LM116>:
+    8596:	fc c4 06    	ldd	c406 <presto_master_clock+0x6>
+    8599:	ed 06       	std	6,x
+    859b:	fc c4 04    	ldd	c404 <presto_master_clock+0x4>
+    859e:	ed 04       	std	4,x
+    85a0:	fc c4 02    	ldd	c402 <presto_master_clock+0x2>
+    85a3:	ed 02       	std	2,x
+    85a5:	fc c4 00    	ldd	c400 <presto_master_clock>
+    85a8:	ed 00       	std	0,x
+
+000085aa <.LM117>:
+    85aa:	39          	rts
+
+000085ab <systimer_Start>:
+    85ab:	ce 10 0e    	ldx	#100e <.Ldebug_info0+0x135>
+    85ae:	ec 00       	ldd	0,x
+    85b0:	c3 13 88    	addd	#1388 <.Ldebug_info0+0x4af>
+    85b3:	ce 10 18    	ldx	#1018 <.Ldebug_info0+0x13f>
+    85b6:	ed 00       	std	0,x
+
+000085b8 <.LM120>:
+    85b8:	ce 10 22    	ldx	#1022 <.Ldebug_info0+0x149>
+    85bb:	1c 00 40    	bset	0,x #$40
+
+000085be <.LM121>:
+    85be:	ce 10 23    	ldx	#1023 <.Ldebug_info0+0x14a>
+    85c1:	c6 40       	ldab	#64
+    85c3:	e7 00       	stab	0,x
+
+000085c5 <.LM122>:
+    85c5:	ce 10 20    	ldx	#1020 <.Ldebug_info0+0x147>
+    85c8:	1d 00 c0    	bclr	0,x #$c0
+
+000085cb <.LM123>:
+    85cb:	39          	rts
+
+000085cc <systimer_Restart>:
+    85cc:	ce 10 18    	ldx	#1018 <.Ldebug_info0+0x13f>
+    85cf:	ec 00       	ldd	0,x
+    85d1:	c3 13 88    	addd	#1388 <.Ldebug_info0+0x4af>
+    85d4:	ed 00       	std	0,x
+
+000085d6 <.LM126>:
+    85d6:	ce 10 23    	ldx	#1023 <.Ldebug_info0+0x14a>
+    85d9:	c6 40       	ldab	#64
+    85db:	e7 00       	stab	0,x
+
+000085dd <.LM127>:
+    85dd:	39          	rts
+
+000085de <systimer_ISR>:
+    85de:	de 00       	ldx	*0 <_.tmp>
+    85e0:	3c          	pshx
+    85e1:	de 02       	ldx	*2 <_.z>
+    85e3:	3c          	pshx
+    85e4:	de 04       	ldx	*4 <_.xy>
+    85e6:	3c          	pshx
+
+000085e7 <.LM129>:
+    85e7:	ce 00 14    	ldx	#14 <_.xy+0x10>
+    85ea:	3c          	pshx
+    85eb:	cc c4 00    	ldd	#c400 <presto_master_clock>
+    85ee:	bd 8a 53    	jsr	8a53 <clock_add_ms>
+
+000085f1 <.LM130>:
+    85f1:	8d d9       	bsr	85cc <systimer_Restart>
+
+000085f3 <.LM131>:
+    85f3:	bd 88 06    	jsr	8806 <msg_DeliverToTasks>
+    85f6:	31          	ins
+    85f7:	31          	ins
+    85f8:	5d          	tstb
+    85f9:	27 01       	beq	85fc <.L50>
+
+000085fb <.LM132>:
+    85fb:	3f          	swi
+
+000085fc <.L50>:
+    85fc:	38          	pulx
+    85fd:	df 04       	stx	*4 <_.xy>
+    85ff:	38          	pulx
+    8600:	df 02       	stx	*2 <_.z>
+    8602:	38          	pulx
+    8603:	df 00       	stx	*0 <_.tmp>
+    8605:	3b          	rti
+
+00008606 <context_switch_isr>:
+    8606:	de 00       	ldx	*0 <_.tmp>
+    8608:	3c          	pshx
+    8609:	de 02       	ldx	*2 <_.z>
+    860b:	3c          	pshx
+    860c:	de 04       	ldx	*4 <_.xy>
+    860e:	3c          	pshx
+
+0000860f <.LM135>:
+    860f:	fe c8 39    	ldx	c839 <current_tcb_p>
+    8612:	ec 01       	ldd	1,x
+    8614:	1a a3 03    	cpd	3,x
+    8617:	22 05       	bhi	861e <.L53>
+    8619:	1a a3 05    	cpd	5,x
+    861c:	24 06       	bcc	8624 <.L52>
+
+0000861e <.L53>:
+    861e:	cc 00 01    	ldd	#1 <_.tmp+0x1>
+    8621:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+00008624 <.L52>:
+    8624:	fe c8 39    	ldx	c839 <current_tcb_p>
+    8627:	3c          	pshx
+    8628:	32          	pula
+    8629:	33          	pulb
+    862a:	c3 00 01    	addd	#1 <_.tmp+0x1>
+    862d:	fd c4 08    	std	c408 <old_task_stack_pointer_p>
+
+00008630 <.LM138>:
+    8630:	ff c8 2f    	stx	c82f <old_tcb_p>
+
+00008633 <.LM139>:
+    8633:	8d 3b       	bsr	8670 <scheduler_FindNextReadyTask>
+    8635:	8f          	xgdx
+    8636:	ff c8 39    	stx	c839 <current_tcb_p>
+
+00008639 <.LM140>:
+    8639:	bc c8 2f    	cpx	c82f <old_tcb_p>
+    863c:	27 28       	beq	8666 <.L54>
+
+0000863e <.LM141>:
+    863e:	ec 01       	ldd	1,x
+    8640:	1a a3 03    	cpd	3,x
+    8643:	22 05       	bhi	864a <.L56>
+    8645:	1a a3 05    	cpd	5,x
+    8648:	24 06       	bcc	8650 <.L55>
+
+0000864a <.L56>:
+    864a:	cc 00 01    	ldd	#1 <_.tmp+0x1>
+    864d:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+00008650 <.L55>:
+    8650:	fe c8 39    	ldx	c839 <current_tcb_p>
+    8653:	ec 01       	ldd	1,x
+    8655:	fd c8 44    	std	c844 <global_new_sp>
+
+00008658 <.LM144>:
+    8658:	bf c8 46    	sts	c846 <global_old_sp>
+
+0000865b <.LM145>:
+    865b:	fe c4 08    	ldx	c408 <old_task_stack_pointer_p>
+    865e:	fc c8 46    	ldd	c846 <global_old_sp>
+    8661:	ed 00       	std	0,x
+
+00008663 <.LM146>:
+    8663:	be c8 44    	lds	c844 <global_new_sp>
+
+00008666 <.L54>:
+    8666:	38          	pulx
+    8667:	df 04       	stx	*4 <_.xy>
+    8669:	38          	pulx
+    866a:	df 02       	stx	*2 <_.z>
+    866c:	38          	pulx
+    866d:	df 00       	stx	*0 <_.tmp>
+    866f:	3b          	rti
+
+00008670 <scheduler_FindNextReadyTask>:
+    8670:	fe c8 3b    	ldx	c83b <tcb_head_p>
+
+00008673 <.LM150>:
+    8673:	27 0a       	beq	867f <.L63>
+
+00008675 <.L62>:
+    8675:	ec 08       	ldd	8,x
+    8677:	26 02       	bne	867b <.L61>
+    8679:	8f          	xgdx
+
+0000867a <.LM152>:
+    867a:	39          	rts
+
+0000867b <.L61>:
+    867b:	ee 0a       	ldx	10,x
+    867d:	26 f6       	bne	8675 <.L62>
+
+0000867f <.L63>:
+    867f:	cc 00 07    	ldd	#7 <_.xy+0x3>
+    8682:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+00008685 <.LM155>:
+    8685:	4f          	clra
+    8686:	5f          	clrb
+
+00008687 <.LBE7>:
+    8687:	39          	rts
+
+00008688 <msg_Create>:
+    8688:	3c          	pshx
+    8689:	3c          	pshx
+    868a:	3c          	pshx
+    868b:	34          	des
+    868c:	30          	tsx
+    868d:	e7 00       	stab	0,x
+
+0000868f <.LBB8>:
+    868f:	fc c8 40    	ldd	c840 <free_mail_p>
+    8692:	26 06       	bne	869a <.L65>
+
+00008694 <.LM159>:
+    8694:	cc 00 0e    	ldd	#e <_.xy+0xa>
+    8697:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+0000869a <.L65>:
+    869a:	18 30       	tsy
+    869c:	18 e6 00    	ldab	0,y
+    869f:	bd 89 1d    	jsr	891d <tid_to_tcbptr>
+    86a2:	30          	tsx
+    86a3:	ed 03       	std	3,x
+
+000086a5 <.LM161>:
+    86a5:	26 06       	bne	86ad <.L66>
+
+000086a7 <.LM162>:
+    86a7:	cc 00 0f    	ldd	#f <_.xy+0xb>
+    86aa:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+000086ad <.L66>:
+    86ad:	07          	tpa
+    86ae:	0f          	sei
+    86af:	18 30       	tsy
+    86b1:	18 ed 05    	std	5,y
+
+000086b4 <.LM164>:
+    86b4:	fe c8 40    	ldx	c840 <free_mail_p>
+    86b7:	cd ef 01    	stx	1,y
+
+000086ba <.LM165>:
+    86ba:	ec 12       	ldd	18,x
+    86bc:	fd c8 40    	std	c840 <free_mail_p>
+
+000086bf <.LM166>:
+    86bf:	fe c8 39    	ldx	c839 <current_tcb_p>
+    86c2:	e6 00       	ldab	0,x
+    86c4:	18 ee 01    	ldy	1,y
+    86c7:	18 e7 01    	stab	1,y
+
+000086ca <.LM167>:
+    86ca:	30          	tsx
+    86cb:	ec 03       	ldd	3,x
+    86cd:	18 ed 02    	std	2,y
+
+000086d0 <.LM168>:
+    86d0:	fc c4 06    	ldd	c406 <presto_master_clock+0x6>
+    86d3:	18 ed 0a    	std	10,y
+    86d6:	fc c4 04    	ldd	c404 <presto_master_clock+0x4>
+    86d9:	18 ed 08    	std	8,y
+    86dc:	fc c4 02    	ldd	c402 <presto_master_clock+0x2>
+    86df:	18 ed 06    	std	6,y
+    86e2:	fc c4 00    	ldd	c400 <presto_master_clock>
+    86e5:	18 ed 04    	std	4,y
+
+000086e8 <.LM169>:
+    86e8:	ec 01       	ldd	1,x
+    86ea:	c3 00 04    	addd	#4 <_.xy>
+    86ed:	1a ee 09    	ldy	9,x
+    86f0:	18 3c       	pshy
+    86f2:	bd 8a 53    	jsr	8a53 <clock_add_ms>
+
+000086f5 <.LM170>:
+    86f5:	30          	tsx
+    86f6:	ec 0d       	ldd	13,x
+    86f8:	ee 03       	ldx	3,x
+    86fa:	ed 0c       	std	12,x
+
+000086fc <.LM171>:
+    86fc:	18 30       	tsy
+    86fe:	cd ee 03    	ldx	3,y
+    8701:	18 ec 11    	ldd	17,y
+    8704:	ed 10       	std	16,x
+    8706:	18 ec 0f    	ldd	15,y
+    8709:	ed 0e       	std	14,x
+
+0000870b <.LM172>:
+    870b:	18 ec 07    	ldd	7,y
+    870e:	06          	tap
+
+0000870f <.LM173>:
+    870f:	31          	ins
+    8710:	31          	ins
+    8711:	30          	tsx
+    8712:	ee 09       	ldx	9,x
+    8714:	27 09       	beq	871f <.L67>
+
+00008716 <.LM174>:
     8716:	18 30       	tsy
-    8718:	18 ec 07    	ldd	7,y
-    871b:	dd 02       	std	*2 <_.z>
-    871d:	cd ee 03    	ldx	3,y
-    8720:	ec 10       	ldd	16,x
-    8722:	18 de 02    	ldy	*2 <_.z>
-    8725:	18 ed 10    	std	16,y
-    8728:	ec 0e       	ldd	14,x
-    872a:	18 ed 0e    	std	14,y
+    8718:	18 ec 01    	ldd	1,y
+    871b:	8d 1f       	bsr	873c <msg_InsertIntoPostOffice>
+    871d:	20 0f       	bra	872e <.L68>
 
-0000872d <.LM225>:
-    872d:	18 8f       	xgdy
-    872f:	bd 85 a2    	jsr	85a2 <msg_InsertIntoPostOffice>
+0000871f <.L67>:
+    871f:	30          	tsx
+    8720:	ee 03       	ldx	3,x
+    8722:	3c          	pshx
+    8723:	18 30       	tsy
+    8725:	18 ec 03    	ldd	3,y
+    8728:	bd 87 d2    	jsr	87d2 <msg_InsertIntoTaskQueue>
 
-00008732 <.LBE13>:
-    8732:	31          	ins
-    8733:	31          	ins
+0000872b <.LM176>:
+    872b:	3f          	swi
+    872c:	31          	ins
+    872d:	31          	ins
 
-00008734 <.L91>:
-    8734:	18 30       	tsy
-    8736:	18 ee 03    	ldy	3,y
-    8739:	18 3c       	pshy
-    873b:	df 04       	stx	*4 <_.xy>
-    873d:	30          	tsx
-    873e:	ec 03       	ldd	3,x
-    8740:	de 04       	ldx	*4 <_.xy>
-    8742:	bd 86 38    	jsr	8638 <msg_InsertIntoTaskQueue>
+0000872e <.L68>:
+    872e:	30          	tsx
+    872f:	ee 01       	ldx	1,x
+    8731:	4f          	clra
+    8732:	e6 00       	ldab	0,x
+    8734:	2a 01       	bpl	8737 <.L69>
+    8736:	4a          	deca
 
-00008745 <.LM227>:
-    8745:	30          	tsx
-    8746:	6c 02       	inc	2,x
-    8748:	31          	ins
-    8749:	31          	ins
+00008737 <.L69>:
+    8737:	38          	pulx
+    8738:	38          	pulx
+    8739:	38          	pulx
+    873a:	31          	ins
+    873b:	39          	rts
 
-0000874a <.L86>:
-    874a:	fc c0 0a    	ldd	c00a <po_mail_p>
-    874d:	27 19       	beq	8768 <.L87>
-    874f:	c3 00 04    	addd	#4 <_.xy>
-    8752:	18 ce c0 18 	ldy	#c018 <__data_end>
-    8756:	18 3c       	pshy
-    8758:	bd 88 da    	jsr	88da <clock_compare>
-    875b:	31          	ins
-    875c:	31          	ins
-    875d:	5d          	tstb
-    875e:	2a 03       	bpl	8763 <.L86+0x19>
-    8760:	7e 86 76    	jmp	8676 <.L93>
-    8763:	26 03       	bne	8768 <.L87>
-    8765:	7e 86 76    	jmp	8676 <.L93>
+0000873c <msg_InsertIntoPostOffice>:
+    873c:	3c          	pshx
+    873d:	3c          	pshx
+    873e:	3c          	pshx
+    873f:	30          	tsx
+    8740:	ed 00       	std	0,x
 
-00008768 <.L87>:
-    8768:	30          	tsx
-    8769:	4f          	clra
-    876a:	e6 00       	ldab	0,x
+00008742 <.LBB9>:
+    8742:	07          	tpa
+    8743:	0f          	sei
+    8744:	ed 02       	std	2,x
 
-0000876c <.LBE12>:
-    876c:	38          	pulx
-    876d:	38          	pulx
-    876e:	38          	pulx
+00008746 <.LM181>:
+    8746:	fe c8 42    	ldx	c842 <po_mail_p>
+    8749:	26 11       	bne	875c <.L71>
+
+0000874b <.LM182>:
+    874b:	18 30       	tsy
+    874d:	18 ee 00    	ldy	0,y
+    8750:	18 ff c8 42 	sty	c842 <po_mail_p>
+
+00008754 <.LM183>:
+    8754:	18 6f 13    	clr	19,y
+    8757:	18 6f 12    	clr	18,y
+    875a:	20 6c       	bra	87c8 <.L72>
+
+0000875c <.L71>:
+    875c:	fc c8 42    	ldd	c842 <po_mail_p>
+    875f:	c3 00 04    	addd	#4 <_.xy>
+    8762:	18 30       	tsy
+    8764:	cd ee 00    	ldx	0,y
+    8767:	08          	inx
+    8768:	08          	inx
+    8769:	08          	inx
+    876a:	08          	inx
+    876b:	3c          	pshx
+    876c:	bd 8a 76    	jsr	8a76 <clock_compare>
     876f:	31          	ins
-    8770:	39          	rts
+    8770:	31          	ins
+    8771:	5d          	tstb
+    8772:	2b 0f       	bmi	8783 <.L73>
+    8774:	27 0d       	beq	8783 <.L73>
 
-00008771 <idle_task>:
-    8771:	20 fe       	bra	8771 <idle_task>
+00008776 <.LM185>:
+    8776:	fc c8 42    	ldd	c842 <po_mail_p>
+    8779:	30          	tsx
+    877a:	ee 00       	ldx	0,x
+    877c:	ed 12       	std	18,x
 
-00008773 <tid_to_tcbptr>:
-    8773:	34          	des
-    8774:	30          	tsx
-    8775:	e7 00       	stab	0,x
+0000877e <.LM186>:
+    877e:	ff c8 42    	stx	c842 <po_mail_p>
+    8781:	20 45       	bra	87c8 <.L72>
 
-00008777 <.LM234>:
-    8777:	c1 0c       	cmpb	#12
-    8779:	23 06       	bls	8781 <.L99>
-    877b:	cc 00 0c    	ldd	#c <_.xy+0x8>
-    877e:	bd 89 42    	jsr	8942 <presto_fatal_error>
+00008783 <.L73>:
+    8783:	fc c8 42    	ldd	c842 <po_mail_p>
 
-00008781 <.L99>:
-    8781:	30          	tsx
-    8782:	4f          	clra
-    8783:	e6 00       	ldab	0,x
-    8785:	05          	asld
-    8786:	05          	asld
-    8787:	05          	asld
-    8788:	05          	asld
-    8789:	c3 c0 5f    	addd	#c05f <tcb_list+0x8>
-    878c:	8f          	xgdx
-    878d:	ee 00       	ldx	0,x
-    878f:	8c 00 02    	cpx	#2 <_.z>
-    8792:	26 04       	bne	8798 <.L100>
-    8794:	4f          	clra
-    8795:	5f          	clrb
-    8796:	20 0b       	bra	87a3 <.L98>
+00008786 <.LM188>:
+    8786:	20 21       	bra	87a9 <.L80>
 
-00008798 <.L100>:
-    8798:	30          	tsx
-    8799:	4f          	clra
-    879a:	e6 00       	ldab	0,x
-    879c:	05          	asld
-    879d:	05          	asld
-    879e:	05          	asld
-    879f:	05          	asld
-    87a0:	c3 c0 57    	addd	#c057 <tcb_list>
+00008788 <.L79>:
+    8788:	30          	tsx
+    8789:	1a ee 04    	ldy	4,x
+    878c:	18 ec 12    	ldd	18,y
+    878f:	c3 00 04    	addd	#4 <_.xy>
+    8792:	18 30       	tsy
+    8794:	cd ee 00    	ldx	0,y
+    8797:	08          	inx
+    8798:	08          	inx
+    8799:	08          	inx
+    879a:	08          	inx
+    879b:	3c          	pshx
+    879c:	bd 8a 76    	jsr	8a76 <clock_compare>
+    879f:	31          	ins
+    87a0:	31          	ins
+    87a1:	5d          	tstb
+    87a2:	2e 0f       	bgt	87b3 <.L76>
 
-000087a3 <.L98>:
-    87a3:	31          	ins
-    87a4:	39          	rts
+000087a4 <.LM190>:
+    87a4:	30          	tsx
+    87a5:	ee 04       	ldx	4,x
+    87a7:	ec 12       	ldd	18,x
 
-000087a5 <premain>:
-    87a5:	0f          	sei
+000087a9 <.L80>:
+    87a9:	30          	tsx
+    87aa:	ed 04       	std	4,x
+    87ac:	18 8f       	xgdy
+    87ae:	cd ee 12    	ldx	18,y
+    87b1:	26 d5       	bne	8788 <.L79>
 
-000087a6 <.LM3>:
-    87a6:	ce 10 3d    	ldx	#103d <.Ldebug_info0+0x930>
-    87a9:	c6 01       	ldab	#1
-    87ab:	e7 00       	stab	0,x
+000087b3 <.L76>:
+    87b3:	30          	tsx
+    87b4:	ee 04       	ldx	4,x
+    87b6:	ec 12       	ldd	18,x
+    87b8:	30          	tsx
+    87b9:	ee 00       	ldx	0,x
+    87bb:	ed 12       	std	18,x
 
-000087ad <.LM4>:
-    87ad:	ce 10 24    	ldx	#1024 <.Ldebug_info0+0x917>
-    87b0:	c6 06       	ldab	#6
-    87b2:	e7 00       	stab	0,x
+000087bd <.LM192>:
+    87bd:	18 30       	tsy
+    87bf:	cd ee 00    	ldx	0,y
+    87c2:	18 ee 04    	ldy	4,y
+    87c5:	cd ef 12    	stx	18,y
 
-000087b4 <.LM5>:
-    87b4:	ce 10 39    	ldx	#1039 <.Ldebug_info0+0x92c>
-    87b7:	c6 a3       	ldab	#163
-    87b9:	e7 00       	stab	0,x
+000087c8 <.L72>:
+    87c8:	18 30       	tsy
+    87ca:	18 ec 02    	ldd	2,y
+    87cd:	06          	tap
 
-000087bb <.LM6>:
-    87bb:	ce 10 02    	ldx	#1002 <.Ldebug_info0+0x8f5>
-    87be:	c6 03       	ldab	#3
-    87c0:	e7 00       	stab	0,x
+000087ce <.LM194>:
+    87ce:	38          	pulx
+    87cf:	38          	pulx
+    87d0:	38          	pulx
+    87d1:	39          	rts
 
-000087c2 <.LM7>:
-    87c2:	ce 10 2d    	ldx	#102d <.Ldebug_info0+0x920>
-    87c5:	5f          	clrb
-    87c6:	e7 00       	stab	0,x
+000087d2 <msg_InsertIntoTaskQueue>:
+    87d2:	3c          	pshx
+    87d3:	dd 02       	std	*2 <_.z>
+    87d5:	30          	tsx
+    87d6:	1a ee 04    	ldy	4,x
 
-000087c8 <.LM8>:
-    87c8:	ce 10 28    	ldx	#1028 <.Ldebug_info0+0x91b>
-    87cb:	c6 04       	ldab	#4
-    87cd:	e7 00       	stab	0,x
+000087d9 <.LBB11>:
+    87d9:	07          	tpa
+    87da:	0f          	sei
+    87db:	ed 00       	std	0,x
 
-000087cf <.LM9>:
-    87cf:	ce 10 20    	ldx	#1020 <.Ldebug_info0+0x913>
-    87d2:	5f          	clrb
-    87d3:	e7 00       	stab	0,x
+000087dd <.LM197>:
+    87dd:	cd ee 0c    	ldx	12,y
+    87e0:	26 07       	bne	87e9 <.L82>
 
-000087d5 <.LM10>:
-    87d5:	ce 10 21    	ldx	#1021 <.Ldebug_info0+0x914>
-    87d8:	e7 00       	stab	0,x
+000087e2 <.LM198>:
+    87e2:	dc 02       	ldd	*2 <_.z>
+    87e4:	18 ed 0c    	std	12,y
 
-000087da <.LM11>:
-    87da:	ce 10 22    	ldx	#1022 <.Ldebug_info0+0x915>
-    87dd:	e7 00       	stab	0,x
+000087e7 <.LM199>:
+    87e7:	20 0b       	bra	87f4 <.L84>
 
-000087df <.LM12>:
-    87df:	ce 10 3c    	ldx	#103c <.Ldebug_info0+0x92f>
-    87e2:	c6 25       	ldab	#37
-    87e4:	e7 00       	stab	0,x
+000087e9 <.L82>:
+    87e9:	cd ee 0e    	ldx	14,y
+    87ec:	dd 04       	std	*4 <_.xy>
+    87ee:	dc 02       	ldd	*2 <_.z>
+    87f0:	ed 12       	std	18,x
 
-000087e6 <.LM13>:
-    87e6:	39          	rts
+000087f2 <.LM201>:
+    87f2:	dc 04       	ldd	*4 <_.xy>
 
-000087e7 <exit>:
-    87e7:	20 fe       	bra	87e7 <exit>
+000087f4 <.L84>:
+    87f4:	de 02       	ldx	*2 <_.z>
+    87f6:	cd ef 0e    	stx	14,y
 
-000087e9 <_start>:
-    87e9:	8e b5 ff    	lds	#b5ff <init_sp>
-    87ec:	bd 87 a5    	jsr	87a5 <premain>
-    87ef:	4f          	clra
-    87f0:	ce c0 18    	ldx	#c018 <__data_end>
+000087f9 <.LM202>:
+    87f9:	4f          	clra
+    87fa:	5f          	clrb
+    87fb:	ed 12       	std	18,x
 
-000087f3 <init_loop>:
-    87f3:	8c c8 47    	cpx	#c847 <__bss_end>
-    87f6:	27 05       	beq	87fd <init_done>
-    87f8:	a7 00       	staa	0,x
-    87fa:	08          	inx
-    87fb:	20 f6       	bra	87f3 <init_loop>
+000087fd <.LM203>:
+    87fd:	18 ed 08    	std	8,y
 
-000087fd <init_done>:
-    87fd:	ce 8b 27    	ldx	#8b27 <__idata_start>
-    8800:	18 ce c0 00 	ldy	#c000 <__specvect_end>
+00008800 <.LM204>:
+    8800:	30          	tsx
+    8801:	ec 00       	ldd	0,x
+    8803:	06          	tap
 
-00008804 <copy_loop>:
-    8804:	8c 8b 3f    	cpx	#8b3f <__idata_end>
-    8807:	27 0a       	beq	8813 <copy_done>
-    8809:	e6 00       	ldab	0,x
-    880b:	18 e7 00    	stab	0,y
-    880e:	08          	inx
-    880f:	18 08       	iny
-    8811:	20 f1       	bra	8804 <copy_loop>
+00008804 <.LM205>:
+    8804:	38          	pulx
+    8805:	39          	rts
 
-00008813 <copy_done>:
-    8813:	bd 8a 9c    	jsr	8a9c <main>
+00008806 <msg_DeliverToTasks>:
+    8806:	30          	tsx
+    8807:	8f          	xgdx
+    8808:	c3 ff f7    	addd	#fff7 <__normvect_start+0x21>
+    880b:	8f          	xgdx
+    880c:	35          	txs
 
-00008816 <_postmain>:
-    8816:	20 fe       	bra	8816 <_postmain>
+0000880d <.LM207>:
+    880d:	30          	tsx
+    880e:	6f 00       	clr	0,x
 
-00008818 <clock_add>:
-    8818:	8f          	xgdx
+00008810 <.LM208>:
+    8810:	07          	tpa
+    8811:	0f          	sei
+    8812:	ed 05       	std	5,x
 
-00008819 <.LM2>:
-    8819:	18 30       	tsy
-    881b:	df 04       	stx	*4 <_.xy>
-    881d:	cd ee 06    	ldx	6,y
-    8820:	df 02       	stx	*2 <_.z>
-    8822:	de 04       	ldx	*4 <_.xy>
-    8824:	18 de 02    	ldy	*2 <_.z>
-    8827:	18 8f       	xgdy
-    8829:	e3 00       	addd	0,x
-    882b:	18 8f       	xgdy
-    882d:	1a ef 00    	sty	0,x
+00008814 <.LM209>:
+    8814:	7e 88 eb    	jmp	88eb <.L86>
 
-00008830 <.LM3>:
-    8830:	18 8f       	xgdy
-    8832:	1a 83 03 e7 	cpd	#3e7 <.Ldebug_abbrev0+0x5e>
-    8836:	23 0c       	bls	8844 <.L2>
+00008817 <.L93>:
+    8817:	fe c8 42    	ldx	c842 <po_mail_p>
+    881a:	dd 04       	std	*4 <_.xy>
+    881c:	ec 02       	ldd	2,x
+    881e:	18 30       	tsy
+    8820:	dd 02       	std	*2 <_.z>
+    8822:	dc 04       	ldd	*4 <_.xy>
+    8824:	de 02       	ldx	*2 <_.z>
+    8826:	cd ef 03    	stx	3,y
 
-00008838 <.LM4>:
-    8838:	c3 fc 18    	addd	#fc18 <__comment_end+0x32ff>
-    883b:	ed 00       	std	0,x
+00008829 <.LM211>:
+    8829:	26 06       	bne	8831 <.L90>
+    882b:	cc 00 04    	ldd	#4 <_.xy>
+    882e:	bd 8a de    	jsr	8ade <presto_fatal_error>
 
-0000883d <.LM5>:
-    883d:	ec 02       	ldd	2,x
-    883f:	c3 00 01    	addd	#1 <_.tmp+0x1>
-    8842:	ed 02       	std	2,x
+00008831 <.L90>:
+    8831:	df 04       	stx	*4 <_.xy>
+    8833:	fe c8 42    	ldx	c842 <po_mail_p>
+    8836:	18 30       	tsy
+    8838:	cd ef 01    	stx	1,y
 
-00008844 <.L2>:
-    8844:	18 30       	tsy
-    8846:	df 04       	stx	*4 <_.xy>
-    8848:	cd ee 04    	ldx	4,y
-    884b:	df 02       	stx	*2 <_.z>
-    884d:	de 04       	ldx	*4 <_.xy>
-    884f:	18 de 02    	ldy	*2 <_.z>
-    8852:	18 8f       	xgdy
-    8854:	e3 02       	addd	2,x
-    8856:	18 8f       	xgdy
-    8858:	1a ef 02    	sty	2,x
+0000883b <.LM213>:
+    883b:	df 02       	stx	*2 <_.z>
+    883d:	ee 12       	ldx	18,x
+    883f:	ff c8 42    	stx	c842 <po_mail_p>
 
-0000885b <.LM7>:
-    885b:	18 8f       	xgdy
-    885d:	1a 83 03 e7 	cpd	#3e7 <.Ldebug_abbrev0+0x5e>
-    8861:	23 0c       	bls	886f <.L3>
+00008842 <.LM214>:
+    8842:	de 02       	ldx	*2 <_.z>
+    8844:	ec 0c       	ldd	12,x
+    8846:	26 03       	bne	884b <.LBB13>
+    8848:	7e 88 d5    	jmp	88d5 <.L91>
 
-00008863 <.LM8>:
-    8863:	c3 fc 18    	addd	#fc18 <__comment_end+0x32ff>
-    8866:	ed 02       	std	2,x
+0000884b <.LBB13>:
+    884b:	fe c8 40    	ldx	c840 <free_mail_p>
+    884e:	26 06       	bne	8856 <.L92>
 
-00008868 <.LM9>:
-    8868:	ec 04       	ldd	4,x
-    886a:	c3 00 01    	addd	#1 <_.tmp+0x1>
-    886d:	ed 04       	std	4,x
+00008850 <.LM216>:
+    8850:	cc 00 03    	ldd	#3 <_.z+0x1>
+    8853:	bd 8a de    	jsr	8ade <presto_fatal_error>
 
-0000886f <.L3>:
-    886f:	18 30       	tsy
-    8871:	df 04       	stx	*4 <_.xy>
-    8873:	cd ee 02    	ldx	2,y
-    8876:	df 02       	stx	*2 <_.z>
-    8878:	de 04       	ldx	*4 <_.xy>
-    887a:	18 de 02    	ldy	*2 <_.z>
-    887d:	18 8f       	xgdy
-    887f:	e3 04       	addd	4,x
-    8881:	18 8f       	xgdy
-    8883:	1a ef 04    	sty	4,x
+00008856 <.L92>:
+    8856:	df 04       	stx	*4 <_.xy>
+    8858:	fe c8 40    	ldx	c840 <free_mail_p>
+    885b:	18 30       	tsy
+    885d:	cd ef 07    	stx	7,y
 
-00008886 <.LM11>:
-    8886:	18 8f       	xgdy
-    8888:	1a 83 0e 0f 	cpd	#e0f <.Ldebug_info0+0x702>
-    888c:	23 0c       	bls	889a <.L4>
+00008860 <.LM218>:
+    8860:	df 02       	stx	*2 <_.z>
+    8862:	ee 12       	ldx	18,x
+    8864:	ff c8 40    	stx	c840 <free_mail_p>
 
-0000888e <.LM12>:
-    888e:	c3 f1 f0    	addd	#f1f0 <__comment_end+0x28d7>
-    8891:	ed 04       	std	4,x
+00008867 <.LM219>:
+    8867:	18 ee 01    	ldy	1,y
+    886a:	18 e6 01    	ldab	1,y
+    886d:	de 02       	ldx	*2 <_.z>
+    886f:	e7 01       	stab	1,x
 
-00008893 <.LM13>:
-    8893:	ec 06       	ldd	6,x
-    8895:	c3 00 01    	addd	#1 <_.tmp+0x1>
-    8898:	ed 06       	std	6,x
+00008871 <.LM220>:
+    8871:	cd ee 02    	ldx	2,y
+    8874:	18 df 04    	sty	*4 <_.xy>
+    8877:	18 de 02    	ldy	*2 <_.z>
+    887a:	cd ef 02    	stx	2,y
 
-0000889a <.L4>:
-    889a:	39          	rts
+0000887d <.LM221>:
+    887d:	18 de 04    	ldy	*4 <_.xy>
+    8880:	18 ec 0a    	ldd	10,y
+    8883:	de 02       	ldx	*2 <_.z>
+    8885:	ed 0a       	std	10,x
+    8887:	18 ec 08    	ldd	8,y
+    888a:	ed 08       	std	8,x
+    888c:	18 ec 06    	ldd	6,y
+    888f:	ed 06       	std	6,x
+    8891:	18 ec 04    	ldd	4,y
+    8894:	ed 04       	std	4,x
 
-0000889b <clock_reset>:
-    889b:	8f          	xgdx
+00008896 <.LM222>:
+    8896:	18 30       	tsy
+    8898:	18 ec 07    	ldd	7,y
+    889b:	c3 00 04    	addd	#4 <_.xy>
+    889e:	cd ee 01    	ldx	1,y
+    88a1:	ee 0c       	ldx	12,x
+    88a3:	3c          	pshx
+    88a4:	bd 8a 53    	jsr	8a53 <clock_add_ms>
 
-0000889c <.LM16>:
-    889c:	4f          	clra
-    889d:	5f          	clrb
-    889e:	ed 00       	std	0,x
+000088a7 <.LM223>:
+    88a7:	18 30       	tsy
+    88a9:	18 ee 03    	ldy	3,y
+    88ac:	18 ec 0c    	ldd	12,y
+    88af:	18 30       	tsy
+    88b1:	18 ee 09    	ldy	9,y
+    88b4:	18 ed 0c    	std	12,y
 
-000088a0 <.LM17>:
-    88a0:	ed 02       	std	2,x
+000088b7 <.LM224>:
+    88b7:	18 30       	tsy
+    88b9:	18 ec 09    	ldd	9,y
+    88bc:	dd 02       	std	*2 <_.z>
+    88be:	cd ee 03    	ldx	3,y
+    88c1:	ec 10       	ldd	16,x
+    88c3:	18 de 02    	ldy	*2 <_.z>
+    88c6:	18 ed 10    	std	16,y
+    88c9:	ec 0e       	ldd	14,x
+    88cb:	18 ed 0e    	std	14,y
 
-000088a2 <.LM18>:
-    88a2:	ed 04       	std	4,x
+000088ce <.LM225>:
+    88ce:	18 8f       	xgdy
+    88d0:	bd 87 3c    	jsr	873c <msg_InsertIntoPostOffice>
 
-000088a4 <.LM19>:
-    88a4:	ed 06       	std	6,x
+000088d3 <.LBE13>:
+    88d3:	31          	ins
+    88d4:	31          	ins
 
-000088a6 <.LM20>:
-    88a6:	39          	rts
+000088d5 <.L91>:
+    88d5:	18 30       	tsy
+    88d7:	18 ee 03    	ldy	3,y
+    88da:	18 3c       	pshy
+    88dc:	df 04       	stx	*4 <_.xy>
+    88de:	30          	tsx
+    88df:	ec 03       	ldd	3,x
+    88e1:	de 04       	ldx	*4 <_.xy>
+    88e3:	bd 87 d2    	jsr	87d2 <msg_InsertIntoTaskQueue>
 
-000088a7 <clock_add_us>:
-    88a7:	30          	tsx
-    88a8:	ee 02       	ldx	2,x
-    88aa:	3c          	pshx
-    88ab:	ce 00 00    	ldx	#0 <_.tmp>
-    88ae:	3c          	pshx
-    88af:	3c          	pshx
-    88b0:	bd 88 18    	jsr	8818 <clock_add>
-    88b3:	38          	pulx
-    88b4:	38          	pulx
-    88b5:	38          	pulx
+000088e6 <.LM227>:
+    88e6:	30          	tsx
+    88e7:	6c 02       	inc	2,x
+    88e9:	31          	ins
+    88ea:	31          	ins
 
-000088b6 <.LM23>:
-    88b6:	39          	rts
+000088eb <.L86>:
+    88eb:	fc c8 42    	ldd	c842 <po_mail_p>
+    88ee:	27 19       	beq	8909 <.L87>
+    88f0:	c3 00 04    	addd	#4 <_.xy>
+    88f3:	18 ce c4 00 	ldy	#c400 <presto_master_clock>
+    88f7:	18 3c       	pshy
+    88f9:	bd 8a 76    	jsr	8a76 <clock_compare>
+    88fc:	31          	ins
+    88fd:	31          	ins
+    88fe:	5d          	tstb
+    88ff:	2a 03       	bpl	8904 <.L86+0x19>
+    8901:	7e 88 17    	jmp	8817 <.L93>
+    8904:	26 03       	bne	8909 <.L87>
+    8906:	7e 88 17    	jmp	8817 <.L93>
 
-000088b7 <clock_add_ms>:
-    88b7:	ce 00 00    	ldx	#0 <_.tmp>
-    88ba:	3c          	pshx
-    88bb:	18 30       	tsy
-    88bd:	18 ee 04    	ldy	4,y
-    88c0:	18 3c       	pshy
-    88c2:	3c          	pshx
-    88c3:	bd 88 18    	jsr	8818 <clock_add>
-    88c6:	38          	pulx
-    88c7:	38          	pulx
-    88c8:	38          	pulx
+00008909 <.L87>:
+    8909:	18 30       	tsy
+    890b:	18 ec 05    	ldd	5,y
+    890e:	06          	tap
 
-000088c9 <.LM26>:
-    88c9:	39          	rts
+0000890f <.LM229>:
+    890f:	4f          	clra
+    8910:	18 e6 00    	ldab	0,y
 
-000088ca <clock_add_sec>:
-    88ca:	ce 00 00    	ldx	#0 <_.tmp>
-    88cd:	3c          	pshx
-    88ce:	3c          	pshx
-    88cf:	30          	tsx
-    88d0:	ee 06       	ldx	6,x
-    88d2:	3c          	pshx
-    88d3:	bd 88 18    	jsr	8818 <clock_add>
-    88d6:	38          	pulx
-    88d7:	38          	pulx
-    88d8:	38          	pulx
-
-000088d9 <.LM29>:
-    88d9:	39          	rts
-
-000088da <clock_compare>:
-    88da:	18 8f       	xgdy
-    88dc:	30          	tsx
-    88dd:	ee 02       	ldx	2,x
-
-000088df <.LM31>:
-    88df:	18 ec 06    	ldd	6,y
-    88e2:	1a a3 06    	cpd	6,x
-    88e5:	24 04       	bcc	88eb <.L10>
-    88e7:	cc ff ff    	ldd	#ffff <__normvect_start+0x29>
-
-000088ea <.LM32>:
-    88ea:	39          	rts
-
-000088eb <.L10>:
-    88eb:	18 ec 06    	ldd	6,y
-    88ee:	1a a3 06    	cpd	6,x
-    88f1:	23 04       	bls	88f7 <.L11>
-    88f3:	cc 00 01    	ldd	#1 <_.tmp+0x1>
-
-000088f6 <.LM34>:
-    88f6:	39          	rts
-
-000088f7 <.L11>:
-    88f7:	18 ec 04    	ldd	4,y
-    88fa:	1a a3 04    	cpd	4,x
-    88fd:	24 04       	bcc	8903 <.L12>
-    88ff:	cc ff ff    	ldd	#ffff <__normvect_start+0x29>
-
-00008902 <.LM36>:
-    8902:	39          	rts
-
-00008903 <.L12>:
-    8903:	18 ec 04    	ldd	4,y
-    8906:	1a a3 04    	cpd	4,x
-    8909:	23 04       	bls	890f <.L13>
-    890b:	cc 00 01    	ldd	#1 <_.tmp+0x1>
-
-0000890e <.LM38>:
-    890e:	39          	rts
-
-0000890f <.L13>:
-    890f:	18 ec 02    	ldd	2,y
-    8912:	1a a3 02    	cpd	2,x
-    8915:	24 04       	bcc	891b <.L14>
-    8917:	cc ff ff    	ldd	#ffff <__normvect_start+0x29>
-
-0000891a <.LM40>:
+00008913 <.LBE12>:
+    8913:	30          	tsx
+    8914:	8f          	xgdx
+    8915:	c3 00 09    	addd	#9 <_.xy+0x5>
+    8918:	8f          	xgdx
+    8919:	35          	txs
     891a:	39          	rts
 
-0000891b <.L14>:
-    891b:	18 ec 02    	ldd	2,y
-    891e:	1a a3 02    	cpd	2,x
-    8921:	23 04       	bls	8927 <.L15>
-    8923:	cc 00 01    	ldd	#1 <_.tmp+0x1>
-
-00008926 <.LM42>:
-    8926:	39          	rts
-
-00008927 <.L15>:
-    8927:	18 ec 00    	ldd	0,y
-    892a:	1a a3 00    	cpd	0,x
-    892d:	24 04       	bcc	8933 <.L16>
-    892f:	cc ff ff    	ldd	#ffff <__normvect_start+0x29>
-
-00008932 <.LM44>:
-    8932:	39          	rts
-
-00008933 <.L16>:
-    8933:	18 ec 00    	ldd	0,y
-    8936:	1a a3 00    	cpd	0,x
-    8939:	23 04       	bls	893f <.L17>
-    893b:	cc 00 01    	ldd	#1 <_.tmp+0x1>
-
-0000893e <.LM46>:
-    893e:	39          	rts
-
-0000893f <.L17>:
-    893f:	4f          	clra
-    8940:	5f          	clrb
-
-00008941 <.LM48>:
-    8941:	39          	rts
-
-00008942 <presto_fatal_error>:
-    8942:	3c          	pshx
-    8943:	3c          	pshx
-    8944:	3c          	pshx
-    8945:	30          	tsx
-    8946:	ed 03       	std	3,x
-
-00008948 <.LBB2>:
-    8948:	0f          	sei
-
-00008949 <.LM3>:
-    8949:	18 df 04    	sty	*4 <_.xy>
-    894c:	18 ce 10 00 	ldy	#1000 <.Ldebug_info0+0x8f3>
-    8950:	ca 0f       	orab	#15
-    8952:	e7 02       	stab	2,x
-    8954:	18 df 02    	sty	*2 <_.z>
-    8957:	18 de 04    	ldy	*4 <_.xy>
-
-0000895a <.L11>:
-    895a:	df 04       	stx	*4 <_.xy>
-    895c:	de 02       	ldx	*2 <_.z>
-    895e:	e6 00       	ldab	0,x
-    8960:	c8 08       	eorb	#8
-    8962:	e7 00       	stab	0,x
-
-00008964 <.LM5>:
-    8964:	18 30       	tsy
-    8966:	18 6a 01    	dec	1,y
-    8969:	de 04       	ldx	*4 <_.xy>
-    896b:	18 e6 01    	ldab	1,y
-    896e:	27 ea       	beq	895a <.L11>
-    8970:	ce 7f ff    	ldx	#7fff <__debug_end+0x40e0>
-    8973:	18 e6 04    	ldab	4,y
-    8976:	58          	aslb
-    8977:	58          	aslb
-    8978:	58          	aslb
-    8979:	58          	aslb
-    897a:	18 e7 05    	stab	5,y
-
-0000897d <.L10>:
-    897d:	18 30       	tsy
-    897f:	18 ec 00    	ldd	0,y
-    8982:	c5 01       	bitb	#1
-    8984:	27 05       	beq	898b <.L8>
-    8986:	18 e6 05    	ldab	5,y
-    8989:	20 05       	bra	8990 <.L12>
-
-0000898b <.L8>:
-    898b:	18 30       	tsy
-    898d:	18 e6 02    	ldab	2,y
-
-00008990 <.L12>:
-    8990:	e7 00       	stab	0,x
-    8992:	18 30       	tsy
-    8994:	18 6a 01    	dec	1,y
-    8997:	26 e4       	bne	897d <.L10>
-    8999:	20 bf       	bra	895a <.L11>
-
-0000899b <inert_isr>:
-    899b:	3b          	rti
-    899c:	39          	rts
-
-0000899d <set_interrupt>:
-    899d:	c1 14       	cmpb	#20
-    899f:	22 0d       	bhi	89ae <.L3>
-
-000089a1 <.LM5>:
-    89a1:	4f          	clra
-    89a2:	05          	asld
-    89a3:	c3 ff d6    	addd	#ffd6 <__normvect_start>
-    89a6:	30          	tsx
-    89a7:	1a ee 02    	ldy	2,x
-    89aa:	8f          	xgdx
-    89ab:	1a ef 00    	sty	0,x
-
-000089ae <.L3>:
-    89ae:	39          	rts
-
-000089af <assert_lights>:
-    89af:	f6 c0 14    	ldab	c014 <light1>
-    89b2:	fa c0 15    	orab	c015 <light2>
-    89b5:	fa c0 16    	orab	c016 <light3>
-    89b8:	fa c0 17    	orab	c017 <light4>
-
-000089bb <.LM3>:
-    89bb:	ce 7f ff    	ldx	#7fff <__debug_end+0x40e0>
-    89be:	ca f0       	orab	#240
-    89c0:	e7 00       	stab	0,x
-
-000089c2 <.LM4>:
-    89c2:	39          	rts
-
-000089c3 <One>:
-    89c3:	3c          	pshx
-    89c4:	3c          	pshx
-
-000089c5 <.LM6>:
-    89c5:	18 30       	tsy
-    89c7:	4f          	clra
-    89c8:	5f          	clrb
-    89c9:	18 ed 02    	std	2,y
-    89cc:	18 ed 00    	std	0,y
-
-000089cf <.LM7>:
-    89cf:	37          	pshb
-    89d0:	36          	psha
-    89d1:	18 ec 00    	ldd	0,y
-    89d4:	37          	pshb
-    89d5:	36          	psha
-    89d6:	ce 00 c8    	ldx	#c8 <_.xy+0xc4>
-    89d9:	3c          	pshx
-    89da:	3c          	pshx
-    89db:	f6 c0 10    	ldab	c010 <one_tid>
-    89de:	bd 83 16    	jsr	8316 <presto_repeating_timer>
-
-000089e1 <.LM8>:
-    89e1:	38          	pulx
-    89e2:	38          	pulx
-    89e3:	38          	pulx
-    89e4:	38          	pulx
-
-000089e5 <.L6>:
-    89e5:	8f          	xgdx
-    89e6:	30          	tsx
-    89e7:	8f          	xgdx
-    89e8:	bd 83 4d    	jsr	834d <presto_wait_for_message>
-
-000089eb <.LM10>:
-    89eb:	f6 c0 14    	ldab	c014 <light1>
-    89ee:	c8 01       	eorb	#1
-    89f0:	f7 c0 14    	stab	c014 <light1>
-
-000089f3 <.LM11>:
-    89f3:	8d ba       	bsr	89af <assert_lights>
-    89f5:	20 ee       	bra	89e5 <.L6>
-
-000089f7 <Two>:
-    89f7:	3c          	pshx
-    89f8:	3c          	pshx
-
-000089f9 <.LM14>:
-    89f9:	30          	tsx
-    89fa:	4f          	clra
-    89fb:	5f          	clrb
-    89fc:	ed 02       	std	2,x
-    89fe:	ed 00       	std	0,x
-
-00008a00 <.L11>:
-    8a00:	8f          	xgdx
-    8a01:	30          	tsx
-    8a02:	8f          	xgdx
-    8a03:	bd 83 4d    	jsr	834d <presto_wait_for_message>
-
-00008a06 <.LM16>:
-    8a06:	f6 c0 15    	ldab	c015 <light2>
-    8a09:	c8 02       	eorb	#2
-    8a0b:	f7 c0 15    	stab	c015 <light2>
-
-00008a0e <.LM17>:
-    8a0e:	8d 9f       	bsr	89af <assert_lights>
-    8a10:	20 ee       	bra	8a00 <.L11>
-
-00008a12 <Three>:
-    8a12:	3c          	pshx
-    8a13:	3c          	pshx
-
-00008a14 <.LM20>:
-    8a14:	30          	tsx
-    8a15:	4f          	clra
-    8a16:	5f          	clrb
-    8a17:	ed 02       	std	2,x
-    8a19:	ed 00       	std	0,x
-
-00008a1b <.L16>:
-    8a1b:	8f          	xgdx
-    8a1c:	30          	tsx
-    8a1d:	8f          	xgdx
-    8a1e:	bd 83 4d    	jsr	834d <presto_wait_for_message>
-
-00008a21 <.LM22>:
-    8a21:	f6 c0 16    	ldab	c016 <light3>
-    8a24:	c8 04       	eorb	#4
-    8a26:	f7 c0 16    	stab	c016 <light3>
-
-00008a29 <.LM23>:
-    8a29:	8d 84       	bsr	89af <assert_lights>
-    8a2b:	20 ee       	bra	8a1b <.L16>
-
-00008a2d <Four>:
-    8a2d:	3c          	pshx
-    8a2e:	3c          	pshx
-
-00008a2f <.LM26>:
-    8a2f:	18 30       	tsy
-    8a31:	4f          	clra
-    8a32:	5f          	clrb
-    8a33:	18 ed 02    	std	2,y
-    8a36:	18 ed 00    	std	0,y
-
-00008a39 <.LM27>:
-    8a39:	37          	pshb
-    8a3a:	36          	psha
-    8a3b:	18 ec 00    	ldd	0,y
-    8a3e:	37          	pshb
-    8a3f:	36          	psha
-    8a40:	f6 c0 13    	ldab	c013 <four_tid>
-    8a43:	bd 82 c4    	jsr	82c4 <presto_send_message>
-
-00008a46 <.LM28>:
-    8a46:	38          	pulx
-    8a47:	38          	pulx
-
-00008a48 <.L21>:
-    8a48:	8f          	xgdx
-    8a49:	30          	tsx
-    8a4a:	8f          	xgdx
-    8a4b:	bd 83 4d    	jsr	834d <presto_wait_for_message>
-
-00008a4e <.LM30>:
-    8a4e:	f6 c0 17    	ldab	c017 <light4>
-    8a51:	c8 08       	eorb	#8
-    8a53:	f7 c0 17    	stab	c017 <light4>
-
-00008a56 <.LM31>:
-    8a56:	bd 89 af    	jsr	89af <assert_lights>
-
-00008a59 <.LM32>:
-    8a59:	18 30       	tsy
-    8a5b:	18 ec 02    	ldd	2,y
-    8a5e:	37          	pshb
-    8a5f:	36          	psha
-    8a60:	18 ec 00    	ldd	0,y
-    8a63:	37          	pshb
-    8a64:	36          	psha
-    8a65:	f6 c0 11    	ldab	c011 <two_tid>
-    8a68:	bd 82 c4    	jsr	82c4 <presto_send_message>
-
-00008a6b <.LM33>:
-    8a6b:	18 30       	tsy
-    8a6d:	18 ec 06    	ldd	6,y
-    8a70:	37          	pshb
-    8a71:	36          	psha
-    8a72:	18 ec 04    	ldd	4,y
-    8a75:	37          	pshb
-    8a76:	36          	psha
-    8a77:	f6 c0 12    	ldab	c012 <three_tid>
-    8a7a:	bd 82 c4    	jsr	82c4 <presto_send_message>
-
-00008a7d <.LM34>:
-    8a7d:	18 30       	tsy
-    8a7f:	18 ec 0a    	ldd	10,y
-    8a82:	37          	pshb
-    8a83:	36          	psha
-    8a84:	18 ec 08    	ldd	8,y
-    8a87:	37          	pshb
-    8a88:	36          	psha
-    8a89:	ce 00 64    	ldx	#64 <_.xy+0x60>
-    8a8c:	3c          	pshx
-    8a8d:	f6 c0 13    	ldab	c013 <four_tid>
-    8a90:	bd 82 ea    	jsr	82ea <presto_timer>
-    8a93:	30          	tsx
-    8a94:	8f          	xgdx
-    8a95:	c3 00 0e    	addd	#e <_.xy+0xa>
-    8a98:	8f          	xgdx
-    8a99:	35          	txs
-    8a9a:	20 ac       	bra	8a48 <.L21>
-
-00008a9c <main>:
-    8a9c:	5f          	clrb
-    8a9d:	f7 c0 10    	stab	c010 <one_tid>
-
-00008aa0 <.LM38>:
-    8aa0:	f7 c0 11    	stab	c011 <two_tid>
-
-00008aa3 <.LM39>:
-    8aa3:	f7 c0 12    	stab	c012 <three_tid>
-
-00008aa6 <.LM40>:
-    8aa6:	f7 c0 13    	stab	c013 <four_tid>
-
-00008aa9 <.LM41>:
-    8aa9:	f7 c0 14    	stab	c014 <light1>
-
-00008aac <.LM42>:
-    8aac:	f7 c0 15    	stab	c015 <light2>
-
-00008aaf <.LM43>:
-    8aaf:	f7 c0 16    	stab	c016 <light3>
-
-00008ab2 <.LM44>:
-    8ab2:	f7 c0 17    	stab	c017 <light4>
-
-00008ab5 <.LM45>:
-    8ab5:	bd 80 00    	jsr	8000 <presto_init>
-
-00008ab8 <.LM46>:
-    8ab8:	c6 23       	ldab	#35
-    8aba:	37          	pshb
-    8abb:	34          	des
-    8abc:	18 ce 01 00 	ldy	#100 <__debug_start>
-    8ac0:	18 3c       	pshy
-    8ac2:	ce c4 47    	ldx	#c447 <task_one_stack>
-    8ac5:	3c          	pshx
-    8ac6:	cc 89 c3    	ldd	#89c3 <One>
-    8ac9:	bd 80 dd    	jsr	80dd <presto_create_task>
-    8acc:	f7 c0 10    	stab	c010 <one_tid>
-
-00008acf <.LM47>:
-    8acf:	c6 1e       	ldab	#30
-    8ad1:	37          	pshb
-    8ad2:	34          	des
-    8ad3:	18 ce 01 00 	ldy	#100 <__debug_start>
-    8ad7:	18 3c       	pshy
-    8ad9:	ce c7 47    	ldx	#c747 <task_two_stack>
-    8adc:	3c          	pshx
-    8add:	cc 89 f7    	ldd	#89f7 <Two>
-    8ae0:	bd 80 dd    	jsr	80dd <presto_create_task>
-    8ae3:	f7 c0 11    	stab	c011 <two_tid>
-
-00008ae6 <.LM48>:
-    8ae6:	c6 14       	ldab	#20
-    8ae8:	37          	pshb
-    8ae9:	34          	des
-    8aea:	18 ce 01 00 	ldy	#100 <__debug_start>
-    8aee:	18 3c       	pshy
-    8af0:	ce c6 47    	ldx	#c647 <task_three_stack>
-    8af3:	3c          	pshx
-    8af4:	cc 8a 12    	ldd	#8a12 <Three>
-    8af7:	bd 80 dd    	jsr	80dd <presto_create_task>
-    8afa:	f7 c0 12    	stab	c012 <three_tid>
-
-00008afd <.LM49>:
-    8afd:	c6 05       	ldab	#5
-    8aff:	37          	pshb
-    8b00:	34          	des
-    8b01:	18 ce 01 00 	ldy	#100 <__debug_start>
-    8b05:	18 3c       	pshy
-    8b07:	ce c5 47    	ldx	#c547 <task_four_stack>
-    8b0a:	3c          	pshx
-    8b0b:	cc 8a 2d    	ldd	#8a2d <Four>
-    8b0e:	bd 80 dd    	jsr	80dd <presto_create_task>
-    8b11:	f7 c0 13    	stab	c013 <four_tid>
-
-00008b14 <.LM50>:
-    8b14:	bd 82 7d    	jsr	827d <presto_start_scheduler>
-
-00008b17 <.LM51>:
-    8b17:	cc 00 05    	ldd	#5 <_.xy+0x1>
-    8b1a:	bd 89 42    	jsr	8942 <presto_fatal_error>
-
-00008b1d <.LM52>:
-    8b1d:	4f          	clra
-    8b1e:	5f          	clrb
-    8b1f:	30          	tsx
-    8b20:	8f          	xgdx
-    8b21:	c3 00 18    	addd	#18 <_.xy+0x14>
-    8b24:	8f          	xgdx
-    8b25:	35          	txs
-
-00008b26 <.LBE7>:
-    8b26:	39          	rts
+0000891b <idle_task>:
+    891b:	20 fe       	bra	891b <idle_task>
+
+0000891d <tid_to_tcbptr>:
+    891d:	34          	des
+    891e:	30          	tsx
+    891f:	e7 00       	stab	0,x
+
+00008921 <.LM235>:
+    8921:	c1 0c       	cmpb	#12
+    8923:	23 06       	bls	892b <.L99>
+    8925:	cc 00 0d    	ldd	#d <_.xy+0x9>
+    8928:	bd 8a de    	jsr	8ade <presto_fatal_error>
+
+0000892b <.L99>:
+    892b:	30          	tsx
+    892c:	4f          	clra
+    892d:	e6 00       	ldab	0,x
+    892f:	05          	asld
+    8930:	05          	asld
+    8931:	05          	asld
+    8932:	05          	asld
+    8933:	c3 c4 47    	addd	#c447 <tcb_list+0x8>
+    8936:	8f          	xgdx
+    8937:	ee 00       	ldx	0,x
+    8939:	8c 00 02    	cpx	#2 <_.z>
+    893c:	26 04       	bne	8942 <.L100>
+    893e:	4f          	clra
+    893f:	5f          	clrb
+    8940:	20 0b       	bra	894d <.L98>
+
+00008942 <.L100>:
+    8942:	30          	tsx
+    8943:	4f          	clra
+    8944:	e6 00       	ldab	0,x
+    8946:	05          	asld
+    8947:	05          	asld
+    8948:	05          	asld
+    8949:	05          	asld
+    894a:	c3 c4 3f    	addd	#c43f <tcb_list>
+
+0000894d <.L98>:
+    894d:	31          	ins
+    894e:	39          	rts
+
+0000894f <premain>:
+    894f:	0f          	sei
+
+00008950 <.LM3>:
+    8950:	ce 10 3d    	ldx	#103d <.Ldebug_info0+0x164>
+    8953:	c6 01       	ldab	#1
+    8955:	e7 00       	stab	0,x
+
+00008957 <.LM4>:
+    8957:	ce 10 24    	ldx	#1024 <.Ldebug_info0+0x14b>
+    895a:	c6 06       	ldab	#6
+    895c:	e7 00       	stab	0,x
+
+0000895e <.LM5>:
+    895e:	ce 10 39    	ldx	#1039 <.Ldebug_info0+0x160>
+    8961:	c6 a3       	ldab	#163
+    8963:	e7 00       	stab	0,x
+
+00008965 <.LM6>:
+    8965:	ce 10 02    	ldx	#1002 <.Ldebug_info0+0x129>
+    8968:	c6 03       	ldab	#3
+    896a:	e7 00       	stab	0,x
+
+0000896c <.LM7>:
+    896c:	ce 10 2d    	ldx	#102d <.Ldebug_info0+0x154>
+    896f:	5f          	clrb
+    8970:	e7 00       	stab	0,x
+
+00008972 <.LM8>:
+    8972:	ce 10 28    	ldx	#1028 <.Ldebug_info0+0x14f>
+    8975:	c6 04       	ldab	#4
+    8977:	e7 00       	stab	0,x
+
+00008979 <.LM9>:
+    8979:	ce 10 20    	ldx	#1020 <.Ldebug_info0+0x147>
+    897c:	5f          	clrb
+    897d:	e7 00       	stab	0,x
+
+0000897f <.LM10>:
+    897f:	ce 10 21    	ldx	#1021 <.Ldebug_info0+0x148>
+    8982:	e7 00       	stab	0,x
+
+00008984 <.LM11>:
+    8984:	ce 10 22    	ldx	#1022 <.Ldebug_info0+0x149>
+    8987:	e7 00       	stab	0,x
+
+00008989 <.LM12>:
+    8989:	ce 10 3c    	ldx	#103c <.Ldebug_info0+0x163>
+    898c:	c6 25       	ldab	#37
+    898e:	e7 00       	stab	0,x
+
+00008990 <.LM13>:
+    8990:	39          	rts
+
+00008991 <exit>:
+    8991:	20 fe       	bra	8991 <exit>
+
+00008993 <_start>:
+    8993:	8e b5 ff    	lds	#b5ff <init_sp>
+    8996:	bd 89 4f    	jsr	894f <premain>
+    8999:	4f          	clra
+    899a:	ce c0 00    	ldx	#c000 <__specvect_end>
+
+0000899d <init_loop>:
+    899d:	8c c8 31    	cpx	#c831 <__bss_end>
+    89a0:	27 05       	beq	89a7 <init_done>
+    89a2:	a7 00       	staa	0,x
+    89a4:	08          	inx
+    89a5:	20 f6       	bra	899d <init_loop>
+
+000089a7 <init_done>:
+    89a7:	ce 8b 59    	ldx	#8b59 <__idata_start>
+    89aa:	18 ce c8 31 	ldy	#c831 <__bss_end>
+
+000089ae <copy_loop>:
+    89ae:	8c 8b 70    	cpx	#8b70 <__idata_end>
+    89b1:	27 0a       	beq	89bd <copy_done>
+    89b3:	e6 00       	ldab	0,x
+    89b5:	18 e7 00    	stab	0,y
+    89b8:	08          	inx
+    89b9:	18 08       	iny
+    89bb:	20 f1       	bra	89ae <copy_loop>
+
+000089bd <copy_done>:
+    89bd:	bd 81 1a    	jsr	811a <main>
+
+000089c0 <_postmain>:
+    89c0:	20 fe       	bra	89c0 <_postmain>
+
+000089c2 <clock_add>:
+    89c2:	18 8f       	xgdy
+
+000089c4 <.LM2>:
+    89c4:	30          	tsx
+    89c5:	ec 06       	ldd	6,x
+    89c7:	18 e3 00    	addd	0,y
+    89ca:	18 ed 00    	std	0,y
+
+000089cd <.LM3>:
+    89cd:	1a 83 03 e7 	cpd	#3e7 <.Ldebug_abbrev0+0x2f>
+    89d1:	23 17       	bls	89ea <.L14>
+    89d3:	8f          	xgdx
+
+000089d4 <.L5>:
+    89d4:	8f          	xgdx
+    89d5:	c3 fc 18    	addd	#fc18 <__comment_end+0x32fe>
+    89d8:	8f          	xgdx
+
+000089d9 <.LM5>:
+    89d9:	18 ec 02    	ldd	2,y
+    89dc:	c3 00 01    	addd	#1 <_.tmp+0x1>
+    89df:	18 ed 02    	std	2,y
+    89e2:	8c 03 e7    	cpx	#3e7 <.Ldebug_abbrev0+0x2f>
+    89e5:	22 ed       	bhi	89d4 <.L5>
+    89e7:	cd ef 00    	stx	0,y
+
+000089ea <.L14>:
+    89ea:	30          	tsx
+    89eb:	ec 04       	ldd	4,x
+    89ed:	18 e3 02    	addd	2,y
+    89f0:	18 ed 02    	std	2,y
+
+000089f3 <.LM7>:
+    89f3:	1a 83 03 e7 	cpd	#3e7 <.Ldebug_abbrev0+0x2f>
+    89f7:	23 17       	bls	8a10 <.L15>
+    89f9:	8f          	xgdx
+
+000089fa <.L9>:
+    89fa:	8f          	xgdx
+    89fb:	c3 fc 18    	addd	#fc18 <__comment_end+0x32fe>
+    89fe:	8f          	xgdx
+
+000089ff <.LM9>:
+    89ff:	18 ec 04    	ldd	4,y
+    8a02:	c3 00 01    	addd	#1 <_.tmp+0x1>
+    8a05:	18 ed 04    	std	4,y
+    8a08:	8c 03 e7    	cpx	#3e7 <.Ldebug_abbrev0+0x2f>
+    8a0b:	22 ed       	bhi	89fa <.L9>
+    8a0d:	cd ef 02    	stx	2,y
+
+00008a10 <.L15>:
+    8a10:	30          	tsx
+    8a11:	ec 02       	ldd	2,x
+    8a13:	18 e3 04    	addd	4,y
+    8a16:	18 ed 04    	std	4,y
+
+00008a19 <.LM11>:
+    8a19:	1a 83 0e 0f 	cpd	#e0f <.Ldebug_info0+0x70b>
+    8a1d:	23 17       	bls	8a36 <.L16>
+    8a1f:	8f          	xgdx
+
+00008a20 <.L13>:
+    8a20:	8f          	xgdx
+    8a21:	c3 f1 f0    	addd	#f1f0 <__comment_end+0x28d6>
+    8a24:	8f          	xgdx
+
+00008a25 <.LM13>:
+    8a25:	18 ec 06    	ldd	6,y
+    8a28:	c3 00 01    	addd	#1 <_.tmp+0x1>
+    8a2b:	18 ed 06    	std	6,y
+    8a2e:	8c 0e 0f    	cpx	#e0f <.Ldebug_info0+0x70b>
+    8a31:	22 ed       	bhi	8a20 <.L13>
+    8a33:	cd ef 04    	stx	4,y
+
+00008a36 <.L16>:
+    8a36:	39          	rts
+
+00008a37 <clock_reset>:
+    8a37:	8f          	xgdx
+
+00008a38 <.LM16>:
+    8a38:	4f          	clra
+    8a39:	5f          	clrb
+    8a3a:	ed 00       	std	0,x
+
+00008a3c <.LM17>:
+    8a3c:	ed 02       	std	2,x
+
+00008a3e <.LM18>:
+    8a3e:	ed 04       	std	4,x
+
+00008a40 <.LM19>:
+    8a40:	ed 06       	std	6,x
+
+00008a42 <.LM20>:
+    8a42:	39          	rts
+
+00008a43 <clock_add_us>:
+    8a43:	30          	tsx
+    8a44:	ee 02       	ldx	2,x
+    8a46:	3c          	pshx
+    8a47:	ce 00 00    	ldx	#0 <_.tmp>
+    8a4a:	3c          	pshx
+    8a4b:	3c          	pshx
+    8a4c:	bd 89 c2    	jsr	89c2 <clock_add>
+    8a4f:	38          	pulx
+    8a50:	38          	pulx
+    8a51:	38          	pulx
+
+00008a52 <.LM23>:
+    8a52:	39          	rts
+
+00008a53 <clock_add_ms>:
+    8a53:	ce 00 00    	ldx	#0 <_.tmp>
+    8a56:	3c          	pshx
+    8a57:	18 30       	tsy
+    8a59:	18 ee 04    	ldy	4,y
+    8a5c:	18 3c       	pshy
+    8a5e:	3c          	pshx
+    8a5f:	bd 89 c2    	jsr	89c2 <clock_add>
+    8a62:	38          	pulx
+    8a63:	38          	pulx
+    8a64:	38          	pulx
+
+00008a65 <.LM26>:
+    8a65:	39          	rts
+
+00008a66 <clock_add_sec>:
+    8a66:	ce 00 00    	ldx	#0 <_.tmp>
+    8a69:	3c          	pshx
+    8a6a:	3c          	pshx
+    8a6b:	30          	tsx
+    8a6c:	ee 06       	ldx	6,x
+    8a6e:	3c          	pshx
+    8a6f:	bd 89 c2    	jsr	89c2 <clock_add>
+    8a72:	38          	pulx
+    8a73:	38          	pulx
+    8a74:	38          	pulx
+
+00008a75 <.LM29>:
+    8a75:	39          	rts
+
+00008a76 <clock_compare>:
+    8a76:	18 8f       	xgdy
+    8a78:	30          	tsx
+    8a79:	ee 02       	ldx	2,x
+
+00008a7b <.LM31>:
+    8a7b:	18 ec 06    	ldd	6,y
+    8a7e:	1a a3 06    	cpd	6,x
+    8a81:	24 04       	bcc	8a87 <.L25>
+    8a83:	cc ff ff    	ldd	#ffff <__normvect_start+0x29>
+
+00008a86 <.LM32>:
+    8a86:	39          	rts
+
+00008a87 <.L25>:
+    8a87:	18 ec 06    	ldd	6,y
+    8a8a:	1a a3 06    	cpd	6,x
+    8a8d:	23 04       	bls	8a93 <.L26>
+    8a8f:	cc 00 01    	ldd	#1 <_.tmp+0x1>
+
+00008a92 <.LM34>:
+    8a92:	39          	rts
+
+00008a93 <.L26>:
+    8a93:	18 ec 04    	ldd	4,y
+    8a96:	1a a3 04    	cpd	4,x
+    8a99:	24 04       	bcc	8a9f <.L27>
+    8a9b:	cc ff ff    	ldd	#ffff <__normvect_start+0x29>
+
+00008a9e <.LM36>:
+    8a9e:	39          	rts
+
+00008a9f <.L27>:
+    8a9f:	18 ec 04    	ldd	4,y
+    8aa2:	1a a3 04    	cpd	4,x
+    8aa5:	23 04       	bls	8aab <.L28>
+    8aa7:	cc 00 01    	ldd	#1 <_.tmp+0x1>
+
+00008aaa <.LM38>:
+    8aaa:	39          	rts
+
+00008aab <.L28>:
+    8aab:	18 ec 02    	ldd	2,y
+    8aae:	1a a3 02    	cpd	2,x
+    8ab1:	24 04       	bcc	8ab7 <.L29>
+    8ab3:	cc ff ff    	ldd	#ffff <__normvect_start+0x29>
+
+00008ab6 <.LM40>:
+    8ab6:	39          	rts
+
+00008ab7 <.L29>:
+    8ab7:	18 ec 02    	ldd	2,y
+    8aba:	1a a3 02    	cpd	2,x
+    8abd:	23 04       	bls	8ac3 <.L30>
+    8abf:	cc 00 01    	ldd	#1 <_.tmp+0x1>
+
+00008ac2 <.LM42>:
+    8ac2:	39          	rts
+
+00008ac3 <.L30>:
+    8ac3:	18 ec 00    	ldd	0,y
+    8ac6:	1a a3 00    	cpd	0,x
+    8ac9:	24 04       	bcc	8acf <.L31>
+    8acb:	cc ff ff    	ldd	#ffff <__normvect_start+0x29>
+
+00008ace <.LM44>:
+    8ace:	39          	rts
+
+00008acf <.L31>:
+    8acf:	18 ec 00    	ldd	0,y
+    8ad2:	1a a3 00    	cpd	0,x
+    8ad5:	23 04       	bls	8adb <.L32>
+    8ad7:	cc 00 01    	ldd	#1 <_.tmp+0x1>
+
+00008ada <.LM46>:
+    8ada:	39          	rts
+
+00008adb <.L32>:
+    8adb:	4f          	clra
+    8adc:	5f          	clrb
+
+00008add <.LM48>:
+    8add:	39          	rts
+
+00008ade <presto_fatal_error>:
+    8ade:	3c          	pshx
+    8adf:	3c          	pshx
+    8ae0:	3c          	pshx
+    8ae1:	30          	tsx
+    8ae2:	ed 03       	std	3,x
+
+00008ae4 <.LBB2>:
+    8ae4:	0f          	sei
+
+00008ae5 <.LM3>:
+    8ae5:	18 df 04    	sty	*4 <_.xy>
+    8ae8:	18 ce 10 00 	ldy	#1000 <.Ldebug_info0+0x127>
+    8aec:	ca 0f       	orab	#15
+    8aee:	e7 02       	stab	2,x
+    8af0:	18 df 02    	sty	*2 <_.z>
+    8af3:	18 de 04    	ldy	*4 <_.xy>
+
+00008af6 <.L11>:
+    8af6:	df 04       	stx	*4 <_.xy>
+    8af8:	de 02       	ldx	*2 <_.z>
+    8afa:	e6 00       	ldab	0,x
+    8afc:	c8 08       	eorb	#8
+    8afe:	e7 00       	stab	0,x
+
+00008b00 <.LM5>:
+    8b00:	18 30       	tsy
+    8b02:	18 6a 01    	dec	1,y
+    8b05:	de 04       	ldx	*4 <_.xy>
+    8b07:	18 e6 01    	ldab	1,y
+    8b0a:	27 ea       	beq	8af6 <.L11>
+    8b0c:	ce 7f ff    	ldx	#7fff <__debug_end+0x3ffa>
+    8b0f:	18 e6 04    	ldab	4,y
+    8b12:	58          	aslb
+    8b13:	58          	aslb
+    8b14:	58          	aslb
+    8b15:	58          	aslb
+    8b16:	18 e7 05    	stab	5,y
+
+00008b19 <.L10>:
+    8b19:	18 30       	tsy
+    8b1b:	18 ec 00    	ldd	0,y
+    8b1e:	c5 01       	bitb	#1
+    8b20:	27 05       	beq	8b27 <.L8>
+    8b22:	18 e6 05    	ldab	5,y
+    8b25:	20 05       	bra	8b2c <.L12>
+
+00008b27 <.L8>:
+    8b27:	18 30       	tsy
+    8b29:	18 e6 02    	ldab	2,y
+
+00008b2c <.L12>:
+    8b2c:	e7 00       	stab	0,x
+    8b2e:	18 30       	tsy
+    8b30:	18 6a 01    	dec	1,y
+    8b33:	26 e4       	bne	8b19 <.L10>
+    8b35:	20 bf       	bra	8af6 <.L11>
+
+00008b37 <inert_isr>:
+    8b37:	3b          	rti
+    8b38:	39          	rts
+
+00008b39 <illop_isr>:
+    8b39:	cc 00 05    	ldd	#5 <_.xy+0x1>
+    8b3c:	bd 8a de    	jsr	8ade <presto_fatal_error>
+    8b3f:	39          	rts
+
+00008b40 <error_isr>:
+    8b40:	cc 00 06    	ldd	#6 <_.xy+0x2>
+    8b43:	bd 8a de    	jsr	8ade <presto_fatal_error>
+    8b46:	39          	rts
+
+00008b47 <set_interrupt>:
+    8b47:	c1 14       	cmpb	#20
+    8b49:	22 0d       	bhi	8b58 <.L5>
+
+00008b4b <.LM9>:
+    8b4b:	4f          	clra
+    8b4c:	05          	asld
+    8b4d:	c3 ff d6    	addd	#ffd6 <__normvect_start>
+    8b50:	30          	tsx
+    8b51:	1a ee 02    	ldy	2,x
+    8b54:	8f          	xgdx
+    8b55:	1a ef 00    	sty	0,x
+
+00008b58 <.L5>:
+    8b58:	39          	rts

@@ -5,10 +5,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define TIMER1    200
-#define TIMER2    200
-#define TIMER3     50
-#define TIMER4    200
+#define TIMER1   1000
+#define TIMER2    700
+#define TIMER3    170
+#define TIMER4     80
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -61,10 +61,13 @@ void One(void) {
 void Two(void) {
    PRESTO_MAIL_T msg;
    msg.dw.dw1=0;
+   presto_repeating_timer(two_tid,TIMER2,TIMER2,msg);
    while(1) {
       presto_wait_for_message(&msg);
       light2=light2^0x02;
       assert_lights();
+      presto_send_message(one_tid,msg);
+      presto_send_message(three_tid,msg);
    }
 }
 
@@ -85,15 +88,13 @@ void Three(void) {
 void Four(void) {
    PRESTO_MAIL_T msg;
    msg.dw.dw1=0;
-   int counter=0;
    presto_send_message(four_tid,msg);
    while(1) {
       presto_wait_for_message(&msg);
       light4=light4^0x08;
       assert_lights();
-      presto_send_message(two_tid,msg);
       presto_send_message(three_tid,msg);
-      presto_timer(four_tid,100,msg); // BUG IF - presto_send_message(four_tid,msg);
+      presto_send_message(four_tid,msg);
    }
 }
 
@@ -113,18 +114,10 @@ int main(void) {
    light4=0x00;
 
    presto_init();
-#if TIMER1 != 0
    one_tid=presto_create_task(One, task_one_stack, STACK_SIZE, 35);
-#endif
-#if TIMER2 != 0
    two_tid=presto_create_task(Two, task_two_stack, STACK_SIZE, 30);
-#endif
-#if TIMER3 != 0
    three_tid=presto_create_task(Three, task_three_stack, STACK_SIZE, 20);
-#endif
-#if TIMER4 != 0
    four_tid=presto_create_task(Four, task_four_stack, STACK_SIZE, 5);
-#endif
 
    //motor_init();
    //lcd_init();

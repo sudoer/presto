@@ -12,8 +12,8 @@
 // debugging
 
 #define STATIC    // static
-//#define CHECK_STACK_CLOBBERING
-//#define PARANOID
+#define CHECK_STACK_CLOBBERING
+#define PARANOID
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -81,7 +81,6 @@ typedef struct PRESTO_TCB {
 // STATIC GLOBAL VARIABLES
 
 STATIC PRESTO_TCB_T * current_tcb_p=NULL;
-STATIC PRESTO_TID_T current_tid=0;
 STATIC PRESTO_TCB_T * tcb_head_p=NULL;
 STATIC PRESTO_TCB_T * free_tcb_p=NULL;
 STATIC PRESTO_TCB_T tcb_list[MAX_TASKS];
@@ -100,6 +99,7 @@ STATIC PRESTO_MESSAGE_T mail_list[MAX_MESSAGES];
 
 // These are used to pass arguments to inline assembly routines.
 // Do not put these on the stack (BOOM).
+STATIC PRESTO_TCB_T * old_tcb_p;
 STATIC BYTE * global_new_sp=NULL;
 STATIC BYTE * global_old_sp=NULL;
 STATIC BYTE ** old_task_stack_pointer_p;
@@ -218,12 +218,12 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
    *sp--=0x11;         // A register
    *sp--=0x22;         // B register
    *sp--=0x00;         // condition codes (I bit cleared)
-   *sp--=0xFF;         // _.xy  0004(L)
-   *sp--=0xEE;         // _.xy  0004(H)
-   *sp--=0xDD;         // _.z   0002(L)
-   *sp--=0xCC;         // _.z   0002(H)
    *sp--=0xBB;         // _.tmp 0000(L)
    *sp--=0xAA;         // _.tmp 0000(H)
+   *sp--=0xDD;         // _.z   0002(L)
+   *sp--=0xCC;         // _.z   0002(H)
+   *sp--=0xFF;         // _.xy  0004(L)
+   *sp--=0xEE;         // _.xy  0004(H)
 
    new_tcb_p->stack_ptr=sp;
 
@@ -278,7 +278,6 @@ void presto_start_scheduler(void) {
    if(current_tcb_p==NULL) {
       presto_fatal_error(ERROR_TCB_HEAD_IS_NULL);
    }
-   current_tid=current_tcb_p->task_id;
 
    // SET UP A NEW STACK AND START EXECUTION USING IT
 
@@ -327,9 +326,6 @@ BOOLEAN presto_mail_waiting(void) {
 PRESTO_MSGID_T presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
    PRESTO_MESSAGE_T * msg_p;
    WORD lock;
-
-   // we're about to switch to a new task... interrupts off
-   // ????? presto_lock_save(lock);
 
    // we will only block if there are no messages in our queue
    if(current_tcb_p->mailbox_head==NULL) {
@@ -420,8 +416,9 @@ STATIC void systimer_Restart(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 STATIC void systimer_ISR(void) {
+   WORD lock;
    // take care of clock things
-   clock_add(&presto_master_clock,MS_PER_TICK);
+   clock_add_ms(&presto_master_clock,MS_PER_TICK);
    systimer_Restart();
    // check mail
    if(msg_DeliverToTasks()>0) {
@@ -434,8 +431,8 @@ STATIC void systimer_ISR(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 STATIC void context_switch_isr(void) {
-
    // registers are pushed when SWI is executed
+   // pseudo-registers are also pushed (tmp,z,xy)
 
    #ifdef CHECK_STACK_CLOBBERING
       // check to see if the old task has clobbered its stack
@@ -448,28 +445,38 @@ STATIC void context_switch_isr(void) {
    old_task_stack_pointer_p=&(current_tcb_p->stack_ptr);
 
    // pick next task to run
+   old_tcb_p=current_tcb_p;
    current_tcb_p=scheduler_FindNextReadyTask();
-   current_tid=current_tcb_p->task_id;
 
-   #ifdef CHECK_STACK_CLOBBERING
-      // check to see if the new task has clobbered its stack
-      if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
-      ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
-         presto_fatal_error(ERROR_CONTEXTSWITCH_STACKCLOBBERED);
-   #endif // CHECK_STACK_CLOBBERING
+   // check to see if the same task won...
+   // only manipulate stacks if there is a context SWITCH
+   if(current_tcb_p!=old_tcb_p) {
 
-   // call asm routine to set up new stack
-   // when we return, we'll be another process
-   // the asm routine will re-enable interrupts
-   global_new_sp=current_tcb_p->stack_ptr;
+      // there's a new "highest priority ready task"
 
-   // store the old stack pointer in a global place
-   asm("sts global_old_sp");
-   // put the old stack pointer into the old task's TCB
-   *old_task_stack_pointer_p=global_old_sp;
-   // load the new stack pointer
-   asm("lds global_new_sp");
+      #ifdef CHECK_STACK_CLOBBERING
+         // check to see if the new task has clobbered its stack
+         if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
+         ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
+            presto_fatal_error(ERROR_CONTEXTSWITCH_STACKCLOBBERED);
+      #endif // CHECK_STACK_CLOBBERING
 
+      // call asm routine to set up new stack
+      // when we return, we'll be another process
+      // the asm routine will re-enable interrupts
+      global_new_sp=current_tcb_p->stack_ptr;
+
+      // store the old stack pointer in a global place
+      asm("sts global_old_sp");
+      // put the old stack pointer into the old task's TCB
+      *old_task_stack_pointer_p=global_old_sp;
+      // load the new stack pointer
+      asm("lds global_new_sp");
+
+   }
+
+   // pseudo-registers are pulled (xy,z,tmp)
+   // then normal registers are pulled
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -518,7 +525,7 @@ STATIC PRESTO_MSGID_T msg_Create(PRESTO_TID_T to, unsigned short delay, unsigned
    new_mail_p->from_tid=current_tcb_p->task_id;
    new_mail_p->to_tcb_p=to_tcb_p;
    new_mail_p->delivery_time=presto_master_clock;
-   clock_add(&new_mail_p->delivery_time,delay);
+   clock_add_ms(&new_mail_p->delivery_time,delay);
    new_mail_p->period=period;
    new_mail_p->payload=payload;
    presto_unlock_restore(lock);
@@ -528,12 +535,8 @@ STATIC PRESTO_MSGID_T msg_Create(PRESTO_TID_T to, unsigned short delay, unsigned
    } else {
       msg_InsertIntoTaskQueue(new_mail_p,to_tcb_p);
       // receiver becomes ready...
-      // if receiver is some other task than current one,
-      // WHY DO WE HAVE TO CHECK THIS?  CAN'T WE 'SWI' TO OURSELF?
-      if(to_tcb_p!=current_tcb_p) {
-         // time to re-evaluate highest ready task
-         asm("swi");
-      }
+      // time to re-evaluate highest ready task
+      asm("swi");
    }
 
    return new_mail_p->serial_number;
@@ -572,8 +575,8 @@ STATIC void msg_InsertIntoPostOffice(PRESTO_MESSAGE_T * new_mail_p) {
 
 STATIC void msg_InsertIntoTaskQueue(PRESTO_MESSAGE_T * msg_p, PRESTO_TCB_T * to_tcb_p) {
    WORD lock;
-   // move the message to the tail of the task's mail list
    presto_lock_save(lock);
+   // move the message to the tail of the task's mail list
    if(to_tcb_p->mailbox_head==NULL) {
       // we are the only message in the list
       to_tcb_p->mailbox_head=msg_p;
@@ -596,6 +599,8 @@ STATIC BYTE msg_DeliverToTasks(void) {
    BYTE count=0;
    PRESTO_MESSAGE_T * msg_p;
    PRESTO_TCB_T * temp_tcb_p;
+   WORD lock;
+   presto_lock_save(lock);
    while((po_mail_p!=NULL)&&(clock_compare(&po_mail_p->delivery_time,&presto_master_clock)<=0)) {
       // we're going to use this a lot, so de-reference once
       temp_tcb_p=po_mail_p->to_tcb_p;
@@ -625,7 +630,7 @@ STATIC BYTE msg_DeliverToTasks(void) {
          duplicate_mail_p->from_tid=msg_p->from_tid;
          duplicate_mail_p->to_tcb_p=msg_p->to_tcb_p;
          duplicate_mail_p->delivery_time=msg_p->delivery_time;
-         clock_add(&duplicate_mail_p->delivery_time,msg_p->period);
+         clock_add_ms(&duplicate_mail_p->delivery_time,msg_p->period);
          duplicate_mail_p->period=msg_p->period;
          duplicate_mail_p->payload=msg_p->payload;
 
@@ -637,6 +642,7 @@ STATIC BYTE msg_DeliverToTasks(void) {
       // indicate that we moved one mail message
       count++;
    }
+   presto_unlock_restore(lock);
    return count;
 }
 

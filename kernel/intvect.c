@@ -50,6 +50,8 @@ extern void _start(void);      // entry point in crt11.s (ICC only)
 
 //void inert_isr(void) __attribute__((interrupt));
 void inert_isr(void) { asm("rti"); }
+void illop_isr(void) { presto_fatal_error(ERROR_INTR_ILLOP); }
+void error_isr(void) { presto_fatal_error(ERROR_INTR_OTHER); }
 
 ////////////////////////////////////////////////////////////////////////////////
 //   I N T E R R U P T   V E C T O R   T A B L E S
@@ -84,27 +86,27 @@ static void (*special_interrupt_vectors[])()
 
 static void (*normal_interrupt_vectors[])()
    __attribute((section(".normvect"))) = {
-   inert_isr,     // SCI
-   inert_isr,     // SPI
-   inert_isr,     // PAIE
-   inert_isr,     // PAO
-   inert_isr,     // TOF
-   inert_isr,     // TOC5
-   inert_isr,     // TOC4
-   inert_isr,     // TOC3
-   inert_isr,     // TOC2
-   inert_isr,     // TOC1
-   inert_isr,     // TIC3
-   inert_isr,     // TIC2
-   inert_isr,     // TIC1
-   inert_isr,     // RTI
-   inert_isr,     // IRQ
-   inert_isr,     // XIRQ
-   inert_isr,     // SWI
-   inert_isr,     // ILLOP
-   inert_isr,     // COP
-   inert_isr,     // CLM
-   inert_isr      // RESET
+   error_isr,     // SCI
+   error_isr,     // SPI
+   error_isr,     // PAIE
+   error_isr,     // PAO
+   error_isr,     // TOF
+   error_isr,     // TOC5
+   error_isr,     // TOC4
+   error_isr,     // TOC3
+   error_isr,     // TOC2
+   error_isr,     // TOC1
+   error_isr,     // TIC3
+   error_isr,     // TIC2
+   error_isr,     // TIC1
+   error_isr,     // RTI
+   error_isr,     // IRQ
+   error_isr,     // XIRQ
+   error_isr,     // SWI
+   illop_isr,     // ILLOP
+   error_isr,     // COP
+   error_isr,     // CLM
+   error_isr      // RESET
 };
 
 ////////////////////////////////////////////////////////////////////////////////

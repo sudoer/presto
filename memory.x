@@ -38,20 +38,20 @@ SECTIONS
    } > rom
 
 
+   /* uninitialized data */
+   .bss : {
+     __bss_start = . ;
+      *(COMMON)
+      *(.bss)
+     __bss_end = . ;
+   } > ram
+
+
    /* initialized data */
    .data : AT (__text_end) {
      __data_start = . ;
       *(.data)
      __data_end = . ;
-   } > ram
-
-
-   /* uninitialized data */
-   .bss : {
-     __bss_start = . ;
-      *(.bss)
-      *(COMMON)
-     __bss_end = . ;
    } > ram
 
 
