@@ -39,13 +39,5 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern BYTE flag_mirror;
-#define INTR_ON()        asm("cli");
-#define INTR_OFF()       asm("sei");
-#define INTR_SAVE(x)     asm("psha"); asm("tpa"); asm("staa flag_mirror"); asm("pula"); asm("sei"); (x)=flag_mirror;
-#define INTR_RESTORE(x)  if(!((x)&0x10)) asm("cli");
-
-////////////////////////////////////////////////////////////////////////////////
-
 #endif
 

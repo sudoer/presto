@@ -1,0 +1,71 @@
+   1                 	;;;-----------------------------------------
+   2                 	;;; Start MC68HC11 gcc assembly output
+   3                 	;;; gcc compiler 3.0.4 m68hc1x-20020922
+   4                 	;;; Command:	cc1 -lang-c -I\alan\play\hc11\presto -I. -iprefix c:\programs\hc11\gnu-m6811-elf\bin\.
+   5                 	;;; Compiled:	Sat Oct 12 23:29:31 2002
+   6                 	;;; (META)compiled by GNU C version 2.95.2 19991024 (release).
+   7                 	;;;-----------------------------------------
+   8                 		.file	"error.c"
+   9                 		.mode mshort
+  10                 		.sect	.text
+  11                 		.globl	presto_fatal_error
+  12                 		.type	presto_fatal_error,@function
+  13                 	presto_fatal_error:
+  14 0000 3C          		pshx
+  15 0001 34          		des
+  16 0002 30          		tsx
+  17 0003 ED 00       		std	0,x
+  18                 	; Begin inline assembler code
+  19                 	#APP
+  20 0005 0F          		sei
+  21                 	; End of inline assembler code
+  22                 	#NO_APP
+  23                 	.L4:
+  24 0006 CE 10 00    		ldx	#4096
+  25 0009 E6 00       		ldab	0,x
+  26 000b C8 08       		eorb	#8
+  27 000d E7 00       		stab	0,x
+  28                 	.L5:
+  29 000f 30          		tsx
+  30 0010 6A 02       		dec	2,x
+  31 0012 E6 02       		ldab	2,x
+  32 0014 C1 00       		cmpb	#0
+  33 0016 26 02       		bne	.L7
+  34 0018 20 EC       		bra	.L4
+  35                 	.L7:
+  36 001a 30          		tsx
+  37 001b E6 02       		ldab	2,x
+  38 001d C4 01       		andb	#1
+  39 001f C1 00       		cmpb	#0
+  40 0021 27 11       		beq	.L8
+  41 0023 E6 01       		ldab	1,x
+  42 0025 C4 0F       		andb	#15
+  43 0027 58          		aslb
+  44 0028 58          		aslb
+  45 0029 58          		aslb
+  46 002a 58          		aslb
+  47 002b C4 F0       		andb	#240
+  48 002d CE 7F FF    		ldx	#32767
+  49 0030 E7 00       		stab	0,x
+  50 0032 20 DB       		bra	.L5
+  51                 	.L8:
+  52 0034 30          		tsx
+  53 0035 E6 01       		ldab	1,x
+  54 0037 C4 F0       		andb	#240
+  55 0039 CA 0F       		orab	#15
+  56 003b CE 7F FF    		ldx	#32767
+  57 003e E7 00       		stab	0,x
+  58 0040 20 CD       		bra	.L5
+  59                 	.Lfe1:
+  60                 		.size	presto_fatal_error,.Lfe1-presto_fatal_error
+  61                 		.ident	"GCC: (GNU) 3.0.4 m68hc1x-20020922"
+DEFINED SYMBOLS
+                            *ABS*:00000000 error.c
+C:\WIN98\TEMP\cc31qjgb.s:13     .text:00000000 presto_fatal_error
+C:\WIN98\TEMP\cc31qjgb.s:23     .text:00000006 .L4
+C:\WIN98\TEMP\cc31qjgb.s:28     .text:0000000f .L5
+C:\WIN98\TEMP\cc31qjgb.s:35     .text:0000001a .L7
+C:\WIN98\TEMP\cc31qjgb.s:51     .text:00000034 .L8
+C:\WIN98\TEMP\cc31qjgb.s:59     .text:00000042 .Lfe1
+
+NO UNDEFINED SYMBOLS

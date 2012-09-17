@@ -1,0 +1,127 @@
+   1                 	;;;-----------------------------------------
+   2                 	;;; Start MC68HC11 gcc assembly output
+   3                 	;;; gcc compiler 3.0.4 m68hc1x-20020922
+   4                 	;;; Command:	cc1 -lang-c -I\alan\play\hc11\presto -I. -iprefix c:\programs\hc11\gnu-m6811-elf\bin\.
+   5                 	;;; Compiled:	Sat Oct 12 23:29:27 2002
+   6                 	;;; (META)compiled by GNU C version 2.95.2 19991024 (release).
+   7                 	;;;-----------------------------------------
+   8                 		.file	"clock.c"
+   9                 		.mode mshort
+  10                 		.sect	.text
+  11                 		.globl	clock_reset
+  12                 		.type	clock_reset,@function
+  13                 	clock_reset:
+  14 0000 3C          		pshx
+  15 0001 3C          		pshx
+  16 0002 37          		pshb
+  17 0003 36          		psha
+  18 0004 38          		pulx
+  19 0005 18 30       		tsy
+  20 0007 18 6F 03    		clr	3,y
+  21 000a 18 6F 02    		clr	2,y
+  22 000d 18 6F 01    		clr	1,y
+  23 0010 18 6F 00    		clr	0,y
+  24 0013 18 EC 02    		ldd	2,y
+  25 0016 ED 02       		std	2,x
+  26 0018 18 EC 00    		ldd	0,y
+  27 001b ED 00       		std	0,x
+  28 001d 3C          		pshx
+  29 001e 32          		pula
+  30 001f 33          		pulb
+  31 0020 38          		pulx
+  32 0021 38          		pulx
+  33 0022 39          		rts
+  34                 	.Lfe1:
+  35                 		.size	clock_reset,.Lfe1-clock_reset
+  36                 		.globl	clock_add
+  37                 		.type	clock_add,@function
+  38                 	clock_add:
+  39 0023 3C          		pshx
+  40 0024 30          		tsx
+  41 0025 ED 00       		std	0,x
+  42 0027 18 30       		tsy
+  43 0029 18 EC 06    		ldd	6,y
+  44 002c E3 08       		addd	8,x
+  45 002e 18 ED 06    		std	6,y
+  46 0031 EC 06       		ldd	6,x
+  47 0033 CD A3 08    		cpd	8,y
+  48 0036 24 08       		bhs	.L3
+  49 0038 EC 04       		ldd	4,x
+  50 003a C3 00 01    		addd	#1
+  51 003d 18 ED 04    		std	4,y
+  52                 	.L3:
+  53 0040 18 30       		tsy
+  54 0042 CD EE 00    		ldx	0,y
+  55 0045 18 EC 06    		ldd	6,y
+  56 0048 ED 02       		std	2,x
+  57 004a 18 EC 04    		ldd	4,y
+  58 004d ED 00       		std	0,x
+  59 004f 18 EC 00    		ldd	0,y
+  60 0052 38          		pulx
+  61 0053 39          		rts
+  62                 	.Lfe2:
+  63                 		.size	clock_add,.Lfe2-clock_add
+  64                 		.globl	clock_compare
+  65                 		.type	clock_compare,@function
+  66                 	clock_compare:
+  67 0054 3C          		pshx
+  68 0055 3C          		pshx
+  69 0056 18 30       		tsy
+  70 0058 18 ED 02    		std	2,y
+  71 005b CD EF 00    		stx	0,y
+  72 005e 30          		tsx
+  73 005f EC 00       		ldd	0,x
+  74 0061 CD A3 06    		cpd	6,y
+  75 0064 24 05       		bhs	.L5
+  76 0066 CC FF FF    		ldd	#-1
+  77 0069 20 2F       		bra	.L4
+  78                 	.L5:
+  79 006b 30          		tsx
+  80 006c EC 00       		ldd	0,x
+  81 006e 18 30       		tsy
+  82 0070 CD A3 06    		cpd	6,y
+  83 0073 23 05       		bls	.L6
+  84 0075 CC 00 01    		ldd	#1
+  85 0078 20 20       		bra	.L4
+  86                 	.L6:
+  87 007a 30          		tsx
+  88 007b EC 02       		ldd	2,x
+  89 007d 18 30       		tsy
+  90 007f CD A3 08    		cpd	8,y
+  91 0082 24 05       		bhs	.L7
+  92 0084 CC FF FF    		ldd	#-1
+  93 0087 20 11       		bra	.L4
+  94                 	.L7:
+  95 0089 30          		tsx
+  96 008a EC 02       		ldd	2,x
+  97 008c 18 30       		tsy
+  98 008e CD A3 08    		cpd	8,y
+  99 0091 23 05       		bls	.L8
+ 100 0093 CC 00 01    		ldd	#1
+ 101 0096 20 02       		bra	.L4
+ 102                 	.L8:
+ 103 0098 4F          		clra
+ 104 0099 5F          		clrb
+ 105                 	.L4:
+ 106 009a 38          		pulx
+ 107 009b 38          		pulx
+ 108 009c 39          		rts
+ 109                 	.Lfe3:
+ 110                 		.size	clock_compare,.Lfe3-clock_compare
+ 111                 		.ident	"GCC: (GNU) 3.0.4 m68hc1x-20020922"
+DEFINED SYMBOLS
+                            *ABS*:00000000 clock.c
+C:\WIN98\TEMP\cc31qjgb.s:13     .text:00000000 clock_reset
+C:\WIN98\TEMP\cc31qjgb.s:34     .text:00000023 .Lfe1
+C:\WIN98\TEMP\cc31qjgb.s:38     .text:00000023 clock_add
+C:\WIN98\TEMP\cc31qjgb.s:52     .text:00000040 .L3
+C:\WIN98\TEMP\cc31qjgb.s:62     .text:00000054 .Lfe2
+C:\WIN98\TEMP\cc31qjgb.s:66     .text:00000054 clock_compare
+C:\WIN98\TEMP\cc31qjgb.s:78     .text:0000006b .L5
+C:\WIN98\TEMP\cc31qjgb.s:105    .text:0000009a .L4
+C:\WIN98\TEMP\cc31qjgb.s:86     .text:0000007a .L6
+C:\WIN98\TEMP\cc31qjgb.s:94     .text:00000089 .L7
+C:\WIN98\TEMP\cc31qjgb.s:102    .text:00000098 .L8
+C:\WIN98\TEMP\cc31qjgb.s:109    .text:0000009d .Lfe3
+
+NO UNDEFINED SYMBOLS

@@ -21,62 +21,70 @@ SECTIONS
 
    /* interrupt vectors */
    .specvect : {
-     ___specvect_start = . ;
+     __specvect_start = . ;
       *(.specvect)
-     ___specvect_end = . ;
+     __specvect_end = . ;
    } > specvect
 
 
    /* interrupt vectors */
    .normvect : {
-     ___normvect_start = . ;
+     __normvect_start = . ;
       *(.normvect)
-     ___normvect_end = . ;
+     __normvect_end = . ;
    } > normvect
 
 
    /* code */
    .text : {
-     ___text_start = . ;
+     __text_start = . ;
      *(.install0)
      *(.install2)
      *(.install4)
      *(.text)
      *(.strings)
-     ___text_end = . ;
+     __text_end = . ;
    } > ram1
 
 
-   /* uninitialized data */
+   /* uninitialized data (variables) */
    .bss : {
-     ___bss_start = . ;
+     __bss_start = . ;
       *(.bss)
       *(COMMON)
-     ___bss_end = . ;
+     __bss_end = . ;
    } > ram2
 
 
-   /* initialized data */
-   .init : {
-     ___data_start = . ;
+   /* initialized data (values) */
+   .idata : {
+     __idata_start = . ;
       *(.data)
-     ___data_end = . ;
+     __idata_end = . ;
    } > ram1
+
+
+   /* initialized data (variables) */
+   .data : {
+     __data_start = . ;
+      *(.data)
+     __data_end = . ;
+   } > ram2
 
 
    /* stack */
    .stack : {
-     ___stack_start = . ;
+     __stack_start = . ;
       *(.stack)
-     ___stack_end = . ;
+     __stack_end = . ;
    } > ram2
 
 
    /* symbol information */
    .comment : {
-     ___comment_start = . ;
+     __comment_start = . ;
      *(.comment)
-     ___comment_end = . ;
+     __comment_end = . ;
    } > ram2
 
 

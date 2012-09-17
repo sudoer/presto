@@ -7,7 +7,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define MAX_USER_TASKS       4
+#define MAX_USER_TASKS       12
 #define MAX_TASKS            MAX_USER_TASKS+1
 #define MAX_MESSAGES         20
 

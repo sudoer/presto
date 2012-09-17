@@ -31,9 +31,11 @@ sub setup_project {
    $TARGET="presto";
    @SRC_FILES=(
                "app\\test.c",
+               "kernel\\crt11.s",
                "kernel\\clock.c",
+               "kernel\\locks.c",
                "kernel\\system.c",
-               "kernel\\debug.c",
+               "kernel\\error.c",
                "kernel\\intvect.c",
                "kernel\\kernel.c",
    );
@@ -161,6 +163,16 @@ sub compile_stage {
                         ."$src_name");
             print("OK\n");
             chdir($build_dir);
+         } elsif($src_ext eq "s") {
+            print($indent."ASSEMBLING...");
+            if($debug) { print("\n"); }
+            chdir($src_dir);
+            $errors+=run("as.exe "
+                        ."-a -L -ahlns=$build_dir\\$OBJ_DIR\\$src_base.lst "
+                        ."-o $build_dir\\$OBJ_DIR\\$src_base.o "
+                        ."$src_name");
+            print("OK\n");
+            chdir($build_dir);
          } else {
             print("HUH?\n");
          }
@@ -212,15 +224,14 @@ sub link_stage {
       ."--trace "
       ."-nostdlib "
       ."-nostartfiles "
-      ."-defsym _io_ports=0x1000 "
-      ."-defsym _stack=0xB5FF "
+      ."-defsym init_sp=0xB5FF "
       ."-defsym _.tmp=0x0 "
       ."-defsym _.z=0x2 "
       ."-defsym _.xy=0x4 "
       ."-Map $TARGET.map " # --cref "
       #."--strip-all "
       ."-o $TARGET.s19 "
-      ."../lib/crt0.o $ofiles");
+      ."$ofiles");
 
    chdir("$build_dir");
 

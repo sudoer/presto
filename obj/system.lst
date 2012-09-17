@@ -1,0 +1,67 @@
+   1                 	;;;-----------------------------------------
+   2                 	;;; Start MC68HC11 gcc assembly output
+   3                 	;;; gcc compiler 3.0.4 m68hc1x-20020922
+   4                 	;;; Command:	cc1 -lang-c -I\alan\play\hc11\presto -I. -iprefix c:\programs\hc11\gnu-m6811-elf\bin\.
+   5                 	;;; Compiled:	Sat Oct 12 23:29:29 2002
+   6                 	;;; (META)compiled by GNU C version 2.95.2 19991024 (release).
+   7                 	;;;-----------------------------------------
+   8                 		.file	"system.c"
+   9                 		.mode mshort
+  10                 		.sect	.text
+  11                 		.globl	premain
+  12                 		.type	premain,@function
+  13                 	premain:
+  14                 	; Begin inline assembler code
+  15                 	#APP
+  16 0000 0F          		sei
+  17                 	; End of inline assembler code
+  18                 	#NO_APP
+  19 0001 CE 10 3D    		ldx	#4157
+  20 0004 C6 01       		ldab	#1
+  21 0006 E7 00       		stab	0,x
+  22 0008 CE 10 24    		ldx	#4132
+  23 000b C6 06       		ldab	#6
+  24 000d E7 00       		stab	0,x
+  25 000f CE 10 39    		ldx	#4153
+  26 0012 C6 A3       		ldab	#163
+  27 0014 E7 00       		stab	0,x
+  28 0016 CE 10 02    		ldx	#4098
+  29 0019 C6 03       		ldab	#3
+  30 001b E7 00       		stab	0,x
+  31 001d CE 10 2D    		ldx	#4141
+  32 0020 6F 00       		clr	0,x
+  33 0022 CE 10 28    		ldx	#4136
+  34 0025 C6 04       		ldab	#4
+  35 0027 E7 00       		stab	0,x
+  36 0029 CE 10 20    		ldx	#4128
+  37 002c 6F 00       		clr	0,x
+  38 002e CE 10 21    		ldx	#4129
+  39 0031 6F 00       		clr	0,x
+  40 0033 CE 10 22    		ldx	#4130
+  41 0036 6F 00       		clr	0,x
+  42 0038 CE 10 3C    		ldx	#4156
+  43 003b C6 25       		ldab	#37
+  44 003d E7 00       		stab	0,x
+  45 003f 39          		rts
+  46                 	.Lfe1:
+  47                 		.size	premain,.Lfe1-premain
+  48                 		.globl	exit
+  49                 		.type	exit,@function
+  50                 	exit:
+  51 0040 3C          		pshx
+  52 0041 30          		tsx
+  53 0042 ED 00       		std	0,x
+  54                 	.L3:
+  55 0044 20 FE       		bra	.L3
+  56                 	.Lfe2:
+  57                 		.size	exit,.Lfe2-exit
+  58                 		.ident	"GCC: (GNU) 3.0.4 m68hc1x-20020922"
+DEFINED SYMBOLS
+                            *ABS*:00000000 system.c
+C:\WIN98\TEMP\cc31qjgb.s:13     .text:00000000 premain
+C:\WIN98\TEMP\cc31qjgb.s:46     .text:00000040 .Lfe1
+C:\WIN98\TEMP\cc31qjgb.s:50     .text:00000040 exit
+C:\WIN98\TEMP\cc31qjgb.s:54     .text:00000044 .L3
+C:\WIN98\TEMP\cc31qjgb.s:56     .text:00000046 .Lfe2
+
+NO UNDEFINED SYMBOLS

@@ -1,0 +1,16 @@
+;Codewright Project Space File (do not remove or modify this line)
+[State]
+StateWindowFrame=53,2,864,600,0x03097fca
+_StateHistory=PROJECTS,'.\presto.pjt'
+_RestoreProject='.\presto.pjt'
+ProjSpaceFlags=0x00000000, 1
+ProjViewSetShow=ABCCCc
+
+[Project]
+ConfigSetUserWorkspace=''
+ConfigSetUserWorkspaceParser=''
+ConfigSetUserWorkspaceTimeStamp=0
+ConfigSetUserWorkspaceAutoSync=0
+
+[Project.".\presto.pjt"]
+

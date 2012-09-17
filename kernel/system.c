@@ -9,8 +9,9 @@
 
 #include "hc11regs.h"
 #include "system.h"
-#include "kernel\kernel.h"
+#include "kernel.h"
 #include "intvect.h"
+#include "locks.h"
 
 
 extern void _start();   // entry point in crt11.s or crt0.o
@@ -44,7 +45,7 @@ extern void _start();   // entry point in crt11.s or crt0.o
 // This function is called from the startup (crt11.s) before interrupts have
 // been turned on but after the stack has been set up.
 
-void __premain() {
+void premain() {
 
    INTR_OFF();
 

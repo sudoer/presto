@@ -8,9 +8,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "hc11regs.h"
-#include "presto.h"       // for INTR_OFF()
+#include "locks.h"
 #include "types.h"
-#include "debug.h"
+#include "error.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,30 +59,14 @@
 // this is the memory location for the motor controller
 #define ERROR_PORT *(unsigned char *)(0x7FFF)
 
-void presto_fatal_error(BYTE err) {
-   // should never get here
+void presto_fatal_error(error_number_e err) {
    BYTE delay;
-   //BYTE temp_reg;
    INTR_OFF();
-
-   // Reload the original stack pointer, so we don't trash anything else.
-   // Oops, by doing this, the compiler references STACK+something, and we
-   // trash eeprom memory, and we read false values for passed parameters!
-   //asm("lds #_stack");         // TODO - use init_sp instead
-
    // speaker is always an output
-   //BITSET(DDRD,4);         // LED is an output
    while(1) {
       // toggle speaker
       BITNOT(PORTA,3);
-      //temp_reg=PORTA;
-      //temp_reg^=(1<<3);
-      //PORTA=temp_reg;
-      //BITCLR(PORTD,4);     // LED on
       while(--delay>0) {
-         // This will force the motor lights to blink so fast
-         // that all eight of them will appear to be on.
-         // ERROR_PORT=delay;
          if(delay&0x01) ERROR_PORT=0xF0&((err&0x0F)<<4);
          else ERROR_PORT=0x0F|(err&0xF0);
       }

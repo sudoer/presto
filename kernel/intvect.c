@@ -33,7 +33,7 @@
 //   D E P E N D E N C I E S
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "debug.h"
+#include "error.h"
 #include "intvect.h"
 
 
@@ -67,7 +67,7 @@ void inert_rti_isr(void)   { asm("rti"); }
 void inert_irq_isr(void)   { asm("rti"); }
 void inert_xirq_isr(void)  { asm("rti"); }
 void inert_swi_isr(void)   { asm("rti"); }
-void inert_illop_isr(void) { presto_fatal_error(0x55); }
+void inert_illop_isr(void) { presto_fatal_error(ERROR_INTR_ILLOP); }
 void inert_cop_isr(void)   { asm("rti"); }
 void inert_clm_isr(void)   { asm("rti"); }
 void inert_reset_isr(void) { asm("rti"); }

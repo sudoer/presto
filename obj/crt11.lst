@@ -1,0 +1,86 @@
+   1                 	USEHEAP = 0
+   2                 	
+   3                 	
+   4                 	   .text
+   5                 	   .globl _start
+   6                 	
+   7                 	
+   8                 	_start:
+   9 0000 8E 00 00    	   lds   #init_sp
+  10 0003 BD 00 00    	   jsr   premain
+  11                 	
+  12                 	
+  13                 	; clear BSS
+  14 0006 4F          	   clra
+  15 0007 CE 00 00    	   ldx   #__bss_start
+  16                 	init_loop:
+  17 000a 8C 00 00    	   cpx   #__bss_end
+  18 000d 27 05       	   beq   init_done
+  19 000f A7 00       	   staa  0,x
+  20 0011 08          	   inx
+  21 0012 20 F6       	   bra   init_loop
+  22                 	init_done:
+  23                 	
+  24                 	
+  25                 	; copy initialized idata to data
+  26                 	; idata in ppage and data in dpage
+  27 0014 CE 00 00    	   ldx   #__idata_start
+  28 0017 18 CE 00 00 	   ldy   #__data_start
+  29                 	copy_loop:
+  30 001b 8C 00 00    	   cpx   #__idata_end
+  31 001e 27 0A       	   beq copy_done
+  32 0020 E6 00       	   ldab 0,x
+  33 0022 18 E7 00    	   stab 0,y
+  34 0025 08          	   inx
+  35 0026 18 08       	   iny
+  36 0028 20 F1       	   bra copy_loop
+  37                 	copy_done:
+  38                 	
+  39                 	
+  40                 	; set up heap space
+  41                 	.if USEHEAP
+  42                 	   ldd   #heap_size
+  43                 	   beq   heap_done
+  44                 	   addd #__bss_end
+  45                 	   pshb
+  46                 	   psha
+  47                 	   ldd   #__bss_end
+  48                 	   jsr   __NewHeap
+  49                 	   pulx
+  50                 	.endif
+  51                 	heap_done:
+  52                 	
+  53                 	
+  54                 	; call user main routine
+  55 002a BD 00 00    	   jsr main
+  56                 	
+  57                 	_postmain:
+  58 002d 20 FE       	   bra   _postmain
+  59                 	
+  60                 	
+  61                 	;    ; __idata_start MUST follow text area for it to be in ROM
+  62                 	;   .area idata
+  63                 	;__idata_start::
+  64                 	;   .data
+  65                 	;__data_start::
+  66                 	;   .area bss
+  67                 	;__bss_start::
+DEFINED SYMBOLS
+                            *ABS*:00000000 USEHEAP
+             crt11.s:8      .text:00000000 _start
+             crt11.s:16     .text:0000000a init_loop
+             crt11.s:22     .text:00000014 init_done
+             crt11.s:29     .text:0000001b copy_loop
+             crt11.s:37     .text:0000002a copy_done
+             crt11.s:51     .text:0000002a heap_done
+             crt11.s:57     .text:0000002d _postmain
+
+UNDEFINED SYMBOLS
+init_sp
+premain
+__bss_start
+__bss_end
+__idata_start
+__data_start
+__idata_end
+main
