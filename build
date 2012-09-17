@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 
 ################################################################################
 #   B A S I C   I N C L U D E S   A N D   D E B U G   I N F O
@@ -189,11 +190,11 @@ sub cpu_specific_settings {
    $GCC_LIB=""
       .ifcpu($CPU_M68HC11,"/usr/lib/gcc-lib/m68hc11/3.2.3/libgcc.a")
       .ifcpu($CPU_AVR8515,"/usr/lib/gcc-lib/avr/3.3.2/libgcc.a")
-      .ifcpu($CPU_MEGA169,"/usr/lib/gcc/avr/3.4.0/libgcc.a")
+      .ifcpu($CPU_MEGA169,"/usr/lib/gcc/avr/4.1.0/avr5/libgcc.a")
       ;
    $CPU_RUNTIME_LIB=""
       .ifcpu($CPU_AVR8515,"/usr/avr/lib/crts8515.o ")
-      .ifcpu($CPU_MEGA169,"/usr/avr/lib/avr5/crtm169.o ")
+      #.ifcpu($CPU_MEGA169,"/usr/avr/lib/avr5/crtm169.o ")
       ;
    $CPU_LINKER_OPTIONS=""
       # DEFINE ARCHITECTURE

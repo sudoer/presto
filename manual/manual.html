@@ -27,11 +27,12 @@ host program.
 
 This fascination quickly turned into a necessity when I was asked to add a
 network interface to an existing product.  What evolved out of that project was
-a cooperative multi-tasking scheduler.  Simply put, I kept a list of functions
-that I needed to call, and I called them until they were all gone. Except each
-time I called one function, new ones might be added to the list.  This simple
+a cooperative multi-tasking scheduler.  This was a small but powerful system
+that kept a list of functions that needed to be run, and it ran every function
+in the list.  However, as one function ran, it would add more functions to the
+list, creating long threads of execution... exactly what was needed.  This simple
 and elegant solution solved that particular problem, and that system is still
-in production today.  But a deeper problem bothered me.
+in production today.  But a deeper question troubled me.
 
 <P>
 
@@ -48,7 +49,7 @@ inspiration behind the development of Presto.
 
 As luck would have it, several things happened at nearly the same time, and
 so the secrets of multi-tasking were revealed.  I decided to build a simple
-single-board computer that would be me development platform.  A friend
+single-board computer that would be my development platform.  A friend
 convinced me to build a Motorola 68HC11-based "Handyboard".  Presto takes
 its name from my friend's last name (Preston).  Plus, I thought that "presto"
 sounded magical.  At the same time, I read an article in <I>Circuit Cellar</I>
@@ -67,23 +68,23 @@ before I found and fixed that bug.
 <P>
 
 I studied the code, and I ran it on an emulator program, and I took the board
-to work and run it on a logic analyzer, but the bug still eluded me.  Since I
+to work and ran it on a logic analyzer, but the bug still eluded me.  Since I
 was working full time and going to graduate school, I tended to put my project
 on a shelf for months at a time.  When I did have time to devote to it, it was
 often only a few hours, and I spent most of that time getting re-aquainted with
-where I had left off.  I graduated.  I moved to Singapore.  I had a baby.
-Where was I going to find some free time?
+where I had left off.  I graduated.  My family moved to Singapore.  We had a
+baby.  Where was I going to find some free time?
 
 <P>
 
 I decided that in order to find the bug, I needed to inspect every instruction
-that ran on the processor.  I would stay up late after the baby went to sleep,
+that ran on the processor.  I stayed up late after the baby went to sleep,
 surfing the net for every emulator I could find.  I decided that they fell into
 two categories: those that emulated the processor correctly but had horrible
 user interfaces, and those that were easy to use but did not emulate the
 processor correctly.  Specifically, I needed to be able to run a million
-instructions without pressing a button a million times.  And I needed to
-generate timer interrupts.
+instructions without pressing the mouse button a million times.  And I needed
+to generate timer interrupts.
 
 <P>
 
@@ -94,32 +95,32 @@ the processor manual to see which one was correct.
 
 <P>
 
-Still the bug eluded me.  I moved back to the US.  We were about to have another
-baby.  I knew that I could kiss those precious moments of free time away.  So
-with time ticking away, I focused on the problem by running the simulator for
-hours and generating huge log files.  I wrote a perl script that would read the
-log files and summarize what was going on.  What function was the program counter
-pointing to?  Where was the stack pointer pointing?  Was it within one of the
-task stacks?
+Still the Presto bug eluded me.  We moved back to the US.  We were about to
+have another baby.  I knew that I could kiss those precious moments of free
+time away.  So with time ticking away, I focused on the problem by running the
+simulator for hours and generating huge log files.  I wrote a perl script that
+would read the log files and summarize what was going on.  What function was
+the program counter pointing to?  Where was the stack pointer pointing?  Was
+it pointing within one of the task stacks, or off into the weeds?
 
 <P>
 
 Eventually, my perl script determined that my stack pointer had drifted out of
 one task's stack.  In fact, it had popped one too many bytes off of one task's
 stack.  Depending on what was in that doomed location of memory, the result
-might have been catastrophic, or it might have gone unnoticed.  Searching the
-code, I quickly found that in one particular instance, the stack would get
-clobbered.  It only occured when the kernel decided to re-evaluate which task
-to run, and the winning task was the same one that was already running.  I
-solved the problem that night, and it felt great.
+might have been catastrophic or it might have gone unnoticed.  Searching the
+code, I quickly found that in one particular instance, this extra byte would
+be popped.  It was very subtle... it only occured when the kernel decided to
+re-evaluate which task to run, and the winning task was the same one that was
+already running.  I solved the problem that night, and it felt great.
 
 <P>
 
 The good news is that in the process of trying to find a bug over a period of
 four years (sitting the project on a shelf for months at a time and dusting it
-off again for a late night of bug-hunting), I wrote and re-wrote the entire
-kernel a couple of times.  As a by-product of my bug-hunt, the kernel evolved
-into a much cleaner piece of code.
+off again and again for late-night bug-hunting sessions), I wrote and re-wrote
+the entire kernel a couple of times.  As a by-product of my prolonged bug-hunt,
+the kernel evolved into a much cleaner piece of code.
 
 
 <!-- ----------------------------------------------------------------------- -->

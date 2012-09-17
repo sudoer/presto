@@ -18,9 +18,9 @@ extern void hwtimer_restart(void);
 //   T I M E R   I S R   S T U F F
 ////////////////////////////////////////////////////////////////////////////////
 
-#define CPU_TIMER_DECLARE_ISR(x)   void x (void) __attribute__((naked));
-#define CPU_TIMER_START_OF_ISR()   CPU_PUSH_ALL_REGISTERS();
-#define CPU_TIMER_END_OF_ISR()     CPU_POP_ALL_REGISTERS();
+#define CPU_TIMER_DECLARE_ISR(x)   void x (void) __attribute__((signal));
+#define CPU_TIMER_START_OF_ISR()   ; // CPU_PUSH_ALL_REGISTERS();
+#define CPU_TIMER_END_OF_ISR()     ; // CPU_POP_ALL_REGISTERS();
 
 ////////////////////////////////////////////////////////////////////////////////
 //   T I M E R   F U N C T I O N S
