@@ -1,16 +1,16 @@
 
 #include "presto.h"
 #include "types.h"
-#include "services.h"
-#include "priority.h"
+//#include "services.h"
+//#include "priority.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // system crashes after 21 seconds (42*500=21000,35*600=21000,30*700=21000)
-#define TIMER0    1200
 #define TIMER1    5000
 #define TIMER2    600
 #define TIMER3    1000
+#define TIMER4    1200
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -19,66 +19,77 @@
 /*static*/ BYTE task_one_stack[STACK_SIZE];
 /*static*/ BYTE task_two_stack[STACK_SIZE];
 /*static*/ BYTE task_three_stack[STACK_SIZE];
-/*static*/ BYTE task_zero_stack[STACK_SIZE];
+/*static*/ BYTE task_four_stack[STACK_SIZE];
 
 PRESTO_TID_T one_tid=0;
 PRESTO_TID_T two_tid=0;
 PRESTO_TID_T three_tid=0;
-PRESTO_TID_T zero_tid=0;
+PRESTO_TID_T four_tid=0;
+
+BYTE light1=0x00;
+BYTE light2=0x00;
+BYTE light3=0x00;
+BYTE light4=0x00;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Zero(void) {
-   sint8 speed0=MOTORS_MAX_SPEED;
-   PRESTO_MAIL_T msg;
-   msg.dw.dw1=0;
-   while(1) {
-      motor_set_speed(0,speed0);
-      presto_timer(zero_tid,TIMER0,msg);
-      presto_wait_for_message(&msg);
-      speed0=0-speed0;
-   }
+#define MOTOR_PORT *(unsigned char *)(0x7FFF)
+
+void assert_lights(void) {
+   BYTE lights;
+   lights=0xF0|light1|light2|light3|light4;
+   MOTOR_PORT=lights;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void One(void) {
-   sint8 speed1=MOTORS_MAX_SPEED;
    PRESTO_MAIL_T msg;
    msg.dw.dw1=0;
    while(1) {
-      motor_set_speed(1,speed1);
+      light1=light1^0x01;
+      assert_lights();
       presto_timer(one_tid,TIMER1,msg);
       presto_wait_for_message(&msg);
-      speed1=0-speed1;
    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void Two(void) {
-   sint8 speed2=MOTORS_MAX_SPEED;
    PRESTO_MAIL_T msg;
    msg.dw.dw1=0;
    while(1) {
-      motor_set_speed(2,speed2);
+      light2=light2^0x02;
+      assert_lights();
       presto_timer(two_tid,TIMER2,msg);
       presto_wait_for_message(&msg);
-      speed2=0-speed2;
    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void Three(void) {
-   sint8 speed3=MOTORS_MAX_SPEED;
    PRESTO_MAIL_T msg;
    msg.dw.dw1=0;
    while(1) {
-      motor_set_speed(3,speed3);
+      light3=light3^0x04;
+      assert_lights();
       presto_timer(three_tid,TIMER3,msg);
       presto_wait_for_message(&msg);
-      speed3=0-speed3;
+   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Four(void) {
+   PRESTO_MAIL_T msg;
+   msg.dw.dw1=0;
+   while(1) {
+      light4=light4^0x08;
+      assert_lights();
+      presto_timer(four_tid,TIMER4,msg);
+      presto_wait_for_message(&msg);
    }
 }
 
@@ -87,9 +98,6 @@ void Three(void) {
 int main(void) {
 
    presto_init();
-#if TIMER0 != 0
-   zero_tid=presto_create_task(Zero, task_zero_stack, STACK_SIZE, 30);
-#endif
 #if TIMER1 != 0
    one_tid=presto_create_task(One, task_one_stack, STACK_SIZE, 35);
 #endif
@@ -99,8 +107,11 @@ int main(void) {
 #if TIMER3 != 0
    three_tid=presto_create_task(Three, task_three_stack, STACK_SIZE, 45);
 #endif
+#if TIMER4 != 0
+   four_tid=presto_create_task(Four, task_four_stack, STACK_SIZE, 50);
+#endif
 
-   motor_init();
+   //motor_init();
    //lcd_init();
    //serial_init(9600);
    //debugger_init();

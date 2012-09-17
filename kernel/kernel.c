@@ -282,7 +282,7 @@ void presto_system_isr_wrapper(void) {
    // inline "RTI" instruction to by-pass the stuff at the bottom.
    asm("_presto_system_isr::");
 
-   INTR_OFF();
+   // interrupts are disabled at this time
 
    // take care of clock things
    presto_master_clock=clock_add(presto_master_clock,MS_PER_TICK);
@@ -315,11 +315,13 @@ void presto_system_isr_wrapper(void) {
       asm("lds _global_new_sp");
    }
 
+/*
    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
    // That way, the new task will have interrupts enabled when it wakes up.
    asm("pula");
    ENABLE_CCR_INTERRUPT_BIT;
    asm("psha");
+*/
 
    // The end of this function SHOULD be an RTI (instead of RTS), because it is
    // an interrupt.  But the ICC compiler adds a lot of stuff at the beginning
@@ -376,11 +378,13 @@ void context_switch_wrapper(void) {
    asm("sts 0,y");
    asm("lds _global_new_sp");
 
+/*
    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
    // That way, the new task will have interrupts enabled when it wakes up.
    asm("pula");
    ENABLE_CCR_INTERRUPT_BIT;
    asm("psha");
+*/
 
    // Normally, this function would end with an RTS, but we want to act EXACTLY
    // the same as if we had just been inside of an interrupt.  So we manually

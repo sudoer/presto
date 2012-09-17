@@ -6,7 +6,7 @@ extern void inert_isr();
 
 // The handyboard boots up in a mode called "SPECIAL TEST" operating mode.
 // This is because certain pins are asserted high or low (when the STOP button
-// button is pressed, it instead boots up into SPECIAL BOOTSTRAP mode).
+// button is pressed, it boots up into SPECIAL BOOTSTRAP mode instead).
 
 // One of the side effects of booting in one of these two so-called "special"
 // modes is that the interrupt vector table is stored at 0xBFD6 instead of the

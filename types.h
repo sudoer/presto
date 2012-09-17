@@ -59,7 +59,7 @@ typedef union MISCLONG {
 
 // TO REDUCE THE NUMBER OF WARNINGS GENERATED
 
-#define NOT_USED(x)        (x);
+#define NOT_USED(p) if (&p) {}
 
 ////////////////////////////////////////////////////////////////////////////////
 

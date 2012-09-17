@@ -10,9 +10,9 @@
 #include "hc11regs.h"
 #include "system.h"
 #include "kernel\kernel.h"
-#include "services\serial.h"
-#include "services\motors.h"
-#include "services\sound.h"
+//#include "services\serial.h"
+//#include "services\motors.h"
+//#include "services\sound.h"
 
 // ICC only
 extern void _start();   // entry point in crt11.s
@@ -42,7 +42,6 @@ void inert_isr(void);
 ////////////////////////////////////////////////////////////////////////////////
 
 // INTERRUPT VECTORS
-
 
 #pragma abs_address:0xFFD6 // for NORMAL and EXPANDED MULTIPLEXED modes
 void (*normal_interrupt_vectors[])() = {
@@ -128,8 +127,8 @@ void _HC11Setup() {
    normal_interrupt_vectors[INTR_RTI]=  inert_isr;
    normal_interrupt_vectors[INTR_IRQ]=  inert_isr;
    normal_interrupt_vectors[INTR_XIRQ]= inert_isr;
-   normal_interrupt_vectors[INTR_SWI]=  presto_swi;
-   normal_interrupt_vectors[INTR_ILLOP]=inert_isr;
+   normal_interrupt_vectors[INTR_SWI]=  inert_isr;
+   normal_interrupt_vectors[INTR_ILLOP]=presto_fatal_error;
    normal_interrupt_vectors[INTR_COP]=  inert_isr;
    normal_interrupt_vectors[INTR_CLM]=  inert_isr;
    normal_interrupt_vectors[INTR_RESET]=_start;
@@ -146,13 +145,6 @@ void _HC11Setup() {
 
 #pragma interrupt inert_isr
 void inert_isr(void) {
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-#pragma interrupt presto_swi
-void presto_swi(void) {
-   presto_fatal_error();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -176,6 +168,9 @@ void presto_fatal_error(void) {
    BYTE delay;
    INTR_OFF();
 
+   // reload the original stack pointer, so we don't trash anything else
+   asm("lds #init_sp");
+
    // speaker is always an output
    BITSET(DDRD,4);              // LED is an output
    while(1) {
@@ -193,4 +188,3 @@ void presto_fatal_error(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
