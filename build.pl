@@ -44,33 +44,16 @@ sub setup_project {
                "kernel\\specvect.c",
                "kernel\\kernel.c",
    );
-   @LIBS=();
+
    print("OK\n");
 }
 
 ################################################################################
 
 sub setup_compiler {
-   # COMPILER CONFIGURATION
-
    print("setting up compiler...");
-   $compiler_home="c:\\programs\\hc11\\gnu";
+   $compiler_home="c:\\programs\\hc11\\gnu-m6811-elf";
    add_to_path("$compiler_home\\BIN");
-
-   #set GCCPATH=h:\68hc11\gcc
-   #set DJGPP=%GCCPATH%\djgpp.env
-   #set GO32TMP=%GCCPATH%\tmp
-   #set C_INCLUDE_PATH=%GCCPATH%\include
-   #set CPLUS_INCLUDE_PATH=%GCCPATH%\include
-   #set PATH=%PATH%;%GCCPATH%\bin
-
-   #rem batch file for compiling a gnu c program
-   #rem uses the new aslink and as6811 programs
-   #rem SLB 1999
-   #xgcc -c -O2 -mlong_branch -S %2 %3 %4 %1.c
-   #xgcc -c -O2 -mlong_branch -S %2 %3 %4 all.c
-   #as6811 -loszg %1.s
-   #as6811 -loszg all.s
    print("OK\n");
 }
 
@@ -78,16 +61,6 @@ sub setup_compiler {
 
 sub setup_linker {
    print("setting up linker...");
-   #echo -mszu > %1.lnk
-   #echo -b_CODE=0x0d000 >> %1.lnk
-   #echo -b_BSS=0x0C000 >> %1.lnk
-   #echo %1 >> %1.lnk
-   #echo crt0 >> %1.lnk
-   #echo all >> %1.lnk
-   #echo -e >> %1.lnk
-   #aslink -f %1
-   #$gcc_lib="$compiler_home\\LIB";
-   #setenv("ICC11_LIB",$icc11_lib);
    print("OK\n");
 }
 
@@ -176,7 +149,7 @@ sub compile_stage {
             print($indent."COMPILING...");
             if($debug) { print("\n"); }
             chdir($src_dir);
-            $errors|=run("m6811-elf-gcc.exe "
+            $errors|=run("gcc.exe "
                         ."-m68hc11 "
                         ."-DGCC "
                         ."-I$build_dir -I. "
@@ -185,12 +158,9 @@ sub compile_stage {
                         ."-fomit-frame-pointer "
                         ."-msoft-reg-count=0 "
                         ."-c "
+                        #."-save-temps "
                         ."-o $build_dir\\$OBJ_DIR\\$src_base.o "
                         ."$src_name");
-            #chdir("$build_dir\\$OBJ_DIR");
-            # GNU compiler thinks that LDD and STD can use "x" as address -- should use "0,x"
-            #search_and_replace("$src_base.asm","\tldd\tx","\tldd\t0,x\t","\tstd\tx","\tstd\t0,x\t");
-            #$errors|=run("as6811 -loszg $src_base");
             chdir($build_dir);
             print("OK\n");
          } else {
@@ -239,28 +209,40 @@ sub link_stage {
    }
 
    print("LINKING...\n");
-   run("m6811-elf-ld.exe "
-      ."--script ../linker.x "
+   run("ld.exe "
+      ."--script ../memory.x "
+      ."--trace "
       ."-nostdlib "
       ."-nostartfiles "
       ."-defsym _io_ports=0x1000 "
+      ."-defsym _stack=0xB5FF "
+      ."-defsym vectors_addr=0xBFC0 "
       ."-defsym _.tmp=0x0 "
       ."-defsym _.z=0x2 "
       ."-defsym _.xy=0x4 "
-      ."-defsym vectors_addr=0xbfc0 "
+      ."-Map $TARGET.map "  #"--cref "
+      #."--strip-all "
       ."-o $TARGET.elf "
       ."../lib/crt0.o $ofiles");
    print("OK\n");
    print("\n");
 
    print("CONVERTING TO S19...\n");
-   run("m6811-elf-objcopy "
+   # do not put page0 or bss into S-record file (they are initialized in crt0)
+   run("objcopy "
       ."--only-section=.text "
-      ."--only-section=.rodata "
-      ."--only-section=.vectors "
       ."--only-section=.data "
+      ."--only-section=.specvect "
+      ."--only-section=.normvect "
+      ."--only-section=.install1 "
+      ."--only-section=.install2 "
+      ."--only-section=.install4 "
+      ."--verbose "
       ."--output-target=srec "
       ."$TARGET.elf $TARGET.s19");
+
+   chdir("$build_dir");
+
    print("OK\n");
    print("\n");
 
@@ -271,7 +253,7 @@ sub link_stage {
 sub show_results {
    print("done\n");
    print("--- SHOW THE RESULTS ---\n");
-   run("dir *.s19");
+   run("dir $OBJ_DIR\\*.s19");
    print("\n");
 }
 
@@ -475,6 +457,12 @@ sub basename {
    # get rid of everything before slashes
    $filename=~s/^.*\///g;
    return $filename;
+}
+
+################################################################################
+
+sub dec2hex {
+   return sprintf("%x",$_[0]);
 }
 
 ################################################################################

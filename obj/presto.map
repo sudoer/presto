@@ -1,0 +1,171 @@
+
+Allocating common symbols
+Common symbol       size              file
+
+presto_master_clock
+                    0x4               kernel.o
+idle_tid            0x1               kernel.o
+global_save_sp      0x2               kernel.o
+idle_stack          0x32              kernel.o
+task_one_stack      0x100             test.o
+task_four_stack     0x100             test.o
+task_three_stack    0x100             test.o
+idle_tcb_p          0x2               kernel.o
+task_two_stack      0x100             test.o
+tcb_list            0x60              kernel.o
+mail_list           0x12c             kernel.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+page0            0x00000040         0x000000c0         xrw
+nothing          0x00000100         0x00007f00
+ram1             0x00008000         0x00003600         xrw
+eeprom           0x0000b600         0x00000200
+ram2             0x0000b800         0x000007c0         xrw
+specvect         0x0000bfc0         0x00000040         r
+ram3             0x0000c000         0x00003fc0         xrw
+normvect         0x0000ffc0         0x00000040         r
+
+Linker script and memory map
+
+
+text            0x0000c000      0x919
+ *(.text)
+ .text          0x0000c000      0x169 test.o
+                0x0000c04d                Two
+                0x0000c0c0                Four
+                0x0000c000                assert_lights
+                0x0000c086                Three
+                0x0000c0fa                main
+                0x0000c014                One
+ .text          0x0000c169       0x7a clock.o
+                0x0000c169                clock_reset
+                0x0000c17e                clock_add
+                0x0000c1b0                clock_compare
+ .text          0x0000c1e3      0x129 system.o
+                0x0000c2c0                inert_illop_isr
+                0x0000c2c2                inert_cop_isr
+                0x0000c2a0                inert_spi_isr
+                0x0000c2b4                inert_tic2_isr
+                0x0000c2a8                inert_toc5_isr
+                0x0000c2bc                inert_xirq_isr
+                0x0000c2b0                inert_toc1_isr
+                0x0000c2b2                inert_tic3_isr
+                0x0000c2b8                inert_rti_isr
+                0x0000c2ba                inert_irq_isr
+                0x0000c2a6                inert_tof_isr
+                0x0000c1e3                __premain
+                0x0000c2c6                inert_reset_isr
+                0x0000c2ae                inert_toc2_isr
+                0x0000c2ac                inert_toc3_isr
+                0x0000c2db                presto_fatal_error
+                0x0000c2c4                inert_clm_isr
+                0x0000c2aa                inert_toc4_isr
+                0x0000c29e                inert_sci_isr
+                0x0000c29c                inert_isr
+                0x0000c2be                inert_swi_isr
+                0x0000c2c8                set_interrupt
+                0x0000c2da                exit
+                0x0000c2a4                inert_pao_isr
+                0x0000c2a2                inert_paie_isr
+                0x0000c2b6                inert_tic1_isr
+ .text          0x0000c30c      0x60d kernel.o
+                0x0000c781                presto_wait_for_message
+                0x0000c30c                presto_init
+                0x0000c62c                presto_next_tcb_to_run
+                0x0000c410                presto_start_scheduler
+                0x0000c8b8                tid_to_tcbptr
+                0x0000c5d2                context_switch
+                0x0000c660                presto_timer
+                0x0000c8b6                idle_task
+                0x0000c54f                presto_kill_self
+                0x0000c553                presto_system_isr
+                0x0000c456                presto_create_task
+                0x0000c641                presto_send_message
+                0x0000c80a                deliver_mail
+                0x0000c907                presto_restart_master_timer
+                0x0000c8e6                presto_start_master_timer
+
+bss             0x00008000        0x0
+ *(.bss)
+
+data            0x0000b800       0x1a
+ *(.data)
+ .data          0x0000b800        0x8 test.o
+                0x0000b807                light4
+                0x0000b806                light3
+                0x0000b802                three_tid
+                0x0000b804                light1
+                0x0000b805                light2
+                0x0000b801                two_tid
+                0x0000b800                one_tid
+                0x0000b803                four_tid
+ .data          0x0000b808       0x12 kernel.o
+                0x0000b80a                global_old_sp_p
+                0x0000b811                tcb_head_p
+                0x0000b816                free_mail_p
+                0x0000b818                po_mail_p
+                0x0000b808                global_new_sp
+                0x0000b815                presto_initialized
+                0x0000b80c                global_new_fn
+                0x0000b813                free_tcb_p
+                0x0000b80e                current_tcb_p
+                0x0000b810                current_tid
+
+specvect        0x0000bfc0       0x40
+ *(.specvect)
+ .specvect      0x0000bfc0       0x40 specvect.o
+                0x0000bfc0                special_interrupt_vectors
+
+normvect        0x0000ffc0       0x40
+ *(.normvect)
+ .normvect      0x0000ffc0       0x40 system.o
+                0x0000ffc0                normal_interrupt_vectors
+                0x00001000                _io_ports = 0x1000
+                0x0000b5ff                _stack = 0xb5ff
+                0x0000bfc0                vectors_addr = 0xbfc0
+                0x00000000                _.tmp = 0x0
+                0x00000002                _.z = 0x2
+                0x00000004                _.xy = 0x4
+LOAD ../lib/crt0.o
+LOAD test.o
+LOAD clock.o
+LOAD system.o
+LOAD specvect.o
+LOAD kernel.o
+OUTPUT(presto.elf elf32-m68hc11)
+
+.install0       0x00000040        0x3
+ .install0      0x00000040        0x3 ../lib/crt0.o
+                0x00000040                _start
+
+.install2       0x00000043        0x3
+ .install2      0x00000043        0x3 ../lib/crt0.o
+
+.install4       0x00000046        0x8
+ .install4      0x00000046        0x8 ../lib/crt0.o
+
+.comment        0x0000004e       0xaf
+ .comment       0x0000004e       0x23 test.o
+ .comment       0x00000071       0x23 clock.o
+ .comment       0x00000094       0x23 system.o
+ .comment       0x000000b7       0x23 specvect.o
+ .comment       0x000000da       0x23 kernel.o
+
+.bss            0x000000fd      0x5c7
+ COMMON         0x000000fd      0x400 test.o
+                                  0x0 (size before relaxing)
+                0x000000fd                task_one_stack
+                0x000001fd                task_four_stack
+                0x000002fd                task_three_stack
+                0x000003fd                task_two_stack
+ COMMON         0x000004fd      0x1c7 kernel.o
+                                  0x0 (size before relaxing)
+                0x000004fd                presto_master_clock
+                0x00000501                idle_tid
+                0x00000502                global_save_sp
+                0x00000504                idle_stack
+                0x00000536                idle_tcb_p
+                0x00000538                tcb_list
+                0x00000598                mail_list

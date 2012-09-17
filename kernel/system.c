@@ -65,6 +65,8 @@ void inert_reset_isr(void);
 
 // INTERRUPT VECTORS
 
+/*
+
 #ifdef ICC
    #pragma abs_address:0xFFD6 // for NORMAL and EXPANDED MULTIPLEXED modes
 #endif
@@ -94,6 +96,50 @@ void (*normal_interrupt_vectors[])() = {
 #ifdef ICC
    #pragma end_abs_address
 #endif
+
+*/
+
+extern void (*normal_interrupt_vectors[32])();
+
+asm("   .sect .normvect");
+asm("   .globl normal_interrupt_vectors");
+
+asm("normal_interrupt_vectors:");
+asm("   .word   inert_isr      ");   //  0xFFC0 - dummy
+asm("   .word   inert_isr      ");   //  0xFFC2 - dummy
+asm("   .word   inert_isr      ");   //  0xFFC4 - dummy
+asm("   .word   inert_isr      ");   //  0xFFC6 - dummy
+asm("   .word   inert_isr      ");   //  0xFFC8 - dummy
+asm("   .word   inert_isr      ");   //  0xFFCA - dummy
+asm("   .word   inert_isr      ");   //  0xFFCC - dummy
+asm("   .word   inert_isr      ");   //  0xFFCE - dummy
+asm("   .word   inert_isr      ");   //  0xFFD0 - dummy
+asm("   .word   inert_isr      ");   //  0xFFD2 - dummy
+asm("   .word   inert_isr      ");   //  0xFFD4 - dummy
+
+asm("   .word   inert_sci_isr  ");   //  0xFFD6 - SCI
+asm("   .word   inert_spi_isr  ");   //  0xFFD8 - SPI
+asm("   .word   inert_paie_isr ");   //  0xFFDA - PAII
+asm("   .word   inert_pao_isr  ");   //  0xFFDC - PAOVI
+asm("   .word   inert_tof_isr  ");   //  0xFFDE - TOI
+asm("   .word   inert_toc5_isr ");   //  0xFFE0 - TOC5
+asm("   .word   inert_toc4_isr ");   //  0xFFE2 - TOC4
+asm("   .word   inert_toc3_isr ");   //  0xFFE4 - TOC3
+asm("   .word   inert_toc2_isr ");   //  0xFFE6 - TOC2
+asm("   .word   inert_toc1_isr ");   //  0xFFE8 - TOC1
+asm("   .word   inert_tic3_isr ");   //  0xFFEA - TIC3
+asm("   .word   inert_tic2_isr ");   //  0xFFEC - TIC2
+asm("   .word   inert_tic1_isr ");   //  0xFFEE - TIC1
+asm("   .word   inert_rti_isr  ");   //  0xFFF0 - RTII
+asm("   .word   inert_irq_isr  ");   //  0xFFF2 - IRQ
+asm("   .word   inert_xirq_isr ");   //  0xFFF4 - XIRQ
+asm("   .word   inert_swi_isr  ");   //  0xFFF6 - SWI
+asm("   .word   inert_illop_isr");   //  0xFFF8 - ILL
+asm("   .word   inert_cop_isr  ");   //  0xFFFA - COP Failure
+asm("   .word   inert_clm_isr  ");   //  0xFFFC - COP Clock monitor
+asm("   .word   inert_reset_isr");   //  0xFFFE - reset
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -177,6 +223,8 @@ void __premain() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+void inert_isr(void)       { asm("rti"); }
 
 void inert_sci_isr(void)   { asm("rti"); }
 void inert_spi_isr(void)   { asm("rti"); }
