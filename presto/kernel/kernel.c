@@ -37,6 +37,14 @@
 // kernel is through setting triggers.
 
 ////////////////////////////////////////////////////////////////////////////////
+
+// NOTE - User tasks are numbered from 0 to (PRESTO_KERNEL_MAXUSERTASKS-1),
+// giving a total of PRESTO_KERNEL_MAXUSERTASKS user tasks.  This makes it
+// convenient to keep an array of items, one for each user task (see the
+// default_mailbox array in mail.c).  The idle task's task ID number equals
+// PRESTO_KERNEL_MAXUSERTASKS.
+
+////////////////////////////////////////////////////////////////////////////////
 //   D E P E N D E N C I E S
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -84,6 +92,7 @@ typedef struct KERNEL_TCB_S {
 
 // scheduling
 static KERNEL_TCB_T * scheduler_next_ready(void);
+static void send_idle_notifications(void);
 static void idle_task(void);
 
 // priority queue
@@ -109,10 +118,16 @@ static KERNEL_TCB_T * free_tcb_p=NULL;
 // idle task stuff
 static BYTE idle_stack[PRESTO_KERNEL_IDLESTACKSIZE];
 static KERNEL_TCB_T * idle_tcb_p;
-static BYTE idle_tid;
+static KERNEL_TASKID_T idle_tid;   // always equals PRESTO_KERNEL_MAXUSERTASKS
+static BYTE idle_notification[TASK_BITMASK_SIZE];
 
 // miscellaneous
-static BYTE presto_initialized=0;
+static enum {
+   PROGRESS_STARTUP,
+   PROGRESS_INITIALIZED,
+   PROGRESS_STARTED,
+   PROGRESS_IDLE_REACHED,
+} presto_runtime_progress=PROGRESS_STARTUP;
 
 // These are used to pass arguments to inline assembly routines.
 // Do not put these on the stack (BOOM).
@@ -128,7 +143,9 @@ static BYTE ** swi_old_spp;
 void presto_init(void) {
    BYTE count;
 
-   if (presto_initialized) return;
+   if (presto_runtime_progress!=PROGRESS_STARTUP) {
+      error_fatal(ERROR_KERNEL_BADINIT);
+   }
 
    // initialize TCB list
    for (count=0;count<MAX_TASKS;count++) {
@@ -160,8 +177,12 @@ void presto_init(void) {
       kernel_memory_init();
    #endif // FEATURE_KERNEL_MEMORY
 
+   for (count=0;count<TASK_BITMASK_SIZE;count++) {
+      idle_notification[count]=0;
+   }
+
    // must be done before creating idle task
-   presto_initialized=1;
+   presto_runtime_progress=PROGRESS_INITIALIZED;
 
    // initialize idle task
    idle_tid=presto_task_create(idle_task,idle_stack,PRESTO_KERNEL_IDLESTACKSIZE,IDLE_PRIORITY);
@@ -177,7 +198,7 @@ KERNEL_TASKID_T presto_task_create(void (*func)(void), BYTE * stack, short stack
    KERNEL_TCB_T * new_tcb_p;
    CPU_LOCK_T lock;
 
-   if (!presto_initialized) {
+   if (presto_runtime_progress<PROGRESS_INITIALIZED) {
       error_fatal(ERROR_KERNEL_CREATEBEFOREINIT);
    }
 
@@ -219,6 +240,11 @@ KERNEL_TASKID_T presto_task_create(void (*func)(void), BYTE * stack, short stack
 
 void presto_scheduler_start(void) {
 
+   if (presto_runtime_progress!=PROGRESS_INITIALIZED) {
+      error_fatal(ERROR_KERNEL_BADSTART);
+   }
+   presto_runtime_progress=PROGRESS_STARTED;
+
    // we're about to switch to our first task... interrupts off
    cpu_lock();
 
@@ -251,6 +277,16 @@ KERNEL_PRIORITY_T presto_priority_get(KERNEL_TASKID_T tid) {
    KERNEL_TCB_T * tcb_p;
    tcb_p=tid_to_tcbptr(tid);
    return tcb_p->current_priority;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+KERNEL_PRIORITY_T kernel_priority_get(KERNEL_TASKID_T tid) {
+   KERNEL_TCB_T * tcb_p;
+   tcb_p=tid_to_tcbptr(tid);
+   return tcb_p->natural_priority;
 }
 
 
@@ -549,7 +585,39 @@ void context_switch_isr(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
+void presto_wait_for_idle(void) {
+   KERNEL_TASKID_T tid=kernel_current_task();
+   BYTE index=TASK_BITMASK_INDEX(tid);
+   BYTE mask=TASK_BITMASK_MASK(tid);
+   if (presto_runtime_progress>=PROGRESS_IDLE_REACHED) return;
+   MASKSET(idle_notification[index],mask);
+   presto_wait(KERNEL_INTERNAL_TRIGGER);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+static void send_idle_notifications(void) {
+   KERNEL_TASKID_T t;
+   BYTE index=TASK_BITMASK_FIRSTINDEX();
+   BYTE mask=TASK_BITMASK_FIRSTMASK();
+   for(t=0;t<PRESTO_KERNEL_MAXUSERTASKS;t++) {
+      if(idle_notification[index]&mask) {
+         kernel_trigger_set_noswitch(t,KERNEL_INTERNAL_TRIGGER);
+      }
+      TASK_BITMASK_INCREMENT(index,mask);
+   }
+   presto_runtime_progress=PROGRESS_IDLE_REACHED;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 static void idle_task(void) {
+   send_idle_notifications();
+   kernel_context_switch();
    while (1) {
       CPU_MAGIC_IDLE_WORK();
    }

@@ -6,6 +6,8 @@
 
 
 enum {
+   // to controller
+   MSG_COLOtoCTRL_INITOK,
    // to president
    MSG_CTRLtoPRES_INIT,
    MSG_CTRLtoPRES_LOOP,
@@ -21,6 +23,7 @@ enum {
    // to student
    MSG_CTRLtoSTUD_INIT,
    MSG_CTRLtoSTUD_LOOP,
+   MSG_MNGRtoSTUD_USELESS,
 };
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -76,13 +76,6 @@ static KERNEL_TASKID_T wait_for_init[PRESTO_KERNEL_MAXUSERTASKS];
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//   S T A T I C   F U N C T I O N S
-////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////
 //   E X T E R N A L   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -98,27 +91,6 @@ void presto_mailbox_create(KERNEL_TASKID_T tid, KERNEL_MAILBOX_T * box_p, KERNEL
    box_p->mailbox_tail=NULL;
    box_p->owner_tid=tid;
    box_p->trigger=trigger;
-
-
-
-   if(wait_for_init[tid]!=KERNEL_TASKID_NONE) {
-      kernel_trigger_set_noswitch(wait_for_init[tid],KERNEL_INTERNAL_TRIGGER);
-      wait_for_init[tid]=KERNEL_TASKID_NONE;
-      kernel_context_switch();
-   }
-
-/*
-
-   THERE MAY BE JUNK IN THE MAILBOX STRUCTURE
-
-   if(box_p->waiter_tid!=KERNEL_TASKID_NONE) {
-      kernel_trigger_set_noswitch(box_p->waiter_tid,KERNEL_INTERNAL_TRIGGER);
-      box_p->waiter_tid=KERNEL_TASKID_NONE;
-      kernel_context_switch();
-   }
-
-*/
-
 }
 
 
@@ -127,32 +99,6 @@ void presto_mailbox_create(KERNEL_TASKID_T tid, KERNEL_MAILBOX_T * box_p, KERNEL
 
 void presto_mailbox_init(KERNEL_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger) {
    presto_mailbox_create(kernel_current_task(), box_p, trigger);
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-void presto_mailbox_wait_for_task(KERNEL_TASKID_T tid) {
-   if (default_mailbox[tid]!=NULL) return;
-   wait_for_init[tid]=kernel_current_task();
-   presto_wait(KERNEL_INTERNAL_TRIGGER);
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-void presto_mailbox_wait_for_box(KERNEL_MAILBOX_T * box_p) {
-
-/*
-
-   THIS DOES NOT WORK YET
-
-*/
-
-   box_p->waiter_tid=kernel_current_task();
-   presto_wait(KERNEL_INTERNAL_TRIGGER);
 }
 
 

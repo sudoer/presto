@@ -1,4 +1,63 @@
-2003.11.31
+
+2003.11.30
+
+I finally got tired of the fixed limit of waiters in the semaphore
+system.  I have a fix, and it sort of resembles the way that the
+mail system uses envelopes for all of it internal record-keeping.
+
+Now, before you can use a semaphore, you have to register with it.
+This is not so unpalatable, because if I ever get around to implementing
+priority ceilings, you'll have to pre-register so I will know the
+highest priority user.  In the process of registering, you pass in
+a data structure called a "semaphore lock".  The data structure is
+used to hold all of the information necessary for a task to wait on
+a semaphore.  The block becomes a segment in a linked list of
+"waiters" or "users", depending on if the task is blocking or using
+the resource.  To enforce registration, the functions for requesting
+a semaphore now require this semwait as a parameter (the pointer to
+the semaphore itself is no longer required).
+
+I also structured the code to accept the eventual changes for
+priority ceiling protocol.  But before I implement that, I would
+like to go over the whole priority-checking-and-changing scheme
+with a fine-tooth comb.
+
+
+---
+
+2003.11.01
+
+I finally settled on a solution that I think is a lot more elegant
+than checking mailbox existence before mail delivery.  I created a
+function called presto_wait_for_idle() which can be called by each
+task after they have done their own mailbox initialization.  That
+way, each task initializes and then yields, in order of priority.
+
+Each task should do this:
+
+      void mytask(void) {
+
+         // initialize mailboxes, etc
+         static PRESTO_MAILBOX_T my_mbox;
+         presto_mailbox_init(&my_mbox,FLAG_MAIL);
+
+         // let others initialize
+         presto_wait_for_idle();
+
+         // send initial messages here
+
+         // main loop
+         while (1) {
+            presto_wait(...);
+            ...
+            ...
+         }
+      }
+
+
+---
+
+2003.10.31
 
 There is a chicken-and-egg problem with mailboxes.  A high priority
 task might try to send a mail message to a low priority task before
@@ -9,7 +68,7 @@ in turn.  I am trying an experiment now to implement some sort of
 for a task's default mailbox, but not for supplementary ones.  I
 need to look at this in more detail.
 
-One side effect of this experiment is that I now reserve on trigger
+One side effect of this experiment is that I now reserve one trigger
 bit as a "kernel use only" trigger.  This makes a few of the
 presto_xxxxx_wait() function calls a little cleaner, since they
 no longer require a trigger parameter.  But it means the user is

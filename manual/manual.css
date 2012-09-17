@@ -1,0 +1,64 @@
+
+BODY {
+  background-color:#E0E0E0;
+  font: 10pt/12pt "Arial";
+  color:darkred;
+  margin:50px;
+}
+
+.CODE {
+  font-size:10pt/12pt;
+  font-family:"Courier";
+  font-weight:bold;
+  color:darkblue;
+  text-align:left;
+  text-indent:20px;
+  text-decoration:none;
+}
+
+.FUNCTION {
+  font-family:"Courier";
+  color:darkblue;
+}
+
+.CONSTANT {
+  font-family:"Courier";
+  color:darkgreen;
+}
+
+.VARIABLE {
+  font-family:"Courier";
+  color:black;
+}
+
+.FILENAME {
+  font-family:"Courier";
+  color:olive;
+}
+
+H1 {
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:22pt;
+  font-weight:bold;
+  font-variant:small-caps;
+  color:maroon;
+}
+
+H2 {
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:16pt;
+  color:maroon;
+  text-decoration: underline;
+}
+
+H3 {
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:12pt;
+  color:maroon;
+}
+
+.HILITE {
+  background:#ffff99;
+  color:#000000;
+}
+

@@ -10,36 +10,25 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-/*
-typedef enum {
-   SEMAPHORE_PRIORITY_NORMAL,
-   SEMAPHORE_PRIORITY_INHERITANCE,
-   SEMAPHORE_PRIORITY_CEILING,
-} KERNEL_SEMPROTOCOL_T;
-*/
-
-////////////////////////////////////////////////////////////////////////////////
-
-typedef struct KERNEL_SEMUSER_S {
+typedef struct KERNEL_SEMAPHORE_LOCK_S {
    KERNEL_TASKID_T tid;
-   KERNEL_TRIGGER_T trigger;
    KERNEL_PRIORITY_T natural_priority;
-   struct KERNEL_SEMUSER_S * next;
-} KERNEL_SEMUSER_T;
+   KERNEL_TRIGGER_T trigger;
+   struct KERNEL_SEMAPHORE_RESOURCE_S * resource_p;
+   struct KERNEL_SEMAPHORE_LOCK_S * next;
+} KERNEL_SEMLOCK_T;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef struct KERNEL_SEMAPHORE_S {
+typedef struct KERNEL_SEMAPHORE_RESOURCE_S {
+   signed int num_locks;
+   KERNEL_PRIORITY_T highest_priority;
    signed int max_resources;
    signed int available_resources;
-   #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
-      BOOLEAN use_inheritance;
-   #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
-   struct KERNEL_SEMUSER_S * user_list;
-   struct KERNEL_SEMUSER_S * wait_list;
-   struct KERNEL_SEMUSER_S * free_list;
-   struct KERNEL_SEMUSER_S semuser_data[PRESTO_SEM_WAITLIST];
-} KERNEL_SEMAPHORE_T;
+   int inheritance_type;
+   struct KERNEL_SEMAPHORE_LOCK_S * user_list;
+   struct KERNEL_SEMAPHORE_LOCK_S * wait_list;
+} KERNEL_SEMRESOURCE_T;
 
 ////////////////////////////////////////////////////////////////////////////////
 

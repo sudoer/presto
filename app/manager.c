@@ -18,6 +18,11 @@ void manager(void) {
    static PRESTO_MAILBOX_T mngr_mbox;
    presto_mailbox_init(&mngr_mbox,FLAG_M_MAIL);
 
+   presto_wait_for_idle();
+
+   PRESTO_ENVELOPE_T * send_p=(PRESTO_ENVELOPE_T *)presto_memory_allocate(sizeof(PRESTO_ENVELOPE_T));
+   presto_mail_send_to_task(stud_tid,send_p,MSG_MNGRtoSTUD_USELESS,NULL);
+
    while (1) {
       PRESTO_ENVELOPE_T * recv_p;
       recv_p=presto_mail_wait(&mngr_mbox);

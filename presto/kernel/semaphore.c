@@ -49,10 +49,10 @@
 //   S T A T I C   F U N C T I O N   P R O T O T Y P E S
 ////////////////////////////////////////////////////////////////////////////////
 
-static void insert_simuser_into_linked_list(KERNEL_SEMUSER_T ** ptr_to_head, KERNEL_SEMUSER_T * item);
-static int remove_simuser_from_linked_list(KERNEL_SEMUSER_T ** ptr_to_head, KERNEL_SEMUSER_T * item);
+static void insert_semuser_into_linked_list(KERNEL_SEMLOCK_T ** ptr_to_head, KERNEL_SEMLOCK_T * item);
+static int remove_semuser_from_linked_list(KERNEL_SEMLOCK_T ** ptr_to_head, KERNEL_SEMLOCK_T * item);
 #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
-static void promote_runners_to_top_waiter_priority(KERNEL_SEMAPHORE_T * sem_p);
+static void promote_runners_to_top_waiter_priority(KERNEL_SEMRESOURCE_T * resource_p);
 #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,84 +60,99 @@ static void promote_runners_to_top_waiter_priority(KERNEL_SEMAPHORE_T * sem_p);
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
-void presto_semaphore_init(KERNEL_SEMAPHORE_T * sem_p, short resources, BOOLEAN use_inheritance) {
-#else
-void presto_semaphore_init(KERNEL_SEMAPHORE_T * sem_p, short resources) {
-#endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
-   int x;
-   sem_p->max_resources=resources;
-   sem_p->available_resources=resources;
-   sem_p->user_list=NULL;
-   sem_p->wait_list=NULL;
-   sem_p->free_list=sem_p->semuser_data;
-   for (x=0;x<PRESTO_SEM_WAITLIST;x++) {
-      sem_p->semuser_data[x].tid=KERNEL_TASKID_NONE;
-      sem_p->semuser_data[x].trigger=NULL;
-      sem_p->semuser_data[x].next=&(sem_p->semuser_data[x+1]);
-   }
-   sem_p->semuser_data[PRESTO_SEM_WAITLIST-1].next=NULL;
-   #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
-      sem_p->use_inheritance=use_inheritance;
-   #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
+void presto_semaphore_init(PRESTO_SEMRESOURCE_T * resource_p, short resources) {
+   resource_p->num_locks=0;
+   resource_p->highest_priority=0;
+   resource_p->max_resources=resources;
+   resource_p->available_resources=resources;
+   resource_p->user_list=NULL;
+   resource_p->wait_list=NULL;
+   resource_p->inheritance_type=PRESTO_SEMAPHORE_PRIORITY_NORMAL;
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
 
-BOOLEAN presto_semaphore_request(KERNEL_SEMAPHORE_T * sem_p, KERNEL_TRIGGER_T trigger) {
+void presto_semaphore_register(PRESTO_SEMRESOURCE_T * resource_p, PRESTO_SEMLOCK_T * semlock_p) {
+   // one more user
+   resource_p->num_locks++;
+   // fill in semuser fields
+   semlock_p->resource_p=resource_p;
+   semlock_p->tid=kernel_current_task();
+   semlock_p->natural_priority=kernel_priority_get(semlock_p->tid);  // NATURAL priority
+   // record highest priority client
+   if(semlock_p->natural_priority > resource_p->highest_priority) {
+      resource_p->highest_priority=semlock_p->natural_priority;
+   }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+void presto_semaphore_protocol(PRESTO_SEMRESOURCE_T * resource_p, PRESTO_SEMPROTOCOL_T inheritance_type) {
+   resource_p->inheritance_type=inheritance_type;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+BOOLEAN presto_semaphore_request(PRESTO_SEMLOCK_T * semlock_p, KERNEL_TRIGGER_T trigger) {
+   KERNEL_SEMRESOURCE_T * resource_p;
    BOOLEAN gotit;
-   KERNEL_SEMUSER_T * our_seminfo;
    CPU_LOCK_T lock;
 
-   cpu_lock_save(lock);
-
-   // get the first available semuser structure
-   our_seminfo=sem_p->free_list;
-   if (our_seminfo==NULL) {
-      error_fatal(ERROR_SEMAPHORE_TOOMANYWAITERS);
-   }
-
-   // sem_p->free_list is not NULL
-   sem_p->free_list=sem_p->free_list->next;
-   cpu_unlock_restore(lock);
-
    // fill in information about the waiting task
-   our_seminfo->tid=kernel_current_task();
-   our_seminfo->trigger=trigger;
+   semlock_p->trigger=trigger;
+   // semlock_p->resource_p is already filled in
+   // semlock_p->tid is already filled in
+   // semlock_p->natural_priority is already filled in
+   // semlock_p->next will be filled in by insert_semuser_into_linked_list()
 
-   // A NOTE ON THE PRIORITY CEILING PROTOCOL
-   // We would bump up the priority of the running task to the highest
-   // level that uses this semaphore.  But that requires each task to
-   // pre-register so we will know what the ceilings are.  Priority
-   // ceilings prevent deadlocks and make Rate Monotonic Analysis possible.
-   // If we are careful, the application can avoid deadlocks by making sure
-   // that it locks resources in a certain order.
+   resource_p=semlock_p->resource_p;
 
    cpu_lock_save(lock);
-   gotit=(sem_p->available_resources>0)?TRUE:FALSE;
+   gotit=(resource_p->available_resources>0)?TRUE:FALSE;
    if (gotit) {
-      KERNEL_SEMUSER_T * old_runner_p;
+      KERNEL_SEMLOCK_T * old_runner_p;
 
       // There is a resource available.  Use it.
-      sem_p->available_resources--;
-      kernel_trigger_set_noswitch(kernel_current_task(), trigger);
+      resource_p->available_resources--;
+      kernel_trigger_set_noswitch(semlock_p->tid, trigger);  // This is us.
 
       // Record who was using the resource before we asked for it.
-      old_runner_p=sem_p->user_list;
+      old_runner_p=resource_p->user_list;
 
       // Insert the task in the user queue.
-      insert_simuser_into_linked_list(&(sem_p->user_list), our_seminfo);
+      insert_semuser_into_linked_list(&(resource_p->user_list), semlock_p);
 
       #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
-         // If we're using priority inheritance..
-         if (sem_p->use_inheritance) {
-            // If there was a change because of us...
-            if ((old_runner_p!=NULL)&&(old_runner_p!=sem_p->user_list)) {
-               // restore the old runner to his old priority
-               presto_priority_restore(old_runner_p->tid);
-            }
+         switch(resource_p->inheritance_type) {
+            case PRESTO_SEMAPHORE_PRIORITY_NORMAL:
+               break;
+
+            case PRESTO_SEMAPHORE_PRIORITY_INHERITANCE:
+               // TODO - ????
+               // If there was a change because of us...
+               if ((old_runner_p!=NULL)&&(old_runner_p!=resource_p->user_list)) {
+                  // restore the old runner to his old priority
+                  presto_priority_restore(old_runner_p->tid);
+               }
+               break;
+
+            case PRESTO_SEMAPHORE_PRIORITY_CEILING:
+               // A NOTE ON THE PRIORITY CEILING PROTOCOL
+               // We would bump up the priority of the running task to the highest
+               // level that uses this semaphore.  But that requires each task to
+               // pre-register so we will know what the ceilings are.  Priority
+               // ceilings prevent deadlocks and make Rate Monotonic Analysis possible.
+               // If we are careful, the application can avoid deadlocks by making sure
+               // that it locks resources in a certain order.
+
+               break;
+
          }
       #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 
@@ -146,16 +161,24 @@ BOOLEAN presto_semaphore_request(KERNEL_SEMAPHORE_T * sem_p, KERNEL_TRIGGER_T tr
       // There is no resource available.
       // We have to wait.
 
-      // Insert the task in the wait queue.
-      insert_simuser_into_linked_list(&(sem_p->wait_list), our_seminfo);
+      // Insert our task in the semaphore's wait queue.
+      insert_semuser_into_linked_list(&(resource_p->wait_list), semlock_p);
 
    }
 
    #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
-      // If we're using priority inheritance,
-      // bump up the first runner to the first waiter's priority.
-      if (sem_p->use_inheritance) {
-         promote_runners_to_top_waiter_priority(sem_p);
+      // TODO - let's revisit this
+      switch(resource_p->inheritance_type) {
+         case PRESTO_SEMAPHORE_PRIORITY_NORMAL:
+            break;
+         case PRESTO_SEMAPHORE_PRIORITY_INHERITANCE:
+            // If we're using priority inheritance,
+            // bump up the first runner to the first waiter's priority.
+            promote_runners_to_top_waiter_priority(resource_p);
+            break;
+         case PRESTO_SEMAPHORE_PRIORITY_CEILING:
+            break;
+
       }
    #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 
@@ -167,8 +190,8 @@ BOOLEAN presto_semaphore_request(KERNEL_SEMAPHORE_T * sem_p, KERNEL_TRIGGER_T tr
 ////////////////////////////////////////////////////////////////////////////////
 
 
-void presto_semaphore_wait(KERNEL_SEMAPHORE_T * sem_p) {
-   presto_semaphore_request(sem_p, KERNEL_INTERNAL_TRIGGER);
+void presto_semaphore_wait(PRESTO_SEMLOCK_T * semlock_p) {
+   presto_semaphore_request(semlock_p, KERNEL_INTERNAL_TRIGGER);
    presto_wait(KERNEL_INTERNAL_TRIGGER);
 }
 
@@ -176,45 +199,61 @@ void presto_semaphore_wait(KERNEL_SEMAPHORE_T * sem_p) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-void presto_semaphore_release(KERNEL_SEMAPHORE_T * sem_p) {
+void presto_semaphore_release(PRESTO_SEMLOCK_T * semlock_p) {
+   KERNEL_SEMRESOURCE_T * resource_p;
+   PRESTO_SEMLOCK_T * first_in_line;
    CPU_LOCK_T lock;
-   KERNEL_SEMUSER_T * first_in_line;
+
+   resource_p=semlock_p->resource_p;
 
    cpu_lock_save(lock);
 
    // Remove ourselves from the running list.
-   first_in_line=sem_p->user_list;
-   if (!remove_simuser_from_linked_list(&(sem_p->user_list), first_in_line)) {
+   if (!remove_semuser_from_linked_list(&(resource_p->user_list), semlock_p)) {
       // oops, we were not a runner!
-      cpu_unlock_restore(lock);
-      return;
+      // TODO - decide whether this is an error or not
+      error_fatal(ERROR_SEMAPHORE_BADUNLOCK);
+      //cpu_unlock_restore(lock);
+      //return;
    }
 
    #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
-      if (sem_p->use_inheritance) {
-         // restore our original current_priority
-         presto_priority_restore(kernel_current_task());
+      switch(resource_p->inheritance_type) {
+         case PRESTO_SEMAPHORE_PRIORITY_NORMAL:
+            break;
+         case PRESTO_SEMAPHORE_PRIORITY_INHERITANCE:
+            // restore our original current_priority
+            presto_priority_restore(semlock_p->tid);
+            break;
+         case PRESTO_SEMAPHORE_PRIORITY_CEILING:
+            break;
       }
    #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 
    // See if anyone is waiting for our resource.
-   first_in_line=sem_p->wait_list;
+   first_in_line=resource_p->wait_list;
    if (first_in_line==NULL) {
       // No one else is waiting -- return the resource.
-      sem_p->available_resources++;
+      resource_p->available_resources++;
    } else {
       // Someone is waiting -- give the resource to them.
       kernel_trigger_set_noswitch(first_in_line->tid, first_in_line->trigger);
       // Remove them from wait list.
-      remove_simuser_from_linked_list(&(sem_p->wait_list), first_in_line);
+      remove_semuser_from_linked_list(&(resource_p->wait_list), first_in_line);
       // Add them to the user list.
-      insert_simuser_into_linked_list(&(sem_p->user_list), first_in_line);
+      insert_semuser_into_linked_list(&(resource_p->user_list), first_in_line);
       #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
          // If we're using priority inheritance,
          // bump up the first runner to the first waiter's priority.
-         if (sem_p->use_inheritance) {
-            // TODO - What should we do if there are more than one runner?
-            promote_runners_to_top_waiter_priority(sem_p);
+         switch(resource_p->inheritance_type) {
+            case PRESTO_SEMAPHORE_PRIORITY_NORMAL:
+               break;
+            case PRESTO_SEMAPHORE_PRIORITY_INHERITANCE:
+               // TODO - What should we do if there are more than one runner?
+               promote_runners_to_top_waiter_priority(resource_p);
+               break;
+            case PRESTO_SEMAPHORE_PRIORITY_CEILING:
+               break;
          }
       #endif // FEATURE_SEMAPHORE_PRIORITYINHERITANCE
    }
@@ -241,19 +280,19 @@ void kernel_semaphore_init(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-static void insert_simuser_into_linked_list(KERNEL_SEMUSER_T ** ptr_to_head, KERNEL_SEMUSER_T * item) {
-   KERNEL_PRIORITY_T priority;
-   KERNEL_SEMUSER_T ** p0;
-   KERNEL_SEMUSER_T * p1;
+static void insert_semuser_into_linked_list(KERNEL_SEMLOCK_T ** ptr_to_head, KERNEL_SEMLOCK_T * item) {
+   KERNEL_PRIORITY_T current_priority;
+   KERNEL_SEMLOCK_T ** p0;
+   KERNEL_SEMLOCK_T * p1;
 
-   // Determine priority of simuser, for position in list
-   priority=presto_priority_get(item->tid);
+   // Determine priority of semuser, for position in list
+   current_priority=presto_priority_get(item->tid);
 
    // Start at the head, look at priorities.
    p0=ptr_to_head;
    p1=*ptr_to_head;
    while (1) {
-      if ((p1==NULL)||(p1->natural_priority<priority)) {
+      if ((p1==NULL)||(p1->natural_priority < current_priority)) {
          // Insert our item between p0 and p1
          item->next=p1;
          *p0=item;
@@ -268,9 +307,9 @@ static void insert_simuser_into_linked_list(KERNEL_SEMUSER_T ** ptr_to_head, KER
 ////////////////////////////////////////////////////////////////////////////////
 
 
-static int remove_simuser_from_linked_list(KERNEL_SEMUSER_T ** ptr_to_head, KERNEL_SEMUSER_T * item) {
-   KERNEL_SEMUSER_T ** p0;
-   KERNEL_SEMUSER_T * p1;
+static int remove_semuser_from_linked_list(KERNEL_SEMLOCK_T ** ptr_to_head, KERNEL_SEMLOCK_T * item) {
+   KERNEL_SEMLOCK_T ** p0;
+   KERNEL_SEMLOCK_T * p1;
    int count=0;
    p0=ptr_to_head;
    while (p1=*p0,p1!=NULL) {
@@ -289,21 +328,21 @@ static int remove_simuser_from_linked_list(KERNEL_SEMUSER_T ** ptr_to_head, KERN
 
 
 #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
-static void promote_runners_to_top_waiter_priority(KERNEL_SEMAPHORE_T * sem_p) {
+static void promote_runners_to_top_waiter_priority(KERNEL_SEMRESOURCE_T * resource_p) {
    // Bump up the priority of the first TCB in the user list.
-   KERNEL_SEMUSER_T * first_waiter_p;
-   KERNEL_SEMUSER_T * user_p;
+   KERNEL_SEMLOCK_T * first_waiter_p;
+   KERNEL_SEMLOCK_T * semlock_p;
    KERNEL_PRIORITY_T waiter_priority;
 
    // find the first waiter, determine his priority
-   first_waiter_p=sem_p->wait_list;
+   first_waiter_p=resource_p->wait_list;
    if (first_waiter_p==NULL) return;
    waiter_priority=presto_priority_get(first_waiter_p->tid);
 
    // go through the user list, bump up priorities of users
-   for (user_p=sem_p->user_list;user_p!=NULL;user_p=user_p->next) {
-      if (presto_priority_get(user_p->tid)<waiter_priority) {
-         presto_priority_override(user_p->tid, waiter_priority);
+   for (semlock_p=resource_p->user_list;semlock_p!=NULL;semlock_p=semlock_p->next) {
+      if (presto_priority_get(semlock_p->tid)<waiter_priority) {
+         presto_priority_override(semlock_p->tid, waiter_priority);
       }
    }
 }

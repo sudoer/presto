@@ -72,11 +72,11 @@ int main(void) {
    assert_lights();
    presto_init();
 
-   ctrl_tid=presto_task_create(control,    ctrl_stack,  STACK_SIZE, 99);
-   empl_tid=presto_task_create(employee,   empl_stack,  STACK_SIZE, 12);
-   mngr_tid=presto_task_create(manager,    mngr_stack,  STACK_SIZE, 13);
-   pres_tid=presto_task_create(president,  pres_stack,  STACK_SIZE, 14);
-   stud_tid=presto_task_create(student,    stud_stack,  STACK_SIZE, 11);
+   ctrl_tid=presto_task_create(control,   ctrl_stack,  STACK_SIZE, 99);
+   pres_tid=presto_task_create(president, pres_stack,  STACK_SIZE, 14);
+   mngr_tid=presto_task_create(manager,   mngr_stack,  STACK_SIZE, 13);
+   empl_tid=presto_task_create(employee,  empl_stack,  STACK_SIZE, 12);
+   stud_tid=presto_task_create(student,   stud_stack,  STACK_SIZE, 11);
 
    presto_scheduler_start();
 

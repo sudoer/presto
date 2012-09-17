@@ -38,10 +38,23 @@ typedef unsigned char  KERNEL_PRIORITY_T;
 #define KERNEL_INTERNAL_TRIGGER  (1<<(PRESTO_KERNEL_TRIGGERBITS-1))
 
 ////////////////////////////////////////////////////////////////////////////////
+
+#define TASK_BITMASK_SIZE          ((PRESTO_KERNEL_MAXUSERTASKS+7)/8)
+
+#define TASK_BITMASK_INDEX(t)      ((t)>>3)            // divide by 8
+#define TASK_BITMASK_MASK(t)       (1<<((t)&0x07))     // modulo 8
+
+#define TASK_BITMASK_FIRSTMASK()     (0x01)
+#define TASK_BITMASK_FIRSTINDEX()    (0)
+#define TASK_BITMASK_INCREMENT(m,i)  m=((m)==0x80?0x01:(m)<<1); i=(i)+((m)==0x01?1:0);
+
+
+////////////////////////////////////////////////////////////////////////////////
 //   K E R N E L - O N L Y   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
 extern KERNEL_TASKID_T kernel_current_task(void);
+extern KERNEL_PRIORITY_T kernel_priority_get(KERNEL_TASKID_T tid);
 extern void kernel_context_switch(void);
 extern void kernel_trigger_set_noswitch(KERNEL_TASKID_T tid, KERNEL_TRIGGER_T trigger);
 

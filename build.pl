@@ -105,8 +105,8 @@ sub setup_compiler {
 
    print("setting up compiler...");
    $COMPILER_HOME=""
-      .ifcpu($CPU_M68HC11,"c:\\programs\\hc11\\gnu")
-      .ifcpu($CPU_AVR8515,"c:\\programs\\avr\\gnu")
+      .ifcpu($CPU_M68HC11,"c:\\programs\\embedded\\hc11\\gnu")
+      .ifcpu($CPU_AVR8515,"c:\\programs\\embedded\\avr\\gnu")
       ;
    $GNU_PREFIX=""
       .ifcpu($CPU_M68HC11,"m6811-elf-")
@@ -122,7 +122,7 @@ sub setup_compiler {
    #   ;
    $GCC_LIB=$COMPILER_HOME
       .ifcpu($CPU_M68HC11,"\\lib\\gcc-lib\\m6811-elf\\3.0.4\\libgcc.a")
-      .ifcpu($CPU_AVR8515,"\\lib\\gcc-lib\\avr\\3.3\\libgcc.a")
+      .ifcpu($CPU_AVR8515,"\\lib\\gcc-lib\\avr\\3.3.1\\libgcc.a")
       ;
    print("OK\n");
 }

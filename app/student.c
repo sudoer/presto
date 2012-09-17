@@ -19,8 +19,10 @@ void student(void) {
    PRESTO_TIMER_T ticker1;
 
    presto_mailbox_init(&stud_mbox,FLAG_S_MAIL);
+
+   presto_wait_for_idle();
+
    presto_timer_start(&ticker1,1,125,FLAG_S_TIMER);
-   debug_init();
 
    int count=0;
    while (1) {
@@ -40,9 +42,6 @@ void student(void) {
       if(++count==25) {
          count=0;
          PRESTO_ENVELOPE_T * send_p;
-         debug_string("empl_tid=");
-         debug_int(empl_tid);
-         debug_string("\r\n");
          send_p=(PRESTO_ENVELOPE_T *)presto_memory_allocate(sizeof(PRESTO_ENVELOPE_T));
          presto_mail_send_to_task(empl_tid,send_p,MSG_STUDtoEMPL_STATUS,NULL);
       }

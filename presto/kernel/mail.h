@@ -32,7 +32,9 @@ typedef struct KERNEL_MAILBOX_S {
    KERNEL_ENVELOPE_T * mailbox_tail;
    KERNEL_TASKID_T owner_tid;
    KERNEL_TRIGGER_T trigger;
+/*
    KERNEL_TASKID_T waiter_tid;
+*/
 } KERNEL_MAILBOX_T;
 
 ////////////////////////////////////////////////////////////////////////////////

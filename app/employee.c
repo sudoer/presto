@@ -18,13 +18,20 @@ void employee(void) {
    static PRESTO_MAILBOX_T empl_mbox;
    presto_mailbox_init(&empl_mbox,FLAG_E_MAIL);
 
+   static PRESTO_SEMLOCK_T copier_empl;
+   presto_semaphore_register(&copier,&copier_empl);
+
+   presto_wait_for_idle();
+
    while (1) {
       PRESTO_ENVELOPE_T * recv_p;
       recv_p=presto_mail_wait(&empl_mbox);
       switch(presto_envelope_message(recv_p)) {
          case MSG_CTRLtoEMPL_LOOP:
             presto_timer_wait(1000);
-            use_copier(0x04,50);
+            presto_semaphore_wait(&copier_empl);
+            busy_work(0x04,50);
+            presto_semaphore_release(&copier_empl);
             break;
          case MSG_STUDtoEMPL_STATUS: {
             PRESTO_ENVELOPE_T * send_p;
