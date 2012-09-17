@@ -11,8 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 typedef struct KERNEL_SEMUSER_S {
-   KERNEL_TCB_T * tcb_p;
+   KERNEL_TASKID_T tid;
    KERNEL_TRIGGER_T trigger;
+   KERNEL_PRIORITY_T natural_priority;
    struct KERNEL_SEMUSER_S * next;
 } KERNEL_SEMUSER_T;
 
@@ -21,7 +22,7 @@ typedef struct KERNEL_SEMUSER_S {
 typedef struct KERNEL_SEMAPHORE_S {
    signed int max_resources;
    signed int available_resources;
-   #ifdef FEATURE_PRIORITY_INHERITANCE
+   #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
       BOOLEAN use_inheritance;
    #endif
    struct KERNEL_SEMUSER_S * user_list;

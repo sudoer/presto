@@ -2,6 +2,11 @@
 //   C O M M E N T A R Y
 ////////////////////////////////////////////////////////////////////////////////
 
+// The HC11 has one constantly-running 16-bit timer, and 5 output comparitors.
+// I elevate the priority of TOC2 (why did I choose TOC2 again? I forget) do it
+// will register before other interrupts, and I set it up to tick every so many
+// milliseconds (configurable in configure.h).  This file handles the conversion
+// from ms to E clock ticks, and it sets up the registers to make the timer go.
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D E P E N D E N C I E S
@@ -10,7 +15,6 @@
 #include "types.h"
 #include "cpu/hc11regs.h"
 #include "cpu/hwtimer.h"
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //   C O N S T A N T S
@@ -24,7 +28,6 @@
 
 // timing, computed from values in configure.h
 #define ECLOCKS_PER_MS       CYCLES_PER_MS/CYCLES_PER_ECLOCK/TIMER_PRESCALE
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //   E X P O R T E D   F U N C T I O N S

@@ -2,6 +2,15 @@
 //   C O M M E N T A R Y
 ////////////////////////////////////////////////////////////////////////////////
 
+// This is not the first code that runs, but it's very close!  The first
+// couple of instructions are in crt0.s.  They set up the stack and then
+// call premain().  The purpose of premain is to do the chip set-up stuff
+// that has to be called in the first few clock cycles (some registers
+// can only be written to in the first 64 cycles, as a security/sanity
+// measure).
+
+// We also declare the initial stack here.  And while we're at it, this
+// looked like a good place for exit() as well.
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D E P E N D E N C I E S
@@ -12,8 +21,6 @@
 #include "cpu/locks.h"
 #include "cpu/intvect.h"
 #include "cpu/boot.h"
-
-extern void _start();   // entry point in crt11.s or crt0.o
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,6 +45,7 @@ BYTE initial_stack[BOOT_INITIALSTACKSIZE] __attribute((section(".stack")));
 
 void premain() {
 
+   // no interrupts
    cpu_lock();
 
    // THE FOLLOWING (*) REGISTERS MAY ONLY BE ALTERED WITHIN THE FIRST 64 CLOCK CYCLES

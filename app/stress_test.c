@@ -5,17 +5,18 @@
 #include "cpu/misc_hw.h"
 #include "services/serial.h"
 #include "services/string.h"
+#include "kernel/memory.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define STACK_SIZE 0x100
+#define STACK_SIZE 0xA0
 
-static BYTE stud_stack[STACK_SIZE];
-static BYTE empl_stack[STACK_SIZE];
-static BYTE mngr_stack[STACK_SIZE];
-static BYTE pres_stack[STACK_SIZE];
-static BYTE ctrl_stack[STACK_SIZE];
-static BYTE dbug_stack[STACK_SIZE];
+/*static*/ BYTE stud_stack[STACK_SIZE];
+/*static*/ BYTE empl_stack[STACK_SIZE];
+/*static*/ BYTE mngr_stack[STACK_SIZE];
+/*static*/ BYTE pres_stack[STACK_SIZE];
+/*static*/ BYTE ctrl_stack[STACK_SIZE];
+/*static*/ BYTE dbug_stack[STACK_SIZE];
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -75,8 +76,9 @@ PRESTO_TASKID_T dbug_tid;
 #define FLAG_S_MAIL        0x02
 #define FLAG_S_TIMER       0x01
 
-#define FLAG_D_SERIAL      0x01
-#define FLAG_D_TIMER       0x02
+#define FLAG_D_SERIALRX    0x01
+#define FLAG_D_SERIALTX    0x02
+#define FLAG_D_TIMER       0x04
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -157,7 +159,7 @@ void control(void) {
 
    PRESTO_ENVELOPE_T * send_p;
    while (1) {
-      #ifdef FEATURE_PRIORITY_INHERITANCE
+      #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
          presto_semaphore_init(&copier,1,tf);
       #else
          presto_semaphore_init(&copier,1);
@@ -358,7 +360,6 @@ static void memdump(BYTE * start, int size) {
       if(++column<16) {
          serial_send_string(" ");
       } else {
-         presto_timer_wait(250,FLAG_D_TIMER);
          serial_send_string("\r\n");
          column=0;
       }
@@ -369,11 +370,71 @@ static void memdump(BYTE * start, int size) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+KERNEL_MEMORYPOOLSTATS_T poolstats;
+
+static void mempool_info(void) {
+
+   int pool;
+   for(pool=0;pool<PRESTO_MEM_NUMPOOLS;pool++) {
+
+      memory_debug(pool, &poolstats);
+
+      serial_send_string("pool=");
+      string_IntegerToString(pool,prt,PRT);
+      serial_send_string(prt);
+      serial_send_string("\r\n");
+
+      serial_send_string("SIZE ");
+      #ifdef FEATURE_MEMORY_STATISTICS
+         serial_send_string("max/");
+      #endif
+      serial_send_string("limit=");
+      #ifdef FEATURE_MEMORY_STATISTICS
+         string_IntegerToString(poolstats.max_requested_size,prt,PRT);
+         serial_send_string(prt);
+         serial_send_string("/");
+      #endif
+      string_IntegerToString(poolstats.mempool_item_size,prt,PRT);
+      serial_send_string(prt);
+      serial_send_string("\r\n");
+
+
+      serial_send_string("QTY current/");
+      #ifdef FEATURE_MEMORY_STATISTICS
+         serial_send_string("max/");
+      #endif
+      serial_send_string("limit=");
+      string_IntegerToString(poolstats.current_used_items,prt,PRT);
+      serial_send_string(prt);
+      serial_send_string("/");
+      #ifdef FEATURE_MEMORY_STATISTICS
+         string_IntegerToString(poolstats.max_used_items,prt,PRT);
+         serial_send_string(prt);
+         serial_send_string("/");
+      #endif
+      string_IntegerToString(poolstats.mempool_num_items,prt,PRT);
+      serial_send_string(prt);
+      serial_send_string("\r\n");
+
+
+      #ifdef FEATURE_MEMORY_STATISTICS
+         serial_send_string("current_total_bytes=");
+         string_IntegerToString(poolstats.current_total_bytes,prt,PRT);
+         serial_send_string(prt);
+         serial_send_string("\r\n");
+      #endif
+
+      serial_send_string("\r\n");
+   }
+   serial_send_string("\r\n");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 static void debugger(void) {
-   extern void presto_memory_debug(void);
    extern BYTE initial_stack[];
 
-   serial_init(dbug_tid,0x00);
+   serial_init(dbug_tid,FLAG_D_SERIALTX,FLAG_D_SERIALRX);
    serial_send_string("hello world\r\n");
 
    serial_send_string("ctrl_tid=");
@@ -406,57 +467,53 @@ static void debugger(void) {
    serial_send_string(prt);
    serial_send_string("\r\n");
 
-   presto_timer_wait(3000,FLAG_D_TIMER);
+   presto_timer_wait(500,FLAG_D_TIMER);
 
    serial_send_string("initial_stack:\r\n");
    memdump(initial_stack,BOOT_INITIALSTACKSIZE);
 
-   int count=0;
    int stack=0;
    while (1) {
-      presto_memory_debug();
-      presto_timer_wait(2500,FLAG_D_TIMER);
+      mempool_info();
+      presto_timer_wait(500,FLAG_D_TIMER);
 
-      if(++count==40) {
-         count=0;
+      switch(stack++) {
+         case 0:
+            serial_send_string("pres stack:\r\n");
+            memdump(pres_stack, STACK_SIZE);
+            break;
 
-         switch(stack++) {
-            case 0:
-               serial_send_string("pres stack:\r\n");
-               memdump(pres_stack, STACK_SIZE);
-               break;
+         case 1:
+            serial_send_string("mngr stack:\r\n");
+            memdump(mngr_stack, STACK_SIZE);
+            break;
 
-            case 1:
-               serial_send_string("mngr stack:\r\n");
-               memdump(mngr_stack, STACK_SIZE);
-               break;
+         case 2:
+            serial_send_string("empl stack:\r\n");
+            memdump(empl_stack, STACK_SIZE);
+            break;
 
-            case 2:
-               serial_send_string("empl stack:\r\n");
-               memdump(empl_stack, STACK_SIZE);
-               break;
+         case 3:
+            serial_send_string("stud stack:\r\n");
+            memdump(stud_stack, STACK_SIZE);
+            break;
 
-            case 3:
-               serial_send_string("stud stack:\r\n");
-               memdump(stud_stack, STACK_SIZE);
-               break;
+         case 4:
+            serial_send_string("ctrl stack:\r\n");
+            memdump(ctrl_stack, STACK_SIZE);
+            break;
 
-            case 4:
-               serial_send_string("ctrl stack:\r\n");
-               memdump(ctrl_stack, STACK_SIZE);
-               break;
+         case 5:
+            serial_send_string("dbug stack:\r\n");
+            memdump(dbug_stack, STACK_SIZE);
+            break;
 
-            case 5:
-               serial_send_string("dbug stack:\r\n");
-               memdump(dbug_stack, STACK_SIZE);
-               break;
-
-            default:
-               stack=0;
-               break;
-         }
-         presto_timer_wait(1000,FLAG_D_TIMER);
+         default:
+            serial_send_string("---\r\n\r\n");
+            stack=0;
+            break;
       }
+      presto_timer_wait(500,FLAG_D_TIMER);
 
    }
 }

@@ -2,6 +2,57 @@
 //   C O M M E N T A R Y
 ////////////////////////////////////////////////////////////////////////////////
 
+// This module implements a simple and fast mechanism for passing messages
+// between tasks.  The metaphor used is that of mailboxes and envelopes.
+
+// A task can own one or more mailboxes.  Each mailbox has associated with
+// it, a "trigger" (or "ready bit").  When mail arrives in the mailbox, the
+// trigger is set.  If the task is waiting on that trigger, then the task
+// will become ready.
+
+// There is a little bit of overhead associated with keeping track of mail
+// messages.  This is primarily the "next" pointers in a linked list of
+// messages.  Rather than keep an arbitrary-sized list of mail messages
+// for each mailbox (which is limiting and inefficient), we require the
+// use of "envelopes".  Envelopes contain internal accounting data that
+// is needed to keep mail messages in lists, but they also contain some
+// useful information, like the sender of the message.
+
+// The user can decide whether to use static envelopes (stored on the stack
+// or globally) or dynamically allocated envelopes (from the heap).  It is
+// a good practice to allocate envelopes just before they are sent, and
+// then let the receiver free the envelope memory after he has read the
+// message.  Coincidentally, this practice mirrors what we do in real life
+// (sender buys, receiver throws away).
+
+// A task may have one mailbox, or it may have many mailboxes, or it may
+// have no mailboxes.  There are cases where it is useful to have more than
+// one mailbox.  For example, a serial port driver may have one mailbox for
+// traffic to pass along the line and a separate mailbox for flow control
+// messages (you would not want a flow control message to get stuck behind
+// lots of data -- you would want that message to be received immediately).
+
+// In most cases, however, one mailbox per task is sufficient.  To make
+// addressing easier, the first mailbox that a task initializes is it's
+// "primary" mailbox.  If someone sends a message to a task, then it will be
+// delivered to that task's primary mailbox.  The "primary" designation can
+// later be assigned to a different mailbox.
+
+// Messages meant to be delivered to a secondary mailbox must be delivered
+// directly to that BOX, and not to the task.  There are two "send" functions
+// which cover these two options.
+
+// So what kind of messages can we send?  Most of the time, we are sending
+// simple instructions from one task to another.  "I am alive", or "please
+// scan the keyboard".  Other times, we need to send a lot of data.  Presto
+// sends two things in each mail message: an integer and a pointer.  For
+// simple messages, the integer will suffice (you can leave the pointer
+// NULL).  For more complex scenarios, the pointer can give the location of
+// a structure that has the needed information.  This pointer can point to
+// static (global) memory or to dynamic memory -- it is up to the user to
+// define a protocol for ownership of memory, and who frees what.  Again,
+// a good practice is to let the sender allocate and the receiver free.
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D E P E N D E N C I E S
@@ -14,24 +65,6 @@
 #include "configure.h"
 #include "kernel/kernel.h"
 #include "kernel/mail.h"
-
-
-////////////////////////////////////////////////////////////////////////////////
-//   C O N S T A N T S
-////////////////////////////////////////////////////////////////////////////////
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-//   D A T A   T Y P E S
-////////////////////////////////////////////////////////////////////////////////
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-//   S T A T I C   F U N C T I O N   P R O T O T Y P E S
-////////////////////////////////////////////////////////////////////////////////
-
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +83,7 @@ static KERNEL_MAILBOX_T * default_mailbox[PRESTO_KERNEL_MAXUSERTASKS];
 void presto_mailbox_init(KERNEL_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger) {
    KERNEL_TASKID_T tid;
    // if this is the first mailbox for this task, make it the default
-   tid=kernel_current_tcb_p->task_id;
+   tid=kernel_current_task();
    if (default_mailbox[tid]==NULL) {
       default_mailbox[tid]=box_p;
    }
@@ -58,7 +91,7 @@ void presto_mailbox_init(KERNEL_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger) {
    box_p->message_count=0;
    box_p->mailbox_head=NULL;
    box_p->mailbox_tail=NULL;
-   box_p->owner_tcb_p=kernel_current_tcb_p;
+   box_p->owner_tid=tid;
    box_p->trigger=trigger;
 }
 
@@ -67,7 +100,7 @@ void presto_mailbox_init(KERNEL_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger) {
 
 
 void presto_mailbox_default(KERNEL_MAILBOX_T * box_p) {
-   default_mailbox[kernel_current_tcb_p->task_id]=box_p;
+   default_mailbox[kernel_current_task()]=box_p;
 }
 
 
@@ -113,28 +146,25 @@ BOOLEAN presto_mail_send_to_task(KERNEL_TASKID_T tid, KERNEL_ENVELOPE_T * env_p,
 void presto_mail_send_to_box(KERNEL_MAILBOX_T * box_p, KERNEL_ENVELOPE_T * env_p,
                       KERNEL_MAILMSG_T message, KERNEL_MAILPTR_T payload) {
 
-   KERNEL_TCB_T * owner_tcb_p;
    CPU_LOCK_T lock;
 
    // check to see that the recipient is a live mailbox
    if (box_p==NULL) {
-      error_fatal(ERROR_KERNEL_MAILSEND_TONULLBOX);
+      error_fatal(ERROR_MAIL_SENDTONULLBOX);
    }
-   owner_tcb_p=box_p->owner_tcb_p;
 
-   // no interrupts
-   cpu_lock_save(lock);
+   // check to see that the envelope is OK
+   if (env_p==NULL) {
+      error_fatal(ERROR_MAIL_SENDNULLENVELOPE);
+   }
 
-   // fill in the blanks
+   // fill in the blanks in the envelope
    env_p->userdata.message=message;
    env_p->userdata.payload=payload;
-   env_p->from_tid=kernel_current_tcb_p->task_id;
+   env_p->from_tid=kernel_current_task();
    env_p->to_box_p=box_p;
 
-   // interrupts OK
-   cpu_unlock_restore(lock);
-
-   // no interrupts
+   // messing with the mail lists, no interrupts
    cpu_lock_save(lock);
 
    // move the message to the tail of the task's mail list
@@ -153,15 +183,15 @@ void presto_mail_send_to_box(KERNEL_MAILBOX_T * box_p, KERNEL_ENVELOPE_T * env_p
    // no matter what, we are the last in the task's message list
    env_p->next=NULL;
 
-   // make mailbox owner ready
-   kernel_trigger_set(box_p->owner_tcb_p, box_p->trigger);
-
-   // interrupts OK
+   // done with mail lists, interrupts OK
    cpu_unlock_restore(lock);
+
+   // make mailbox owner ready
+   kernel_trigger_set_noswitch(box_p->owner_tid, box_p->trigger);
 
    // receiver becomes ready...
    // time to re-evaluate highest ready task
-   asm("swi");
+   kernel_context_switch();
 }
 
 
@@ -172,12 +202,12 @@ KERNEL_ENVELOPE_T * presto_mail_wait(KERNEL_MAILBOX_T * box_p) {
    // First, wait for mail to arrive.
    presto_wait(box_p->trigger);
 
-   // sanity check
-   if (box_p->mailbox_head==NULL) {
-      error_fatal(ERROR_KERNEL_MAILWAIT_NOMAIL);
-   }
+   // We have mail(*), so return it.
 
-   // We have mail, so return it.
+   // * If we allow mail stealing (letting a task read from mailboxes that
+   // he does now own), the owner could be alerted to an incoming mail, but
+   // by the time he checks the box, it could be empty.  In this case, we
+   // return a NULL here.
    return presto_mail_get(box_p);
 }
 
@@ -189,28 +219,20 @@ KERNEL_ENVELOPE_T * presto_mail_get(KERNEL_MAILBOX_T * box_p) {
    KERNEL_ENVELOPE_T * env_p;
    CPU_LOCK_T lock;
 
-   // We will return immediately if there are no messages in our queue
-   if (box_p->mailbox_head==NULL) return NULL;
-
-   // we're about to mess with the mail list... interrupts off
-   cpu_lock_save(lock);
-
    // we're going to use this a lot, so dereference now
    env_p=box_p->mailbox_head;
 
-   // get one message from the task's mail queue
-   if (env_p==NULL) {
-      // there are no messages in the box's mail list
-      error_fatal(ERROR_KERNEL_MAILGET_NOMESSAGES);
-   }
+   // We will return immediately if there are no messages in our queue
+   if (env_p==NULL) return NULL;
 
-   #ifdef SANITYCHECK_MISDELIVEREDMAIL
-      // TODO - this is no longer paranoia... this is security
-      // are we being paranoid?
-      if ((env_p->to_box_p->owner_tcb_p)!=kernel_current_tcb_p) {
-         error_fatal(ERROR_KERNEL_MAILGET_NOTFORME);
-      }
+   #ifdef FEATURE_MAIL_NOSTEALING
+      // Someone can easily read mail from someone else's box.
+      // Check ownership, and give anyone else nothing.
+      if ((env_p->to_box_p->owner_tid)!=kernel_current_task()) return NULL;
    #endif
+
+   // we're about to mess with the mail list... interrupts off
+   cpu_lock_save(lock);
 
    // there is at least one message, get one
    if (env_p==box_p->mailbox_tail) {
@@ -218,12 +240,13 @@ KERNEL_ENVELOPE_T * presto_mail_get(KERNEL_MAILBOX_T * box_p) {
       box_p->mailbox_head=NULL;
       box_p->mailbox_tail=NULL;
       box_p->message_count=0;
+      // Should we clear the owner's flag here?  I don't think so.
    } else {
       // there are many messages, take first
       box_p->mailbox_head=env_p->next;
       box_p->message_count--;
       // make mailbox owner ready (again?)
-      kernel_trigger_set(box_p->owner_tcb_p, box_p->trigger);
+      kernel_trigger_set_noswitch(box_p->owner_tid, box_p->trigger);
    }
 
    // do not point to the other envelopes any more

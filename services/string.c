@@ -2,6 +2,20 @@
 //   C O M M E N T A R Y
 ////////////////////////////////////////////////////////////////////////////////
 
+// These are common string functions.
+
+// All functions that write to strings also take "max length" as a parameter.
+// One safe way to keep from over-writing strings is to declare all strings
+// using a constant, and then provide that constant to all function calls.
+// Example:
+//
+//   #define MYSTRLEN  5
+//   char mystring[MYSTRLEN+1];   // always add one for the terminating NULL
+//   string_IntegerToString(123456, mystring, MYSTRLEN);
+//
+// This still produces a wrong result (the string is truncated).  But it does
+// NOT over-write memory like the string functions (strcpy, sprintf, itoa) in
+// the standard C library do.
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D E P E N D E N C I E S
@@ -13,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 //   C O N S T A N T S
 ////////////////////////////////////////////////////////////////////////////////
+
+// #define FLOAT
 
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -26,15 +26,16 @@
 #include "cpu/hc11regs.h"
 #include "cpu/locks.h"
 #include "cpu/intvect.h"
-#include "kernel/kernel.h"
+#include "presto.h"
 #include "services/serial.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //   C O N S T A N T S
 ////////////////////////////////////////////////////////////////////////////////
 
-#define TX_BUFFER_SIZE 300
-#define RX_BUFFER_SIZE 200
+#define TX_BUFFER_SIZE    250
+#define TX_RESTART_LEVEL   16
+#define RX_BUFFER_SIZE     16
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D A T A   T Y P E S
@@ -66,22 +67,23 @@ static BYTE com1_tx_buffer[TX_BUFFER_SIZE];
 
 static void serial_isr(void) __attribute__((interrupt));
 static void clear_buffers(void);
+static void queue_up_or_block(BYTE send);
 
 // circular queue stuff
+static cq_size_t cq_used(circ_queue * queue);
 static cq_size_t cq_put_byte(circ_queue * queue, BYTE b);
 static cq_size_t cq_get_byte(circ_queue * queue, BYTE * b);
 static void cq_init(circ_queue * queue, BYTE * buffer, cq_size_t max_size);
 
-static PRESTO_TASKID_T     serialuser_tid;
-static PRESTO_TRIGGER_T serialuser_trigger;
+static PRESTO_TASKID_T  serialuser_tid;
+static PRESTO_TRIGGER_T serialuser_tx_trigger;
+static PRESTO_TRIGGER_T serialuser_rx_trigger;
 
 ////////////////////////////////////////////////////////////////////////////////
-//   E X P O R T E D   F U N C T I O N S
+//   INITIALIZATION
 ////////////////////////////////////////////////////////////////////////////////
 
-void serial_init(PRESTO_TASKID_T task, PRESTO_TRIGGER_T alert) {
-   CPU_LOCK_T lock;
-   cpu_lock_save(lock);
+void serial_init(PRESTO_TASKID_T task, PRESTO_TRIGGER_T tx_alert, PRESTO_TRIGGER_T rx_alert) {
    // 1 start, 8 data, 1 stop bits
    // WAKE mode = idle line
    SCCR1 = 0x00;
@@ -96,12 +98,12 @@ void serial_init(PRESTO_TASKID_T task, PRESTO_TRIGGER_T alert) {
    BAUD=BAUD_SCP1|BAUD_SCP0; // 9600 baud
    // INITIALIZE SERIAL PORT SOFTWARE
    clear_buffers();
-   // remember who called us, and their alert trigger
+   // remember who called us, and their rx_alert trigger
    serialuser_tid=task;
-   serialuser_trigger=alert;
+   serialuser_tx_trigger=tx_alert;
+   serialuser_rx_trigger=rx_alert;
    // set serial port interrupt service routine
    set_interrupt(INTR_SCI, serial_isr);
-   cpu_unlock_restore(lock);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -115,9 +117,24 @@ static void clear_buffers(void) {
 //   SENDING
 ////////////////////////////////////////////////////////////////////////////////
 
-void serial_send_byte(BYTE send) {
+static void queue_up_or_block(BYTE send) {
+   cq_size_t b;
    // queue up one byte to send
-   cq_put_byte(&com1_tx_queue,send);
+   do {
+      b=cq_put_byte(&com1_tx_queue,send);
+      if (b==0) {
+         // enable the TX interrupt
+         MASKSET(SCCR2,SCCR2_TIE);
+         presto_trigger_clear(serialuser_tx_trigger);
+         presto_wait(serialuser_tx_trigger);
+      }
+   } while (b<1);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void serial_send_byte(BYTE send) {
+   queue_up_or_block(send);
    // enable the TX interrupt
    MASKSET(SCCR2,SCCR2_TIE);
 }
@@ -127,7 +144,7 @@ void serial_send_byte(BYTE send) {
 void serial_send_string(char * send) {
    // queue up the bytes to send
    while (*send) {
-      cq_put_byte(&com1_tx_queue,*send);
+      queue_up_or_block(*send);
       send++;
    }
    // enable the TX interrupt
@@ -160,13 +177,12 @@ int serial_recv_string(BYTE * recv, uint8 maxlen) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//   S T A T I C   F U N C T I O N S
-////////////////////////////////////////////////////////////////////////////////
 //   INTERRUPT SERVICE ROUTINE
 ////////////////////////////////////////////////////////////////////////////////
 
 static void serial_isr(void) {
    BYTE b;
+   BOOLEAN sent_something=FALSE;
    BOOLEAN received_something=FALSE;
 
    // TRANSMIT
@@ -176,6 +192,7 @@ static void serial_isr(void) {
       if (cq_get_byte(&com1_tx_queue,&b)) {
          // there is data in the TX queue
          SCDR=b;
+         sent_something=TRUE;
       } else {
          // TX queue empty, turn off TX interrupt
          MASKCLR(SCCR2,SCCR2_TIE);
@@ -191,10 +208,15 @@ static void serial_isr(void) {
       received_something=TRUE;
    }
 
-   // NOTIFY RECEIVER
+   // ASSERT TRIGGERS IF NECESSARY
+
+   if((sent_something)&&(cq_used(&com1_tx_queue)<TX_RESTART_LEVEL)) {
+      presto_trigger_send(serialuser_tid,serialuser_tx_trigger);
+      // will do a task switch if necessary
+   }
 
    if (received_something) {
-      presto_trigger_send(serialuser_tid,serialuser_trigger);
+      presto_trigger_send(serialuser_tid,serialuser_rx_trigger);
       // will do a task switch if necessary
    }
 }
@@ -204,15 +226,18 @@ static void serial_isr(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 static void cq_init(circ_queue * queue, BYTE * buffer, cq_size_t max_size) {
-   CPU_LOCK_T lock;
-   cpu_lock_save(lock);
    queue->buffer=buffer;
    queue->end=buffer+max_size-1;
    queue->head=buffer;
    queue->tail=buffer;
    queue->max_size=max_size;
    queue->current_size=0;
-   cpu_unlock_restore(lock);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+static cq_size_t cq_used(circ_queue * queue) {
+   return queue->current_size;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -221,35 +246,43 @@ static void cq_init(circ_queue * queue, BYTE * buffer, cq_size_t max_size) {
 
 static cq_size_t cq_get_byte(circ_queue * queue, BYTE * b) {
    CPU_LOCK_T lock;
-   cq_size_t bytes=0;
+
+   // If the queue is empty, forget it.
+   if (queue->current_size == 0) return 0;
 
    cpu_lock_save(lock);
-   // If the buffer is not empty
-   if (queue->tail != queue->head) {
-      // return the contents at tail pointer
-      *b = *queue->tail;
-      // Increment the tail pointer.
-      queue->tail++;
-      // If the tail points past the circular queue, then
-      if (queue->tail > queue->end) {
-         // point the tail at the beginning of the circular queue.
-         queue->tail = queue->buffer;
-      }
-      bytes++;
+
+   // Return the contents at tail pointer.
+   *b = *queue->tail;
+
+   // Increment the tail pointer.
+   queue->tail++;
+
+   // If the tail points past the circular queue, then
+   if (queue->tail > queue->end) {
+      // point the tail at the beginning of the circular queue.
+      queue->tail = queue->buffer;
    }
+
+   // Keep track of size.
+   queue->current_size--;
+
    cpu_unlock_restore(lock);
-   return bytes;
+   return 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// returns 0 if no errors, else the number of overwritten bytes (one)
+// returns the number of bytes written to the queue (0 or 1)
 
 static cq_size_t cq_put_byte(circ_queue * queue, BYTE b) {
    CPU_LOCK_T lock;
-   cq_size_t overwrite=0;
+
+   // If the queue is full, forget it.
+   if (queue->current_size >= queue->max_size) return 0;
 
    cpu_lock_save(lock);
+
    // Store byte at head pointer
    *(queue->head) = b;
 
@@ -262,19 +295,11 @@ static cq_size_t cq_put_byte(circ_queue * queue, BYTE b) {
       queue->head = queue->buffer;
    }
 
-   // If the head points at the tail
-   if (queue->head == queue->tail) {
-      // increment the tail pointer
-      queue->tail++;
-      overwrite++;
-      // If the tail points past the queue
-      if (queue->tail > queue->end) {
-         // point the tail at the beginning of the circular queue.
-         queue->tail = queue->buffer;
-      }
-   }
+   // Keep track of size.
+   queue->current_size++;
+
    cpu_unlock_restore(lock);
-   return overwrite;
+   return 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

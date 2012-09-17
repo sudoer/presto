@@ -35,7 +35,6 @@
 
 #include "types.h"
 #include "cpu/error.h"
-#include "cpu/locks.h"
 #include "cpu/intvect.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -49,7 +48,7 @@ typedef void (*interrupt_vector)(void);
 //   E X T E R N A L   F U N C T I O N   P R O T O T Y P E S
 ////////////////////////////////////////////////////////////////////////////////
 
-extern void _start(void);      // entry point in crt11.s (ICC only)
+extern void _start(void);      // entry point in crt0.s
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,13 +129,11 @@ void set_interrupt(BYTE intr, void (*vector)(void)) {
 
 void init_interrupts(void) {
    int i;
-   CPU_LOCK_T lock;
-   cpu_lock_save(lock);
-   for (i=INTR_SCI;i<=INTR_RESET;i++) {
+   for (i=INTR_SCI;i<INTR_RESET;i++) {
       normal_interrupt_vectors[i]=error_isr;
    }
    normal_interrupt_vectors[INTR_ILLOP]=illop_isr;
-   cpu_unlock_restore(lock);
+   normal_interrupt_vectors[INTR_RESET]=_start;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

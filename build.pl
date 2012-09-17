@@ -13,7 +13,6 @@ prepare();
 heading("CONFIGURATION");
 setup_project();
 setup_compiler();
-setup_linker();
 
 heading("COMPILING AND ASSEMBLING");
 compile_stage();
@@ -63,15 +62,13 @@ sub setup_project {
 sub setup_compiler {
    print("setting up compiler...");
    $COMPILER_HOME="c:\\programs\\hc11\\gnu";
+   $GNU_PREFIX="m6811-elf-";
    add_to_path("$COMPILER_HOME\\bin");
    print("OK\n");
-}
 
-################################################################################
-
-sub setup_linker {
    print("setting up linker...");
    $LIB_DIR=$COMPILER_HOME."\\lib";
+   $GCC_LIB=$COMPILER_HOME."\\lib\\gcc-lib\\m6811-elf\\3.0.4\\libgcc.a";
    print("OK\n");
 }
 
@@ -224,17 +221,17 @@ sub compile_stage {
       $src_base=chop_extension($src_name);
       $src_ext=extension_of($src_path);
       debug("");
-      debug("FILE $src_path");
-      debug("src_name=[$src_name]");
-      debug("src_path=[$src_path]");
-      debug("src_dir=[$src_dir]");
-      debug("src_base=[$src_base]");
-      debug("src_ext=[$src_ext]");
+      #debug("FILE $src_path");
+      #debug("src_name=[$src_name]");
+      #debug("src_path=[$src_path]");
+      #debug("src_dir=[$src_dir]");
+      #debug("src_base=[$src_base]");
+      #debug("src_ext=[$src_ext]");
 
       $obj_name="$src_base.o";
       $obj_path="$BUILD_DIR\\$OBJ_DIR\\$obj_name";
-      debug("obj_name=[$obj_name]");
-      debug("obj_path=[$obj_path]");
+      #debug("obj_name=[$obj_name]");
+      #debug("obj_path=[$obj_path]");
       $lst_path="$BUILD_DIR\\$OBJ_DIR\\$src_base.lst";
 
       # DETERMINE IF WE NEED TO DO ANYTHING FOR THIS FILE
@@ -260,12 +257,12 @@ sub compile_stage {
          if($src_ext eq "c") {
             print("COMPILING  $src_file...");
             debug("");
-            $errors+=run("gcc.exe "                  # compiler
+            $errors+=run($GNU_PREFIX."gcc.exe "      # compiler
                         ."-m68hc11 "                 # platform, hc11 or hc12
                         ."-DGCC "                    # define GCC
                         .$include_path               # include path
                         ."-mshort "                  # ???
-                        ."-O "                       # optimization, was (oh-zero)
+                        ."-O1 "                      # optimization, was (oh-zero)
                         ."-fomit-frame-pointer "     # ???
                         ."-msoft-reg-count=0 "       # ???
                         ."-funsigned-char "          # ???
@@ -280,11 +277,11 @@ sub compile_stage {
          } elsif($src_ext eq "s") {
             print("ASSEMBLING $src_file...");
             debug("");
-            $errors+=run("as.exe "            # assembler
-                        ."-a -L "             # ???
-                        ."-ahlns=$lst_path "  # generate list file
-                        ."-o $obj_path "      # output file
-                        ."$src_name");        # source file
+            $errors+=run($GNU_PREFIX."as.exe "       # assembler
+                        ."-L "                       # include local symbols in debug table
+                        ."-ahlns=$lst_path "         # generate list file
+                        ."-o $obj_path "             # output file
+                        ."$src_name");               # source file
             print("OK\n");
          } else {
             print("WHAT???    $src_file\n");
@@ -327,29 +324,32 @@ sub link_stage {
       $ofiles=$ofiles." ".$obj_file;
    }
 
+   my $trace="";
+   if($DEBUG) { $trace="--trace"; }
 
    print("LINKING...\n");
-   $errors+=run("ld.exe "           # linker
-      ."--script ..\\memory.x "      # memory and segment map
-      ."-m m68hc11elf "             # architecture, file format
-      ."--trace "                   # ???
-      ."-nostdlib "                 # do not include C standard library
-      ."-nostartfiles "             # do not include crt0.s
-      ."-defsym _.tmp=0x0 "         # temporary "soft" register
-      ."-defsym _.z=0x2 "           # temporary "soft" register
-      ."-defsym _.xy=0x4 "          # temporary "soft" register
-      ."-Map $TARGET.map --cref "   # create memory map file
-      ."--oformat=elf32-m68hc11 "   # output file format
-      ."-o $TARGET.elf "            # output file
-      ."$ofiles "                   # input files
-      ."-L$LIB_DIR -lgcc");         # include GCC library (should be last argument)
+   $errors+=run($GNU_PREFIX."ld.exe "   # linker
+      ."--script ..\\memory.x "         # memory and segment map
+      ."-m m68hc11elf "                 # architecture, file format
+      ."$trace "                        # print file names as they are completed
+      ."-nostdlib "                     # do not include C standard library
+      ."-nostartfiles "                 # do not include crt0.s
+      ."-defsym _.tmp=0x0 "             # temporary "soft" register
+      ."-defsym _.z=0x2 "               # temporary "soft" register
+      ."-defsym _.xy=0x4 "              # temporary "soft" register
+      ."-Map $TARGET.map --cref "       # create memory map file
+      ."--oformat=elf32-m68hc11 "       # output file format
+      ."-o $TARGET.elf "                # output file
+      ."$ofiles "                       # input files
+      ."$GCC_LIB");                     # include GCC library
+      #."-L$LIB_DIR -lgcc");             # include GCC library (should be last argument)
    print("OK\n");
    print("\n");
 
 
    if($errors==0) {
       print("CONVERTING...\n");
-      $errors+=run("objcopy.exe "
+      $errors+=run($GNU_PREFIX."objcopy.exe "
          ."--output-target=srec "
          #."--srec-forceS3 "
          ."--strip-all "
@@ -398,7 +398,7 @@ sub generate_listing {
    chdir("$BUILD_DIR\\$OBJ_DIR");
 
    print("GENERATING LISTING...\n");
-   $errors+=run("objdump.exe "
+   $errors+=run($GNU_PREFIX."objdump.exe "
       ."--disassemble-all "
       ."--architecture=m68hc11 "
       ."--section=.text "
@@ -423,7 +423,7 @@ sub show_memory_usage {
    print("------------\n");
 
    my $tempfile="headers.txt";  #$TARGET.".tmp";
-   run("objdump.exe -h $OBJ_DIR\\$TARGET.elf > $tempfile");
+   run($GNU_PREFIX."objdump.exe -h $OBJ_DIR\\$TARGET.elf > $tempfile");
 
    my %memusage_sectsize;
    my @memusage_ramsections;
@@ -585,7 +585,7 @@ sub run {
    my $cmd=$_[0];
    my $rc;
    if($DEBUG) {
-      print("RUNNING [$cmd]\n");
+      print("RUNNING [$cmd]\n\n");
    }
    $rc=system($cmd);
    return $rc;

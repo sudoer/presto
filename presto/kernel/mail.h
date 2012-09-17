@@ -30,7 +30,7 @@ typedef struct KERNEL_MAILBOX_S {
    unsigned short message_count;
    KERNEL_ENVELOPE_T * mailbox_head;
    KERNEL_ENVELOPE_T * mailbox_tail;
-   KERNEL_TCB_T * owner_tcb_p;
+   KERNEL_TASKID_T owner_tid;
    KERNEL_TRIGGER_T trigger;
 } KERNEL_MAILBOX_T;
 

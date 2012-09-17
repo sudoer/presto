@@ -30,7 +30,7 @@ SECTIONS
    /* interrupt vectors */
    .specvect : {
      __specvect_start = . ;
-      *(.specvect)
+     *(.specvect)
      __specvect_end = . ;
    } > specvect
 
@@ -38,7 +38,7 @@ SECTIONS
    /* interrupt vectors */
    .normvect : {
      __normvect_start = . ;
-      *(.normvect)
+     *(.normvect)
      __normvect_end = . ;
    } > normvect
 

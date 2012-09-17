@@ -6,21 +6,24 @@
 
 typedef enum {
 
-     ERROR_KERNEL_MAILSEND_TONOBODY,               // 00
-     ERROR_KERNEL_MAILWAIT_NOMAIL,                 // 01
-     ERROR_KERNEL_MAILGET_NOMESSAGES,              // 02
-     ERROR_KERNEL_MAILGET_NOTFORME,                // 03
-     ERROR_KERNEL_CONTEXTSWITCH_STACKCLOBBERED,    // 04
-     ERROR_KERNEL_TIDTOTCB_RANGE,                  // 05
-     ERROR_KERNEL_SEMWAIT_TOOMANYUSERS,            // 06
-     ERROR_MAIN_AFTERSTART,                        // 07
-     ERROR_INTVECT_OTHER,                          // 08
-     ERROR_KERNEL_CREATE_BEFORE_INIT,              // 09
-     ERROR_KERNEL_CREATE_NO_MORE_TCBS,             // 0A
-     ERROR_KERNEL_START_NOTASKS,                   // 0B
-     ERROR_KERNEL_START_AFTER_RTI,                 // 0C
-     ERROR_KERNEL_SCHEDULER_ERROR,                 // 0D
-     ERROR_KERNEL_MAILSEND_TONULLBOX,              // 0E
+     // KERNEL ERRORS
+     ERROR_KERNEL_CONTEXTSWITCH_STACKCLOBBERED,    // 00
+     ERROR_KERNEL_CREATEBEFOREINIT,                // 01
+     ERROR_KERNEL_NOMORETCBS,                      // 02
+     ERROR_KERNEL_NOTASKTOSTART,                   // 03
+     ERROR_KERNEL_SCHEDULERERROR,                  // 04
+     ERROR_KERNEL_STARTAFTERRTI,                   // 05
+     ERROR_KERNEL_TIDTOTCB_RANGE,                  // 06
+     ERROR_MAIL_SENDNULLENVELOPE,
+     ERROR_MAIL_SENDTONULLBOX,                     // 07
+     ERROR_MEMORY_CLOBBEREDMEMBLOCK,               // 08
+     ERROR_SEMAPHORE_TOOMANYWAITERS,               // 09
+
+     // CPU-SPECIFIC ERRORS
+     ERROR_INTVECT_OTHER,                          // 0A
+
+     // APPLICATION ERRORS
+     ERROR_MAIN_AFTERSTART,                        // 0B
 
 } error_number_e;
 

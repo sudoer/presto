@@ -6,7 +6,7 @@
 _start:
 
 
-; load initial statck pointer
+; load initial stack pointer
    lds   #__stack_end-1
 
 ; call cpu-specific initialization

@@ -5,8 +5,8 @@
 
 // This is the main header file for the presto operating system.
 // Below you will find the complete API for the O/S.  You should
-// not have to include any of the files in the "kernel" directory
-// in your application.
+// not have to include any of the header files from the "kernel"
+// directory in your application.
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -20,6 +20,9 @@
 #include "kernel/semaphore.h"
 
 ////////////////////////////////////////////////////////////////////////////////
+
+// These are the data types that you will use in your application.
+// Use the ones that begin with "PRESTO".
 
 // core kernel
 typedef KERNEL_TASKID_T       PRESTO_TASKID_T;
@@ -52,20 +55,31 @@ extern PRESTO_TASKID_T presto_task_create(void (*func)(void), BYTE * stack, shor
 extern void presto_scheduler_start(void);
 
 ////////////////////////////////////////////////////////////////////////////////
+//   T A S K   P R I O R I T I E S
+////////////////////////////////////////////////////////////////////////////////
+
+extern PRESTO_PRIORITY_T presto_priority_get(PRESTO_TASKID_T tid);
+extern void presto_priority_override(PRESTO_TASKID_T tid, PRESTO_PRIORITY_T new_priority);
+extern void presto_priority_restore(PRESTO_TASKID_T tid);
+
+////////////////////////////////////////////////////////////////////////////////
 //   T R I G G E R S
 ////////////////////////////////////////////////////////////////////////////////
 
+// This function could also be called "presto_trigger_wait", but
+// since it is used everywhere, we simply call it "presto_wait".
 extern PRESTO_TRIGGER_T presto_wait(PRESTO_TRIGGER_T triggers);
+
 extern void presto_trigger_set(PRESTO_TRIGGER_T trigger);
 extern void presto_trigger_clear(PRESTO_TRIGGER_T trigger);
-extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
 extern void presto_trigger_send(PRESTO_TASKID_T tid, PRESTO_TRIGGER_T trigger);
+extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
 
 ////////////////////////////////////////////////////////////////////////////////
 //   M A I L
 ////////////////////////////////////////////////////////////////////////////////
 
-// mail boxes, etc
+// mailboxes, etc
 extern void presto_mailbox_init(PRESTO_MAILBOX_T * box_p, PRESTO_TRIGGER_T trigger);
 extern void presto_mailbox_default(PRESTO_MAILBOX_T * box_p);
 
@@ -93,12 +107,12 @@ extern void presto_timer_stop(PRESTO_TIMER_T * timer_p);
 //   S E M A P H O R E S
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef FEATURE_PRIORITY_INHERITANCE
+#ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
 extern void presto_semaphore_init(PRESTO_SEMAPHORE_T * sem_p, short resources, BOOLEAN use_inheritance);
 #else
 extern void presto_semaphore_init(PRESTO_SEMAPHORE_T * sem_p, short resources);
 #endif
-extern void presto_semaphore_request(PRESTO_SEMAPHORE_T * sem_p, PRESTO_TRIGGER_T trigger);
+extern BOOLEAN presto_semaphore_request(PRESTO_SEMAPHORE_T * sem_p, PRESTO_TRIGGER_T trigger);
 extern void presto_semaphore_release(PRESTO_SEMAPHORE_T * sem_p);
 extern void presto_semaphore_wait(PRESTO_SEMAPHORE_T * sem_p, PRESTO_TRIGGER_T trigger);
 

@@ -2,6 +2,14 @@
 //   C O M M E N T A R Y
 ////////////////////////////////////////////////////////////////////////////////
 
+// If you've gotten here, you're in trouble.  These functions report an error
+// condition.  The functions are application-specific, since different boards
+// will have different ways of reporting stuff to the user.
+
+// The Handyboard has four motor drivers with status LED's.  I use them to
+// show 8-bit values, but that means I have to multiplex the data in two
+// sets of four bits (a motor can not be going forwards and backwards at
+// the same time).  While I am at it, I make a little bit of noise.
 
 ////////////////////////////////////////////////////////////////////////////////
 //   D E P E N D E N C I E S
@@ -13,13 +21,6 @@
 #include "cpu/locks.h"
 #include "cpu/misc_hw.h"
 #include "cpu/error.h"
-
-
-////////////////////////////////////////////////////////////////////////////////
-//   C O N S T A N T S
-////////////////////////////////////////////////////////////////////////////////
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S T A T I C   F U N C T I O N S
@@ -39,7 +40,7 @@ void show_one_byte(BYTE leds) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void error_fatal(error_number_e err) {
-   cpu_lock();
+   cpu_lock();  // no more interrupts
    while (1) {
       TOGGLE_SPEAKER();
       show_one_byte(err);
@@ -57,7 +58,7 @@ void error_crash(void) {
 
 void error_address(unsigned short address) {
    BYTE delay;
-   cpu_lock();
+   cpu_lock();  // no more interrupts
    while (1) {
       for (delay=0;delay<150;delay++) {
          show_one_byte(0x00);

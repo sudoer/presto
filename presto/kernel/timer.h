@@ -9,10 +9,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+typedef unsigned short KERNEL_INTERVAL_T;
+
 typedef struct KERNEL_TIMER_S {
    KERNEL_TIME_T delivery_time;
    KERNEL_INTERVAL_T timer_period;
-   KERNEL_TCB_T * owner_tcb_p;
+   KERNEL_TASKID_T owner_tid;
    KERNEL_TRIGGER_T trigger;
    struct KERNEL_TIMER_S * next;
 } KERNEL_TIMER_T;
