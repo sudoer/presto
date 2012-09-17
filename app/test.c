@@ -16,10 +16,10 @@
 
 #define STACK_SIZE 100
 
-static BYTE task_one_stack[STACK_SIZE];
-static BYTE task_two_stack[STACK_SIZE];
-static BYTE task_three_stack[STACK_SIZE];
-static BYTE task_zero_stack[STACK_SIZE];
+/*static*/ BYTE task_one_stack[STACK_SIZE];
+/*static*/ BYTE task_two_stack[STACK_SIZE];
+/*static*/ BYTE task_three_stack[STACK_SIZE];
+/*static*/ BYTE task_zero_stack[STACK_SIZE];
 
 PRESTO_TID_T one_tid=0;
 PRESTO_TID_T two_tid=0;
@@ -111,4 +111,3 @@ int main(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-

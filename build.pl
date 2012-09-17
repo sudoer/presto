@@ -20,12 +20,8 @@ print("--- CONFIGURATION ---\n");
 print("setting up project...");
 $OBJ_DIR="obj";
 $TARGET="hbtest";
-@SRC_FILES=("kernel\\kernel.c",
-#           "kernel\\task_sw.asm",
-            "kernel\\clock.c",
-            "kernel\\system.c",
-            "kernel\\intvect.c",
-#           "kernel\\crt0.asm",
+@SRC_FILES=(
+            "app\\test.c",
             "services\\debugger.c",
             "services\\lcd.c",
             "services\\i2c.c",
@@ -34,7 +30,11 @@ $TARGET="hbtest";
             "services\\serial.c",
             "services\\sound.c",
             "utils\\string.c",
-            "app\\test.c");
+            "kernel\\clock.c",
+            "kernel\\system.c",
+            "kernel\\intvect.c",
+            "kernel\\kernel.c",
+);
 @LIBS=();
 print("OK\n");
 
@@ -467,4 +467,3 @@ sub basename {
 }
 
 ################################################################################
-

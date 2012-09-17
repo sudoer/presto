@@ -1,14 +1,10 @@
 
-
-
 %inst=();
 %func=();
-
 
 $current_addr="0000";
 $current_function="";
 $longest_function=0;
-
 
 open(LST,"<OBJ\\HBTEST.LST");
 while($line=<LST>) {
@@ -51,9 +47,10 @@ $longest_function++;
 #   print("\n");
 #}
 
-open(LOG,"<crash2.log");
+# start of code
+$addr="C000";
+open(LOG,"<SIM68.LOG");
 while($line=<LOG>) {
-   $addr=substr($line,0,4);
    if(length($inst{$addr})>0) {
       $printme=$inst{$addr};
       $spaces=' ' x $longest_function;
@@ -62,9 +59,11 @@ while($line=<LOG>) {
       $printme=~s/\n/\n$spaces/g;
       print("$printme\n");
    }
-   print($func{$addr});
-   print(' ' x ($longest_function-length($func{$addr})));
+   print("$addr $func{$addr}");
+   print(' ' x ($longest_function-length($func{$addr})-5));
    print($line);
+   # save for next time
+   $addr_loc=index($line,"P-");
+   $addr=substr($line,$addr_loc+2,4);
 }
 close(LOG);
-

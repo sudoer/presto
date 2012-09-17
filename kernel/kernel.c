@@ -22,49 +22,52 @@
 // GLOBAL VARIABLES
 // These are used to pass arguments to inline assembly routines
 
-static BYTE * global_new_sp=NULL;
-static BYTE ** global_old_sp_p=NULL;
-static void (*global_new_fn)(void)=NULL;
-static BYTE * global_save_sp;     // do not put this on the stack (BOOM)
+/*static*/ BYTE * global_new_sp=NULL;
+/*static*/ BYTE ** global_old_sp_p=NULL;
+/*static*/ void (*global_new_fn)(void)=NULL;
+/*static*/ BYTE * global_save_sp;     // do not put this on the stack (BOOM)
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // STATIC GLOBAL VARIABLES
 
-static PRESTO_TCB_T * current_tcb_p=NULL;
-static PRESTO_TCB_T * tcb_head_p=NULL;
-static PRESTO_TCB_T * free_tcb_p=NULL;
-static PRESTO_TCB_T tcb_list[MAX_TASKS];
+/*static*/ PRESTO_TCB_T * current_tcb_p=NULL;
+/*static*/ PRESTO_TID_T current_tid=0;
+/*static*/ PRESTO_TCB_T * tcb_head_p=NULL;
+/*static*/ PRESTO_TCB_T * free_tcb_p=NULL;
+/*static*/ PRESTO_TCB_T tcb_list[MAX_TASKS];
 
-static PRESTO_TIME_T presto_master_clock;
-static BYTE presto_initialized=0;
+/*static*/ PRESTO_TIME_T presto_master_clock;
+/*static*/ BYTE presto_initialized=0;
 
 // idle task stuff
-static BYTE idle_stack[IDLE_STACK_SIZE];
-static PRESTO_TCB_T * idle_tcb_p;
-static BYTE idle_tid;
+/*static*/ BYTE idle_stack[IDLE_STACK_SIZE];
+/*static*/ PRESTO_TCB_T * idle_tcb_p;
+/*static*/ BYTE idle_tid;
 
 // mail stuff
-static PRESTO_MESSAGE_T * free_mail_p=NULL;
-static PRESTO_MESSAGE_T * po_mail_p=NULL;
-static PRESTO_MESSAGE_T mail_list[MAX_MESSAGES];
+/*static*/ PRESTO_MESSAGE_T * free_mail_p=NULL;
+/*static*/ PRESTO_MESSAGE_T * po_mail_p=NULL;
+/*static*/ PRESTO_MESSAGE_T mail_list[MAX_MESSAGES];
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // FUNCTION PROTOTYPES
 
-static PRESTO_TCB_T * presto_next_tcb_to_run(void);
-static void presto_start_master_timer(void);
-static void presto_restart_master_timer(void);
-static void idle_task(void);
-static BYTE deliver_mail(void);
-static PRESTO_TCB_T * tid_to_tcbptr(BYTE tid);
-static void print_tcb_list(void);
-static void print_mail_list(void);
-static void idle_task(void);
+/*static*/ PRESTO_TCB_T * presto_next_tcb_to_run(void);
+/*static*/ void presto_start_master_timer(void);
+/*static*/ void presto_restart_master_timer(void);
+/*static*/ void idle_task(void);
+/*static*/ BYTE deliver_mail(void);
+/*static*/ PRESTO_TCB_T * tid_to_tcbptr(BYTE tid);
+/*static*/ void print_tcb_list(void);
+/*static*/ void print_mail_list(void);
+/*static*/ void idle_task(void);
 
 void presto_system_isr_wrapper(void);
 void presto_system_isr(void);
+void context_switch_wrapper(void);
+void context_switch(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 //   I N I T I A L I Z A T I O N
@@ -114,6 +117,7 @@ void presto_start_scheduler(void) {
 
    //set_interrupt(INTR_TOC2, presto_system_isr_wrapper);
    set_interrupt(INTR_TOC2, presto_system_isr);
+   set_interrupt(INTR_SWI, context_switch);
 
    // start timer interrupts for pre-emption
    presto_start_master_timer();
@@ -121,6 +125,10 @@ void presto_start_scheduler(void) {
    // pick next task to run
    // first task in list is highest priority and is ready
    current_tcb_p=tcb_head_p;
+   if(current_tcb_p==NULL) {
+      presto_fatal_error();
+   }
+   current_tid=current_tcb_p->task_id;
 
    // SET UP A NEW STACK AND START EXECUTION USING IT
 
@@ -296,13 +304,14 @@ void presto_system_isr_wrapper(void) {
 
       // pick next task to run
       current_tcb_p=presto_next_tcb_to_run();
+      current_tid=current_tcb_p->task_id;
 
       // end of ISR will set up new stack
       global_new_sp=current_tcb_p->stack_ptr;
 
       // swap the stack pointers
-      asm("ldx _global_old_sp_p");
-      asm("sts 0,x");
+      asm("ldy _global_old_sp_p");
+      asm("sts 0,y");
       asm("lds _global_new_sp");
    }
 
@@ -327,7 +336,9 @@ void presto_system_isr_wrapper(void) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void context_switch(void) {
+void context_switch_wrapper(void) {
+
+   asm("_context_switch::");
 
    // check to see if the old task has clobbered its stack
    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
@@ -339,10 +350,7 @@ void context_switch(void) {
 
    // pick next task to run
    current_tcb_p=presto_next_tcb_to_run();
-
-   if(current_tcb_p==NULL) {
-      presto_fatal_error();
-   }
+   current_tid=current_tcb_p->task_id;
 
    // check to see if the new task has clobbered its stack
    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
@@ -364,8 +372,8 @@ void context_switch(void) {
    asm("psha");  // 1 byte, the condition codes
 
    // swap the stack pointers
-   asm("ldx _global_old_sp_p");
-   asm("sts 0,x");
+   asm("ldy _global_old_sp_p");
+   asm("sts 0,y");
    asm("lds _global_new_sp");
 
    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
@@ -388,7 +396,7 @@ void context_switch(void) {
 //   S C H E D U L I N G
 ////////////////////////////////////////////////////////////////////////////////
 
-static PRESTO_TCB_T * presto_next_tcb_to_run(void) {
+/*static*/ PRESTO_TCB_T * presto_next_tcb_to_run(void) {
    // pick highest priority ready task to run
    PRESTO_TCB_T * ptr=tcb_head_p;
    while(ptr!=NULL) {
@@ -485,7 +493,7 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
    if(current_tcb_p->mailbox_head==NULL) {
       // no mail, so we can sleep
       current_tcb_p->state=STATE_BLOCKED;
-      context_switch();
+      asm("swi");
       // When we wake up, we'll be ready to recieve our mail.
       // Interrupts will be enabled.
    }
@@ -532,7 +540,7 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static BYTE deliver_mail(void) {
+/*static*/ BYTE deliver_mail(void) {
    BYTE count=0;
    PRESTO_MESSAGE_T * msg_p;
    PRESTO_TCB_T * tcb_p;
@@ -575,7 +583,7 @@ static BYTE deliver_mail(void) {
 //   I D L E   T A S K
 ////////////////////////////////////////////////////////////////////////////////
 
-static void idle_task(void) {
+/*static*/ void idle_task(void) {
    while(1) {
       // do nothing
    }
@@ -585,7 +593,7 @@ static void idle_task(void) {
 //   U T I L I T I E S
 ////////////////////////////////////////////////////////////////////////////////
 
-static PRESTO_TCB_T * tid_to_tcbptr(BYTE tid) {
+/*static*/ PRESTO_TCB_T * tid_to_tcbptr(BYTE tid) {
    if(tid>=MAX_TASKS) presto_fatal_error();
    if(tcb_list[tid].state==STATE_INACTIVE) return NULL;
    return &tcb_list[tid];
@@ -595,7 +603,7 @@ static PRESTO_TCB_T * tid_to_tcbptr(BYTE tid) {
 //   H A R D W A R E   T I M E R / C O U N T E R
 ////////////////////////////////////////////////////////////////////////////////
 
-static void presto_start_master_timer(void) {
+/*static*/ void presto_start_master_timer(void) {
    // store (current plus CYCLES_PER_TICK)
    TOC2 = TCNT + CYCLES_PER_TICK;
    // request output compare interrupt
@@ -609,7 +617,7 @@ static void presto_start_master_timer(void) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void presto_restart_master_timer(void) {
+/*static*/ void presto_restart_master_timer(void) {
    // store (last plus CYCLES_PER_TICK)
    TOC2 = TOC2 + CYCLES_PER_TICK;
    // clear the OUTPUT COMPARE flag
