@@ -1,18 +1,18 @@
 
-#ifndef _SOUND_H_
-#define _SOUND_H_
+#ifndef _ISR_H_
+#define _ISR_H_
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// HIDDEN
+#pragma interrupt_handler motor_isr
+#pragma interrupt_handler serial_isr
 #pragma interrupt_handler sound_isr
-void sound_isr(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern void sound_on(unsigned short tone);
-extern void sound_off(void);
-extern void sound_tick(void);
+extern void motor_isr(void);
+void serial_isr(void);
+extern void sound_isr(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -4,6 +4,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// SPECIAL FUNCTION REGISTERS
+
 #define OC1M_OC1M7  0x80
 #define OC1M_OC1M6  0x40
 #define OC1M_OC1M5  0x20
@@ -50,7 +52,39 @@
 #define TFLG1_IC2F  0x02
 #define TFLG1_IC3F  0x01
 
+#define SCCR1_R8    0x80
+#define SCCR1_T8    0x40
+#define SCCR1_M     0x10
+#define SCCR1_WAKE  0x04
+
+#define SCSR_TDRE   0x80
+#define SCSR_TC     0x40
+#define SCSR_RDRF   0x20
+#define SCSR_IDLE   0x10
+#define SCSR_OR     0x08
+#define SCSR_NF     0x04
+#define SCSR_FE     0x02
+
+#define SCCR2_TIE   0x80
+#define SCCR2_TCIE  0x40
+#define SCCR2_RIE   0x20
+#define SCCR2_ILIE  0x10
+#define SCCR2_TE    0x08
+#define SCCR2_RE    0x04
+#define SCCR2_RWU   0x02
+#define SCCR2_SBK   0x01
+
+#define BAUD_TCLR   0x80
+#define BAUD_SCP1   0x20
+#define BAUD_SCP0   0x10
+#define BAUD_RCKB   0x08
+#define BAUD_SCR2   0x04
+#define BAUD_SCR1   0x02
+#define BAUD_SCR0   0x01
+
 ////////////////////////////////////////////////////////////////////////////////
+
+// INTERRUPTS
 
 #define INTR_SCI     0
 #define INTR_SPI     1
@@ -75,6 +109,8 @@
 #define INTR_RESET  20
 
 ////////////////////////////////////////////////////////////////////////////////
+
+// STATUS REGISTER BITS
 
 #define CCR_STOP_DISABLE   0x80
 #define CCR_X_INTERRUPT    0x40

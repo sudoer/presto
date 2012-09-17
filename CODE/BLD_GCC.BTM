@@ -8,6 +8,8 @@ set OBJ_DIR=obj
 set SRC_FILES=presto\kernel.c presto\task_sw.asm presto\clock.c presto\system.c services\debugger.c services\lcd.c services\i2c.c services\motors.c services\serial.c services\sound.c app\test.c
 set TARGET=hbtest
 
+PATH=%PATH%;c:\alan\play\hc11\gcc\bin
+
 @echo.
 @echo --- CLEANING UP ---
 
@@ -46,11 +48,11 @@ do
       set ext=%@LOWER[%@EXT[%file%]]
       iff "%ext%"=="c" then
          @echo COMPILING
-         icc11 -c -l -e -I. -o %obj% %file%
+         xgcc -c -I. -I%ICC11_INCLUDE% -o %obj% %file%
          if errorlevel 1 goto abort
       elseiff "%ext%"=="asm" then
          @echo ASSEMBLING
-         ias6811 -o %obj% %file%
+         as6811 -o %obj% %file%
          if errorlevel 1 goto abort
          move /q %@PATH[%file%]\%@NAME[%file%].lis %OBJ_DIR%
       else
@@ -72,18 +74,18 @@ enddo
 @rem -m option to produce map file
 
 set ICC11_LIB=H:\ICC\LIB
-set ICC11_LINKER_OPTS=-bdata:0x8000.0x9fff -bbss:0xa000.0xb5ff -btext:0xc000.0xffbf -m -dheap_size:0x800 -dinit_sp:0xbfbf
+set ICC11_LINKER_OPTS=-bdata:0x8000.0x9fff -bbss:0xa000.0xafff -btext:0xc000.0xffbf -m -dheap_size:0x800 -dinit_sp:0xb5ff
 
-@rem   ADDRESSES    SIZE   USED FOR WHAT
-@rem ----------------------------------------------------
-@rem   8000-9FFF      8k   DATA - GLOBAL VARIABLES
-@rem   A000-B5FF    5632   BSS - INITIALIZED GLOBAL VARIABLES
-@rem   B600-B7FF     512   EEPROM
-@rem   B800-BFBF   2k-64   INITIAL STACK
-@rem   BFC0-BFFF      64   SPECIAL INTERRUPTS
-@rem   C000-FFBF  16k-64   TEXT - CODE INSTRUCTIONS, CONSTANT DATA
-@rem   FFC0-FFFF      64   NORMAL INTERRUPTS
-@rem ----------------------------------------------------
+@rem         MEMORY MAP
+@rem ------------------------
+@rem        DATA   8000-9FFF    8k      GLOBAL VARIABLES
+@rem         BSS   A000-AFFF    4k      INITIALIZED GLOBAL VARIABLES
+@rem       STACK   B000-B5FF  1536      INITIAL STACK
+@rem     NOTHING   B600-B7FF   512      EEPROM
+@rem     NOTHING   B800-BFBF   ~2k      NOTHING
+@rem INT VECTORS   BFC0-BFFF    64      SPECIAL INTERRUPTS
+@rem        TEXT   C000-FFBF  ~16k      CODE INSTRUCTIONS, CONSTANT DATA
+@rem INT VECTORS   FFC0-FFFF    64      NORMAL INTERRUPTS
 
 echo -L%ICC11_LIB% -o %TARGET%.S19 %OBJS% > BUILD.TMP
 icc11 @BUILD.TMP

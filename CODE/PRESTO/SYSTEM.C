@@ -3,6 +3,7 @@
 #include "hc11regs.h"
 #include "system.h"
 #include "presto\kernel.h"
+#include "services\serial.h"
 #include "services\motors.h"
 #include "services\sound.h"
 
@@ -39,12 +40,13 @@ void inert_isr(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 #pragma interrupt_handler presto_system_isr
+#pragma interrupt_handler presto_serial_isr
 
 // address FFD6 for simulator
 // address BFD6 for handyboard
 #pragma abs_address:0xBFD6
 static void (*special_interrupt_vectors[])() = {
-   inert_isr,          // SCI
+   presto_serial_isr,  // SCI
    inert_isr,          // SPI
    inert_isr,          // PAIE
    inert_isr,          // PAO

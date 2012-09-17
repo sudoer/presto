@@ -9,10 +9,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // system crashes after...
-#define TIMER0   1000      //
-#define TIMER1   5000      //
-#define TIMER2  12000      //
-#define TIMER3      0      //
+#define TIMER0     0
+#define TIMER1     0
+#define TIMER2     0
+#define TIMER3  1000
 
 ////////////////////////////////////////////////////////////////////////////////
 /*
@@ -113,11 +113,6 @@ void Two(void) {
       presto_sleep();
       presto_get_message(&msg);
       speed2=0-speed2;
-      //msg.b.b1=MSG_LCD_LETTER;
-      //msg.b.b2=c;
-      //presto_send_message(lcd_task_tid,msg);
-      //c++;
-      //if(c>'Z') c='A';
    }
 }
 
@@ -127,6 +122,10 @@ void Three(void) {
    int speed3=MOTORS_MAX_SPEED;
    PRESTO_MAIL_T msg;
    PRESTO_MAIL_T msg3;
+
+   uint16 timer=0;
+   char timerstring[6];
+
    msg.dw.dw1=0;
    while(1) {
       motor_speed(3,speed3);
@@ -134,6 +133,17 @@ void Three(void) {
       presto_sleep();
       presto_get_message(&msg3);
       speed3=0-speed3;
+
+      timer++;
+      timerstring[0]=(timer/10000)%10+'0';
+      timerstring[1]=(timer/1000)%10+'0';
+      timerstring[2]=(timer/100)%10+'0';
+      timerstring[3]=(timer/10)%10+'0';
+      timerstring[4]=(timer)%10+'0';
+      timerstring[5]=0;
+      serial_send_string(timerstring);
+      serial_send_byte(' ');
+
    }
 }
 
@@ -142,10 +152,20 @@ void Three(void) {
 void main(void) {
    presto_init();
    lcd_task_tid=presto_create_task(LcdTask, lcd_task_stack, STACK_SIZE, 50);
-   zero_tid=presto_create_task(Zero, task_zero_stack, STACK_SIZE, 45);
-   one_tid=presto_create_task(One, task_one_stack, STACK_SIZE, 40);
-   two_tid=presto_create_task(Two, task_two_stack, STACK_SIZE, 35);
-   //three_tid=presto_create_task(Three, task_three_stack, STACK_SIZE, 30);
+#if TIMER0 != 0
+   zero_tid=presto_create_task(Zero, task_zero_stack, STACK_SIZE, 30);
+#endif
+#if TIMER1 != 0
+   one_tid=presto_create_task(One, task_one_stack, STACK_SIZE, 35);
+#endif
+#if TIMER2 != 0
+   two_tid=presto_create_task(Two, task_two_stack, STACK_SIZE, 40);
+#endif
+#if TIMER3 != 0
+   three_tid=presto_create_task(Three, task_three_stack, STACK_SIZE, 45);
+#endif
+   serial_init(9600);
+   //debugger_init();
    motor_init();
    lcd_init();
    presto_start_scheduler();
