@@ -1,6 +1,4 @@
 
-#include <stdlib.h>
-#include <hc11.h>        // register definitions
 #include "hc11regs.h"
 #include "system.h"
 #include "presto.h"

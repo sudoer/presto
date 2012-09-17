@@ -1,5 +1,5 @@
 
-#include <hc11.h>
+#include "hc11regs.h"
 #include "presto.h"
 #include "services\i2c.h"
 #include "types.h"

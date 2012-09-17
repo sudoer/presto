@@ -1,17 +1,0 @@
-ASxxxx Assembler V02.01 MSOE  (Motorola 6811), page 1.
-
-Symbol Table
-
-    .__.ABS.=  0000 G   |     CCR_INTE=  0010     |     ISR_LED_=  0010 
-    ISR_LED_=  1008     |     _presto_   **** GX  |     _presto_   **** GX
-    _presto_   **** GX  |   0 _presto_   0000 R   |     _presto_   **** GX
-    _presto_   **** GX  |     _presto_   **** GX  |   2 _presto_   0034 GR
-  2 _presto_   0026 GR  |   2 _presto_   0017 GR  |   2 _presto_   0000 GR
-  2 psi_rti    0011 R
-ASxxxx Assembler V02.01 MSOE  (Motorola 6811), page 2.
-
-Area Table
-
-   0 _CODE      size    2   flags 0
-   1 idata      size    2   flags 0
-   2 text       size   55   flags 0

@@ -37,7 +37,6 @@
 //   S T A T I C   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <hc11.h>
 #include "hc11regs.h"
 #include "system.h"
 #include "kernel\kernel.h"
@@ -83,7 +82,10 @@ void inert_isr(void) {
 
 // address FFD6 for simulator
 // address BFD6 for handyboard
+#ifdef ICC
 #pragma abs_address:0xBFD6
+#endif
+
 static void (*special_interrupt_vectors[])() = {
    inert_isr,          // SCI    -   presto_serial_isr
    inert_isr,          // SPI

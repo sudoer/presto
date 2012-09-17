@@ -1,4 +1,4 @@
-set VER=105
+set VER=106
 
 del ..\presto%VER%.zip
 pkzip25 -add -rec -path=rel ..\presto%VER%.zip *.*

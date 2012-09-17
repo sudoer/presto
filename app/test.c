@@ -1,6 +1,4 @@
 
-#include <stdio.h>
-#include <hc11.h>
 #include "presto.h"
 #include "types.h"
 #include "services.h"
@@ -138,7 +136,7 @@ void Three(void) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void main(void) {
+int main(void) {
    presto_init();
    lcd_task_tid=presto_create_task(LcdTask, lcd_task_stack, STACK_SIZE, 50);
 #if TIMER0 != 0
@@ -158,6 +156,8 @@ void main(void) {
    serial_init(9600);
    debugger_init();
    presto_start_scheduler();
+   // we never get here
+   return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

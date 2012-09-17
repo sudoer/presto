@@ -1,6 +1,4 @@
 
-#include <stdio.h>
-#include <hc11.h>
 #include "presto.h"
 #include "types.h"
 #include "services.h"
