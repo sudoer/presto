@@ -7,20 +7,25 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #define CYCLES_PER_MS     2000
-#define MS_PER_TICK       5
+#define MS_PER_TICK       100
 #define CYCLES_PER_TICK   CYCLES_PER_MS*MS_PER_TICK
 #define IDLE_PRIORITY     0
-#define IDLE_STACK_SIZE   150
+#define IDLE_STACK_SIZE   50
+
+////////////////////////////////////////////////////////////////////////////////
+
+#define DISABLE_CCR_INTERRUPT_BIT      asm("oraa #0x10");
+#define ENABLE_CCR_INTERRUPT_BIT      asm("anda ~#0x10");
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // GLOBAL VARIABLES
-// These are used to pass arguments to asm routines.
+// These are used to pass arguments to inline assembly routines
 
-BYTE * presto_asm_new_sp=NULL;
-BYTE ** presto_asm_old_sp_p=NULL;
-void (*presto_asm_new_fn)(void)=NULL;
-BYTE presto_asm_swap;
+static BYTE * global_new_sp=NULL;
+static BYTE ** global_old_sp_p=NULL;
+static void (*global_new_fn)(void)=NULL;
+static BYTE * global_save_sp;     // do not put this on the stack (BOOM)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -58,8 +63,11 @@ static void print_tcb_list(void);
 static void print_mail_list(void);
 static void idle_task(void);
 
+#pragma interrupt presto_system_isr
+void presto_system_isr(void);
+
 ////////////////////////////////////////////////////////////////////////////////
-//   I N T E R F A C E
+//   I N I T I A L I Z A T I O N
 ////////////////////////////////////////////////////////////////////////////////
 
 void presto_init(void) {
@@ -68,11 +76,6 @@ void presto_init(void) {
    // initialize once and only once
    if(presto_initialized) return;
    presto_initialized++;
-
-   BITSET(DDRD,4);    // LED is output
-   BITSET(DDRD,5);    // LED is output
-   BITSET(PORTD,5);   // light off
-   BITSET(PORTD,4);   // light off
 
    // initialize master clock
    presto_master_clock=clock_reset();
@@ -95,19 +98,61 @@ void presto_init(void) {
    free_mail_p=&mail_list[0];
 
    // initialize idle task
-   // must be done after presto_initialized++ to break out of recursion
+   // must be done after presto_initialized++ because of initialization check
    idle_tid=presto_create_task(idle_task,idle_stack,IDLE_STACK_SIZE,IDLE_PRIORITY);
    idle_tcb_p=tid_to_tcbptr(idle_tid);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void presto_start_scheduler(void) {
+
+   if(presto_initialized==0) presto_fatal_error();
+
+   // we're about to switch to our first task... interrupts off
+   INTR_OFF();
+
+   set_interrupt(INTR_TOC2, presto_system_isr);
+
+   // start timer interrupts for pre-emption
+   presto_start_master_timer();
+
+   // pick next task to run
+   // first task in list is highest priority and is ready
+   current_tcb_p=tcb_head_p;
+
+   // SET UP A NEW STACK AND START EXECUTION USING IT
+
+   // these parameters will be used in inline assembly...
+   // must be put in global space, not on stack
+   global_new_sp=current_tcb_p->stack_ptr;
+
+   asm("lds _global_new_sp");
+
+   // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
+   // That way, the new task will have interrupts enabled when it wakes up.
+   asm("pula");
+   ENABLE_CCR_INTERRUPT_BIT;
+   asm("psha");
+
+   // Normally, this function would end with an RTS, but we want to act EXACTLY
+   // the same as if we had just been inside of an interrupt.  So we manually
+   // call RTI here to pop the registers and "run" the new task.
+   asm("rti");
+
+   // we never get here
+   presto_fatal_error();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//   T A S K   M A N A G E M E N T
+////////////////////////////////////////////////////////////////////////////////
+
 PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_size, BYTE priority ) {
 
    PRESTO_TCB_T * new_tcb_p;
 
-   // lazy initialization
-   if(presto_initialized==0) presto_init();
+   if(presto_initialized==0) presto_fatal_error();
 
    if(free_tcb_p==NULL) {
       // There are no more TCB's left.
@@ -131,13 +176,52 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
    new_tcb_p->mailbox_head=NULL;
    new_tcb_p->mailbox_tail=NULL;
 
-   // call asm routine to set up new stack
-   presto_asm_new_sp=new_tcb_p->stack_ptr;
-   presto_asm_new_fn=func;
-   presto_setup_new_task();
-   new_tcb_p->stack_ptr=presto_asm_new_sp;
+   // SET UP NEW STACK USING ASSEMBLY LANGUAGE
 
-   // insert new TCB into list in priority order
+   // these parameters will be used in inline assembly...
+   // must be put in global space, not on stack
+   global_new_sp=new_tcb_p->stack_ptr;
+   global_new_fn=func;
+
+   // store our own SP so we can work on the new task
+   asm("sts _global_save_sp");
+
+   // load empty SP from task so we can initialize it
+   asm("lds _global_new_sp");
+
+   // Set presto_fatal_error as the "return pc" of a new task.  If some bozo
+   // tries to return out of his task's main function, we will cause an alarm.
+   asm("ldd #_presto_fatal_error");
+   asm("pshb");
+   asm("psha");
+
+   // push the actual function call on the stack
+   asm("ldd _global_new_fn");
+   asm("pshb");
+   asm("psha");
+
+   // push any old stinkin' registers onto the stack
+   // they'll be pulled off when we start running
+   // we push in interrupt-stack order
+   asm("ldaa #0");
+   asm("psha"); // Y(L) register
+   asm("psha"); // Y(H) register
+   asm("psha"); // X(L) register
+   asm("psha"); // X(H) register
+   asm("psha"); // A register
+   asm("psha"); // B register
+   asm("psha"); // Initial Condition Codes (I bit cleared)
+
+   // save task SP in TCB
+   asm("sts _global_new_sp");
+   // re-load our own SP so we can return
+   asm("lds _global_save_sp");
+
+   // recover the altered stack pointer and save it in the TCB
+   new_tcb_p->stack_ptr=global_new_sp;
+
+   // INSERT NEW TCB INTO LIST IN PRIORITY ORDER
+
    if(tcb_head_p==NULL) {
       // we are the first TCB in the list
       tcb_head_p=new_tcb_p;
@@ -167,46 +251,20 @@ PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_s
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_start_scheduler(void) {
-
-   // lazy initialization
-   if(presto_initialized==0) presto_init();
-
-   // we're about to switch to our first task... interrupts off
-   INTR_OFF();
-
-   set_interrupt(INTR_TOC2, presto_system_isr);
-
-   // start timer interrupts for pre-emption
-   presto_start_master_timer();
-
-   // pick next task to run
-   // first task in list is highest priority and is ready
-   current_tcb_p=tcb_head_p;
-
-   // call asm routine to set up new stack and run from it
-   presto_asm_new_sp=current_tcb_p->stack_ptr;
-   presto_start_task_switching();
-
-   // we never get here
-   presto_fatal_error();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void presto_kill_self(void) {
    // TODO - remove TCB from list
    presto_fatal_error();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//   I N T E R R U P T
+//   C O N T E X T   S W I T C H I N G   ( I N T E R R U P T )
 ////////////////////////////////////////////////////////////////////////////////
 
-void presto_service_timer_interrupt(void) {
-   // we're changing tasks, dealing with task list and mail list
-   // don't want to get interrupted
-   // INTR_OFF();  already off
+void presto_system_isr(void) {
+
+   // no local variables... we'll mess up our stack
+
+   INTR_OFF();
 
    // take care of clock things
    presto_master_clock=clock_add(presto_master_clock,MS_PER_TICK);
@@ -220,23 +278,108 @@ void presto_service_timer_interrupt(void) {
       ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
          presto_fatal_error();
 
+      // these parameters will be used in inline assembly...
+      // must be put in global space, not on stack
+
       // the ISR will save old SP in old TCB
-      presto_asm_old_sp_p=&(current_tcb_p->stack_ptr);
-      current_tcb_p->state=STATE_READY;
+      global_old_sp_p=&(current_tcb_p->stack_ptr);
 
       // pick next task to run
       current_tcb_p=presto_next_tcb_to_run();
 
       // end of ISR will set up new stack
-      presto_asm_new_sp=current_tcb_p->stack_ptr;
+      global_new_sp=current_tcb_p->stack_ptr;
 
-      // signal to ISR for it to do the task swapping
-      presto_asm_swap=1;
-   } else {
-      // signal to ISR for it NOT to do the task swapping
-      presto_asm_swap=0;
+      // swap the stack pointers
+      asm("ldx _global_old_sp_p");
+      asm("sts 0,x");
+      asm("lds _global_new_sp");
    }
+
+   // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
+   // That way, the new task will have interrupts enabled when it wakes up.
+   asm("pula");
+   ENABLE_CCR_INTERRUPT_BIT;
+   asm("psha");
+
+   // The end of this function SHOULD be an RTI (instead of RTS), because it is
+   // an interrupt.  But checking the listing file, it looks like the ICC
+   // compiler is doing some funny math at the end of interrupt routines.  So
+   // I will add my RTI here explicitly, to force the behavior that I want.
+   // Now we will pop the stack and "run" the new task.
+   asm("rti");
+
+   // we never get here
+   presto_fatal_error();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+void context_switch(void) {
+
+   // check to see if the old task has clobbered its stack
+   if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
+   ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
+      presto_fatal_error();
+
+   // the inline asm will save old SP in old TCB
+   global_old_sp_p=&(current_tcb_p->stack_ptr);
+
+   // pick next task to run
+   current_tcb_p=presto_next_tcb_to_run();
+
+   if(current_tcb_p==NULL) {
+      presto_fatal_error();
+   }
+
+   // check to see if the new task has clobbered its stack
+   if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
+   ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
+      presto_fatal_error();
+
+   // call asm routine to set up new stack
+   // when we return, we'll be another process
+   // the asm routine will re-enable interrupts
+   global_new_sp=current_tcb_p->stack_ptr;
+
+
+
+   asm("swi");
+
+
+
+/*
+   // save the registers (in the same order that an interrupt does)
+   asm("pshy");  // 2 bytes (Low, then High)
+   asm("pshx");  // 2 bytes (Low, then High)
+   asm("psha");  // 1 byte
+   asm("pshb");  // 1 byte
+   asm("tpa");
+   ENABLE_CCR_INTERRUPT_BIT;  // enable interrupts in pushed CC register
+   asm("psha");  // 1 byte, the condition codes
+
+   // swap the stack pointers
+   asm("ldx _global_old_sp_p");
+   asm("sts 0,x");
+   asm("lds _global_new_sp");
+
+   // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
+   // That way, the new task will have interrupts enabled when it wakes up.
+   asm("pula");
+   ENABLE_CCR_INTERRUPT_BIT;
+   asm("psha");
+
+   // Normally, this function would end with an RTS, but we want to act EXACTLY
+   // the same as if we had just been inside of an interrupt.  So we manually
+   // call RTI here to pop the registers and "run" the new task.
+   asm("rti");
+
+
+   // we never get here
+   presto_fatal_error();
+*/
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //   S C H E D U L I N G
@@ -273,15 +416,11 @@ BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload) 
    // check to see if there's room
    if(free_mail_p==NULL) {
       presto_fatal_error();
-      INTR_ON();
-      return 1;
    }
 
    // check to see that the recipient is an alive task
    if(tid_to_tcbptr(to)==NULL) {
       presto_fatal_error();
-      INTR_ON();
-      return 2;
    }
 
    // allocate space for a new message
@@ -325,7 +464,71 @@ BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload) 
 
    // we're done messing with the PO mail list... interrupts back on
    INTR_ON();
+
+   /*
+   // this would be a good chance to deliver some mail...
+   // maybe someone just sent a message to himself (what a loser).
+   deliver_mail();
+   */
+
    return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
+   PRESTO_MESSAGE_T * msg_p;
+
+   // we're about to switch to a new task... interrupts off
+   INTR_OFF();
+
+   // we will only sleep if there are no messages in our queue
+   if(current_tcb_p->mailbox_head==NULL) {
+      // no mail, so we can sleep
+      current_tcb_p->state=STATE_BLOCKED;
+      context_switch();
+      // When we wake up, we'll be ready to recieve our mail.
+      // Interrupts will be enabled.
+   }
+
+   // we're about to mess with the mail list... interrupts off
+   INTR_OFF();
+   // we're going to use this a lot, so dereference now
+   msg_p=current_tcb_p->mailbox_head;
+
+   // get one message from the task's mail queue
+   if(msg_p==NULL) {
+      // there are no messages in the task's mail list
+      presto_fatal_error();
+   }
+
+   // are we being paranoid?
+   if((msg_p->to_tcb_p)!=current_tcb_p) {
+      presto_fatal_error();
+   }
+
+   // there is at least one message, get one
+   if (msg_p==current_tcb_p->mailbox_tail) {
+      // there is only one item in the list, take it
+      current_tcb_p->mailbox_head=NULL;
+      current_tcb_p->mailbox_tail=NULL;
+   } else {
+      // there are many messages, take first
+      current_tcb_p->mailbox_head=msg_p->next;
+   }
+
+   // record the message id before we can get interrupted
+   if(payload_p!=NULL) *payload_p=msg_p->payload;
+
+   // return the message to the free list
+   msg_p->next=free_mail_p;
+   free_mail_p=msg_p;
+
+   // done messing with mail lists... interrupts back on
+   INTR_ON();
+
+   // return the number of messages retrieved
+   return 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -370,71 +573,6 @@ static BYTE deliver_mail(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-BYTE presto_get_message(PRESTO_MAIL_T * payload_p) {
-   PRESTO_MESSAGE_T * msg_p;
-
-   // we're about to switch to a new task... interrupts off
-   INTR_OFF();
-
-   // check to see if we've clobbered our stack
-   if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
-   ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
-      presto_fatal_error();
-
-   // we will only sleep if there are no messages in our queue
-   if(current_tcb_p->mailbox_head==NULL) {
-      // no mail, so we can sleep
-      current_tcb_p->state=STATE_BLOCKED;
-
-      // the asm routine will save old SP in old TCB
-      presto_asm_old_sp_p=&(current_tcb_p->stack_ptr);
-
-      // pick next task to run
-      current_tcb_p=presto_next_tcb_to_run();
-
-      // call asm routine to set up new stack
-      // when we return, we'll be another process
-      // the asm routine will re-enable interrupts
-      presto_asm_new_sp=current_tcb_p->stack_ptr;
-      presto_switch_tasks();
-
-      // when we wake up, we will be here,
-      // and we will be ready to recieve our mail.
-   }
-
-   // we're about to mess with the mail list... interrupts off
-   INTR_OFF();
-   // we're going to use this a lot, so dereference now
-   msg_p=current_tcb_p->mailbox_head;
-
-   // are we being paranoid?
-   if((msg_p->to_tcb_p)!=current_tcb_p) presto_fatal_error();
-
-   // get one message from the task's mail queue
-   if(msg_p==NULL) {
-      // there are no messages in the task's mail list
-      presto_fatal_error();
-   } else if (msg_p==current_tcb_p->mailbox_tail) {
-      // there is only one item in the list, take it
-      current_tcb_p->mailbox_head=NULL;
-      current_tcb_p->mailbox_tail=NULL;
-   } else {
-      // there are many messages, take first
-      current_tcb_p->mailbox_head=msg_p->next;
-   }
-   // record the message id before we can get interrupted
-   if(payload_p!=NULL) *payload_p=msg_p->payload;
-   // return the message to the free list
-   msg_p->next=free_mail_p;
-   free_mail_p=msg_p;
-   // done messing with mail lists... interrupts back on
-   INTR_ON();
-   // return the number of messages retrieved
-   return 1;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 //   I D L E   T A S K
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -459,17 +597,13 @@ static PRESTO_TCB_T * tid_to_tcbptr(BYTE tid) {
 ////////////////////////////////////////////////////////////////////////////////
 
 static void presto_start_master_timer(void) {
-
    // store (current plus CYCLES_PER_TICK)
    TOC2 = TCNT + CYCLES_PER_TICK;
-
    // request output compare interrupt
    TMSK1 |= TMSK1_OC2I;
-
    // clear the OUTPUT COMPARE flag
    // writing O's makes no change, writing 1's clears the bit
    TFLG1 = TFLG1_OC2F;
-
    // counter disconnected from output pin logic
    TCTL1 &= ~(TCTL1_OM2|TCTL1_OL2);
 }
@@ -479,7 +613,6 @@ static void presto_start_master_timer(void) {
 static void presto_restart_master_timer(void) {
    // store (last plus CYCLES_PER_TICK)
    TOC2 = TOC2 + CYCLES_PER_TICK;
-
    // clear the OUTPUT COMPARE flag
    // writing O's makes no change, writing 1's clears the bit
    TFLG1 = TFLG1_OC2F;

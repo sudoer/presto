@@ -55,7 +55,7 @@ extern void (*presto_asm_new_fn)(void);
 extern BYTE presto_asm_swap;
 
 ////////////////////////////////////////////////////////////////////////////////
-
+/*
 // ASM functions for kernel, called by C functions
 
 #pragma interrupt_handler presto_system_isr
@@ -70,7 +70,7 @@ extern void presto_swap_within_isr(void);
 // C functions for kernel, called by ASM functions
 
 extern void presto_service_timer_interrupt(void);
-
+*/
 ////////////////////////////////////////////////////////////////////////////////
 
 // used in kernel, as well as in system.c

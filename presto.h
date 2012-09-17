@@ -37,14 +37,14 @@ void presto_sleep(void);
 BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload);
 BYTE presto_send_message(PRESTO_TID_T to, PRESTO_MAIL_T payload);
 BYTE presto_mail_waiting(void);
-BYTE presto_get_message(PRESTO_MAIL_T * payload_p);
+BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p);
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef INTR_ON
-#define INTR_ON() asm(" cli");
-#define INTR_OFF() asm(" sei");
+#define INTR_ON() asm("cli");
+#define INTR_OFF() asm("sei");
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////

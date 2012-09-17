@@ -38,7 +38,7 @@ print("setting up project...");
 $OBJ_DIR="obj";
 $TARGET="hbtest";
 @SRC_FILES=("kernel\\kernel.c",
-            "kernel\\task_sw.asm",
+#           "kernel\\task_sw.asm",
             "kernel\\clock.c",
             "kernel\\system.c",
 #           "kernel\\crt0.asm",

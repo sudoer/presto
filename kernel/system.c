@@ -82,32 +82,39 @@ void inert_isr(void) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#pragma interrupt presto_swi
+void presto_swi(void) {
+   presto_fatal_error();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 // address FFD6 for simulator
 // address BFD6 for handyboard
 
 #pragma abs_address:0xBFD6
 static void (*special_interrupt_vectors[])() = {
-   inert_isr,          // SCI    -   presto_serial_isr
-   inert_isr,          // SPI
-   inert_isr,          // PAIE
-   inert_isr,          // PAO
-   inert_isr,          // TOF
-   inert_isr,          // TOC5
-   inert_isr,          // TOC4
-   inert_isr,          // TOC3   -   motor_isr
-   inert_isr,          // TOC2   -   presto_system_isr
-   inert_isr,          // TOC1
-   inert_isr,          // TIC3
-   inert_isr,          // TIC2
-   inert_isr,          // TIC1
-   inert_isr,          // RTI
-   inert_isr,          // IRQ
-   inert_isr,          // XIRQ
-   presto_fatal_error, // SWI
-   inert_isr,          // ILLOP
-   inert_isr,          // COP
-   inert_isr,          // CLM
-   _start              // RESET
+   inert_isr,   // SCI    -   presto_serial_isr
+   inert_isr,   // SPI
+   inert_isr,   // PAIE
+   inert_isr,   // PAO
+   inert_isr,   // TOF
+   inert_isr,   // TOC5
+   inert_isr,   // TOC4
+   inert_isr,   // TOC3   -   motor_isr
+   inert_isr,   // TOC2   -   presto_system_isr
+   inert_isr,   // TOC1
+   inert_isr,   // TIC3
+   inert_isr,   // TIC2
+   inert_isr,   // TIC1
+   inert_isr,   // RTI
+   inert_isr,   // IRQ
+   inert_isr,   // XIRQ
+   presto_swi,  // SWI
+   inert_isr,   // ILLOP
+   inert_isr,   // COP
+   inert_isr,   // CLM
+   _start       // RESET
 };
 #pragma end_abs_address
 
@@ -124,6 +131,9 @@ void set_interrupt(BYTE intr, void (*vector)(void)) {
 //   S A F E T Y   C H E C K
 ////////////////////////////////////////////////////////////////////////////////
 
+// this is the memory location for the motor controller
+#define ERROR_PORT *(unsigned char *)(0x7FFF)
+
 void presto_fatal_error(void) {
    // should never get here
    BYTE delay;
@@ -137,7 +147,11 @@ void presto_fatal_error(void) {
       // LED on
       BITCLR(PORTD,4);
       // delay
-      while(--delay>0);
+      while(--delay>0) {
+         // This will force the motor lights to blink so fast
+         // that all eight of them will appear to be on.
+         ERROR_PORT=delay;
+      }
    }
 }
 
