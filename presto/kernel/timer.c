@@ -104,10 +104,10 @@ void presto_timer_start(KERNEL_TIMER_T * timer_p, KERNEL_INTERVAL_T delay, KERNE
 ////////////////////////////////////////////////////////////////////////////////
 
 
-void presto_timer_wait(KERNEL_INTERVAL_T delay, KERNEL_TRIGGER_T trigger) {
+void presto_timer_wait(KERNEL_INTERVAL_T delay) {
    KERNEL_TIMER_T timer;
-   presto_timer_start(&timer, delay, 0, trigger);
-   presto_wait(trigger);
+   presto_timer_start(&timer, delay, 0, KERNEL_INTERNAL_TRIGGER);
+   presto_wait(KERNEL_INTERNAL_TRIGGER);
 }
 
 

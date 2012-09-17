@@ -40,7 +40,7 @@ void show_one_byte(BYTE leds) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void error_fatal(error_number_e err) {
-   cpu_lock();  // no more interrupts
+   //cpu_lock();  // no more interrupts
    while (1) {
       TOGGLE_SPEAKER();
       show_one_byte(err);

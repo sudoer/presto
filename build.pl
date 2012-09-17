@@ -55,7 +55,14 @@ sub setup_project {
 
       # APPLICATION FILES
 
-      ifcpu($CPU_M68HC11,"app\\stress_test.c"),
+      ifcpu($CPU_M68HC11,"app\\main.c"),
+      ifcpu($CPU_M68HC11,"app\\control.c"),
+      ifcpu($CPU_M68HC11,"app\\president.c"),
+      ifcpu($CPU_M68HC11,"app\\manager.c"),
+      ifcpu($CPU_M68HC11,"app\\employee.c"),
+      ifcpu($CPU_M68HC11,"app\\student.c"),
+      ifcpu($CPU_M68HC11,"app\\shared.c"),
+      ifcpu($CPU_M68HC11,"app\\debug.c"),
       ifcpu($CPU_M68HC11,"services\\serial.c"),
       ifcpu($CPU_M68HC11,"services\\string.c"),
 

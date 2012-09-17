@@ -70,25 +70,29 @@ extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
 
 #ifdef FEATURE_KERNEL_MAIL
 
+   // data types
    typedef KERNEL_MAILBOX_T      PRESTO_MAILBOX_T;
    typedef KERNEL_ENVELOPE_T     PRESTO_ENVELOPE_T;
    typedef KERNEL_MAILMSG_T      PRESTO_MAILMSG_T;
    typedef KERNEL_MAILPTR_T      PRESTO_MAILPTR_T;
 
    // mailboxes, etc
+   extern void presto_mailbox_create(KERNEL_TASKID_T tid, KERNEL_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger);
    extern void presto_mailbox_init(PRESTO_MAILBOX_T * box_p, PRESTO_TRIGGER_T trigger);
    extern void presto_mailbox_default(PRESTO_MAILBOX_T * box_p);
+   extern void presto_mailbox_wait_for_box(KERNEL_MAILBOX_T * box_p);
+   extern void presto_mailbox_wait_for_task(KERNEL_TASKID_T tid);
+
+   // sending and receiving
+   extern void presto_mail_send_to_box(PRESTO_MAILBOX_T * box_p, PRESTO_ENVELOPE_T * env_p, PRESTO_MAILMSG_T message, PRESTO_MAILPTR_T payload);
+   extern void presto_mail_send_to_task(PRESTO_TASKID_T tid, PRESTO_ENVELOPE_T * env_p, PRESTO_MAILMSG_T message, PRESTO_MAILPTR_T payload);
+   extern PRESTO_ENVELOPE_T * presto_mail_get(PRESTO_MAILBOX_T * box_p);
+   extern PRESTO_ENVELOPE_T * presto_mail_wait(PRESTO_MAILBOX_T * box_p);
 
    // envelopes
    extern PRESTO_MAILMSG_T presto_envelope_message(PRESTO_ENVELOPE_T * env_p);
    extern PRESTO_MAILPTR_T presto_envelope_payload(PRESTO_ENVELOPE_T * env_p);
    extern PRESTO_TASKID_T presto_envelope_sender(PRESTO_ENVELOPE_T * env_p);
-
-   // sending and receiving
-   extern void presto_mail_send_to_box(PRESTO_MAILBOX_T * box_p, PRESTO_ENVELOPE_T * env_p, PRESTO_MAILMSG_T message, PRESTO_MAILPTR_T payload);
-   extern BOOLEAN presto_mail_send_to_task(PRESTO_TASKID_T tid, PRESTO_ENVELOPE_T * env_p, PRESTO_MAILMSG_T message, PRESTO_MAILPTR_T payload);
-   extern PRESTO_ENVELOPE_T * presto_mail_get(PRESTO_MAILBOX_T * box_p);
-   extern PRESTO_ENVELOPE_T * presto_mail_wait(PRESTO_MAILBOX_T * box_p);
 
 #endif // FEATURE_KERNEL_MAIL
 
@@ -98,10 +102,11 @@ extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
 
 #ifdef FEATURE_KERNEL_TIMER
 
+   // data types
    typedef KERNEL_TIMER_T        PRESTO_TIMER_T;
 
    extern void presto_timer_start(PRESTO_TIMER_T * timer_p, PRESTO_INTERVAL_T delay, PRESTO_INTERVAL_T period, PRESTO_TRIGGER_T trigger);
-   extern void presto_timer_wait(PRESTO_INTERVAL_T delay, PRESTO_TRIGGER_T trigger);
+   extern void presto_timer_wait(PRESTO_INTERVAL_T delay);
    extern void presto_timer_stop(PRESTO_TIMER_T * timer_p);
 
 #endif // FEATURE_KERNEL_TIMER
@@ -112,6 +117,7 @@ extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
 
 #ifdef FEATURE_KERNEL_SEMAPHORE
 
+   // data types
    typedef KERNEL_SEMAPHORE_T    PRESTO_SEMAPHORE_T;
 
    #ifdef FEATURE_SEMAPHORE_PRIORITYINHERITANCE
@@ -121,7 +127,7 @@ extern PRESTO_TRIGGER_T presto_trigger_poll(PRESTO_TRIGGER_T test);
    #endif // 
    extern BOOLEAN presto_semaphore_request(PRESTO_SEMAPHORE_T * sem_p, PRESTO_TRIGGER_T trigger);
    extern void presto_semaphore_release(PRESTO_SEMAPHORE_T * sem_p);
-   extern void presto_semaphore_wait(PRESTO_SEMAPHORE_T * sem_p, PRESTO_TRIGGER_T trigger);
+   extern void presto_semaphore_wait(PRESTO_SEMAPHORE_T * sem_p);
 
 #endif // FEATURE_KERNEL_SEMAPHORE
 

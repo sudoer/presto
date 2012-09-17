@@ -1,3 +1,22 @@
+2003.11.31
+
+There is a chicken-and-egg problem with mailboxes.  A high priority
+task might try to send a mail message to a low priority task before
+the LPT's mailbox has been initialized.  I got around this before
+by doing a delicate dance at startup, passing control to each task
+in turn.  I am trying an experiment now to implement some sort of
+"wait until receiver mailbox exists" function.  It appears to work
+for a task's default mailbox, but not for supplementary ones.  I
+need to look at this in more detail.
+
+One side effect of this experiment is that I now reserve on trigger
+bit as a "kernel use only" trigger.  This makes a few of the
+presto_xxxxx_wait() function calls a little cleaner, since they
+no longer require a trigger parameter.  But it means the user is
+a little bit restricted in his choice of which trigger bits to use
+for his own purposes.
+
+---
 
 2003.08.16
 

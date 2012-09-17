@@ -167,9 +167,9 @@ BOOLEAN presto_semaphore_request(KERNEL_SEMAPHORE_T * sem_p, KERNEL_TRIGGER_T tr
 ////////////////////////////////////////////////////////////////////////////////
 
 
-void presto_semaphore_wait(KERNEL_SEMAPHORE_T * sem_p, KERNEL_TRIGGER_T trigger) {
-   presto_semaphore_request(sem_p, trigger);
-   presto_wait(trigger);
+void presto_semaphore_wait(KERNEL_SEMAPHORE_T * sem_p) {
+   presto_semaphore_request(sem_p, KERNEL_INTERNAL_TRIGGER);
+   presto_wait(KERNEL_INTERNAL_TRIGGER);
 }
 
 

@@ -31,16 +31,14 @@
 // traffic to pass along the line and a separate mailbox for flow control
 // messages (you would not want a flow control message to get stuck behind
 // lots of data -- you would want that message to be received immediately).
-
 // In most cases, however, one mailbox per task is sufficient.  To make
 // addressing easier, the first mailbox that a task initializes is it's
-// "primary" mailbox.  If someone sends a message to a task, then it will be
-// delivered to that task's primary mailbox.  The "primary" designation can
-// later be assigned to a different mailbox.
+// "primary" mailbox.  A task can change which mailbox is considered to be
+// its primary mailbox.
 
-// Messages meant to be delivered to a secondary mailbox must be delivered
-// directly to that BOX, and not to the task.  There are two "send" functions
-// which cover these two options.
+// Messages can be sent to a specific mailbox, or they can be sent directly
+// to a task (in which case it is simply delivered to the task's primary
+// mailbox).  There are two "send" functions which cover these two options.
 
 // So what kind of messages can we send?  Most of the time, we are sending
 // simple instructions from one task to another.  "I am alive", or "please
@@ -74,6 +72,14 @@
 
 
 static KERNEL_MAILBOX_T * default_mailbox[PRESTO_KERNEL_MAXUSERTASKS];
+static KERNEL_TASKID_T wait_for_init[PRESTO_KERNEL_MAXUSERTASKS];
+
+
+////////////////////////////////////////////////////////////////////////////////
+//   S T A T I C   F U N C T I O N S
+////////////////////////////////////////////////////////////////////////////////
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,10 +87,8 @@ static KERNEL_MAILBOX_T * default_mailbox[PRESTO_KERNEL_MAXUSERTASKS];
 ////////////////////////////////////////////////////////////////////////////////
 
 
-void presto_mailbox_init(KERNEL_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger) {
-   KERNEL_TASKID_T tid;
+void presto_mailbox_create(KERNEL_TASKID_T tid, KERNEL_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger) {
    // if this is the first mailbox for this task, make it the default
-   tid=kernel_current_task();
    if (default_mailbox[tid]==NULL) {
       default_mailbox[tid]=box_p;
    }
@@ -94,6 +98,61 @@ void presto_mailbox_init(KERNEL_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger) {
    box_p->mailbox_tail=NULL;
    box_p->owner_tid=tid;
    box_p->trigger=trigger;
+
+
+
+   if(wait_for_init[tid]!=KERNEL_TASKID_NONE) {
+      kernel_trigger_set_noswitch(wait_for_init[tid],KERNEL_INTERNAL_TRIGGER);
+      wait_for_init[tid]=KERNEL_TASKID_NONE;
+      kernel_context_switch();
+   }
+
+/*
+
+   THERE MAY BE JUNK IN THE MAILBOX STRUCTURE
+
+   if(box_p->waiter_tid!=KERNEL_TASKID_NONE) {
+      kernel_trigger_set_noswitch(box_p->waiter_tid,KERNEL_INTERNAL_TRIGGER);
+      box_p->waiter_tid=KERNEL_TASKID_NONE;
+      kernel_context_switch();
+   }
+
+*/
+
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+void presto_mailbox_init(KERNEL_MAILBOX_T * box_p, KERNEL_TRIGGER_T trigger) {
+   presto_mailbox_create(kernel_current_task(), box_p, trigger);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+void presto_mailbox_wait_for_task(KERNEL_TASKID_T tid) {
+   if (default_mailbox[tid]!=NULL) return;
+   wait_for_init[tid]=kernel_current_task();
+   presto_wait(KERNEL_INTERNAL_TRIGGER);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+void presto_mailbox_wait_for_box(KERNEL_MAILBOX_T * box_p) {
+
+/*
+
+   THIS DOES NOT WORK YET
+
+*/
+
+   box_p->waiter_tid=kernel_current_task();
+   presto_wait(KERNEL_INTERNAL_TRIGGER);
 }
 
 
@@ -132,13 +191,11 @@ KERNEL_TASKID_T presto_envelope_sender(KERNEL_ENVELOPE_T * env_p) {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-BOOLEAN presto_mail_send_to_task(KERNEL_TASKID_T tid, KERNEL_ENVELOPE_T * env_p,
-                                 KERNEL_MAILMSG_T message, KERNEL_MAILPTR_T payload) {
+void presto_mail_send_to_task(KERNEL_TASKID_T tid, KERNEL_ENVELOPE_T * env_p,
+                              KERNEL_MAILMSG_T message, KERNEL_MAILPTR_T payload) {
    KERNEL_MAILBOX_T * box_p;
    box_p=default_mailbox[tid];
-   if (box_p==NULL) return FALSE;
    presto_mail_send_to_box(box_p, env_p, message, payload);
-   return TRUE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +206,8 @@ void presto_mail_send_to_box(KERNEL_MAILBOX_T * box_p, KERNEL_ENVELOPE_T * env_p
 
    CPU_LOCK_T lock;
 
-   // check to see that the recipient is a live mailbox
+   // This will only be null if presto_mail_send_to_task() does
+   // not find the mailbox in the default_mailbox list.
    if (box_p==NULL) {
       error_fatal(ERROR_MAIL_SENDTONULLBOX);
    }
@@ -269,6 +327,7 @@ void kernel_mail_init(void) {
    int t;
    for (t=0;t<PRESTO_KERNEL_MAXUSERTASKS;t++) {
       default_mailbox[t]=NULL;
+      wait_for_init[t]=KERNEL_TASKID_NONE;
    }
 }
 

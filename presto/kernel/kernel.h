@@ -34,6 +34,8 @@ typedef unsigned char  KERNEL_PRIORITY_T;
    typedef unsigned char KERNEL_TRIGGER_T;
 #endif // PRESTO_KERNEL_TRIGGERBITS
 
+// the most significant bit is reserved for kernel calls that block
+#define KERNEL_INTERNAL_TRIGGER  (1<<(PRESTO_KERNEL_TRIGGERBITS-1))
 
 ////////////////////////////////////////////////////////////////////////////////
 //   K E R N E L - O N L Y   F U N C T I O N S
