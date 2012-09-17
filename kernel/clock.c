@@ -4,34 +4,72 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PRESTO_TIME_T clock_reset(void) {
-   PRESTO_TIME_T clock;
-   clock.l=0;
-   clock.h=0;
-   return clock;
-}
+#define STATIC      // static
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PRESTO_TIME_T clock_add(PRESTO_TIME_T clock, unsigned short time) {
-   clock.l=clock.l+time;
-   if(clock.l<time) {
-      // carry
-      clock.h++;
+STATIC clock_add(PRESTO_TIME_T * clk, unsigned short sec, unsigned short msec, unsigned short usec) {
+   clk->usec+=usec;
+   if(clk->usec>=1000) {
+      clk->usec-=1000;
+      clk->msec++;
    }
-   return clock;
+   clk->msec+=msec;
+   if(clk->msec>=1000) {
+      clk->msec-=1000;
+      clk->sec++;
+   }
+   clk->sec+=sec;
+   if(clk->sec>=3600) {
+      clk->sec-=3600;
+      clk->hour++;
+   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-signed char clock_compare(PRESTO_TIME_T A,PRESTO_TIME_T B) {
-   if(A.h < B.h) return -1;
-   if(A.h > B.h) return 1;
-   // we now know that A.h == B.h
-   if(A.l < B.l) return -1;
-   if(A.l > B.l) return 1;
+void clock_reset(PRESTO_TIME_T * clk) {
+   clk->usec=0;
+   clk->msec=0;
+   clk->sec=0;
+   clk->hour=0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void clock_add_us(PRESTO_TIME_T * clk, unsigned short us) {
+   clock_add(clk,0,0,us);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void clock_add_ms(PRESTO_TIME_T * clk, unsigned short ms) {
+   clock_add(clk,0,ms,0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void clock_add_sec(PRESTO_TIME_T * clk, unsigned short s) {
+   clock_add(clk,s,0,0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+signed char clock_compare(PRESTO_TIME_T * A,PRESTO_TIME_T * B) {
+   if(A->hour < B->hour) return -1;
+   if(A->hour > B->hour) return 1;
+   // we now know that A->hour == B->hour
+   if(A->sec < B->sec) return -1;
+   if(A->sec > B->sec) return 1;
+   // we now know that A->sec == B->sec
+   if(A->msec < B->msec) return -1;
+   if(A->msec > B->msec) return 1;
+   // we now know that A->msec == B->msec
+   if(A->usec < B->usec) return -1;
+   if(A->usec > B->usec) return 1;
    return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
 

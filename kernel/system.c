@@ -9,7 +9,6 @@
 
 #include "hc11regs.h"
 #include "system.h"
-#include "kernel.h"
 #include "intvect.h"
 #include "locks.h"
 
@@ -47,7 +46,7 @@ extern void _start();   // entry point in crt11.s or crt0.o
 
 void premain() {
 
-   INTR_OFF();
+   presto_lock();
 
    // THE FOLLOWING (*) REGISTERS MAY ONLY BE ALTERED WITHIN THE FIRST 64 CLOCK CYCLES
 

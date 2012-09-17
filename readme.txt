@@ -1,4 +1,26 @@
 
+2002.10.19
+
+Added recurring timers.
+
+Enhanced clock to count up to seven years!
+
+Trimmed down (duplicate code in) timer interrupt.  Same stuff is in
+context switch (SWI ISR).  Just call SWI from within timer ISR.  It's
+OK, SWI is a non-maskable interrupt.
+
+Getting some sort of skewing.  I would like to know more about it.  Set
+all tasks to switch lights at 200ms intervals.  At first, all lights
+switch at the same time.  After a while, light #0 leads the rest.  Looks
+like a wagging tail.
+
+Would like to add semaphores.
+
+Maybe I should add the drivers and command-line interpreter that I had
+before.  ???  Any need to?
+
+---
+
 2002.10.18
 
 Using crt11.s from imagecraft.  Set up linker to properly load initial

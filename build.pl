@@ -183,7 +183,7 @@ sub compile_stage {
       push(@OBJS,$obj_name);
 
       $total_errors+=$errors;
-      if($errors gt 0) {
+      if($errors > 0) {
          print("\n");
          print("ERRORS IN COMPILE ... stopping\n");
          return;
@@ -201,7 +201,7 @@ sub compile_stage {
 
 sub link_stage {
 
-   if($total_errors gt 0) {
+   if($total_errors > 0) {
       print("errors compiling, skipping the link stage\n");
       print("\n");
       return;
@@ -216,7 +216,7 @@ sub link_stage {
 
 
    print("LINKING...\n");
-   run("ld.exe "
+   $errors+=run("ld.exe "
       ."--script ../memory.x "
       ."--trace "
       ."-nostdlib "
@@ -233,31 +233,40 @@ sub link_stage {
    print("\n");
 
 
-   print("CONVERTING...\n");
-   run("objcopy.exe "
-      ."--output-target=srec "
-      ."--strip-all "
-      ."--strip-debug "
-      ."$TARGET.elf $TARGET.s19");
-   print("OK\n");
-   print("\n");
+   if($errors==0) {
+      print("CONVERTING...\n");
+      $errors+=run("objcopy.exe "
+         ."--output-target=srec "
+         ."--strip-all "
+         ."--strip-debug "
+         ."$TARGET.elf $TARGET.s19");
+      print("OK\n");
+      print("\n");
+   }
 
 
-   print("GENERATING LISTING...\n");
-   run("objdump.exe "
-      ."--disassemble-all "
-      ."--architecture=m68hc11 "
-      ."--section=.text "
-      ."$TARGET.elf > $TARGET.lst");
-   print("OK\n");
-   print("\n");
+   if($errors==0) {
+      print("GENERATING LISTING...\n");
+      $errors+=run("objdump.exe "
+         ."--disassemble-all "
+         ."--architecture=m68hc11 "
+         ."--section=.text "
+         #."--debugging "
+         ."$TARGET.elf > $TARGET.lst");
+      print("OK\n");
+      print("\n");
+   }
 
+   $total_errors+=$errors;
    chdir($build_dir);
 }
 
 ################################################################################
 
 sub show_results {
+   if($total_errors > 0) {
+      return;
+   }
    print("done\n");
    print("--- SHOW THE RESULTS ---\n");
    run("dir $OBJ_DIR\\$TARGET.s19");

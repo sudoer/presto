@@ -3,28 +3,28 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-__inline__ unsigned short presto_lock(void) {
+inline unsigned short presto_lock(void) {
   unsigned short mask;
-  __asm__ __volatile__ ("tpa\n\tsei" : "=d"(mask));
+  asm volatile ("tpa\n\tsei" : "=d"(mask));
   return mask;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-__inline__ void presto_unlock_all(void) {
-  __asm__ __volatile__ ("cli");
+inline void presto_unlock_all(void) {
+  asm volatile ("cli");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-__inline__ void presto_restore_lock(unsigned short mask) {
-  __asm__ __volatile__ ("tap" : : "d"(mask));
+inline void presto_restore_lock(unsigned short mask) {
+  asm volatile ("tap" : : "d"(mask));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-__inline__ void presto_interruption_point (void) {
-  __asm__ __volatile__ ("cli\n\tnop\n\tsei");
+inline void presto_interruption_point (void) {
+  asm volatile ("cli\n\tnop\n\tsei");
 }
 
 ////////////////////////////////////////////////////////////////////////////////

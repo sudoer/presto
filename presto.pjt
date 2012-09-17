@@ -1,0 +1,141 @@
+;Codewright Project File (do not remove or modify this line)
+[ProjInit]
+ConfigSetExtMode=2
+ProjSetConfigFlags=0x04110940
+
+[State]
+SysSetCwd='C:\alan\hc11\my_sim'
+SrchSetFlags=0x46122826
+SrchSetAgainFlags=0x40022022,0
+SrchSetAgainFlags=0x42022026,1
+SrchSetAttrElements=
+SrchSetAgainAttrElements=
+FileSortMode=0x0
+_StateView='C:\alan\hc11\presto\presto.h',132,132,615,413,-1,-1,18,1,18,1,2,'',0x0b410048,0,80,0,0,'',0,1
+_StateView='C:\alan\hc11\presto\kernel\kernel.c',22,22,615,413,-1,-1,293,41,257,1,1,'',0x0b410058,0,80,0,0,'',0,2
+_StateView='C:\alan\hc11\my_sim\intr_using_swi_for_task_switching.out',44,44,637,407,-1,-1,2304,23,2268,1,3,'',0x0b410048,0,80,0,0,'',0,3
+_StateView='C:\alan\hc11\my_sim\SIM_CPU.C',22,22,637,407,-1,-1,169,61,160,1,4,'',0x0b410048,0,80,0,0,'',0,4
+_StateView='C:\alan\hc11\presto\app\test.c',154,154,615,413,-1,-1,96,19,87,1,5,'',0x0b410048,0,80,0,0,'',0,5
+_StateBuffer='C:\alan\hc11\presto\presto.h',0x04001c8a,18,1,25,'4 7','',0x0,'',1,72,0,0,'',''
+_StateBuffer='C:\alan\hc11\presto\kernel\kernel.c',0x04001c82,293,41,25,'4 7','',0x0,'',1,72,1,0,'',''
+_StateBuffer='C:\alan\hc11\my_sim\intr_using_swi_for_task_switching.out',0x04001c8a,2304,23,25,'4 7','',0x0,'',1,72,0,0,'',''
+_StateBuffer='C:\alan\hc11\my_sim\SIM_CPU.C',0x04001c82,169,61,25,'4 7','',0x0,'',1,72,0,0,'',''
+_StateBuffer='C:\alan\hc11\presto\app\test.c',0x0c001c83,96,19,25,'4 7','',0x0,'',1,72,0,0,'',''
+_StateHistory=FILELIST,'C:\alan\hc11\presto\kernel\locks.c','C:\alan\hc11\presto\kernel\system.c','C:\alan\hc11\my_sim\sim.out','C:\alan\hc11\presto\obj\presto.map','C:\alan\hc11\presto\kernel\crt11.s','C:\alan\hc11\my_sim\SIM_CPU.C','C:\alan\hc11\my_sim\intr_using_swi_for_task_switching.out','C:\alan\hc11\presto\obj\kernel.lst','C:\alan\hc11\presto\readme.txt'
+_StateHistory=SEARCH,'system_timer_isr','presto_get_system_clock','SP=c1','LDS','SWI','global_old_sp_p','stack_pointer_ptr','sts','global_save_sp','global_new_fn'
+_StateHistory=REPLACE,'scheduler_FindNextReadyTask','msg_Create','msg_InsertIntoPostOffice','msg_DeliverToTasks','systimer_Start','systimer_Restart','systimer_ISR','presto_get_clock','stack_pointer_ptr','old_task_stack_pointer_p'
+_StateHistory=XMACRO,'Sort'
+_StateHistory=EDITFILE,'C:\sde\CC\EUSALPO_camera\alan1.psp','C:\alan\hc11\presto\presto','C:\alan\hc11\presto\readme.txt','C:\alan\hc11\presto\build.pl','C:\alan\hc11\presto\memory.x'
+_StateHistory=DIRECTORY,'C:\alan\play\hc11\presto','C:\programs\hc11\gcc\doc'
+_StateHistory=FILTER,'sort'
+_StateHistory=FGREP,'INTR','INTR_','presto_fatal_error','Extended Asm'
+_StateHistory=GREPSCOPE,'*.c ; *.h','*.html'
+_StateHistory=FGREPDIR,'C:\alan\play\hc11\presto','C:\programs\hc11\gcc\doc'
+_StateHistory=DOCUMENTVISIT,'1292        28          C:\alan\hc11\presto\obj\kernel.lst','169         61          C:\alan\hc11\my_sim\SIM_CPU.C','460         5           C:\alan\hc11\presto\kernel\kernel.c','1292        28          C:\alan\hc11\presto\obj\kernel.lst','460         5           C:\alan\hc11\presto\kernel\kernel.c','1292        28          C:\alan\hc11\presto\obj\kernel.lst','460         1           C:\alan\hc11\presto\kernel\kernel.c','1329        28          C:\alan\hc11\presto\obj\kernel.lst','293         41          C:\alan\hc11\presto\kernel\kernel.c','20          27          C:\alan\hc11\presto\readme.txt'
+_StateDocumentVisit=10
+
+[Editor]
+_RestoreSysFlags=0x03017fca, 0xfffffffc, 0
+FilterProjDeleteList 
+FilterProjAdd='Source Files','*.c;*.s',-1
+FilterProjAdd='Header Files','*.h',-1
+FilterProjAdd='build files','*.pl ; *.x',-1
+FilterProjAdd='Other Files','*.*',-1
+VCSProject=''
+VCSProjectPath=''
+VCSProjectLocalPath=''
+ScrapSetCount=1
+ClipboardSetCount=1
+ClipboardEnableSepStr=1
+ClipboardSetSepStr='\r\n',0
+ClipboardEnableTermStr=1
+ClipboardSetTermStr='\r\n',0
+
+[Tools]
+ToolDeleteList 
+ToolAddCmd='$_custom_tool_$_1','API Database Editor',1342177312,'cwtedit.exe'
+ToolAddCmd='$_custom_tool_$_2','Paint',1342177312,'pbrush.exe'
+
+[Compiler]
+CompilerNewExt=.htm
+CompilerNewExt=.v
+CompilerNewExt=.awk
+CompilerNewExt=.bas
+CompilerNewExt=.adb
+CompilerNewExt=.cfml
+CompilerNewExt=.jsp
+CompilerNewExt=.pl
+CompilerNewExt=.vhd
+CompilerNewExt=.pas
+CompilerNewExt=.tk
+CompilerNewExt=.asp
+CompilerNewExt=.rul
+CompilerNewExt=.cob
+CompilerNewExt=.js
+CompilerNewExt=.php
+CompilerNewExt=.rc
+CompilerNewExt=.tcl
+CompilerNewExt=.ini
+CompilerNewExt=.cs
+CompilerNewExt=.bat
+CompilerNewExt=.html
+CompilerNewExt=.cgi
+CompilerNewExt=.txt
+CompilerNewExt=.nrx
+CompilerNewExt=.xml
+CompilerNewExt=.java
+CompilerNewExt=.jav
+CompilerNewExt=.sqlj
+TagSetCmd='"${HOME}${WTAGS}" -oc -d -t"${TAGFILE}.tag" -p"${TAGFILE}.ptg"',0x8000060
+BrowseSetFile='C:\PROGRAMS\CODEWRIGHT\tagfile.ptg'
+TagSetFile='C:\PROGRAMS\CODEWRIGHT\tagfile.tag'
+CompilerAddCmdEx='$_cw_proj_hash_$','',1073741824,'',0,'perl build.pl',128,'${FTEE} nmake',176,'${FTEE} nmake',176,'${FTEE} nmake',176,'',0,'',0,'_ErrorInfoDefault','','','proj.err','%x'
+CompilerAddResponse='$_cw_proj_hash_$',
+
+[VersionControl:PVCS]
+VCSSetCmd=VCS_CHECKIN_ID,'put -n -T@"%Q" -M@"%Q" "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKINLOCK_ID,'put -n -T@"%Q" -M@"%Q" -l "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKOUT_ID,'get -y "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKOUTLOCK_ID,'get -y -l "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKLOCK_ID,'vcs -y -l "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKUNLOCK_ID,'vcs -y -u "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKLABEL_ID,'vcs -y -v"${VCSLABEL}" "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKLOG_ID,'vlog "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKPROP_ID,'vlog -b "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKDIFF_ID,'vdiff -r "%b%e"',0x8000040
+VCSSetCmd=VCS_CHECKMENU_ID,'pvcsvmwn',0x8000000
+VCSSetCmd=VCS_ADD_ID,'vcs -i -t@"%Q" "%b%e"',0x8000040
+VCSSetCmd=VCS_REMOVE_ID,'del /f "%b%{??v|___}e"',0x8000040
+
+[Project]
+ConfigSetUserMakefile=''
+ConfigSetUserMakefileParser=''
+ConfigSetUserMakefileTimeStamp=0
+ConfigSetUserMakefileAutoSync=0
+ConfigSetLinkDBFilename='C:\programs\CodeWright\cwright.ldb'
+ConfigSetMarkDBFilename='C:\programs\CodeWright\cwright.mrk'
+ConfigSetSymbolDBFilename='C:\alan\hc11\presto\presto.sbl'
+EditSetPath=''
+
+[Files]
+.\clock.h
+.\hc11regs.h
+.\locks.h
+.\error.h
+.\presto.h
+.\types.h
+.\kernel.h
+.\system.h
+.\intvect.h
+.\app\test.c
+.\kernel\clock.c
+.\kernel\kernel.c
+.\kernel\crt11.s
+.\kernel\system.c
+.\kernel\intvect.c
+.\kernel\locks.c
+.\kernel\error.c
+.\readme.txt
+.\build.pl
+.\memory.x
+

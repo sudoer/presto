@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 typedef signed char PRESTO_TID_T;
+typedef signed char PRESTO_MSGID_T;
 
 typedef union {
    struct {DWORD dw1;} dw;
@@ -31,10 +32,12 @@ void presto_init(void);
 PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_size, BYTE priority );
 void presto_start_scheduler(void);
 void presto_sleep(void);
-BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload);
-BYTE presto_send_message(PRESTO_TID_T to, PRESTO_MAIL_T payload);
-BYTE presto_mail_waiting(void);
-BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p);
+PRESTO_MSGID_T presto_send_message(PRESTO_TID_T to, PRESTO_MAIL_T payload);
+PRESTO_MSGID_T presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload);
+PRESTO_MSGID_T presto_repeating_timer(PRESTO_TID_T to, unsigned short delay, unsigned short period, PRESTO_MAIL_T payload);
+void presto_get_clock(PRESTO_TIME_T * clk);
+BOOLEAN presto_mail_waiting(void);
+PRESTO_MSGID_T presto_wait_for_message(PRESTO_MAIL_T * payload_p);
 
 
 ////////////////////////////////////////////////////////////////////////////////

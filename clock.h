@@ -7,16 +7,25 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#define SECS_PER_DAY  86400
+
+////////////////////////////////////////////////////////////////////////////////
+
+// note - clock rolls over after seven years
 typedef struct {
-   unsigned short h;
-   unsigned short l;
+   unsigned short usec;
+   unsigned short msec;
+   unsigned short sec;
+   unsigned short hour;
 } PRESTO_TIME_T;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-PRESTO_TIME_T clock_reset(void);
-PRESTO_TIME_T clock_add(PRESTO_TIME_T clock, unsigned short time);
-signed char clock_compare(PRESTO_TIME_T A,PRESTO_TIME_T B);
+extern void clock_reset(PRESTO_TIME_T * clk);
+extern void clock_add_us(PRESTO_TIME_T * clk, unsigned short ms);
+extern void clock_add_ms(PRESTO_TIME_T * clk, unsigned short ms);
+extern void clock_add_sec(PRESTO_TIME_T * clk, unsigned short ms);
+extern signed char clock_compare(PRESTO_TIME_T * A,PRESTO_TIME_T * B);
 
 ////////////////////////////////////////////////////////////////////////////////
 
