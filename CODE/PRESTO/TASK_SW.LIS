@@ -1,0 +1,130 @@
+                       
+                       .data
+ 0000                    _presto_asm_save_sp:
+ 0000                    .blkw 1
+                       .area idata
+ 0000 0000               .word 0    ; _presto_asm_save_sp
+                       .area text
+                       
+                       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                       
+ 0010                 CCR_INTERRUPT=0x10
+ 1008                 ISR_LED_PORT=0x1008       ; PORTD
+ 0010                 ISR_LED_MASK=0x10         ; PIN4
+                       
+                       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                       
+ 0000                 _presto_system_isr::
+                       ; uses global presto_asm_old_sp_p
+                       ; uses global presto_asm_new_sp
+                       ; uses global presto_asm_swap
+                       
+                          ; turn off interrupts
+ 0000 0F                 sei
+                          ; LED on
+                       ;  ldaa  ISR_LED_PORT
+                       ;  anda  ~#ISR_LED_MASK
+                       ;  staa  ISR_LED_PORT
+                          ; increment clock, check if we need to pre-empt
+ 0001 BD0000             jsr   _presto_service_timer_interrupt
+                          ; check to see if we need to switch tasks
+ 0004 7D0000             tst   _presto_asm_swap
+ 0007 2708               beq   psi_rti
+                          ; toggle the speaker
+                       ;  ldaa  $1000
+                       ;  eora  #$08
+                       ;  staa  $1000
+                         ; swap the stack pointers
+ 0009 FE0000             ldx   _presto_asm_old_sp_p
+ 000C AF00               sts   0,x
+ 000E BE0000             lds   _presto_asm_new_sp
+ 0011                 psi_rti:
+                          ; clear interrupt mask bit (enable ints) in the CC register on the stack
+ 0011 32                 pula
+ 0012 84EF               anda  ~#CCR_INTERRUPT
+ 0014 36                 psha
+                          ; LED off
+                       ;  ldaa  ISR_LED_PORT
+                       ;  oraa  ISR_LED_MASK
+                       ;  staa  ISR_LED_PORT
+                          ; "run" new task
+ 0015 3B                 rti
+                       
+                       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                       
+ 0016                 _presto_switch_tasks::
+                       ; uses global presto_asm_old_sp_p
+                       ; uses global presto_asm_new_sp
+                       
+                          ; LED on
+                       ;  ldaa  ISR_LED_PORT
+                       ;  anda  ~#ISR_LED_MASK
+                       ;  staa  ISR_LED_PORT
+                          ; save the registers (in the same order that an interrupt does)
+ 0016 183C               pshy
+ 0018 3C                 pshx
+ 0019 36                 psha
+ 001A 37                 pshb
+ 001B 07                 tpa
+ 001C 84EF               anda  ~#CCR_INTERRUPT     ; enable interrupts in pushed CC register
+ 001E 36                 psha
+                          ; swap the stack pointers
+ 001F FE0000             ldx   _presto_asm_old_sp_p
+ 0022 AF00               sts   0,x
+                          ; fall through to the "half-function" below
+ 0024                 _presto_start_task_switching::
+ 0024 BE0000             lds   _presto_asm_new_sp
+                          ; restore the registers
+ 0027 32                 pula
+ 0028 8A10               oraa  #CCR_INTERRUPT      ; do not enable interrupts in the CC register... yet
+ 002A 06                 tap
+ 002B 33                 pulb
+ 002C 32                 pula
+ 002D 38                 pulx
+ 002E 1838               puly
+                          ; NOW we can re-enable interrupts, because we are done with the stack
+ 0030 0E                 cli
+                          ; LED off
+                       ;  ldaa  ISR_LED_PORT
+                       ;  oraa  ISR_LED_MASK
+                       ;  staa  ISR_LED_PORT
+                          ; "run" new task
+ 0031 39                 rts
+                       
+                       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                       
+ 0032                 _presto_setup_new_task::
+                       ; uses global presto_asm_new_sp
+                       
+                          ; store our own SP so we can work on the new task
+ 0032 BF0000             sts _presto_asm_save_sp
+                          ; load empty SP from task so we can initialize it
+ 0035 BE0000             lds _presto_asm_new_sp
+                          ; make presto_kill_self as the "return pc" of a new task,
+                          ; so if it ever returns, it will reclaim the TCB, etc
+ 0038 CC0000             ldd   #_presto_kill_self
+ 003B 37                 pshb
+ 003C 36                 psha
+                          ; push the actual function call on the stack
+ 003D FC0000             ldd   _presto_asm_new_fn
+ 0040 37                 pshb
+ 0041 36                 psha
+                          ; push any old stinkin' registers onto the stack
+                          ; they'll be pulled off when we start running
+                          ; we push in interrupt-stack order
+ 0042 183C               pshy
+ 0044 3C                 pshx
+ 0045 36                 psha
+ 0046 37                 pshb
+ 0047 07                 tpa
+ 0048 84EF               anda  ~#CCR_INTERRUPT     ; enable interrupts in pushed CC
+ 004A 36                 psha
+                          ; save task SP in TCB
+ 004B BF0000             sts   _presto_asm_new_sp
+                          ; re-load our own SP so we can return
+ 004E BE0000             lds   _presto_asm_save_sp
+ 0051 39                 rts
+                       
+                       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                       
+                       

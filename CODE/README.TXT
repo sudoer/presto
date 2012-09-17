@@ -44,3 +44,8 @@ On LCD itself:
 6=DATA
 
 ------------------------------------------
+
+Serial port now works.
+
+
+
