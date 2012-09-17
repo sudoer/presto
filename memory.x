@@ -1,19 +1,13 @@
 
-OUTPUT_FORMAT("srec")
-
 MEMORY
 {
-   page0    (rwx) : ORIGIN = 0x0040, LENGTH = 0x0100 - 0x0040
-   nothing        : ORIGIN = 0x0100, LENGTH = 0x8000 - 0x0100
-   ram1     (rwx) : ORIGIN = 0x8000, LENGTH = 0xBFD6 - 0x8000
-   specvect  (r)  : ORIGIN = 0xBFD6, LENGTH = 0xC000 - 0xBFD6
-   ram2     (rwx) : ORIGIN = 0xC000, LENGTH = 0xFFD6 - 0xC000
-   normvect  (r)  : ORIGIN = 0xFFD6, LENGTH = 0x0000 - 0xFFD6
+   page0    (rwx) : ORIGIN = 0x0040, LENGTH =  0x0100 - 0x0040
+   nothing        : ORIGIN = 0x0100, LENGTH =  0x8000 - 0x0100
+   rom      (rwx) : ORIGIN = 0x8000, LENGTH =  0xBFD6 - 0x8000
+   specvect  (r)  : ORIGIN = 0xBFD6, LENGTH =  0xC000 - 0xBFD6
+   ram      (rwx) : ORIGIN = 0xC000, LENGTH =  0xFFD6 - 0xC000
+   normvect  (r)  : ORIGIN = 0xFFD6, LENGTH = 0x10000 - 0xFFD6
 }
-
-/* ram1     (rwx) : ORIGIN = 0x8000, LENGTH = 0xB600 - 0x8000 */
-/* eeprom         : ORIGIN = 0xB600, LENGTH = 0xB800 - 0xB600 */
-/* ram2     (rwx) : ORIGIN = 0xB800, LENGTH = 0xBFD6 - 0xB800 */
 
 
 SECTIONS
@@ -38,38 +32,27 @@ SECTIONS
    /* code */
    .text : {
      __text_start = . ;
-     *(.install0)
-     *(.install2)
-     *(.install4)
      *(.text)
      *(.strings)
      __text_end = . ;
-   } > ram1
+   } > rom
 
 
-   /* uninitialized data (variables) */
+   /* initialized data */
+   .data : AT (__text_end) {
+     __data_start = . ;
+      *(.data)
+     __data_end = . ;
+   } > ram
+
+
+   /* uninitialized data */
    .bss : {
      __bss_start = . ;
       *(.bss)
       *(COMMON)
      __bss_end = . ;
-   } > ram2
-
-
-   /* initialized data (values) */
-   .idata : {
-     __idata_start = . ;
-      *(.data)
-     __idata_end = . ;
-   } > ram1
-
-
-   /* initialized data (variables) */
-   .data : {
-     __data_start = . ;
-      *(.data)
-     __data_end = . ;
-   } > ram2
+   } > ram
 
 
    /* stack */
@@ -77,7 +60,7 @@ SECTIONS
      __stack_start = . ;
       *(.stack)
      __stack_end = . ;
-   } > ram2
+   } > ram
 
 
    /* symbol information */
@@ -85,7 +68,24 @@ SECTIONS
      __comment_start = . ;
      *(.comment)
      __comment_end = . ;
-   } > ram2
+   } > ram
+
+
+   /* debug information */
+   .debug : {
+     __debug_start = . ;
+     *(.debug_abbrev)
+     *(.debug_info)
+     *(.debug_line)
+     *(.debug_pubnames)
+     __debug_end = . ;
+   } > nothing
 
 
 }
+
+
+__idata_start = __text_end ;
+__idata_end = __data_end - __data_start + __idata_start ;
+
+

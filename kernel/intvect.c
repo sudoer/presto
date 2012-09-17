@@ -48,29 +48,8 @@ extern void _start(void);      // entry point in crt11.s (ICC only)
 //   I N E R T   I N T E R R U P T   S E R V I C E   R O U T I N E ( S )
 ////////////////////////////////////////////////////////////////////////////////
 
-void inert_isr(void)       { asm("rti"); }
-
-void inert_sci_isr(void)   { asm("rti"); }
-void inert_spi_isr(void)   { asm("rti"); }
-void inert_paie_isr(void)  { asm("rti"); }
-void inert_pao_isr(void)   { asm("rti"); }
-void inert_tof_isr(void)   { asm("rti"); }
-void inert_toc5_isr(void)  { asm("rti"); }
-void inert_toc4_isr(void)  { asm("rti"); }
-void inert_toc3_isr(void)  { asm("rti"); }
-void inert_toc2_isr(void)  { asm("rti"); }
-void inert_toc1_isr(void)  { asm("rti"); }
-void inert_tic3_isr(void)  { asm("rti"); }
-void inert_tic2_isr(void)  { asm("rti"); }
-void inert_tic1_isr(void)  { asm("rti"); }
-void inert_rti_isr(void)   { asm("rti"); }
-void inert_irq_isr(void)   { asm("rti"); }
-void inert_xirq_isr(void)  { asm("rti"); }
-void inert_swi_isr(void)   { asm("rti"); }
-void inert_illop_isr(void) { presto_fatal_error(ERROR_INTR_ILLOP); }
-void inert_cop_isr(void)   { asm("rti"); }
-void inert_clm_isr(void)   { asm("rti"); }
-void inert_reset_isr(void) { asm("rti"); }
+//void inert_isr(void) __attribute__((interrupt));
+void inert_isr(void) { asm("rti"); }
 
 ////////////////////////////////////////////////////////////////////////////////
 //   I N T E R R U P T   V E C T O R   T A B L E S
@@ -78,54 +57,54 @@ void inert_reset_isr(void) { asm("rti"); }
 
 static void (*special_interrupt_vectors[])()
    __attribute((section(".specvect"))) = {
-   inert_sci_isr,      // SCI
-   inert_spi_isr,      // SPI
-   inert_paie_isr,     // PAIE
-   inert_pao_isr,      // PAO
-   inert_tof_isr,      // TOF
-   inert_toc5_isr,     // TOC5
-   inert_toc4_isr,     // TOC4
-   inert_toc3_isr,     // TOC3
-   inert_toc2_isr,     // TOC2
-   inert_toc1_isr,     // TOC1
-   inert_tic3_isr,     // TIC3
-   inert_tic2_isr,     // TIC2
-   inert_tic1_isr,     // TIC1
-   inert_rti_isr,      // RTI
-   inert_irq_isr,      // IRQ
-   inert_xirq_isr,     // XIRQ
-   inert_swi_isr,      // SWI
-   inert_illop_isr,    // ILLOP
-   inert_cop_isr,      // COP
-   inert_clm_isr,      // CLM
-   _start              // RESET
+   inert_isr,     // SCI
+   inert_isr,     // SPI
+   inert_isr,     // PAIE
+   inert_isr,     // PAO
+   inert_isr,     // TOF
+   inert_isr,     // TOC5
+   inert_isr,     // TOC4
+   inert_isr,     // TOC3
+   inert_isr,     // TOC2
+   inert_isr,     // TOC1
+   inert_isr,     // TIC3
+   inert_isr,     // TIC2
+   inert_isr,     // TIC1
+   inert_isr,     // RTI
+   inert_isr,     // IRQ
+   inert_isr,     // XIRQ
+   inert_isr,     // SWI
+   inert_isr,     // ILLOP
+   inert_isr,     // COP
+   inert_isr,     // CLM
+   _start         // RESET
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 static void (*normal_interrupt_vectors[])()
    __attribute((section(".normvect"))) = {
-   inert_sci_isr,      // SCI    -   presto_serial_isr
-   inert_spi_isr,      // SPI
-   inert_paie_isr,     // PAIE
-   inert_pao_isr,      // PAO
-   inert_tof_isr,      // TOF
-   inert_toc5_isr,     // TOC5
-   inert_toc4_isr,     // TOC4
-   inert_toc3_isr,     // TOC3   -   motor_isr
-   inert_toc2_isr,     // TOC2   -   presto_system_isr
-   inert_toc1_isr,     // TOC1
-   inert_tic3_isr,     // TIC3
-   inert_tic2_isr,     // TIC2
-   inert_tic1_isr,     // TIC1
-   inert_rti_isr,      // RTI
-   inert_irq_isr,      // IRQ
-   inert_xirq_isr,     // XIRQ
-   inert_swi_isr,      // SWI
-   inert_illop_isr,    // ILLOP
-   inert_cop_isr,      // COP
-   inert_clm_isr,      // CLM
-   inert_reset_isr     // RESET
+   inert_isr,     // SCI
+   inert_isr,     // SPI
+   inert_isr,     // PAIE
+   inert_isr,     // PAO
+   inert_isr,     // TOF
+   inert_isr,     // TOC5
+   inert_isr,     // TOC4
+   inert_isr,     // TOC3
+   inert_isr,     // TOC2
+   inert_isr,     // TOC1
+   inert_isr,     // TIC3
+   inert_isr,     // TIC2
+   inert_isr,     // TIC1
+   inert_isr,     // RTI
+   inert_isr,     // IRQ
+   inert_isr,     // XIRQ
+   inert_isr,     // SWI
+   inert_isr,     // ILLOP
+   inert_isr,     // COP
+   inert_isr,     // CLM
+   inert_isr      // RESET
 };
 
 ////////////////////////////////////////////////////////////////////////////////

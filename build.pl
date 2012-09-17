@@ -47,7 +47,7 @@ sub setup_project {
 
 sub setup_compiler {
    print("setting up compiler...");
-   $compiler_home="c:\\programs\\hc11\\gnu-m6811-elf";
+   $compiler_home="c:\\programs\\hc11\\gcc";
    add_to_path("$compiler_home\\BIN");
    print("OK\n");
 }
@@ -66,15 +66,6 @@ sub prepare {
    print("--- PREPARING ---\n");
 
    # CLEANING UP OLD FILES
-
-   print("deleting old intermediate files...");
-   #unlink <*.bak>;
-   #unlink <*.aaa>;
-   #unlink <*.s>;
-   #unlink <*.i>;
-   #rem del /s/y/x/q %OBJ_DIR% >&> NUL:
-   #rem del /s/q *.s19 >&> NUL:
-   print("OK\n");
 
    print("deleting old target file...");
    unlink("$OBJ_DIR\\$TARGET.s19");
@@ -157,11 +148,16 @@ sub compile_stage {
                         ."-fomit-frame-pointer "
                         ."-msoft-reg-count=0 "
                         ."-c "
-                        #."-keep-temps "
+                        ."-g "
                         ."-Wa,-L,-ahlns=$build_dir\\$OBJ_DIR\\$src_base.lst "
                         ."-o $build_dir\\$OBJ_DIR\\$src_base.o "
                         ."$src_name");
             print("OK\n");
+            #print($indent."GENERATING LISTINGS...");
+            #if($debug) { print("\n"); }
+            #chdir("$build_dir\\$OBJ_DIR");
+            #$errors+=run("objdump.exe --source $src_base.o > $src_base.lst ");
+            #print("OK\n");
             chdir($build_dir);
          } elsif($src_ext eq "s") {
             print($indent."ASSEMBLING...");
@@ -218,6 +214,7 @@ sub link_stage {
       $ofiles=$ofiles." ".$obj_file;
    }
 
+
    print("LINKING...\n");
    run("ld.exe "
       ."--script ../memory.x "
@@ -228,16 +225,34 @@ sub link_stage {
       ."-defsym _.tmp=0x0 "
       ."-defsym _.z=0x2 "
       ."-defsym _.xy=0x4 "
-      ."-Map $TARGET.map " # --cref "
-      #."--strip-all "
-      ."-o $TARGET.s19 "
+      ."-Map $TARGET.map --cref "
+      ."--oformat=elf32-m68hc11 "
+      ."-o $TARGET.elf "
       ."$ofiles");
-
-   chdir("$build_dir");
-
    print("OK\n");
    print("\n");
 
+
+   print("CONVERTING...\n");
+   run("objcopy.exe "
+      ."--output-target=srec "
+      ."--strip-all "
+      ."--strip-debug "
+      ."$TARGET.elf $TARGET.s19");
+   print("OK\n");
+   print("\n");
+
+
+   print("GENERATING LISTING...\n");
+   run("objdump.exe "
+      ."--disassemble-all "
+      ."--architecture=m68hc11 "
+      ."--section=.text "
+      ."$TARGET.elf > $TARGET.lst");
+   print("OK\n");
+   print("\n");
+
+   chdir($build_dir);
 }
 
 ################################################################################

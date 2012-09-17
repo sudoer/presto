@@ -1,4 +1,18 @@
 
+2002.10.18
+
+Using crt11.s from imagecraft.  Set up linker to properly load initial
+values of idata into ROM (variables themselves in RAM).
+
+Now generating debug output in object files.  Linking into an elf binary.
+Then generating a detailed listing file.  Finally converting to s-record.
+
+Stole locks.c functions from GNU.
+
+Timing looks right.
+
+---
+
 2002.10.12
 
 IT'S ALIVE!
@@ -23,9 +37,7 @@ locks.h.  I am not entirely happy with my INTR_ON/OFF macros.
 
 Also, play with timing.  What's the deal with ECLOCK?
 
-
 ---
-
 
 2002.09.29
 
