@@ -57,6 +57,11 @@ $icc11_lib="$compiler_home\\LIB";
 setenv("ICC11_LIB",$icc11_lib);
 print("OK\n");
 
+# PERL/DOS CONFIGURATION
+
+#$TO_NULL=">&> NUL:";   # Win98
+$TO_NULL="";   # Win2k
+
 # END OF --- CONFIGURATION ---
 
 print("\n");
@@ -236,7 +241,8 @@ if($total_errors gt 0) {
    print("OK\n");
    print("moving map/list files to obj dir...");
    if($debug) { print("\n"); }
-   run("move *.lst *.mp $OBJ_DIR >&> NUL:");
+   run("move $TARGET.MP $OBJ_DIR $TO_NULL");
+   run("move $TARGET.LST $OBJ_DIR $TO_NULL");
    print("OK\n");
    print("cleaning up...");
    unlink("BUILD.TMP");

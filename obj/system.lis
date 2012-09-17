@@ -1,0 +1,557 @@
+                         .area memory(abs)
+                         .org 0xffd6
+ FFD6                 _normal_interrupt_vectors::
+ FFD6 00A5              .word _inert_sci_isr
+ FFD8 00A7              .word _inert_spi_isr
+ FFDA 00A9              .word _inert_paie_isr
+ FFDC 00AB              .word _inert_pao_isr
+ FFDE 00AD              .word _inert_tof_isr
+ FFE0 00AF              .word _inert_toc5_isr
+ FFE2 00B1              .word _inert_toc4_isr
+ FFE4 00B3              .word _inert_toc3_isr
+ FFE6 00B5              .word _inert_toc2_isr
+ FFE8 00B7              .word _inert_toc1_isr
+ FFEA 00B9              .word _inert_tic3_isr
+ FFEC 00BB              .word _inert_tic2_isr
+ FFEE 00BD              .word _inert_tic1_isr
+ FFF0 00BF              .word _inert_rti_isr
+ FFF2 00C1              .word _inert_irq_isr
+ FFF4 00C3              .word _inert_xirq_isr
+ FFF6 00C5              .word _inert_swi_isr
+ FFF8 00C7              .word _inert_illop_isr
+ FFFA 00C9              .word _inert_cop_isr
+ FFFC 00CB              .word _inert_clm_isr
+ FFFE 00CD              .word _inert_reset_isr
+                         .area data
+                         .area text
+                       ;  IX -> 0,x
+ 0000                 __HC11Setup::
+ 0000 0F                    sei
+ 0001                 system.113::	
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   C O M M E N T A R Y
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   D E P E N D E N C I E S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #include "hc11regs.h"
+                       ; #include "system.h"
+                       ; #include "kernel\kernel.h"
+                       ; //#include "services\serial.h"
+                       ; //#include "services\motors.h"
+                       ; //#include "services\sound.h"
+                       ; 
+                       ; // ICC only
+                       ; extern void _start();   // entry point in crt11.s
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   C O N S T A N T S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   D A T A   T Y P E S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   S T A T I C   F U N C T I O N   P R O T O T Y P E S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #pragma interrupt presto_swi
+                       ; void presto_swi(void);
+                       ; 
+                       ; #pragma interrupt inert_isr
+                       ; void inert_isr(void);
+                       ; 
+                       ; void inert_sci_isr(void);
+                       ; void inert_spi_isr(void);
+                       ; void inert_paie_isr(void);
+                       ; void inert_pao_isr(void);
+                       ; void inert_tof_isr(void);
+                       ; void inert_toc5_isr(void);
+                       ; void inert_toc4_isr(void);
+                       ; void inert_toc3_isr(void);
+                       ; void inert_toc2_isr(void);
+                       ; void inert_toc1_isr(void);
+                       ; void inert_tic3_isr(void);
+                       ; void inert_tic2_isr(void);
+                       ; void inert_tic1_isr(void);
+                       ; void inert_rti_isr(void);
+                       ; void inert_irq_isr(void);
+                       ; void inert_xirq_isr(void);
+                       ; void inert_swi_isr(void);
+                       ; void inert_illop_isr(void);
+                       ; void inert_cop_isr(void);
+                       ; void inert_clm_isr(void);
+                       ; void inert_reset_isr(void);
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   S T A T I C   G L O B A L   D A T A
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // INTERRUPT VECTORS
+                       ; 
+                       ; #pragma abs_address:0xFFD6 // for NORMAL and EXPANDED MULTIPLEXED modes
+                       ; void (*normal_interrupt_vectors[])() = {
+                       ;    inert_sci_isr,      // SCI    -   presto_serial_isr
+                       ;    inert_spi_isr,      // SPI
+                       ;    inert_paie_isr,     // PAIE
+                       ;    inert_pao_isr,      // PAO
+                       ;    inert_tof_isr,      // TOF
+                       ;    inert_toc5_isr,     // TOC5
+                       ;    inert_toc4_isr,     // TOC4
+                       ;    inert_toc3_isr,     // TOC3   -   motor_isr
+                       ;    inert_toc2_isr,     // TOC2   -   presto_system_isr
+                       ;    inert_toc1_isr,     // TOC1
+                       ;    inert_tic3_isr,     // TIC3
+                       ;    inert_tic2_isr,     // TIC2
+                       ;    inert_tic1_isr,     // TIC1
+                       ;    inert_rti_isr,      // RTI
+                       ;    inert_irq_isr,      // IRQ
+                       ;    inert_xirq_isr,     // XIRQ
+                       ;    inert_swi_isr,      // SWI
+                       ;    inert_illop_isr,    // ILLOP
+                       ;    inert_cop_isr,      // COP
+                       ;    inert_clm_isr,      // CLM
+                       ;    inert_reset_isr     // RESET
+                       ; };
+                       ; #pragma end_abs_address
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   E X P O R T E D   F U N C T I O N S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   S T A T I C   F U N C T I O N S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // This function is called from the startup (crt11.s) before interrupts have
+                       ; // been turned on but after the stack has been set up.
+                       ; 
+                       ; void _HC11Setup() {
+                       ; 
+                       ;    INTR_OFF();
+                       ; 
+                       ;    // RAM would start at $0000 if it were enabled
+                       ;    // control registers are mapped to locations $1000-$103F (default)
+                       ;    INIT=0x01;
+ 0001 C601              ldab #1
+ 0003 F7103D            stab 0x103d
+ 0006                 system.117::	
+                       ; 
+                       ;    // disable output compare interrupts for TOC1,TOC2,TOC3,TOC4,TOC5
+                       ;    // disable input capture interrupts for TIC1,TIC2,TIC3
+                       ;    TMSK1=0x00;
+ 0006 7F1022            clr 0x1022
+ 0009                 system.121::	
+                       ; 
+                       ;    // set prescaler for timer to 1
+                       ;    // disable TOF, RTIF, PAOVF, PAIF interrupts
+                       ;    TMSK2=0x00;
+ 0009 7F1024            clr 0x1024
+ 000C                 system.124::	
+                       ; 
+                       ;    // disable SPI subsystem, disable SPI interrupt
+                       ;    SPCR=0x04;
+ 000C C604              ldab #4
+ 000E F71028            stab 0x1028
+ 0011                 system.127::	
+                       ; 
+                       ;    // disable all serial interrupts
+                       ;    SCCR2=0x00;
+ 0011 7F102D            clr 0x102d
+ 0014                 system.130::	
+                       ; 
+                       ;    // disable parallel I/O (and strobe A interrupt)
+                       ;    PIOC=0x00;
+ 0014 7F1002            clr 0x1002
+ 0017                 system.133::	
+                       ; 
+                       ;    // disable SECURITY and COP, disable ROM and EEPROM
+                       ;    CONFIG=0x0C;
+ 0017 C60C              ldab #12
+ 0019 F7103F            stab 0x103f
+ 001C                 system.138::	
+                       ; 
+                       ;    // turn on the A2D subsystem (wait 100 usec before using)
+                       ;    // use "E clock" to drive the A2D
+                       ;    // disable COP clock monitor (interrupt)
+                       ;    OPTION=0xA0;  // OPTION_ADPU=1,OPTION_CSEL=0
+ 001C C6A0              ldab #160
+ 001E F71039            stab 0x1039
+ 0021                 system.140::	
+                       ; 
+                       ;    normal_interrupt_vectors[INTR_SCI]=  inert_sci_isr;
+ 0021 CC00A5            ldd #_inert_sci_isr
+ 0024 FDFFD6            std _normal_interrupt_vectors
+ 0027                 system.141::	
+                       ;    normal_interrupt_vectors[INTR_SPI]=  inert_spi_isr;
+ 0027 CC00A7            ldd #_inert_spi_isr
+ 002A FDFFD8            std _normal_interrupt_vectors+2
+ 002D                 system.142::	
+                       ;    normal_interrupt_vectors[INTR_PAIE]= inert_paie_isr;
+ 002D CC00A9            ldd #_inert_paie_isr
+ 0030 FDFFDA            std _normal_interrupt_vectors+4
+ 0033                 system.143::	
+                       ;    normal_interrupt_vectors[INTR_PAO]=  inert_pao_isr;
+ 0033 CC00AB            ldd #_inert_pao_isr
+ 0036 FDFFDC            std _normal_interrupt_vectors+6
+ 0039                 system.144::	
+                       ;    normal_interrupt_vectors[INTR_TOF]=  inert_tof_isr;
+ 0039 CC00AD            ldd #_inert_tof_isr
+ 003C FDFFDE            std _normal_interrupt_vectors+8
+ 003F                 system.145::	
+                       ;    normal_interrupt_vectors[INTR_TOC5]= inert_toc5_isr;
+ 003F CC00AF            ldd #_inert_toc5_isr
+ 0042 FDFFE0            std _normal_interrupt_vectors+10
+ 0045                 system.146::	
+                       ;    normal_interrupt_vectors[INTR_TOC4]= inert_toc4_isr;
+ 0045 CC00B1            ldd #_inert_toc4_isr
+ 0048 FDFFE2            std _normal_interrupt_vectors+12
+ 004B                 system.147::	
+                       ;    normal_interrupt_vectors[INTR_TOC3]= inert_toc3_isr;
+ 004B CC00B3            ldd #_inert_toc3_isr
+ 004E FDFFE4            std _normal_interrupt_vectors+14
+ 0051                 system.148::	
+                       ;    normal_interrupt_vectors[INTR_TOC2]= inert_toc2_isr;
+ 0051 CC00B5            ldd #_inert_toc2_isr
+ 0054 FDFFE6            std _normal_interrupt_vectors+16
+ 0057                 system.149::	
+                       ;    normal_interrupt_vectors[INTR_TOC1]= inert_toc1_isr;
+ 0057 CC00B7            ldd #_inert_toc1_isr
+ 005A FDFFE8            std _normal_interrupt_vectors+18
+ 005D                 system.150::	
+                       ;    normal_interrupt_vectors[INTR_TIC3]= inert_tic3_isr;
+ 005D CC00B9            ldd #_inert_tic3_isr
+ 0060 FDFFEA            std _normal_interrupt_vectors+20
+ 0063                 system.151::	
+                       ;    normal_interrupt_vectors[INTR_TIC2]= inert_tic2_isr;
+ 0063 CC00BB            ldd #_inert_tic2_isr
+ 0066 FDFFEC            std _normal_interrupt_vectors+22
+ 0069                 system.152::	
+                       ;    normal_interrupt_vectors[INTR_TIC1]= inert_tic1_isr;
+ 0069 CC00BD            ldd #_inert_tic1_isr
+ 006C FDFFEE            std _normal_interrupt_vectors+24
+ 006F                 system.153::	
+                       ;    normal_interrupt_vectors[INTR_RTI]=  inert_rti_isr;
+ 006F CC00BF            ldd #_inert_rti_isr
+ 0072 FDFFF0            std _normal_interrupt_vectors+26
+ 0075                 system.154::	
+                       ;    normal_interrupt_vectors[INTR_IRQ]=  inert_irq_isr;
+ 0075 CC00C1            ldd #_inert_irq_isr
+ 0078 FDFFF2            std _normal_interrupt_vectors+28
+ 007B                 system.155::	
+                       ;    normal_interrupt_vectors[INTR_XIRQ]= inert_xirq_isr;
+ 007B CC00C3            ldd #_inert_xirq_isr
+ 007E FDFFF4            std _normal_interrupt_vectors+30
+ 0081                 system.156::	
+                       ;    normal_interrupt_vectors[INTR_SWI]=  inert_swi_isr;
+ 0081 CC00C5            ldd #_inert_swi_isr
+ 0084 FDFFF6            std _normal_interrupt_vectors+32
+ 0087                 system.157::	
+                       ;    normal_interrupt_vectors[INTR_ILLOP]=presto_fatal_error;
+ 0087 CC00F7            ldd #_presto_fatal_error
+ 008A FDFFF8            std _normal_interrupt_vectors+34
+ 008D                 system.158::	
+                       ;    normal_interrupt_vectors[INTR_COP]=  inert_cop_isr;
+ 008D CC00C9            ldd #_inert_cop_isr
+ 0090 FDFFFA            std _normal_interrupt_vectors+36
+ 0093                 system.159::	
+                       ;    normal_interrupt_vectors[INTR_CLM]=  inert_clm_isr;
+ 0093 CC00CB            ldd #_inert_clm_isr
+ 0096 FDFFFC            std _normal_interrupt_vectors+38
+ 0099                 system.160::	
+                       ;    normal_interrupt_vectors[INTR_RESET]=_start;
+ 0099 CC0000            ldd #__start
+ 009C FDFFFE            std _normal_interrupt_vectors+40
+ 009F                 system.165::	
+                       ; 
+                       ;    // get out of SPECIAL TEST operating mode
+                       ;    // go into EXPANDED MULTIPLEXED operating mode
+                       ;    // promote IRQ interrupt priority
+                       ;    HPRIO=0x25;
+ 009F C625              ldab #37
+ 00A1 F7103C            stab 0x103c
+ 00A4                 system.168::	
+                       ; 
+                       ;    //INTR_ON();
+                       ; }
+ 00A4                 L11:
+ 00A4 39                rts
+                       ;  IX -> 0,x
+ 00A5                 _inert_sci_isr::
+ 00A5 3B                rti
+ 00A6                 system.172::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void inert_sci_isr(void)   { asm("rti"); }
+ 00A6                 L32:
+ 00A6 39                rts
+                       ;  IX -> 0,x
+ 00A7                 _inert_spi_isr::
+ 00A7 3B                rti
+ 00A8                 system.173::	
+                       ; void inert_spi_isr(void)   { asm("rti"); }
+ 00A8                 L33:
+ 00A8 39                rts
+                       ;  IX -> 0,x
+ 00A9                 _inert_paie_isr::
+ 00A9 3B                rti
+ 00AA                 system.174::	
+                       ; void inert_paie_isr(void)  { asm("rti"); }
+ 00AA                 L34:
+ 00AA 39                rts
+                       ;  IX -> 0,x
+ 00AB                 _inert_pao_isr::
+ 00AB 3B                rti
+ 00AC                 system.175::	
+                       ; void inert_pao_isr(void)   { asm("rti"); }
+ 00AC                 L35:
+ 00AC 39                rts
+                       ;  IX -> 0,x
+ 00AD                 _inert_tof_isr::
+ 00AD 3B                rti
+ 00AE                 system.176::	
+                       ; void inert_tof_isr(void)   { asm("rti"); }
+ 00AE                 L36:
+ 00AE 39                rts
+                       ;  IX -> 0,x
+ 00AF                 _inert_toc5_isr::
+ 00AF 3B                rti
+ 00B0                 system.177::	
+                       ; void inert_toc5_isr(void)  { asm("rti"); }
+ 00B0                 L37:
+ 00B0 39                rts
+                       ;  IX -> 0,x
+ 00B1                 _inert_toc4_isr::
+ 00B1 3B                rti
+ 00B2                 system.178::	
+                       ; void inert_toc4_isr(void)  { asm("rti"); }
+ 00B2                 L38:
+ 00B2 39                rts
+                       ;  IX -> 0,x
+ 00B3                 _inert_toc3_isr::
+ 00B3 3B                rti
+ 00B4                 system.179::	
+                       ; void inert_toc3_isr(void)  { asm("rti"); }
+ 00B4                 L39:
+ 00B4 39                rts
+                       ;  IX -> 0,x
+ 00B5                 _inert_toc2_isr::
+ 00B5 3B                rti
+ 00B6                 system.180::	
+                       ; void inert_toc2_isr(void)  { asm("rti"); }
+ 00B6                 L40:
+ 00B6 39                rts
+                       ;  IX -> 0,x
+ 00B7                 _inert_toc1_isr::
+ 00B7 3B                rti
+ 00B8                 system.181::	
+                       ; void inert_toc1_isr(void)  { asm("rti"); }
+ 00B8                 L41:
+ 00B8 39                rts
+                       ;  IX -> 0,x
+ 00B9                 _inert_tic3_isr::
+ 00B9 3B                rti
+ 00BA                 system.182::	
+                       ; void inert_tic3_isr(void)  { asm("rti"); }
+ 00BA                 L42:
+ 00BA 39                rts
+                       ;  IX -> 0,x
+ 00BB                 _inert_tic2_isr::
+ 00BB 3B                rti
+ 00BC                 system.183::	
+                       ; void inert_tic2_isr(void)  { asm("rti"); }
+ 00BC                 L43:
+ 00BC 39                rts
+                       ;  IX -> 0,x
+ 00BD                 _inert_tic1_isr::
+ 00BD 3B                rti
+ 00BE                 system.184::	
+                       ; void inert_tic1_isr(void)  { asm("rti"); }
+ 00BE                 L44:
+ 00BE 39                rts
+                       ;  IX -> 0,x
+ 00BF                 _inert_rti_isr::
+ 00BF 3B                rti
+ 00C0                 system.185::	
+                       ; void inert_rti_isr(void)   { asm("rti"); }
+ 00C0                 L45:
+ 00C0 39                rts
+                       ;  IX -> 0,x
+ 00C1                 _inert_irq_isr::
+ 00C1 3B                rti
+ 00C2                 system.186::	
+                       ; void inert_irq_isr(void)   { asm("rti"); }
+ 00C2                 L46:
+ 00C2 39                rts
+                       ;  IX -> 0,x
+ 00C3                 _inert_xirq_isr::
+ 00C3 3B                rti
+ 00C4                 system.187::	
+                       ; void inert_xirq_isr(void)  { asm("rti"); }
+ 00C4                 L47:
+ 00C4 39                rts
+                       ;  IX -> 0,x
+ 00C5                 _inert_swi_isr::
+ 00C5 3B                rti
+ 00C6                 system.188::	
+                       ; void inert_swi_isr(void)   { asm("rti"); }
+ 00C6                 L48:
+ 00C6 39                rts
+                       ;  IX -> 0,x
+ 00C7                 _inert_illop_isr::
+ 00C7 3B                rti
+ 00C8                 system.189::	
+                       ; void inert_illop_isr(void) { asm("rti"); }
+ 00C8                 L49:
+ 00C8 39                rts
+                       ;  IX -> 0,x
+ 00C9                 _inert_cop_isr::
+ 00C9 3B                rti
+ 00CA                 system.190::	
+                       ; void inert_cop_isr(void)   { asm("rti"); }
+ 00CA                 L50:
+ 00CA 39                rts
+                       ;  IX -> 0,x
+ 00CB                 _inert_clm_isr::
+ 00CB 3B                rti
+ 00CC                 system.191::	
+                       ; void inert_clm_isr(void)   { asm("rti"); }
+ 00CC                 L51:
+ 00CC 39                rts
+                       ;  IX -> 0,x
+ 00CD                 _inert_reset_isr::
+ 00CD 3B                rti
+ 00CE                 system.192::	
+                       ; void inert_reset_isr(void) { asm("rti"); }
+ 00CE                 L52:
+ 00CE 39                rts
+                       ;  IX -> 0,x
+                       ;         vector -> 8,x
+                       ;           intr -> 5,x
+ 00CF                 _set_interrupt::
+ 00CF 37                pshb
+ 00D0 36                psha
+ 00D1 3C                pshx
+ 00D2 30                tsx
+ 00D3 3C                pshx
+ 00D4 30                tsx
+ 00D5 EC04              ldd 4,x
+ 00D7 E705              stab 5,x
+ 00D9                 system.198::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; //extern void os_set_irq(int number, void (*fn)() );
+                       ; void set_interrupt(BYTE intr, void (*vector)(void)) {
+                       ;    if(intr<=INTR_RESET) {
+ 00D9 E605              ldab 5,x
+ 00DB C114              cmpb #20
+ 00DD 220E              bhi L54
+ 00DF                 system.199::	
+                       ;       normal_interrupt_vectors[intr]=vector;
+ 00DF E605              ldab 5,x
+ 00E1 4F                clra
+ 00E2 05                lsld
+ 00E3 C3FFD6            addd #_normal_interrupt_vectors
+ 00E6 188F              xgdy
+ 00E8 EC08              ldd 8,x
+ 00EA 18ED00            std 0,y
+ 00ED                 system.200::	
+                       ;    }
+ 00ED                 L54:
+ 00ED                 system.201::	
+                       ; }
+ 00ED                 L53:
+ 00ED 8F                xgdx
+ 00EE C30002            addd #2
+ 00F1 8F                xgdx
+ 00F2 35                txs
+ 00F3 38                pulx
+ 00F4 1838              puly
+ 00F6 39                rts
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;          delay -> 3,x
+ 00F7                 _presto_fatal_error::
+ 00F7 BD0000            jsr __enterb
+ 00FA 04                .byte 0x4
+ 00FB 0F                    sei
+ 00FC 8E0000            lds #init_sp
+ 00FF                 system.219::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   S A F E T Y   C H E C K
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // this is the memory location for the motor controller
+                       ; #define ERROR_PORT *(unsigned char *)(0x7FFF)
+                       ; 
+                       ; void presto_fatal_error(void) {
+                       ;    // should never get here
+                       ;    BYTE delay;
+                       ;    INTR_OFF();
+                       ; 
+                       ;    // reload the original stack pointer, so we don't trash anything else
+                       ;    asm("lds #init_sp");
+                       ; 
+                       ;    // speaker is always an output
+                       ;    BITSET(DDRD,4);              // LED is an output
+ 00FF 18CE1009          ldy #0x1009
+ 0103 181C0010          bset 0,y,#16
+ 0107 202A              bra L58
+ 0109                 L57:
+ 0109                 system.222::	
+                       ;    while(1) {
+                       ;       // toggle speaker
+                       ;       BITNOT(PORTA,3);
+ 0109 F61000            ldab 0x1000 ; vol
+ 010C 4F                clra
+ 010D 8800              eora #0
+ 010F C808              eorb #8
+ 0111 F71000            stab 0x1000
+ 0114                 system.224::	
+                       ;       // LED on
+                       ;       BITCLR(PORTD,4);
+ 0114 18CE1008          ldy #0x1008
+ 0118 181D0010          bclr 0,y,~#-17
+ 011C 2005              bra L61
+ 011E                 L60:
+ 011E                 system.229::	
+                       ;       // delay
+                       ;       while(--delay>0) {
+                       ;          // This will force the motor lights to blink so fast
+                       ;          // that all eight of them will appear to be on.
+                       ;          ERROR_PORT=delay;
+ 011E E603              ldab 3,x
+ 0120 F77FFF            stab 0x7fff
+ 0123                 system.230::	
+                       ;       }
+ 0123                 L61:
+ 0123 E603              ldab 3,x
+ 0125 4F                clra
+ 0126 830001            subd #1
+ 0129 E702              stab 2,x
+ 012B E703              stab 3,x
+ 012D E602              ldab 2,x
+ 012F C100              cmpb #0
+ 0131 22EB              bhi L60
+ 0133                 system.231::	
+                       ;    }
+ 0133                 L58:
+ 0133 20D4              bra L57
+ 0135                 L56:
+ 0135 8F                xgdx
+ 0136 C30004            addd #4
+ 0139 8F                xgdx
+ 013A 35                txs
+ 013B 38                pulx
+ 013C 39                rts

@@ -1,0 +1,42 @@
+XH
+H 3 areas 16 global symbols
+M obj\intvect
+S _inert_tic3_isr Ref0000
+S _inert_toc1_isr Ref0000
+S _inert_toc2_isr Ref0000
+S _inert_toc3_isr Ref0000
+S _inert_toc4_isr Ref0000
+S _inert_toc5_isr Ref0000
+S _inert_clm_isr Ref0000
+S _inert_sci_isr Ref0000
+S _inert_pao_isr Ref0000
+S _inert_cop_isr Ref0000
+S _inert_xirq_isr Ref0000
+S _inert_tof_isr Ref0000
+S _inert_irq_isr Ref0000
+S _inert_spi_isr Ref0000
+S _inert_rti_isr Ref0000
+S _inert_swi_isr Ref0000
+S __start Ref0000
+S _inert_paie_isr Ref0000
+S _inert_illop_isr Ref0000
+S _inert_tic1_isr Ref0000
+S _inert_tic2_isr Ref0000
+A text size 0 flags 0
+A memory size C000 flags C
+S _special_interrupt_vectors DefBFD6
+A data size 0 flags 0
+T BF D6 00 00 00 00 00 00
+R 00 00 00 01 02 02 00 07 02 04 00 0D 02 06 00 11
+T BF DC 00 00 00 00 00 00
+R 00 00 00 01 02 02 00 08 02 04 00 0B 02 06 00 05
+T BF E2 00 00 00 00 00 00
+R 00 00 00 01 02 02 00 04 02 04 00 03 02 06 00 02
+T BF E8 00 00 00 00 00 00
+R 00 00 00 01 02 02 00 01 02 04 00 00 02 06 00 14
+T BF EE 00 00 00 00 00 00
+R 00 00 00 01 02 02 00 13 02 04 00 0E 02 06 00 0C
+T BF F4 00 00 00 00 00 00
+R 00 00 00 01 02 02 00 0A 02 04 00 0F 02 06 00 12
+T BF FA 00 00 00 00 00 00
+R 00 00 00 01 02 02 00 09 02 04 00 06 02 06 00 10

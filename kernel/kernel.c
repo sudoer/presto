@@ -280,6 +280,7 @@ void presto_system_isr_wrapper(void) {
    // it even ends the ISR with a jump instruction.  Yikes!  I use this label
    // to by-pass this destructive behavior at the top, and later I use an
    // inline "RTI" instruction to by-pass the stuff at the bottom.
+   presto_fatal_error();
    asm("_presto_system_isr::");
 
    // interrupts are disabled at this time
@@ -308,6 +309,8 @@ void presto_system_isr_wrapper(void) {
 
       // end of ISR will set up new stack
       global_new_sp=current_tcb_p->stack_ptr;
+
+// WHAT??? CHANGE STACK POINTER WITHOUT SAVING REGISTERS???
 
       // swap the stack pointers
       asm("ldy _global_old_sp_p");
@@ -342,6 +345,8 @@ void context_switch_wrapper(void) {
 
    asm("_context_switch::");
 
+// REGISTERS PUSHED THE FIRST TIME WHEN SWI EXECUTED!!
+
    // check to see if the old task has clobbered its stack
    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
    ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
@@ -363,6 +368,8 @@ void context_switch_wrapper(void) {
    // when we return, we'll be another process
    // the asm routine will re-enable interrupts
    global_new_sp=current_tcb_p->stack_ptr;
+
+// REGISTERS PUSHED A SECOND TIME HERE!!
 
    // save the registers (in the same order that an interrupt does)
    asm("pshy");  // 2 bytes (Low, then High)
@@ -630,4 +637,3 @@ BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-

@@ -1,6 +1,28 @@
 
-extern void _start();      // entry point in crt11.s (ICC only)
-extern void inert_isr();
+extern void _start(void);      // entry point in crt11.s (ICC only)
+extern void inert_isr(void);
+
+extern void inert_sci_isr(void);
+extern void inert_spi_isr(void);
+extern void inert_paie_isr(void);
+extern void inert_pao_isr(void);
+extern void inert_tof_isr(void);
+extern void inert_toc5_isr(void);
+extern void inert_toc4_isr(void);
+extern void inert_toc3_isr(void);
+extern void inert_toc2_isr(void);
+extern void inert_toc1_isr(void);
+extern void inert_tic3_isr(void);
+extern void inert_tic2_isr(void);
+extern void inert_tic1_isr(void);
+extern void inert_rti_isr(void);
+extern void inert_irq_isr(void);
+extern void inert_xirq_isr(void);
+extern void inert_swi_isr(void);
+extern void inert_illop_isr(void);
+extern void inert_cop_isr(void);
+extern void inert_clm_isr(void);
+extern void inert_reset_isr(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -50,4 +72,3 @@ void (*special_interrupt_vectors[])() = {
 #pragma end_abs_address
 
 ////////////////////////////////////////////////////////////////////////////////
-

@@ -1,0 +1,2108 @@
+                         .area data
+ 0000                 _global_new_sp::
+ 0000                   .blkb 2
+                         .area idata
+ 0000 0000              .word 0
+                         .area data
+ 0002                 _global_old_sp_p::
+ 0002                   .blkb 2
+                         .area idata
+ 0002 0000              .word 0
+                         .area data
+ 0004                 _global_new_fn::
+ 0004                   .blkb 2
+                         .area idata
+ 0004 0000              .word 0
+                         .area data
+ 0006                 _current_tcb_p::
+ 0006                   .blkb 2
+                         .area idata
+ 0006 0000              .word 0
+                         .area data
+ 0008                 _current_tid::
+ 0008                   .blkb 1
+                         .area idata
+ 0008 00                .byte 0
+                         .area data
+ 0009                 _tcb_head_p::
+ 0009                   .blkb 2
+                         .area idata
+ 0009 0000              .word 0
+                         .area data
+ 000B                 _free_tcb_p::
+ 000B                   .blkb 2
+                         .area idata
+ 000B 0000              .word 0
+                         .area data
+ 000D                 _presto_initialized::
+ 000D                   .blkb 1
+                         .area idata
+ 000D 00                .byte 0
+                         .area data
+ 000E                 _free_mail_p::
+ 000E                   .blkb 2
+                         .area idata
+ 000E 0000              .word 0
+                         .area data
+ 0010                 _po_mail_p::
+ 0010                   .blkb 2
+                         .area idata
+ 0010 0000              .word 0
+                         .area text
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;          ?temp -> 4,x
+                       ;          ?temp -> 2,x
+                       ;          ?temp -> 4,x
+                       ;          count -> 7,x
+ 0000                 _presto_init::
+ 0000 BD0000            jsr __enterb
+ 0003 08                .byte 0x8
+ 0004                 kernel.80::	
+                       ; 
+                       ; #include "hc11regs.h"
+                       ; #include "system.h"
+                       ; #include "presto.h"
+                       ; #include "kernel\kernel.h"
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #define CYCLES_PER_MS     2000
+                       ; #define MS_PER_TICK       100
+                       ; #define CYCLES_PER_TICK   CYCLES_PER_MS*MS_PER_TICK
+                       ; #define IDLE_PRIORITY     0
+                       ; #define IDLE_STACK_SIZE   50
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #define DISABLE_CCR_INTERRUPT_BIT      asm("oraa #0x10");
+                       ; #define ENABLE_CCR_INTERRUPT_BIT      asm("anda ~#0x10");
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // GLOBAL VARIABLES
+                       ; // These are used to pass arguments to inline assembly routines
+                       ; 
+                       ; /*static*/ BYTE * global_new_sp=NULL;
+                       ; /*static*/ BYTE ** global_old_sp_p=NULL;
+                       ; /*static*/ void (*global_new_fn)(void)=NULL;
+                       ; /*static*/ BYTE * global_save_sp;     // do not put this on the stack (BOOM)
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // STATIC GLOBAL VARIABLES
+                       ; 
+                       ; /*static*/ PRESTO_TCB_T * current_tcb_p=NULL;
+                       ; /*static*/ PRESTO_TID_T current_tid=0;
+                       ; /*static*/ PRESTO_TCB_T * tcb_head_p=NULL;
+                       ; /*static*/ PRESTO_TCB_T * free_tcb_p=NULL;
+                       ; /*static*/ PRESTO_TCB_T tcb_list[MAX_TASKS];
+                       ; 
+                       ; /*static*/ PRESTO_TIME_T presto_master_clock;
+                       ; /*static*/ BYTE presto_initialized=0;
+                       ; 
+                       ; // idle task stuff
+                       ; /*static*/ BYTE idle_stack[IDLE_STACK_SIZE];
+                       ; /*static*/ PRESTO_TCB_T * idle_tcb_p;
+                       ; /*static*/ BYTE idle_tid;
+                       ; 
+                       ; // mail stuff
+                       ; /*static*/ PRESTO_MESSAGE_T * free_mail_p=NULL;
+                       ; /*static*/ PRESTO_MESSAGE_T * po_mail_p=NULL;
+                       ; /*static*/ PRESTO_MESSAGE_T mail_list[MAX_MESSAGES];
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // FUNCTION PROTOTYPES
+                       ; 
+                       ; /*static*/ PRESTO_TCB_T * presto_next_tcb_to_run(void);
+                       ; /*static*/ void presto_start_master_timer(void);
+                       ; /*static*/ void presto_restart_master_timer(void);
+                       ; /*static*/ void idle_task(void);
+                       ; /*static*/ BYTE deliver_mail(void);
+                       ; /*static*/ PRESTO_TCB_T * tid_to_tcbptr(BYTE tid);
+                       ; /*static*/ void print_tcb_list(void);
+                       ; /*static*/ void print_mail_list(void);
+                       ; /*static*/ void idle_task(void);
+                       ; 
+                       ; void presto_system_isr_wrapper(void);
+                       ; void presto_system_isr(void);
+                       ; void context_switch_wrapper(void);
+                       ; void context_switch(void);
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   I N I T I A L I Z A T I O N
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void presto_init(void) {
+                       ;    BYTE count;
+                       ; 
+                       ;    // initialize once and only once
+                       ;    if(presto_initialized) return;
+ 0004 7D000D            tst _presto_initialized
+ 0007 2703              beq L12
+ 0009 7E00F4            jmp L11
+ 000C                 L12:
+ 000C                 kernel.81::	
+                       ;    presto_initialized++;
+ 000C F6000D            ldab _presto_initialized
+ 000F 4F                clra
+ 0010 C30001            addd #1
+ 0013 F7000D            stab _presto_initialized
+ 0016                 kernel.84::	
+                       ; 
+                       ;    // initialize master clock
+                       ;    presto_master_clock=clock_reset();
+ 0016 CC0175            ldd #_presto_master_clock
+ 0019 BD0000            jsr _clock_reset
+ 001C                 kernel.87::	
+                       ; 
+                       ;    // initialize TCB list
+                       ;    for(count=0;count<MAX_TASKS;count++) {
+ 001C 6F07              clr 7,x
+ 001E 2050              bra L17
+ 0020                 L14:
+ 0020                 kernel.88::	
+                       ;       tcb_list[count].next=&tcb_list[count+1];
+ 0020 E607              ldab 7,x
+ 0022 4F                clra
+ 0023 188F              xgdy
+ 0025 CC0012            ldd #18
+ 0028 BD0000            jsr __muli
+ 002B ED04              std 4,x
+ 002D C30185            addd #_tcb_list+12
+ 0030 188F              xgdy
+ 0032 EC04              ldd 4,x
+ 0034 C3018B            addd #_tcb_list+18
+ 0037 18ED00            std 0,y
+ 003A                 kernel.89::	
+                       ;       tcb_list[count].task_id=count;
+ 003A E607              ldab 7,x
+ 003C 4F                clra
+ 003D ED02              std 2,x
+ 003F CC0012            ldd #18
+ 0042 1AEE02            ldy 2,x
+ 0045 BD0000            jsr __muli
+ 0048 C30179            addd #_tcb_list
+ 004B 188F              xgdy
+ 004D E603              ldab 3,x
+ 004F 18E700            stab 0,y
+ 0052                 kernel.90::	
+                       ;       tcb_list[count].state=STATE_INACTIVE;
+ 0052 E607              ldab 7,x
+ 0054 4F                clra
+ 0055 188F              xgdy
+ 0057 CC0012            ldd #18
+ 005A BD0000            jsr __muli
+ 005D C30183            addd #_tcb_list+10
+ 0060 188F              xgdy
+ 0062 CC0002            ldd #2
+ 0065 18ED00            std 0,y
+ 0068                 kernel.91::	
+                       ;    }
+ 0068                 L15:
+ 0068 E607              ldab 7,x
+ 006A 4F                clra
+ 006B C30001            addd #1
+ 006E E707              stab 7,x
+ 0070                 L17:
+ 0070 E607              ldab 7,x
+ 0072 C106              cmpb #6
+ 0074 25AA              blo L14
+ 0076                 kernel.92::	
+                       ;    tcb_list[MAX_TASKS-1].next=NULL;
+ 0076 CC0000            ldd #0
+ 0079 FD01DF            std _tcb_list+90+12
+ 007C                 kernel.93::	
+                       ;    free_tcb_p=&tcb_list[0];
+ 007C CC0179            ldd #_tcb_list
+ 007F FD000B            std _free_tcb_p
+ 0082                 kernel.96::	
+                       ; 
+                       ;    // initialize mail list
+                       ;    for(count=0;count<MAX_MESSAGES;count++) {
+ 0082 6F07              clr 7,x
+ 0084 2031              bra L26
+ 0086                 L23:
+ 0086                 kernel.97::	
+                       ;       mail_list[count].next=&mail_list[count+1];  // goes past end of array - OK
+ 0086 E607              ldab 7,x
+ 0088 4F                clra
+ 0089 05                lsld
+ 008A 05                lsld
+ 008B 05                lsld
+ 008C 05                lsld
+ 008D ED04              std 4,x
+ 008F C3000E            addd #_mail_list+14
+ 0092 188F              xgdy
+ 0094 EC04              ldd 4,x
+ 0096 C30010            addd #_mail_list+16
+ 0099 18ED00            std 0,y
+ 009C                 kernel.98::	
+                       ;       mail_list[count].serial_number=count;
+ 009C E607              ldab 7,x
+ 009E 4F                clra
+ 009F ED02              std 2,x
+ 00A1 05                lsld
+ 00A2 05                lsld
+ 00A3 05                lsld
+ 00A4 05                lsld
+ 00A5 C30000            addd #_mail_list
+ 00A8 188F              xgdy
+ 00AA EC02              ldd 2,x
+ 00AC 18ED00            std 0,y
+ 00AF                 kernel.99::	
+                       ;    }
+ 00AF                 L24:
+ 00AF E607              ldab 7,x
+ 00B1 4F                clra
+ 00B2 C30001            addd #1
+ 00B5 E707              stab 7,x
+ 00B7                 L26:
+ 00B7 E607              ldab 7,x
+ 00B9 C114              cmpb #20
+ 00BB 25C9              blo L23
+ 00BD                 kernel.100::	
+                       ;    mail_list[MAX_MESSAGES-1].next=NULL;
+ 00BD CC0000            ldd #0
+ 00C0 FD013E            std _mail_list+304+14
+ 00C3                 kernel.101::	
+                       ;    free_mail_p=&mail_list[0];
+ 00C3 CC0000            ldd #_mail_list
+ 00C6 FD000E            std _free_mail_p
+ 00C9                 kernel.105::	
+                       ; 
+                       ;    // initialize idle task
+                       ;    // must be done after presto_initialized++ because of initialization check
+                       ;    idle_tid=presto_create_task(idle_task,idle_stack,IDLE_STACK_SIZE,IDLE_PRIORITY);
+ 00C9 CC0000            ldd #0
+ 00CC 37                pshb
+ 00CD 36                psha
+ 00CE CC0032            ldd #50
+ 00D1 37                pshb
+ 00D2 36                psha
+ 00D3 CC0143            ldd #_idle_stack
+ 00D6 37                pshb
+ 00D7 36                psha
+ 00D8 CC086C            ldd #_idle_task
+ 00DB BD0154            jsr _presto_create_task
+ 00DE BD0000            jsr __movspb
+ 00E1 06                .byte 6
+ 00E2 4F                clra
+ 00E3 5D                tstb
+ 00E4 2A01              bpl X0
+ 00E6 43                coma
+ 00E7                 X0:
+ 00E7 F70140            stab _idle_tid
+ 00EA                 kernel.106::	
+                       ;    idle_tcb_p=tid_to_tcbptr(idle_tid);
+ 00EA F60140            ldab _idle_tid
+ 00ED 4F                clra
+ 00EE BD086F            jsr _tid_to_tcbptr
+ 00F1 FD0141            std _idle_tcb_p
+ 00F4                 kernel.107::	
+                       ; }
+ 00F4                 L11:
+ 00F4 8F                xgdx
+ 00F5 C30008            addd #8
+ 00F8 8F                xgdx
+ 00F9 35                txs
+ 00FA 38                pulx
+ 00FB 39                rts
+                       ;  IX -> 0,x
+ 00FC                 _presto_start_scheduler::
+ 00FC                 kernel.113::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void presto_start_scheduler(void) {
+                       ; 
+                       ;    if(presto_initialized==0) presto_fatal_error();
+ 00FC 7D000D            tst _presto_initialized
+ 00FF 2603              bne L32
+ 0101 BD0000            jsr _presto_fatal_error
+ 0104                 L32:
+ 0104 0F                    sei
+ 0105                 kernel.119::	
+                       ; 
+                       ;    // we're about to switch to our first task... interrupts off
+                       ;    INTR_OFF();
+                       ; 
+                       ;    //set_interrupt(INTR_TOC2, presto_system_isr_wrapper);
+                       ;    set_interrupt(INTR_TOC2, presto_system_isr);
+ 0105 CC030F            ldd #_presto_system_isr
+ 0108 37                pshb
+ 0109 36                psha
+ 010A CC0008            ldd #8
+ 010D BD0000            jsr _set_interrupt
+ 0110 1838              puly
+ 0112                 kernel.120::	
+                       ;    set_interrupt(INTR_SWI, context_switch);
+ 0112 CC03B0            ldd #_context_switch
+ 0115 37                pshb
+ 0116 36                psha
+ 0117 CC0010            ldd #16
+ 011A BD0000            jsr _set_interrupt
+ 011D 1838              puly
+ 011F                 kernel.123::	
+                       ; 
+                       ;    // start timer interrupts for pre-emption
+                       ;    presto_start_master_timer();
+ 011F BD08CA            jsr _presto_start_master_timer
+ 0122                 kernel.127::	
+                       ; 
+                       ;    // pick next task to run
+                       ;    // first task in list is highest priority and is ready
+                       ;    current_tcb_p=tcb_head_p;
+ 0122 FC0009            ldd _tcb_head_p
+ 0125 FD0006            std _current_tcb_p
+ 0128                 kernel.128::	
+                       ;    if(current_tcb_p==NULL) {
+ 0128 FC0006            ldd _current_tcb_p
+ 012B 2603              bne L34
+ 012D                 kernel.129::	
+                       ;       presto_fatal_error();
+ 012D BD0000            jsr _presto_fatal_error
+ 0130                 kernel.130::	
+                       ;    }
+ 0130                 L34:
+ 0130                 kernel.131::	
+                       ;    current_tid=current_tcb_p->task_id;
+ 0130 18FE0006          ldy _current_tcb_p
+ 0134 18E600            ldab 0,y
+ 0137 F70008            stab _current_tid
+ 013A                 kernel.137::	
+                       ; 
+                       ;    // SET UP A NEW STACK AND START EXECUTION USING IT
+                       ; 
+                       ;    // these parameters will be used in inline assembly...
+                       ;    // must be put in global space, not on stack
+                       ;    global_new_sp=current_tcb_p->stack_ptr;
+ 013A FC0006            ldd _current_tcb_p
+ 013D C30002            addd #2
+ 0140 188F              xgdy
+ 0142 18EC00            ldd 0,y
+ 0145 FD0000            std _global_new_sp
+ 0148 BE0000            lds _global_new_sp
+ 014B 32                pula
+ 014C 84EF              anda ~#0x10
+ 014E 36                psha
+ 014F 3B                rti
+ 0150                 kernel.153::	
+                       ; 
+                       ;    asm("lds _global_new_sp");
+                       ; 
+                       ;    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
+                       ;    // That way, the new task will have interrupts enabled when it wakes up.
+                       ;    asm("pula");
+                       ;    ENABLE_CCR_INTERRUPT_BIT;
+                       ;    asm("psha");
+                       ; 
+                       ;    // Normally, this function would end with an RTS, but we want to act EXACTLY
+                       ;    // the same as if we had just been inside of an interrupt.  So we manually
+                       ;    // call RTI here to pop the registers and "run" the new task.
+                       ;    asm("rti");
+                       ; 
+                       ;    // we never get here
+                       ;    presto_fatal_error();
+ 0150 BD0000            jsr _presto_fatal_error
+ 0153                 kernel.154::	
+                       ; }
+ 0153                 L31:
+ 0153 39                rts
+                       ;  IX -> 0,x
+                       ;            ptr -> 2,x
+                       ;      new_tcb_p -> 4,x
+                       ;       priority -> 17,x
+                       ;     stack_size -> 14,x
+                       ;          stack -> 12,x
+                       ;           func -> 8,x
+ 0154                 _presto_create_task::
+ 0154 BD0000            jsr __enterb
+ 0157 46                .byte 0x46
+ 0158 EC10              ldd 16,x
+ 015A E711              stab 17,x
+ 015C                 kernel.164::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   T A S K   M A N A G E M E N T
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_size, BYTE priority ) {
+                       ; 
+                       ;    PRESTO_TCB_T * new_tcb_p;
+                       ; 
+                       ;    if(presto_initialized==0) presto_fatal_error();
+ 015C 7D000D            tst _presto_initialized
+ 015F 2603              bne L37
+ 0161 BD0000            jsr _presto_fatal_error
+ 0164                 L37:
+ 0164                 kernel.166::	
+                       ; 
+                       ;    if(free_tcb_p==NULL) {
+ 0164 FC000B            ldd _free_tcb_p
+ 0167 2610              bne L39
+ 0169                 kernel.168::	
+                       ;       // There are no more TCB's left.
+                       ;       presto_fatal_error();
+ 0169 BD0000            jsr _presto_fatal_error
+ 016C                 kernel.169::	
+                       ;       return -1;
+ 016C CCFFFF            ldd #-1
+ 016F 8F                xgdx
+ 0170 C30006            addd #6
+ 0173 8F                xgdx
+ 0174 35                txs
+ 0175 38                pulx
+ 0176 1838              puly
+ 0178 39                rts
+ 0179                 L39:
+ 0179 0F                    sei
+ 017A                 kernel.176::	
+                       ;    }
+                       ; 
+                       ;    // we're about to mess with tasks, TCB's... interrupts off
+                       ;    INTR_OFF();
+                       ; 
+                       ;    // allocate TCB for new task
+                       ;    new_tcb_p=free_tcb_p;
+ 017A FC000B            ldd _free_tcb_p
+ 017D ED04              std 4,x
+ 017F                 kernel.177::	
+                       ;    free_tcb_p=free_tcb_p->next;
+ 017F FC000B            ldd _free_tcb_p
+ 0182 C3000C            addd #12
+ 0185 188F              xgdy
+ 0187 18EC00            ldd 0,y
+ 018A FD000B            std _free_tcb_p
+ 018D                 kernel.181::	
+                       ; 
+                       ;    // initialize TCB elements
+                       ;    // new_tcb_p->task_id is already assigned
+                       ;    new_tcb_p->stack_top=stack+stack_size-1;
+ 018D EC04              ldd 4,x
+ 018F C30004            addd #4
+ 0192 188F              xgdy
+ 0194 EC0E              ldd 14,x
+ 0196 E30C              addd 12,x
+ 0198 C3FFFF            addd #-1
+ 019B 18ED00            std 0,y
+ 019E                 kernel.182::	
+                       ;    new_tcb_p->stack_bottom=stack;
+ 019E EC04              ldd 4,x
+ 01A0 C30006            addd #6
+ 01A3 188F              xgdy
+ 01A5 EC0C              ldd 12,x
+ 01A7 18ED00            std 0,y
+ 01AA                 kernel.183::	
+                       ;    new_tcb_p->stack_ptr=new_tcb_p->stack_top;
+ 01AA EC04              ldd 4,x
+ 01AC C30004            addd #4
+ 01AF 188F              xgdy
+ 01B1 18EC00            ldd 0,y
+ 01B4 37                pshb ; 
+ 01B5 36                psha ; spill
+ 01B6 EC04              ldd 4,x
+ 01B8 C30002            addd #2
+ 01BB 188F              xgdy
+ 01BD 32                pula ; 
+ 01BE 33                pulb ; reload
+ 01BF 18ED00            std 0,y
+ 01C2                 kernel.184::	
+                       ;    new_tcb_p->priority=priority;
+ 01C2 EC04              ldd 4,x
+ 01C4 C30008            addd #8
+ 01C7 188F              xgdy
+ 01C9 E611              ldab 17,x
+ 01CB 18E700            stab 0,y
+ 01CE                 kernel.185::	
+                       ;    new_tcb_p->state=STATE_READY;
+ 01CE EC04              ldd 4,x
+ 01D0 C3000A            addd #10
+ 01D3 188F              xgdy
+ 01D5 CC0000            ldd #0
+ 01D8 18ED00            std 0,y
+ 01DB                 kernel.186::	
+                       ;    new_tcb_p->mailbox_head=NULL;
+ 01DB EC04              ldd 4,x
+ 01DD C3000E            addd #14
+ 01E0 188F              xgdy
+ 01E2 CC0000            ldd #0
+ 01E5 18ED00            std 0,y
+ 01E8                 kernel.187::	
+                       ;    new_tcb_p->mailbox_tail=NULL;
+ 01E8 EC04              ldd 4,x
+ 01EA C30010            addd #16
+ 01ED 188F              xgdy
+ 01EF CC0000            ldd #0
+ 01F2 18ED00            std 0,y
+ 01F5                 kernel.193::	
+                       ; 
+                       ;    // SET UP NEW STACK USING ASSEMBLY LANGUAGE
+                       ; 
+                       ;    // these parameters will be used in inline assembly...
+                       ;    // must be put in global space, not on stack
+                       ;    global_new_sp=new_tcb_p->stack_ptr;
+ 01F5 EC04              ldd 4,x
+ 01F7 C30002            addd #2
+ 01FA 188F              xgdy
+ 01FC 18EC00            ldd 0,y
+ 01FF FD0000            std _global_new_sp
+ 0202                 kernel.194::	
+                       ;    global_new_fn=func;
+ 0202 EC08              ldd 8,x
+ 0204 FD0004            std _global_new_fn
+ 0207 BF01E5            sts _global_save_sp
+ 020A BE0000            lds _global_new_sp
+ 020D CC0000            ldd #_presto_fatal_error
+ 0210 37                pshb
+ 0211 36                psha
+ 0212 FC0004            ldd _global_new_fn
+ 0215 37                pshb
+ 0216 36                psha
+ 0217 8600              ldaa #0
+ 0219 36                psha
+ 021A 36                psha
+ 021B 36                psha
+ 021C 36                psha
+ 021D 36                psha
+ 021E 36                psha
+ 021F 36                psha
+ 0220 BF0000            sts _global_new_sp
+ 0223 BE01E5            lds _global_save_sp
+ 0226                 kernel.231::	
+                       ; 
+                       ;    // store our own SP so we can work on the new task
+                       ;    asm("sts _global_save_sp");
+                       ; 
+                       ;    // load empty SP from task so we can initialize it
+                       ;    asm("lds _global_new_sp");
+                       ; 
+                       ;    // Set presto_fatal_error as the "return pc" of a new task.  If some bozo
+                       ;    // tries to return out of his task's main function, we will cause an alarm.
+                       ;    asm("ldd #_presto_fatal_error");
+                       ;    asm("pshb");
+                       ;    asm("psha");
+                       ; 
+                       ;    // push the actual function call on the stack
+                       ;    asm("ldd _global_new_fn");
+                       ;    asm("pshb");
+                       ;    asm("psha");
+                       ; 
+                       ;    // push any old stinkin' registers onto the stack
+                       ;    // they'll be pulled off when we start running
+                       ;    // we push in interrupt-stack order
+                       ;    asm("ldaa #0");
+                       ;    asm("psha"); // Y(L) register
+                       ;    asm("psha"); // Y(H) register
+                       ;    asm("psha"); // X(L) register
+                       ;    asm("psha"); // X(H) register
+                       ;    asm("psha"); // A register
+                       ;    asm("psha"); // B register
+                       ;    asm("psha"); // Initial Condition Codes (I bit cleared)
+                       ; 
+                       ;    // save task SP in TCB
+                       ;    asm("sts _global_new_sp");
+                       ;    // re-load our own SP so we can return
+                       ;    asm("lds _global_save_sp");
+                       ; 
+                       ;    // recover the altered stack pointer and save it in the TCB
+                       ;    new_tcb_p->stack_ptr=global_new_sp;
+ 0226 EC04              ldd 4,x
+ 0228 C30002            addd #2
+ 022B 188F              xgdy
+ 022D FC0000            ldd _global_new_sp
+ 0230 18ED00            std 0,y
+ 0233                 kernel.235::	
+                       ; 
+                       ;    // INSERT NEW TCB INTO LIST IN PRIORITY ORDER
+                       ; 
+                       ;    if(tcb_head_p==NULL) {
+ 0233 FC0009            ldd _tcb_head_p
+ 0236 2615              bne L41
+ 0238                 kernel.237::	
+                       ;       // we are the first TCB in the list
+                       ;       tcb_head_p=new_tcb_p;
+ 0238 EC04              ldd 4,x
+ 023A FD0009            std _tcb_head_p
+ 023D                 kernel.238::	
+                       ;       new_tcb_p->next=NULL;
+ 023D EC04              ldd 4,x
+ 023F C3000C            addd #12
+ 0242 188F              xgdy
+ 0244 CC0000            ldd #0
+ 0247 18ED00            std 0,y
+ 024A                 kernel.239::	
+                       ;    } else if((new_tcb_p->priority)>(tcb_head_p->priority)) {
+ 024A 7E02E4            jmp L42
+ 024D                 L41:
+ 024D EC04              ldd 4,x
+ 024F C30008            addd #8
+ 0252 188F              xgdy
+ 0254 18E600            ldab 0,y
+ 0257 37                pshb ; 
+ 0258 36                psha ; spill
+ 0259 FC0009            ldd _tcb_head_p
+ 025C C30008            addd #8
+ 025F 188F              xgdy
+ 0261 32                pula ; 
+ 0262 33                pulb ; reload
+ 0263 18E100            cmpb 0,y
+ 0266 2315              bls L43
+ 0268                 kernel.241::	
+                       ;       // advance to the head of the class!
+                       ;       new_tcb_p->next=tcb_head_p;
+ 0268 EC04              ldd 4,x
+ 026A C3000C            addd #12
+ 026D 188F              xgdy
+ 026F FC0009            ldd _tcb_head_p
+ 0272 18ED00            std 0,y
+ 0275                 kernel.242::	
+                       ;       tcb_head_p=new_tcb_p;
+ 0275 EC04              ldd 4,x
+ 0277 FD0009            std _tcb_head_p
+ 027A                 kernel.243::	
+                       ;    } else {
+ 027A 7E02E4            jmp L44
+ 027D                 L43:
+ 027D                 kernel.244::	
+                       ;       PRESTO_TCB_T * ptr=tcb_head_p;
+ 027D FC0009            ldd _tcb_head_p
+ 0280 ED02              std 2,x
+ 0282 2030              bra L46
+ 0284                 L45:
+ 0284                 kernel.246::	
+                       ;       while(ptr->next!=NULL) {
+                       ;          if((new_tcb_p->priority)>(ptr->next->priority)) break;
+ 0284 EC02              ldd 2,x
+ 0286 C3000C            addd #12
+ 0289 188F              xgdy
+ 028B 18EC00            ldd 0,y
+ 028E C30008            addd #8
+ 0291 188F              xgdy
+ 0293 EC04              ldd 4,x
+ 0295 C30008            addd #8
+ 0298 183C              pshy ; spill
+ 029A 188F              xgdy
+ 029C 18E600            ldab 0,y
+ 029F 1838              puly ; reload
+ 02A1 18E100            cmpb 0,y
+ 02A4 2302              bls L48
+ 02A6 2018              bra L47
+ 02A8                 L48:
+ 02A8                 kernel.247::	
+                       ;          ptr=ptr->next;
+ 02A8 EC02              ldd 2,x
+ 02AA C3000C            addd #12
+ 02AD 188F              xgdy
+ 02AF 18EC00            ldd 0,y
+ 02B2 ED02              std 2,x
+ 02B4                 kernel.248::	
+                       ;       }
+ 02B4                 L46:
+ 02B4 EC02              ldd 2,x
+ 02B6 C3000C            addd #12
+ 02B9 188F              xgdy
+ 02BB 18EC00            ldd 0,y
+ 02BE 26C4              bne L45
+ 02C0                 L47:
+ 02C0                 kernel.252::	
+                       ; 
+                       ;       // ptr->next is either NULL or lower priority than us
+                       ;       // either way, we want to get inserted between ptr and ptr->next
+                       ;       new_tcb_p->next=ptr->next;
+ 02C0 EC02              ldd 2,x
+ 02C2 C3000C            addd #12
+ 02C5 188F              xgdy
+ 02C7 18EC00            ldd 0,y
+ 02CA 37                pshb ; 
+ 02CB 36                psha ; spill
+ 02CC EC04              ldd 4,x
+ 02CE C3000C            addd #12
+ 02D1 188F              xgdy
+ 02D3 32                pula ; 
+ 02D4 33                pulb ; reload
+ 02D5 18ED00            std 0,y
+ 02D8                 kernel.253::	
+                       ;       ptr->next=new_tcb_p;
+ 02D8 EC02              ldd 2,x
+ 02DA C3000C            addd #12
+ 02DD 188F              xgdy
+ 02DF EC04              ldd 4,x
+ 02E1 18ED00            std 0,y
+ 02E4                 kernel.254::	
+                       ;    }
+ 02E4                 L44:
+ 02E4                 L42:
+ 02E4 0E                    cli
+ 02E5                 kernel.259::	
+                       ; 
+                       ;    // we're done messing with the task list... interrupts back on
+                       ;    INTR_ON();
+                       ; 
+                       ;    return new_tcb_p->task_id;
+ 02E5 1AEE04            ldy 4,x
+ 02E8 18E600            ldab 0,y
+ 02EB 4F                clra
+ 02EC 5D                tstb
+ 02ED 2A01              bpl X1
+ 02EF 43                coma
+ 02F0                 X1:
+ 02F0 8F                xgdx
+ 02F1 C30006            addd #6
+ 02F4 8F                xgdx
+ 02F5 35                txs
+ 02F6 38                pulx
+ 02F7 1838              puly
+ 02F9 39                rts
+ 02FA                 L36:
+ 02FA 8F                xgdx
+ 02FB C30006            addd #6
+ 02FE 8F                xgdx
+ 02FF 35                txs
+ 0300 38                pulx
+ 0301 1838              puly
+ 0303 39                rts
+                       ;  IX -> 0,x
+ 0304                 _presto_kill_self::
+ 0304                 kernel.266::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void presto_kill_self(void) {
+                       ;    // TODO - remove TCB from list
+                       ;    presto_fatal_error();
+ 0304 BD0000            jsr _presto_fatal_error
+ 0307                 kernel.267::	
+                       ; }
+ 0307                 L50:
+ 0307 39                rts
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;          ?temp -> 4,x
+ 0308                 _presto_system_isr_wrapper::
+ 0308 BD0000            jsr __enterb
+ 030B 08                .byte 0x8
+ 030C                 kernel.283::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   C O N T E X T   S W I T C H I N G   ( I N T E R R U P T )
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #pragma interrupt presto_system_isr_wrapper
+                       ; void presto_system_isr_wrapper(void) {
+                       ; 
+                       ;    // The ICC compiler adds a "jsr __enterb" at the beginning of my interrupt
+                       ;    // service routine.  Apparently, it is concerned with preserving the state
+                       ;    // of the X register, and it tries to push it onto the stack and then do some
+                       ;    // funny math.  At the end of the ISR, it tries to undo all of the mess, and
+                       ;    // it even ends the ISR with a jump instruction.  Yikes!  I use this label
+                       ;    // to by-pass this destructive behavior at the top, and later I use an
+                       ;    // inline "RTI" instruction to by-pass the stuff at the bottom.
+                       ;    presto_fatal_error();
+ 030C BD0000            jsr _presto_fatal_error
+ 030F                 	_presto_system_isr::
+ 030F                 kernel.289::	
+                       ;    asm("_presto_system_isr::");
+                       ; 
+                       ;    // interrupts are disabled at this time
+                       ; 
+                       ;    // take care of clock things
+                       ;    presto_master_clock=clock_add(presto_master_clock,MS_PER_TICK);
+ 030F CC0064            ldd #100
+ 0312 37                pshb
+ 0313 36                psha
+ 0314 EC00              ldd 0,x
+ 0316 C30004            addd #4
+ 0319 18CE0175          ldy #_presto_master_clock
+ 031D 3C                pshx
+ 031E 8F                xgdx
+ 031F CC0004            ldd #4
+ 0322 BD0000            jsr __asgnblk
+ 0325 38                pulx
+ 0326 EC00              ldd 0,x
+ 0328 C30004            addd #4
+ 032B 37                pshb
+ 032C 36                psha
+ 032D CC0175            ldd #_presto_master_clock
+ 0330 BD0000            jsr _clock_add
+ 0333 1838              puly
+ 0335 1838              puly
+ 0337                 kernel.290::	
+                       ;    presto_restart_master_timer();
+ 0337 BD08FF            jsr _presto_restart_master_timer
+ 033A                 kernel.293::	
+                       ; 
+                       ;    // check mail
+                       ;    if(deliver_mail()>0) {
+ 033A BD0776            jsr _deliver_mail
+ 033D C100              cmpb #0
+ 033F 235F              bls L52
+ 0341                 kernel.296::	
+                       ; 
+                       ;       // check to see if we've clobbered our stack
+                       ;       if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
+ 0341 FC0006            ldd _current_tcb_p
+ 0344 C30002            addd #2
+ 0347 188F              xgdy
+ 0349 18EC00            ldd 0,y
+ 034C ED02              std 2,x
+ 034E FC0006            ldd _current_tcb_p
+ 0351 C30004            addd #4
+ 0354 188F              xgdy
+ 0356 EC02              ldd 2,x
+ 0358 CDA300            cpd 0,y
+ 035B 220F              bhi L56
+ 035D FC0006            ldd _current_tcb_p
+ 0360 C30006            addd #6
+ 0363 188F              xgdy
+ 0365 EC02              ldd 2,x
+ 0367 CDA300            cpd 0,y
+ 036A 2403              bhs L54
+ 036C                 L56:
+ 036C                 kernel.298::	
+                       ;       ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
+                       ;          presto_fatal_error();
+ 036C BD0000            jsr _presto_fatal_error
+ 036F                 L54:
+ 036F                 kernel.304::	
+                       ; 
+                       ;       // these parameters will be used in inline assembly...
+                       ;       // must be put in global space, not on stack
+                       ; 
+                       ;       // the ISR will save old SP in old TCB
+                       ;       global_old_sp_p=&(current_tcb_p->stack_ptr);
+ 036F FC0006            ldd _current_tcb_p
+ 0372 C30002            addd #2
+ 0375 FD0002            std _global_old_sp_p
+ 0378                 kernel.307::	
+                       ; 
+                       ;       // pick next task to run
+                       ;       current_tcb_p=presto_next_tcb_to_run();
+ 0378 BD0452            jsr _presto_next_tcb_to_run
+ 037B FD0006            std _current_tcb_p
+ 037E                 kernel.308::	
+                       ;       current_tid=current_tcb_p->task_id;
+ 037E 18FE0006          ldy _current_tcb_p
+ 0382 18E600            ldab 0,y
+ 0385 F70008            stab _current_tid
+ 0388                 kernel.311::	
+                       ; 
+                       ;       // end of ISR will set up new stack
+                       ;       global_new_sp=current_tcb_p->stack_ptr;
+ 0388 FC0006            ldd _current_tcb_p
+ 038B C30002            addd #2
+ 038E 188F              xgdy
+ 0390 18EC00            ldd 0,y
+ 0393 FD0000            std _global_new_sp
+ 0396 18FE0002          ldy _global_old_sp_p
+ 039A 18AF00            sts 0,y
+ 039D BE0000            lds _global_new_sp
+ 03A0                 kernel.319::	
+                       ; 
+                       ; // WHAT??? CHANGE STACK POINTER WITHOUT SAVING REGISTERS???
+                       ; 
+                       ;       // swap the stack pointers
+                       ;       asm("ldy _global_old_sp_p");
+                       ;       asm("sts 0,y");
+                       ;       asm("lds _global_new_sp");
+                       ;    }
+ 03A0                 L52:
+ 03A0 3B                rti
+ 03A1                 kernel.339::	
+                       ; 
+                       ; /*
+                       ;    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
+                       ;    // That way, the new task will have interrupts enabled when it wakes up.
+                       ;    asm("pula");
+                       ;    ENABLE_CCR_INTERRUPT_BIT;
+                       ;    asm("psha");
+                       ; */
+                       ; 
+                       ;    // The end of this function SHOULD be an RTI (instead of RTS), because it is
+                       ;    // an interrupt.  But the ICC compiler adds a lot of stuff at the beginning
+                       ;    // and the end of interrupt service routines.  Specifically, it is messing
+                       ;    // with the X register (pushing it onto the stack) because it uses that as
+                       ;    // a frame pointer.  So I will add my RTI here explicitly, to force the
+                       ;    // behavior that I want.
+                       ;    // Now we will pop the stack and "run" the new task.
+                       ;    asm("rti");
+                       ; 
+                       ;    // we never get here
+                       ;    presto_fatal_error();
+ 03A1 BD0000            jsr _presto_fatal_error
+ 03A4                 kernel.340::	
+                       ; }
+ 03A4                 L51:
+ 03A4 8F                xgdx
+ 03A5 C30008            addd #8
+ 03A8 8F                xgdx
+ 03A9 35                txs
+ 03AA 38                pulx
+ 03AB 39                rts
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;          ?temp -> 4,x
+ 03AC                 _context_switch_wrapper::
+ 03AC BD0000            jsr __enterb
+ 03AF 06                .byte 0x6
+ 03B0                 	_context_switch::
+ 03B0                 kernel.351::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void context_switch_wrapper(void) {
+                       ; 
+                       ;    asm("_context_switch::");
+                       ; 
+                       ; // REGISTERS PUSHED THE FIRST TIME WHEN SWI EXECUTED!!
+                       ; 
+                       ;    // check to see if the old task has clobbered its stack
+                       ;    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
+ 03B0 FC0006            ldd _current_tcb_p
+ 03B3 C30002            addd #2
+ 03B6 188F              xgdy
+ 03B8 18EC00            ldd 0,y
+ 03BB ED04              std 4,x
+ 03BD FC0006            ldd _current_tcb_p
+ 03C0 C30004            addd #4
+ 03C3 188F              xgdy
+ 03C5 EC04              ldd 4,x
+ 03C7 CDA300            cpd 0,y
+ 03CA 220F              bhi L60
+ 03CC FC0006            ldd _current_tcb_p
+ 03CF C30006            addd #6
+ 03D2 188F              xgdy
+ 03D4 EC04              ldd 4,x
+ 03D6 CDA300            cpd 0,y
+ 03D9 2403              bhs L58
+ 03DB                 L60:
+ 03DB                 kernel.353::	
+                       ;    ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
+                       ;       presto_fatal_error();
+ 03DB BD0000            jsr _presto_fatal_error
+ 03DE                 L58:
+ 03DE                 kernel.356::	
+                       ; 
+                       ;    // the inline asm will save old SP in old TCB
+                       ;    global_old_sp_p=&(current_tcb_p->stack_ptr);
+ 03DE FC0006            ldd _current_tcb_p
+ 03E1 C30002            addd #2
+ 03E4 FD0002            std _global_old_sp_p
+ 03E7                 kernel.359::	
+                       ; 
+                       ;    // pick next task to run
+                       ;    current_tcb_p=presto_next_tcb_to_run();
+ 03E7 BD0452            jsr _presto_next_tcb_to_run
+ 03EA FD0006            std _current_tcb_p
+ 03ED                 kernel.360::	
+                       ;    current_tid=current_tcb_p->task_id;
+ 03ED 18FE0006          ldy _current_tcb_p
+ 03F1 18E600            ldab 0,y
+ 03F4 F70008            stab _current_tid
+ 03F7                 kernel.363::	
+                       ; 
+                       ;    // check to see if the new task has clobbered its stack
+                       ;    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
+ 03F7 FC0006            ldd _current_tcb_p
+ 03FA C30002            addd #2
+ 03FD 188F              xgdy
+ 03FF 18EC00            ldd 0,y
+ 0402 ED02              std 2,x
+ 0404 FC0006            ldd _current_tcb_p
+ 0407 C30004            addd #4
+ 040A 188F              xgdy
+ 040C EC02              ldd 2,x
+ 040E CDA300            cpd 0,y
+ 0411 220F              bhi L63
+ 0413 FC0006            ldd _current_tcb_p
+ 0416 C30006            addd #6
+ 0419 188F              xgdy
+ 041B EC02              ldd 2,x
+ 041D CDA300            cpd 0,y
+ 0420 2403              bhs L61
+ 0422                 L63:
+ 0422                 kernel.365::	
+                       ;    ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
+                       ;       presto_fatal_error();
+ 0422 BD0000            jsr _presto_fatal_error
+ 0425                 L61:
+ 0425                 kernel.370::	
+                       ; 
+                       ;    // call asm routine to set up new stack
+                       ;    // when we return, we'll be another process
+                       ;    // the asm routine will re-enable interrupts
+                       ;    global_new_sp=current_tcb_p->stack_ptr;
+ 0425 FC0006            ldd _current_tcb_p
+ 0428 C30002            addd #2
+ 042B 188F              xgdy
+ 042D 18EC00            ldd 0,y
+ 0430 FD0000            std _global_new_sp
+ 0433 183C              pshy
+ 0435 3C                pshx
+ 0436 36                psha
+ 0437 37                pshb
+ 0438 07                tpa
+ 0439 84EF              anda ~#0x10
+ 043B 36                psha
+ 043C 18FE0002          ldy _global_old_sp_p
+ 0440 18AF00            sts 0,y
+ 0443 BE0000            lds _global_new_sp
+ 0446 3B                rti
+ 0447                 kernel.402::	
+                       ; 
+                       ; // REGISTERS PUSHED A SECOND TIME HERE!!
+                       ; 
+                       ;    // save the registers (in the same order that an interrupt does)
+                       ;    asm("pshy");  // 2 bytes (Low, then High)
+                       ;    asm("pshx");  // 2 bytes (Low, then High)
+                       ;    asm("psha");  // 1 byte
+                       ;    asm("pshb");  // 1 byte
+                       ;    asm("tpa");
+                       ;    ENABLE_CCR_INTERRUPT_BIT;  // enable interrupts in pushed CC register
+                       ;    asm("psha");  // 1 byte, the condition codes
+                       ; 
+                       ;    // swap the stack pointers
+                       ;    asm("ldy _global_old_sp_p");
+                       ;    asm("sts 0,y");
+                       ;    asm("lds _global_new_sp");
+                       ; 
+                       ; /*
+                       ;    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
+                       ;    // That way, the new task will have interrupts enabled when it wakes up.
+                       ;    asm("pula");
+                       ;    ENABLE_CCR_INTERRUPT_BIT;
+                       ;    asm("psha");
+                       ; */
+                       ; 
+                       ;    // Normally, this function would end with an RTS, but we want to act EXACTLY
+                       ;    // the same as if we had just been inside of an interrupt.  So we manually
+                       ;    // call RTI here to pop the registers and "run" the new task.
+                       ;    asm("rti");
+                       ; 
+                       ;    // we never get here
+                       ;    presto_fatal_error();
+ 0447 BD0000            jsr _presto_fatal_error
+ 044A                 kernel.403::	
+                       ; }
+ 044A                 L57:
+ 044A 8F                xgdx
+ 044B C30006            addd #6
+ 044E 8F                xgdx
+ 044F 35                txs
+ 0450 38                pulx
+ 0451 39                rts
+                       ;  IX -> 0,x
+                       ;            ptr -> 2,x
+ 0452                 _presto_next_tcb_to_run::
+ 0452 BD0000            jsr __enterb
+ 0455 04                .byte 0x4
+ 0456                 kernel.412::	
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   S C H E D U L I N G
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ PRESTO_TCB_T * presto_next_tcb_to_run(void) {
+                       ;    // pick highest priority ready task to run
+                       ;    PRESTO_TCB_T * ptr=tcb_head_p;
+ 0456 FC0009            ldd _tcb_head_p
+ 0459 ED02              std 2,x
+ 045B 2022              bra L66
+ 045D                 L65:
+ 045D                 kernel.414::	
+                       ;    while(ptr!=NULL) {
+                       ;       if(ptr->state==STATE_READY) return ptr;
+ 045D EC02              ldd 2,x
+ 045F C3000A            addd #10
+ 0462 188F              xgdy
+ 0464 18EC00            ldd 0,y
+ 0467 260A              bne L68
+ 0469 EC02              ldd 2,x
+ 046B 8F                xgdx
+ 046C C30004            addd #4
+ 046F 8F                xgdx
+ 0470 35                txs
+ 0471 38                pulx
+ 0472 39                rts
+ 0473                 L68:
+ 0473                 kernel.415::	
+                       ;       ptr=ptr->next;
+ 0473 EC02              ldd 2,x
+ 0475 C3000C            addd #12
+ 0478 188F              xgdy
+ 047A 18EC00            ldd 0,y
+ 047D ED02              std 2,x
+ 047F                 kernel.416::	
+                       ;    }
+ 047F                 L66:
+ 047F EC02              ldd 2,x
+ 0481 26DA              bne L65
+ 0483                 kernel.418::	
+                       ;    // should never get here
+                       ;    presto_fatal_error();
+ 0483 BD0000            jsr _presto_fatal_error
+ 0486                 kernel.419::	
+                       ;    return NULL;
+ 0486 CC0000            ldd #0
+ 0489 8F                xgdx
+ 048A C30004            addd #4
+ 048D 8F                xgdx
+ 048E 35                txs
+ 048F 38                pulx
+ 0490 39                rts
+ 0491                 L64:
+ 0491 8F                xgdx
+ 0492 C30004            addd #4
+ 0495 8F                xgdx
+ 0496 35                txs
+ 0497 38                pulx
+ 0498 39                rts
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;        payload -> 12,x
+                       ;             to -> 9,x
+ 0499                 _presto_send_message::
+ 0499 BD0000            jsr __enterb
+ 049C 46                .byte 0x46
+ 049D                 kernel.427::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   M E S S A G E S   A N D   T I M E R S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; BYTE presto_send_message(PRESTO_TID_T to, PRESTO_MAIL_T payload) {
+                       ;    return presto_timer(to,0,payload);
+ 049D EC00              ldd 0,x
+ 049F C30002            addd #2
+ 04A2 1AEE0C            ldy 12,x
+ 04A5 3C                pshx
+ 04A6 8F                xgdx
+ 04A7 CC0004            ldd #4
+ 04AA BD0000            jsr __asgnblk
+ 04AD 38                pulx
+ 04AE EC00              ldd 0,x
+ 04B0 C30002            addd #2
+ 04B3 37                pshb
+ 04B4 36                psha
+ 04B5 CC0000            ldd #0
+ 04B8 37                pshb
+ 04B9 36                psha
+ 04BA E609              ldab 9,x
+ 04BC 4F                clra
+ 04BD 5D                tstb
+ 04BE 2A01              bpl X2
+ 04C0 43                coma
+ 04C1                 X2:
+ 04C1 BD04DD            jsr _presto_timer
+ 04C4 1838              puly
+ 04C6 1838              puly
+ 04C8 4F                clra
+ 04C9 8F                xgdx
+ 04CA C30006            addd #6
+ 04CD 8F                xgdx
+ 04CE 35                txs
+ 04CF 38                pulx
+ 04D0 1838              puly
+ 04D2 39                rts
+ 04D3                 L70:
+ 04D3 8F                xgdx
+ 04D4 C30006            addd #6
+ 04D7 8F                xgdx
+ 04D8 35                txs
+ 04D9 38                pulx
+ 04DA 1838              puly
+ 04DC 39                rts
+                       ;  IX -> 0,x
+                       ;  func temp: 2,x - 6,x
+                       ;          ?temp -> 6,x
+                       ;          ?temp -> 10,x
+                       ;          msg_p -> 14,x
+                       ;          ?temp -> 16,x
+                       ;          ?temp -> 20,x
+                       ;          ?temp -> 24,x
+                       ;          ?temp -> 28,x
+                       ;        tcb_ptr -> 32,x
+                       ;     new_mail_p -> 34,x
+                       ;        payload -> 44,x
+                       ;          delay -> 42,x
+                       ;             to -> 39,x
+ 04DD                 _presto_timer::
+ 04DD BD0000            jsr __enterb
+ 04E0 64                .byte 0x64
+ 04E1 0F                    sei
+ 04E2                 kernel.440::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload) {
+                       ;    PRESTO_MESSAGE_T * new_mail_p;
+                       ;    PRESTO_TCB_T * tcb_ptr;
+                       ; 
+                       ;    // we're going to mess with the PO mail list... interrupts off
+                       ;    INTR_OFF();
+                       ; 
+                       ;    // check to see if there's room
+                       ;    if(free_mail_p==NULL) {
+ 04E2 FC000E            ldd _free_mail_p
+ 04E5 2603              bne L72
+ 04E7                 kernel.441::	
+                       ;       presto_fatal_error();
+ 04E7 BD0000            jsr _presto_fatal_error
+ 04EA                 kernel.442::	
+                       ;    }
+ 04EA                 L72:
+ 04EA                 kernel.445::	
+                       ; 
+                       ;    // check to see that the recipient is an alive task
+                       ;    tcb_ptr=tid_to_tcbptr(to);
+ 04EA E627              ldab 39,x
+ 04EC 4F                clra
+ 04ED 5D                tstb
+ 04EE 2A01              bpl X3
+ 04F0 43                coma
+ 04F1                 X3:
+ 04F1 4F                clra
+ 04F2 BD086F            jsr _tid_to_tcbptr
+ 04F5 ED20              std 32,x
+ 04F7                 kernel.446::	
+                       ;    if(tcb_ptr==NULL) {
+ 04F7 EC20              ldd 32,x
+ 04F9 2603              bne L74
+ 04FB                 kernel.447::	
+                       ;       presto_fatal_error();
+ 04FB BD0000            jsr _presto_fatal_error
+ 04FE                 kernel.448::	
+                       ;    }
+ 04FE                 L74:
+ 04FE                 kernel.451::	
+                       ; 
+                       ;    // allocate space for a new message
+                       ;    new_mail_p=free_mail_p;
+ 04FE FC000E            ldd _free_mail_p
+ 0501 ED22              std 34,x
+ 0503                 kernel.452::	
+                       ;    free_mail_p=free_mail_p->next;
+ 0503 FC000E            ldd _free_mail_p
+ 0506 C3000E            addd #14
+ 0509 188F              xgdy
+ 050B 18EC00            ldd 0,y
+ 050E FD000E            std _free_mail_p
+ 0511                 kernel.456::	
+                       ; 
+                       ;    // fill in the blanks
+                       ;    // new_mail_p->serial_number;   already set
+                       ;    new_mail_p->from_tid=current_tcb_p->task_id;
+ 0511 EC22              ldd 34,x
+ 0513 C30002            addd #2
+ 0516 188F              xgdy
+ 0518 183C              pshy ; spill
+ 051A 18FE0006          ldy _current_tcb_p
+ 051E 18E600            ldab 0,y
+ 0521 1838              puly ; reload
+ 0523 18E700            stab 0,y
+ 0526                 kernel.457::	
+                       ;    new_mail_p->to_tcb_p=tcb_ptr;
+ 0526 EC22              ldd 34,x
+ 0528 C30004            addd #4
+ 052B 188F              xgdy
+ 052D EC20              ldd 32,x
+ 052F 18ED00            std 0,y
+ 0532                 kernel.458::	
+                       ;    new_mail_p->delivery_time=clock_add(presto_master_clock,delay);
+ 0532 EC2A              ldd 42,x
+ 0534 37                pshb
+ 0535 36                psha
+ 0536 EC00              ldd 0,x
+ 0538 C3001C            addd #28
+ 053B 18CE0175          ldy #_presto_master_clock
+ 053F 3C                pshx
+ 0540 8F                xgdx
+ 0541 CC0004            ldd #4
+ 0544 BD0000            jsr __asgnblk
+ 0547 38                pulx
+ 0548 EC00              ldd 0,x
+ 054A C3001C            addd #28
+ 054D 37                pshb
+ 054E 36                psha
+ 054F EC00              ldd 0,x
+ 0551 C30018            addd #24
+ 0554 BD0000            jsr _clock_add
+ 0557 1838              puly
+ 0559 1838              puly
+ 055B EC00              ldd 0,x
+ 055D C30018            addd #24
+ 0560 188F              xgdy
+ 0562 EC22              ldd 34,x
+ 0564 C30006            addd #6
+ 0567 3C                pshx
+ 0568 8F                xgdx
+ 0569 CC0004            ldd #4
+ 056C BD0000            jsr __asgnblk
+ 056F 38                pulx
+ 0570                 kernel.459::	
+                       ;    new_mail_p->payload=payload;
+ 0570 EC22              ldd 34,x
+ 0572 C3000A            addd #10
+ 0575 1AEE2C            ldy 44,x
+ 0578 3C                pshx
+ 0579 8F                xgdx
+ 057A CC0004            ldd #4
+ 057D BD0000            jsr __asgnblk
+ 0580 38                pulx
+ 0581                 kernel.462::	
+                       ; 
+                       ;    // insert new message into list in time order
+                       ;    if(po_mail_p==NULL) {
+ 0581 FC0010            ldd _po_mail_p
+ 0584 2615              bne L76
+ 0586                 kernel.465::	
+                       ; 
+                       ;       // we are the first message in PO
+                       ;       po_mail_p=new_mail_p;
+ 0586 EC22              ldd 34,x
+ 0588 FD0010            std _po_mail_p
+ 058B                 kernel.466::	
+                       ;       new_mail_p->next=NULL;
+ 058B EC22              ldd 34,x
+ 058D C3000E            addd #14
+ 0590 188F              xgdy
+ 0592 CC0000            ldd #0
+ 0595 18ED00            std 0,y
+ 0598                 kernel.468::	
+                       ; 
+                       ;    } else if(clock_compare(po_mail_p->delivery_time,new_mail_p->delivery_time)>0) {
+ 0598 7E068F            jmp L77
+ 059B                 L76:
+ 059B EC00              ldd 0,x
+ 059D C30014            addd #20
+ 05A0 37                pshb ; 
+ 05A1 36                psha ; spill
+ 05A2 EC22              ldd 34,x
+ 05A4 C30006            addd #6
+ 05A7 188F              xgdy
+ 05A9 32                pula ; 
+ 05AA 33                pulb ; reload
+ 05AB 3C                pshx
+ 05AC 8F                xgdx
+ 05AD CC0004            ldd #4
+ 05B0 BD0000            jsr __asgnblk
+ 05B3 38                pulx
+ 05B4 EC00              ldd 0,x
+ 05B6 C30014            addd #20
+ 05B9 37                pshb
+ 05BA 36                psha
+ 05BB EC00              ldd 0,x
+ 05BD C30010            addd #16
+ 05C0 37                pshb ; 
+ 05C1 36                psha ; spill
+ 05C2 FC0010            ldd _po_mail_p
+ 05C5 C30006            addd #6
+ 05C8 188F              xgdy
+ 05CA 32                pula ; 
+ 05CB 33                pulb ; reload
+ 05CC 3C                pshx
+ 05CD 8F                xgdx
+ 05CE CC0004            ldd #4
+ 05D1 BD0000            jsr __asgnblk
+ 05D4 38                pulx
+ 05D5 EC00              ldd 0,x
+ 05D7 C30010            addd #16
+ 05DA BD0000            jsr _clock_compare
+ 05DD 1838              puly
+ 05DF ED02              std 2,x
+ 05E1 6D03              tst 3,x
+ 05E3 2F15              ble L78
+ 05E5                 kernel.471::	
+                       ; 
+                       ;       // advance to the head of the class!
+                       ;       new_mail_p->next=po_mail_p;
+ 05E5 EC22              ldd 34,x
+ 05E7 C3000E            addd #14
+ 05EA 188F              xgdy
+ 05EC FC0010            ldd _po_mail_p
+ 05EF 18ED00            std 0,y
+ 05F2                 kernel.472::	
+                       ;       po_mail_p=new_mail_p;
+ 05F2 EC22              ldd 34,x
+ 05F4 FD0010            std _po_mail_p
+ 05F7                 kernel.474::	
+                       ; 
+                       ;    } else {
+ 05F7 7E068F            jmp L79
+ 05FA                 L78:
+ 05FA                 kernel.477::	
+                       ; 
+                       ;       // we are one of many messages in the PO
+                       ;       PRESTO_MESSAGE_T * msg_p=po_mail_p;
+ 05FA FC0010            ldd _po_mail_p
+ 05FD ED0E              std 14,x
+ 05FF 205B              bra L81
+ 0601                 L80:
+ 0601                 kernel.479::	
+                       ;       while(msg_p->next!=NULL) {
+                       ;          if(clock_compare(msg_p->next->delivery_time,new_mail_p->delivery_time)>0) break;
+ 0601 EC00              ldd 0,x
+ 0603 C3000A            addd #10
+ 0606 37                pshb ; 
+ 0607 36                psha ; spill
+ 0608 EC22              ldd 34,x
+ 060A C30006            addd #6
+ 060D 188F              xgdy
+ 060F 32                pula ; 
+ 0610 33                pulb ; reload
+ 0611 3C                pshx
+ 0612 8F                xgdx
+ 0613 CC0004            ldd #4
+ 0616 BD0000            jsr __asgnblk
+ 0619 38                pulx
+ 061A EC00              ldd 0,x
+ 061C C3000A            addd #10
+ 061F 37                pshb
+ 0620 36                psha
+ 0621 EC0E              ldd 14,x
+ 0623 C3000E            addd #14
+ 0626 188F              xgdy
+ 0628 18EC00            ldd 0,y
+ 062B C30006            addd #6
+ 062E 188F              xgdy
+ 0630 EC00              ldd 0,x
+ 0632 C30006            addd #6
+ 0635 3C                pshx
+ 0636 8F                xgdx
+ 0637 CC0004            ldd #4
+ 063A BD0000            jsr __asgnblk
+ 063D 38                pulx
+ 063E EC00              ldd 0,x
+ 0640 C30006            addd #6
+ 0643 BD0000            jsr _clock_compare
+ 0646 1838              puly
+ 0648 ED04              std 4,x
+ 064A 6D05              tst 5,x
+ 064C 2F02              ble L83
+ 064E 201B              bra L82
+ 0650                 L83:
+ 0650                 kernel.480::	
+                       ;          msg_p=msg_p->next;
+ 0650 EC0E              ldd 14,x
+ 0652 C3000E            addd #14
+ 0655 188F              xgdy
+ 0657 18EC00            ldd 0,y
+ 065A ED0E              std 14,x
+ 065C                 kernel.481::	
+                       ;       }
+ 065C                 L81:
+ 065C EC0E              ldd 14,x
+ 065E C3000E            addd #14
+ 0661 188F              xgdy
+ 0663 18EC00            ldd 0,y
+ 0666 2703              beq X4
+ 0668 7E0601            jmp L80
+ 066B                 X4:
+ 066B                 L82:
+ 066B                 kernel.485::	
+                       ; 
+                       ;       // msg_p->next is either NULL or later delivery time than us
+                       ;       // either way, we want to get inserted between msg_p and msg_p->next
+                       ;       new_mail_p->next=msg_p->next;
+ 066B EC0E              ldd 14,x
+ 066D C3000E            addd #14
+ 0670 188F              xgdy
+ 0672 18EC00            ldd 0,y
+ 0675 37                pshb ; 
+ 0676 36                psha ; spill
+ 0677 EC22              ldd 34,x
+ 0679 C3000E            addd #14
+ 067C 188F              xgdy
+ 067E 32                pula ; 
+ 067F 33                pulb ; reload
+ 0680 18ED00            std 0,y
+ 0683                 kernel.486::	
+                       ;       msg_p->next=new_mail_p;
+ 0683 EC0E              ldd 14,x
+ 0685 C3000E            addd #14
+ 0688 188F              xgdy
+ 068A EC22              ldd 34,x
+ 068C 18ED00            std 0,y
+ 068F                 kernel.487::	
+                       ;    }
+ 068F                 L79:
+ 068F                 L77:
+ 068F 0E                    cli
+ 0690                 kernel.492::	
+                       ; 
+                       ;    // we're done messing with the PO mail list... interrupts back on
+                       ;    INTR_ON();
+                       ; 
+                       ;    return 0;
+ 0690 CC0000            ldd #0
+ 0693 8F                xgdx
+ 0694 C30024            addd #36
+ 0697 8F                xgdx
+ 0698 35                txs
+ 0699 38                pulx
+ 069A 1838              puly
+ 069C 39                rts
+ 069D                 L71:
+ 069D 8F                xgdx
+ 069E C30024            addd #36
+ 06A1 8F                xgdx
+ 06A2 35                txs
+ 06A3 38                pulx
+ 06A4 1838              puly
+ 06A6 39                rts
+                       ;  IX -> 0,x
+                       ;          msg_p -> 2,x
+                       ;      payload_p -> 6,x
+ 06A7                 _presto_wait_for_message::
+ 06A7 BD0000            jsr __enterb
+ 06AA 44                .byte 0x44
+ 06AB 0F                    sei
+ 06AC                 kernel.504::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
+                       ;    PRESTO_MESSAGE_T * msg_p;
+                       ; 
+                       ;    // we're about to switch to a new task... interrupts off
+                       ;    INTR_OFF();
+                       ; 
+                       ;    // we will only sleep if there are no messages in our queue
+                       ;    if(current_tcb_p->mailbox_head==NULL) {
+ 06AC FC0006            ldd _current_tcb_p
+ 06AF C3000E            addd #14
+ 06B2 188F              xgdy
+ 06B4 18EC00            ldd 0,y
+ 06B7 260F              bne L86
+ 06B9                 kernel.506::	
+                       ;       // no mail, so we can sleep
+                       ;       current_tcb_p->state=STATE_BLOCKED;
+ 06B9 FC0006            ldd _current_tcb_p
+ 06BC C3000A            addd #10
+ 06BF 188F              xgdy
+ 06C1 CC0001            ldd #1
+ 06C4 18ED00            std 0,y
+ 06C7 3F                swi
+ 06C8                 kernel.510::	
+                       ;       asm("swi");
+                       ;       // When we wake up, we'll be ready to recieve our mail.
+                       ;       // Interrupts will be enabled.
+                       ;    }
+ 06C8                 L86:
+ 06C8 0F                    sei
+ 06C9                 kernel.515::	
+                       ; 
+                       ;    // we're about to mess with the mail list... interrupts off
+                       ;    INTR_OFF();
+                       ;    // we're going to use this a lot, so dereference now
+                       ;    msg_p=current_tcb_p->mailbox_head;
+ 06C9 FC0006            ldd _current_tcb_p
+ 06CC C3000E            addd #14
+ 06CF 188F              xgdy
+ 06D1 18EC00            ldd 0,y
+ 06D4 ED02              std 2,x
+ 06D6                 kernel.518::	
+                       ; 
+                       ;    // get one message from the task's mail queue
+                       ;    if(msg_p==NULL) {
+ 06D6 EC02              ldd 2,x
+ 06D8 2603              bne L88
+ 06DA                 kernel.520::	
+                       ;       // there are no messages in the task's mail list
+                       ;       presto_fatal_error();
+ 06DA BD0000            jsr _presto_fatal_error
+ 06DD                 kernel.521::	
+                       ;    }
+ 06DD                 L88:
+ 06DD                 kernel.524::	
+                       ; 
+                       ;    // are we being paranoid?
+                       ;    if((msg_p->to_tcb_p)!=current_tcb_p) {
+ 06DD EC02              ldd 2,x
+ 06DF C30004            addd #4
+ 06E2 188F              xgdy
+ 06E4 18EC00            ldd 0,y
+ 06E7 1AB30006          cpd _current_tcb_p
+ 06EB 2703              beq L90
+ 06ED                 kernel.525::	
+                       ;       presto_fatal_error();
+ 06ED BD0000            jsr _presto_fatal_error
+ 06F0                 kernel.526::	
+                       ;    }
+ 06F0                 L90:
+ 06F0                 kernel.529::	
+                       ; 
+                       ;    // there is at least one message, get one
+                       ;    if (msg_p==current_tcb_p->mailbox_tail) {
+ 06F0 FC0006            ldd _current_tcb_p
+ 06F3 C30010            addd #16
+ 06F6 188F              xgdy
+ 06F8 EC02              ldd 2,x
+ 06FA CDA300            cpd 0,y
+ 06FD 261E              bne L92
+ 06FF                 kernel.531::	
+                       ;       // there is only one item in the list, take it
+                       ;       current_tcb_p->mailbox_head=NULL;
+ 06FF FC0006            ldd _current_tcb_p
+ 0702 C3000E            addd #14
+ 0705 188F              xgdy
+ 0707 CC0000            ldd #0
+ 070A 18ED00            std 0,y
+ 070D                 kernel.532::	
+                       ;       current_tcb_p->mailbox_tail=NULL;
+ 070D FC0006            ldd _current_tcb_p
+ 0710 C30010            addd #16
+ 0713 188F              xgdy
+ 0715 CC0000            ldd #0
+ 0718 18ED00            std 0,y
+ 071B                 kernel.533::	
+                       ;    } else {
+ 071B 2019              bra L93
+ 071D                 L92:
+ 071D                 kernel.535::	
+                       ;       // there are many messages, take first
+                       ;       current_tcb_p->mailbox_head=msg_p->next;
+ 071D EC02              ldd 2,x
+ 071F C3000E            addd #14
+ 0722 188F              xgdy
+ 0724 18EC00            ldd 0,y
+ 0727 37                pshb ; 
+ 0728 36                psha ; spill
+ 0729 FC0006            ldd _current_tcb_p
+ 072C C3000E            addd #14
+ 072F 188F              xgdy
+ 0731 32                pula ; 
+ 0732 33                pulb ; reload
+ 0733 18ED00            std 0,y
+ 0736                 kernel.536::	
+                       ;    }
+ 0736                 L93:
+ 0736                 kernel.539::	
+                       ; 
+                       ;    // record the message id before we can get interrupted
+                       ;    if(payload_p!=NULL) *payload_p=msg_p->payload;
+ 0736 EC06              ldd 6,x
+ 0738 2712              beq L94
+ 073A EC02              ldd 2,x
+ 073C C3000A            addd #10
+ 073F 188F              xgdy
+ 0741 EC06              ldd 6,x
+ 0743 3C                pshx
+ 0744 8F                xgdx
+ 0745 CC0004            ldd #4
+ 0748 BD0000            jsr __asgnblk
+ 074B 38                pulx
+ 074C                 L94:
+ 074C                 kernel.542::	
+                       ; 
+                       ;    // return the message to the free list
+                       ;    msg_p->next=free_mail_p;
+ 074C EC02              ldd 2,x
+ 074E C3000E            addd #14
+ 0751 188F              xgdy
+ 0753 FC000E            ldd _free_mail_p
+ 0756 18ED00            std 0,y
+ 0759                 kernel.543::	
+                       ;    free_mail_p=msg_p;
+ 0759 EC02              ldd 2,x
+ 075B FD000E            std _free_mail_p
+ 075E 0E                    cli
+ 075F                 kernel.549::	
+                       ; 
+                       ;    // done messing with mail lists... interrupts back on
+                       ;    INTR_ON();
+                       ; 
+                       ;    // return the number of messages retrieved
+                       ;    return 1;
+ 075F CC0001            ldd #1
+ 0762 8F                xgdx
+ 0763 C30004            addd #4
+ 0766 8F                xgdx
+ 0767 35                txs
+ 0768 38                pulx
+ 0769 1838              puly
+ 076B 39                rts
+ 076C                 L85:
+ 076C 8F                xgdx
+ 076D C30004            addd #4
+ 0770 8F                xgdx
+ 0771 35                txs
+ 0772 38                pulx
+ 0773 1838              puly
+ 0775 39                rts
+                       ;  IX -> 0,x
+                       ;  func temp: 2,x - 4,x
+                       ;          ?temp -> 4,x
+                       ;          ?temp -> 8,x
+                       ;          count -> 13,x
+                       ;          msg_p -> 14,x
+                       ;          tcb_p -> 16,x
+ 0776                 _deliver_mail::
+ 0776 BD0000            jsr __enterb
+ 0779 12                .byte 0x12
+ 077A                 kernel.555::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ BYTE deliver_mail(void) {
+                       ;    BYTE count=0;
+ 077A 6F0D              clr 13,x
+ 077C 7E080E            jmp L98
+ 077F                 L97:
+ 077F                 kernel.560::	
+                       ;    PRESTO_MESSAGE_T * msg_p;
+                       ;    PRESTO_TCB_T * tcb_p;
+                       ;    while((po_mail_p!=NULL)&&(clock_compare(po_mail_p->delivery_time,presto_master_clock)<=0)) {
+                       ;       // we're going to use this a lot, so de-reference once
+                       ;       tcb_p=po_mail_p->to_tcb_p;
+ 077F FC0010            ldd _po_mail_p
+ 0782 C30004            addd #4
+ 0785 188F              xgdy
+ 0787 18EC00            ldd 0,y
+ 078A ED10              std 16,x
+ 078C                 kernel.561::	
+                       ;       if(tcb_p==NULL) presto_fatal_error();
+ 078C EC10              ldd 16,x
+ 078E 2603              bne L100
+ 0790 BD0000            jsr _presto_fatal_error
+ 0793                 L100:
+ 0793                 kernel.564::	
+                       ; 
+                       ;       // make receiver task ready
+                       ;       tcb_p->state=STATE_READY;
+ 0793 EC10              ldd 16,x
+ 0795 C3000A            addd #10
+ 0798 188F              xgdy
+ 079A CC0000            ldd #0
+ 079D 18ED00            std 0,y
+ 07A0                 kernel.567::	
+                       ; 
+                       ;       // remove message from PO list
+                       ;       msg_p=po_mail_p;
+ 07A0 FC0010            ldd _po_mail_p
+ 07A3 ED0E              std 14,x
+ 07A5                 kernel.568::	
+                       ;       po_mail_p=po_mail_p->next;
+ 07A5 FC0010            ldd _po_mail_p
+ 07A8 C3000E            addd #14
+ 07AB 188F              xgdy
+ 07AD 18EC00            ldd 0,y
+ 07B0 FD0010            std _po_mail_p
+ 07B3                 kernel.571::	
+                       ; 
+                       ;       // move the message to the task's mail list
+                       ;       if(tcb_p->mailbox_head==NULL) {
+ 07B3 EC10              ldd 16,x
+ 07B5 C3000E            addd #14
+ 07B8 188F              xgdy
+ 07BA 18EC00            ldd 0,y
+ 07BD 261A              bne L102
+ 07BF                 kernel.574::	
+                       ; 
+                       ;          // we are the only message in the list
+                       ;          tcb_p->mailbox_head=msg_p;
+ 07BF EC10              ldd 16,x
+ 07C1 C3000E            addd #14
+ 07C4 188F              xgdy
+ 07C6 EC0E              ldd 14,x
+ 07C8 18ED00            std 0,y
+ 07CB                 kernel.575::	
+                       ;          tcb_p->mailbox_tail=msg_p;
+ 07CB EC10              ldd 16,x
+ 07CD C30010            addd #16
+ 07D0 188F              xgdy
+ 07D2 EC0E              ldd 14,x
+ 07D4 18ED00            std 0,y
+ 07D7                 kernel.577::	
+                       ; 
+                       ;       } else {
+ 07D7 2020              bra L103
+ 07D9                 L102:
+ 07D9                 kernel.580::	
+                       ; 
+                       ;          // we are one of many, add to the tail of the list
+                       ;          tcb_p->mailbox_tail->next=msg_p;
+ 07D9 EC10              ldd 16,x
+ 07DB C30010            addd #16
+ 07DE 188F              xgdy
+ 07E0 18EC00            ldd 0,y
+ 07E3 C3000E            addd #14
+ 07E6 188F              xgdy
+ 07E8 EC0E              ldd 14,x
+ 07EA 18ED00            std 0,y
+ 07ED                 kernel.581::	
+                       ;          tcb_p->mailbox_tail=msg_p;
+ 07ED EC10              ldd 16,x
+ 07EF C30010            addd #16
+ 07F2 188F              xgdy
+ 07F4 EC0E              ldd 14,x
+ 07F6 18ED00            std 0,y
+ 07F9                 kernel.583::	
+                       ; 
+                       ;       }
+ 07F9                 L103:
+ 07F9                 kernel.585::	
+                       ;       // no matter what, we are the last in the task's message list
+                       ;       msg_p->next=NULL;
+ 07F9 EC0E              ldd 14,x
+ 07FB C3000E            addd #14
+ 07FE 188F              xgdy
+ 0800 CC0000            ldd #0
+ 0803 18ED00            std 0,y
+ 0806                 kernel.588::	
+                       ; 
+                       ;       // indicate that we moved one mail message
+                       ;       count++;
+ 0806 E60D              ldab 13,x
+ 0808 4F                clra
+ 0809 C30001            addd #1
+ 080C E70D              stab 13,x
+ 080E                 kernel.589::	
+                       ;    }
+ 080E                 L98:
+ 080E FC0010            ldd _po_mail_p
+ 0811 2746              beq L104
+ 0813 EC00              ldd 0,x
+ 0815 C30008            addd #8
+ 0818 18CE0175          ldy #_presto_master_clock
+ 081C 3C                pshx
+ 081D 8F                xgdx
+ 081E CC0004            ldd #4
+ 0821 BD0000            jsr __asgnblk
+ 0824 38                pulx
+ 0825 EC00              ldd 0,x
+ 0827 C30008            addd #8
+ 082A 37                pshb
+ 082B 36                psha
+ 082C EC00              ldd 0,x
+ 082E C30004            addd #4
+ 0831 37                pshb ; 
+ 0832 36                psha ; spill
+ 0833 FC0010            ldd _po_mail_p
+ 0836 C30006            addd #6
+ 0839 188F              xgdy
+ 083B 32                pula ; 
+ 083C 33                pulb ; reload
+ 083D 3C                pshx
+ 083E 8F                xgdx
+ 083F CC0004            ldd #4
+ 0842 BD0000            jsr __asgnblk
+ 0845 38                pulx
+ 0846 EC00              ldd 0,x
+ 0848 C30004            addd #4
+ 084B BD0000            jsr _clock_compare
+ 084E 1838              puly
+ 0850 ED02              std 2,x
+ 0852 6D03              tst 3,x
+ 0854 2E03              bgt X5
+ 0856 7E077F            jmp L97
+ 0859                 X5:
+ 0859                 L104:
+ 0859                 kernel.590::	
+                       ;    return count;
+ 0859 E60D              ldab 13,x
+ 085B 4F                clra
+ 085C 8F                xgdx
+ 085D C30012            addd #18
+ 0860 8F                xgdx
+ 0861 35                txs
+ 0862 38                pulx
+ 0863 39                rts
+ 0864                 L96:
+ 0864 8F                xgdx
+ 0865 C30012            addd #18
+ 0868 8F                xgdx
+ 0869 35                txs
+ 086A 38                pulx
+ 086B 39                rts
+                       ;  IX -> 0,x
+ 086C                 _idle_task::
+ 086C                 kernel.597::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   I D L E   T A S K
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ void idle_task(void) {
+ 086C                 L106:
+ 086C                 kernel.600::	
+                       ;    while(1) {
+                       ;       // do nothing
+                       ;    }
+ 086C                 L107:
+ 086C 20FE              bra L106
+ 086E                 L105:
+ 086E 39                rts
+                       ;  IX -> 0,x
+                       ;            tid -> 5,x
+ 086F                 _tid_to_tcbptr::
+ 086F 37                pshb
+ 0870 36                psha
+ 0871 3C                pshx
+ 0872 30                tsx
+ 0873 3C                pshx
+ 0874 30                tsx
+ 0875 EC04              ldd 4,x
+ 0877 E705              stab 5,x
+ 0879                 kernel.608::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   U T I L I T I E S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ PRESTO_TCB_T * tid_to_tcbptr(BYTE tid) {
+                       ;    if(tid>=MAX_TASKS) presto_fatal_error();
+ 0879 E605              ldab 5,x
+ 087B C106              cmpb #6
+ 087D 2503              blo L110
+ 087F BD0000            jsr _presto_fatal_error
+ 0882                 L110:
+ 0882                 kernel.609::	
+                       ;    if(tcb_list[tid].state==STATE_INACTIVE) return NULL;
+ 0882 E605              ldab 5,x
+ 0884 4F                clra
+ 0885 188F              xgdy
+ 0887 CC0012            ldd #18
+ 088A BD0000            jsr __muli
+ 088D C30183            addd #_tcb_list+10
+ 0890 188F              xgdy
+ 0892 18EC00            ldd 0,y
+ 0895 1A830002          cpd #2
+ 0899 260D              bne L112
+ 089B CC0000            ldd #0
+ 089E 8F                xgdx
+ 089F C30002            addd #2
+ 08A2 8F                xgdx
+ 08A3 35                txs
+ 08A4 38                pulx
+ 08A5 1838              puly
+ 08A7 39                rts
+ 08A8                 L112:
+ 08A8                 kernel.610::	
+                       ;    return &tcb_list[tid];
+ 08A8 E605              ldab 5,x
+ 08AA 4F                clra
+ 08AB 188F              xgdy
+ 08AD CC0012            ldd #18
+ 08B0 BD0000            jsr __muli
+ 08B3 C30179            addd #_tcb_list
+ 08B6 8F                xgdx
+ 08B7 C30002            addd #2
+ 08BA 8F                xgdx
+ 08BB 35                txs
+ 08BC 38                pulx
+ 08BD 1838              puly
+ 08BF 39                rts
+ 08C0                 L109:
+ 08C0 8F                xgdx
+ 08C1 C30002            addd #2
+ 08C4 8F                xgdx
+ 08C5 35                txs
+ 08C6 38                pulx
+ 08C7 1838              puly
+ 08C9 39                rts
+                       ;  IX -> 0,x
+                       ;  rMEM -> 2,x
+ 08CA                 _presto_start_master_timer::
+ 08CA BD0000            jsr __enterb
+ 08CD 04                .byte 0x4
+ 08CE                 kernel.619::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   H A R D W A R E   T I M E R / C O U N T E R
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ void presto_start_master_timer(void) {
+                       ;    // store (current plus CYCLES_PER_TICK)
+                       ;    TOC2 = TCNT + CYCLES_PER_TICK;
+ 08CE CC07D0            ldd #2000
+ 08D1 18CE0064          ldy #100
+ 08D5 BD0000            jsr __muli
+ 08D8 ED02              std 2,x
+ 08DA FC100E            ldd 0x100e ; vol
+ 08DD E302              addd 2,x
+ 08DF FD1018            std 0x1018
+ 08E2                 kernel.621::	
+                       ;    // request output compare interrupt
+                       ;    TMSK1 |= TMSK1_OC2I;
+ 08E2 18CE1022          ldy #0x1022
+ 08E6 181C0040          bset 0,y,#64
+ 08EA                 kernel.624::	
+                       ;    // clear the OUTPUT COMPARE flag
+                       ;    // writing O's makes no change, writing 1's clears the bit
+                       ;    TFLG1 = TFLG1_OC2F;
+ 08EA C640              ldab #64
+ 08EC F71023            stab 0x1023
+ 08EF                 kernel.626::	
+                       ;    // counter disconnected from output pin logic
+                       ;    TCTL1 &= ~(TCTL1_OM2|TCTL1_OL2);
+ 08EF 18CE1020          ldy #0x1020
+ 08F3 181D00C0          bclr 0,y,~#-193
+ 08F7                 kernel.627::	
+                       ; }
+ 08F7                 L115:
+ 08F7 8F                xgdx
+ 08F8 C30004            addd #4
+ 08FB 8F                xgdx
+ 08FC 35                txs
+ 08FD 38                pulx
+ 08FE 39                rts
+                       ;  IX -> 0,x
+                       ;  rMEM -> 2,x
+ 08FF                 _presto_restart_master_timer::
+ 08FF BD0000            jsr __enterb
+ 0902 04                .byte 0x4
+ 0903                 kernel.633::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ void presto_restart_master_timer(void) {
+                       ;    // store (last plus CYCLES_PER_TICK)
+                       ;    TOC2 = TOC2 + CYCLES_PER_TICK;
+ 0903 CC07D0            ldd #2000
+ 0906 18CE0064          ldy #100
+ 090A BD0000            jsr __muli
+ 090D ED02              std 2,x
+ 090F FC1018            ldd 0x1018 ; vol
+ 0912 E302              addd 2,x
+ 0914 FD1018            std 0x1018
+ 0917                 kernel.636::	
+                       ;    // clear the OUTPUT COMPARE flag
+                       ;    // writing O's makes no change, writing 1's clears the bit
+                       ;    TFLG1 = TFLG1_OC2F;
+ 0917 C640              ldab #64
+ 0919 F71023            stab 0x1023
+ 091C                 kernel.637::	
+                       ; }
+ 091C                 L116:
+ 091C 8F                xgdx
+ 091D C30004            addd #4
+ 0920 8F                xgdx
+ 0921 35                txs
+ 0922 38                pulx
+ 0923 39                rts
+                         .area bss
+ 0000                 _mail_list::
+ 0000                   .blkb 320
+ 0140                 _idle_tid::
+ 0140                   .blkb 1
+ 0141                 _idle_tcb_p::
+ 0141                   .blkb 2
+ 0143                 _idle_stack::
+ 0143                   .blkb 50
+ 0175                 _presto_master_clock::
+ 0175                   .blkb 4
+ 0179                 _tcb_list::
+ 0179                   .blkb 108
+ 01E5                 _global_save_sp::
+ 01E5                   .blkb 2

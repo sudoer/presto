@@ -1,0 +1,3466 @@
+                         .area data
+ 8000                  _one_tid::
+ 8000                    .blkb 1
+                         .area idata
+--- 0000 00                .byte 0
+                         .area data
+ 8001                  _two_tid::
+ 8001                    .blkb 1
+                         .area idata
+--- 0001 00                .byte 0
+                         .area data
+ 8002                  _three_tid::
+ 8002                    .blkb 1
+                         .area idata
+--- 0002 00                .byte 0
+                         .area data
+ 8003                  _four_tid::
+ 8003                    .blkb 1
+                         .area idata
+--- 0003 00                .byte 0
+                         .area data
+ 8004                  _light1::
+ 8004                    .blkb 1
+                         .area idata
+--- 0004 00                .byte 0
+                         .area data
+ 8005                  _light2::
+ 8005                    .blkb 1
+                         .area idata
+--- 0005 00                .byte 0
+                         .area data
+ 8006                  _light3::
+ 8006                    .blkb 1
+                         .area idata
+--- 0006 00                .byte 0
+                         .area data
+ 8007                  _light4::
+ 8007                    .blkb 1
+                         .area idata
+--- 0007 00                .byte 0
+                         .area text
+                       ;  IX -> 0,x
+                       ;  rMEM -> 2,x
+                       ;         lights -> 5,x
+ C040                  _assert_lights::
+ C040  BDCE7D            jsr __enterb
+ C043  06                .byte 0x6
+ C044                  test.40::	
+                       ; 
+                       ; #include "presto.h"
+                       ; #include "types.h"
+                       ; //#include "services.h"
+                       ; //#include "priority.h"
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // system crashes after 21 seconds (42*500=21000,35*600=21000,30*700=21000)
+                       ; #define TIMER1    5000
+                       ; #define TIMER2    600
+                       ; #define TIMER3    1000
+                       ; #define TIMER4    1200
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #define STACK_SIZE 100
+                       ; 
+                       ; /*static*/ BYTE task_one_stack[STACK_SIZE];
+                       ; /*static*/ BYTE task_two_stack[STACK_SIZE];
+                       ; /*static*/ BYTE task_three_stack[STACK_SIZE];
+                       ; /*static*/ BYTE task_four_stack[STACK_SIZE];
+                       ; 
+                       ; PRESTO_TID_T one_tid=0;
+                       ; PRESTO_TID_T two_tid=0;
+                       ; PRESTO_TID_T three_tid=0;
+                       ; PRESTO_TID_T four_tid=0;
+                       ; 
+                       ; BYTE light1=0x00;
+                       ; BYTE light2=0x00;
+                       ; BYTE light3=0x00;
+                       ; BYTE light4=0x00;
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #define MOTOR_PORT *(unsigned char *)(0x7FFF)
+                       ; 
+                       ; void assert_lights(void) {
+                       ;    BYTE lights;
+                       ;    lights=0xF0|light1|light2|light3|light4;
+ C044  F68004            ldab _light1
+ C047  4F                clra
+ C048  8A00              oraa #0
+ C04A  CAF0              orab #240
+ C04C  37                pshb ; 
+ C04D  36                psha ; spill
+ C04E  F68005            ldab _light2
+ C051  4F                clra
+ C052  ED02              std 2,x
+ C054  32                pula ; 
+ C055  33                pulb ; reload
+ C056  AA02              oraa 2,x
+ C058  EA03              orab 3,x
+ C05A  37                pshb ; 
+ C05B  36                psha ; spill
+ C05C  F68006            ldab _light3
+ C05F  4F                clra
+ C060  ED02              std 2,x
+ C062  32                pula ; 
+ C063  33                pulb ; reload
+ C064  AA02              oraa 2,x
+ C066  EA03              orab 3,x
+ C068  37                pshb ; 
+ C069  36                psha ; spill
+ C06A  F68007            ldab _light4
+ C06D  4F                clra
+ C06E  ED02              std 2,x
+ C070  32                pula ; 
+ C071  33                pulb ; reload
+ C072  AA02              oraa 2,x
+ C074  EA03              orab 3,x
+ C076  E705              stab 5,x
+ C078                  test.41::	
+                       ;    MOTOR_PORT=lights;
+ C078  E605              ldab 5,x
+ C07A  F77FFF            stab 0x7fff
+ C07D                  test.42::	
+                       ; }
+ C07D                  L10:
+ C07D  8F                xgdx
+ C07E  C30006            addd #6
+ C081  8F                xgdx
+ C082  35                txs
+ C083  38                pulx
+ C084  39                rts
+                       ;  lreg1 -> -4,x
+                       ;  lreg2 -> -8,x
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;            msg -> 6,x
+ C085                  _One::
+ C085  BDCE7D            jsr __enterb
+ C088  8A                .byte 0x8a
+ C089                  test.48::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void One(void) {
+                       ;    PRESTO_MAIL_T msg;
+                       ;    msg.dw.dw1=0;
+ C089  18CEC29F          ldy #L12
+ C08D  BDCF83            jsr __ly2reg
+ C090  EC00              ldd 0,x
+ C092  C30006            addd #6
+ C095  188F              xgdy
+ C097  BDCFC0            jsr __lreg2y
+ C09A  2046              bra L14
+ C09C                  L13:
+ C09C                  test.50::	
+                       ;    while(1) {
+                       ;       light1=light1^0x01;
+ C09C  F68004            ldab _light1
+ C09F  4F                clra
+ C0A0  8800              eora #0
+ C0A2  C801              eorb #1
+ C0A4  F78004            stab _light1
+ C0A7                  test.51::	
+                       ;       assert_lights();
+ C0A7  BDC040            jsr _assert_lights
+ C0AA                  test.52::	
+                       ;       presto_timer(one_tid,TIMER1,msg);
+ C0AA  EC00              ldd 0,x
+ C0AC  C30006            addd #6
+ C0AF  188F              xgdy
+ C0B1  EC00              ldd 0,x
+ C0B3  C30002            addd #2
+ C0B6  3C                pshx
+ C0B7  8F                xgdx
+ C0B8  CC0004            ldd #4
+ C0BB  BDCF26            jsr __asgnblk
+ C0BE  38                pulx
+ C0BF  EC00              ldd 0,x
+ C0C1  C30002            addd #2
+ C0C4  37                pshb
+ C0C5  36                psha
+ C0C6  CC1388            ldd #5000
+ C0C9  37                pshb
+ C0CA  36                psha
+ C0CB  F68000            ldab _one_tid
+ C0CE  4F                clra
+ C0CF  5D                tstb
+ C0D0  2A01              bpl X0
+ C0D2  43                coma
+ C0D3                  X0:
+ C0D3  BDC9D7            jsr _presto_timer
+ C0D6  1838              puly
+ C0D8  1838              puly
+ C0DA                  test.53::	
+                       ;       presto_wait_for_message(&msg);
+ C0DA  EC00              ldd 0,x
+ C0DC  C30006            addd #6
+ C0DF  BDCBA1            jsr _presto_wait_for_message
+ C0E2                  test.54::	
+                       ;    }
+ C0E2                  L14:
+ C0E2  20B8              bra L13
+ C0E4                  L11:
+ C0E4  8F                xgdx
+ C0E5  C3000A            addd #10
+ C0E8  8F                xgdx
+ C0E9  35                txs
+ C0EA  38                pulx
+ C0EB  39                rts
+                       ;  lreg1 -> -4,x
+                       ;  lreg2 -> -8,x
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;            msg -> 6,x
+ C0EC                  _Two::
+ C0EC  BDCE7D            jsr __enterb
+ C0EF  8A                .byte 0x8a
+ C0F0                  test.61::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void Two(void) {
+                       ;    PRESTO_MAIL_T msg;
+                       ;    msg.dw.dw1=0;
+ C0F0  18CEC29F          ldy #L12
+ C0F4  BDCF83            jsr __ly2reg
+ C0F7  EC00              ldd 0,x
+ C0F9  C30006            addd #6
+ C0FC  188F              xgdy
+ C0FE  BDCFC0            jsr __lreg2y
+ C101  2046              bra L18
+ C103                  L17:
+ C103                  test.63::	
+                       ;    while(1) {
+                       ;       light2=light2^0x02;
+ C103  F68005            ldab _light2
+ C106  4F                clra
+ C107  8800              eora #0
+ C109  C802              eorb #2
+ C10B  F78005            stab _light2
+ C10E                  test.64::	
+                       ;       assert_lights();
+ C10E  BDC040            jsr _assert_lights
+ C111                  test.65::	
+                       ;       presto_timer(two_tid,TIMER2,msg);
+ C111  EC00              ldd 0,x
+ C113  C30006            addd #6
+ C116  188F              xgdy
+ C118  EC00              ldd 0,x
+ C11A  C30002            addd #2
+ C11D  3C                pshx
+ C11E  8F                xgdx
+ C11F  CC0004            ldd #4
+ C122  BDCF26            jsr __asgnblk
+ C125  38                pulx
+ C126  EC00              ldd 0,x
+ C128  C30002            addd #2
+ C12B  37                pshb
+ C12C  36                psha
+ C12D  CC0258            ldd #600
+ C130  37                pshb
+ C131  36                psha
+ C132  F68001            ldab _two_tid
+ C135  4F                clra
+ C136  5D                tstb
+ C137  2A01              bpl X1
+ C139  43                coma
+ C13A                  X1:
+ C13A  BDC9D7            jsr _presto_timer
+ C13D  1838              puly
+ C13F  1838              puly
+ C141                  test.66::	
+                       ;       presto_wait_for_message(&msg);
+ C141  EC00              ldd 0,x
+ C143  C30006            addd #6
+ C146  BDCBA1            jsr _presto_wait_for_message
+ C149                  test.67::	
+                       ;    }
+ C149                  L18:
+ C149  20B8              bra L17
+ C14B                  L16:
+ C14B  8F                xgdx
+ C14C  C3000A            addd #10
+ C14F  8F                xgdx
+ C150  35                txs
+ C151  38                pulx
+ C152  39                rts
+                       ;  lreg1 -> -4,x
+                       ;  lreg2 -> -8,x
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;            msg -> 6,x
+ C153                  _Three::
+ C153  BDCE7D            jsr __enterb
+ C156  8A                .byte 0x8a
+ C157                  test.74::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void Three(void) {
+                       ;    PRESTO_MAIL_T msg;
+                       ;    msg.dw.dw1=0;
+ C157  18CEC29F          ldy #L12
+ C15B  BDCF83            jsr __ly2reg
+ C15E  EC00              ldd 0,x
+ C160  C30006            addd #6
+ C163  188F              xgdy
+ C165  BDCFC0            jsr __lreg2y
+ C168  2046              bra L22
+ C16A                  L21:
+ C16A                  test.76::	
+                       ;    while(1) {
+                       ;       light3=light3^0x04;
+ C16A  F68006            ldab _light3
+ C16D  4F                clra
+ C16E  8800              eora #0
+ C170  C804              eorb #4
+ C172  F78006            stab _light3
+ C175                  test.77::	
+                       ;       assert_lights();
+ C175  BDC040            jsr _assert_lights
+ C178                  test.78::	
+                       ;       presto_timer(three_tid,TIMER3,msg);
+ C178  EC00              ldd 0,x
+ C17A  C30006            addd #6
+ C17D  188F              xgdy
+ C17F  EC00              ldd 0,x
+ C181  C30002            addd #2
+ C184  3C                pshx
+ C185  8F                xgdx
+ C186  CC0004            ldd #4
+ C189  BDCF26            jsr __asgnblk
+ C18C  38                pulx
+ C18D  EC00              ldd 0,x
+ C18F  C30002            addd #2
+ C192  37                pshb
+ C193  36                psha
+ C194  CC03E8            ldd #1000
+ C197  37                pshb
+ C198  36                psha
+ C199  F68002            ldab _three_tid
+ C19C  4F                clra
+ C19D  5D                tstb
+ C19E  2A01              bpl X2
+ C1A0  43                coma
+ C1A1                  X2:
+ C1A1  BDC9D7            jsr _presto_timer
+ C1A4  1838              puly
+ C1A6  1838              puly
+ C1A8                  test.79::	
+                       ;       presto_wait_for_message(&msg);
+ C1A8  EC00              ldd 0,x
+ C1AA  C30006            addd #6
+ C1AD  BDCBA1            jsr _presto_wait_for_message
+ C1B0                  test.80::	
+                       ;    }
+ C1B0                  L22:
+ C1B0  20B8              bra L21
+ C1B2                  L20:
+ C1B2  8F                xgdx
+ C1B3  C3000A            addd #10
+ C1B6  8F                xgdx
+ C1B7  35                txs
+ C1B8  38                pulx
+ C1B9  39                rts
+                       ;  lreg1 -> -4,x
+                       ;  lreg2 -> -8,x
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;            msg -> 6,x
+ C1BA                  _Four::
+ C1BA  BDCE7D            jsr __enterb
+ C1BD  8A                .byte 0x8a
+ C1BE                  test.87::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void Four(void) {
+                       ;    PRESTO_MAIL_T msg;
+                       ;    msg.dw.dw1=0;
+ C1BE  18CEC29F          ldy #L12
+ C1C2  BDCF83            jsr __ly2reg
+ C1C5  EC00              ldd 0,x
+ C1C7  C30006            addd #6
+ C1CA  188F              xgdy
+ C1CC  BDCFC0            jsr __lreg2y
+ C1CF  2046              bra L26
+ C1D1                  L25:
+ C1D1                  test.89::	
+                       ;    while(1) {
+                       ;       light4=light4^0x08;
+ C1D1  F68007            ldab _light4
+ C1D4  4F                clra
+ C1D5  8800              eora #0
+ C1D7  C808              eorb #8
+ C1D9  F78007            stab _light4
+ C1DC                  test.90::	
+                       ;       assert_lights();
+ C1DC  BDC040            jsr _assert_lights
+ C1DF                  test.91::	
+                       ;       presto_timer(four_tid,TIMER4,msg);
+ C1DF  EC00              ldd 0,x
+ C1E1  C30006            addd #6
+ C1E4  188F              xgdy
+ C1E6  EC00              ldd 0,x
+ C1E8  C30002            addd #2
+ C1EB  3C                pshx
+ C1EC  8F                xgdx
+ C1ED  CC0004            ldd #4
+ C1F0  BDCF26            jsr __asgnblk
+ C1F3  38                pulx
+ C1F4  EC00              ldd 0,x
+ C1F6  C30002            addd #2
+ C1F9  37                pshb
+ C1FA  36                psha
+ C1FB  CC04B0            ldd #1200
+ C1FE  37                pshb
+ C1FF  36                psha
+ C200  F68003            ldab _four_tid
+ C203  4F                clra
+ C204  5D                tstb
+ C205  2A01              bpl X3
+ C207  43                coma
+ C208                  X3:
+ C208  BDC9D7            jsr _presto_timer
+ C20B  1838              puly
+ C20D  1838              puly
+ C20F                  test.92::	
+                       ;       presto_wait_for_message(&msg);
+ C20F  EC00              ldd 0,x
+ C211  C30006            addd #6
+ C214  BDCBA1            jsr _presto_wait_for_message
+ C217                  test.93::	
+                       ;    }
+ C217                  L26:
+ C217  20B8              bra L25
+ C219                  L24:
+ C219  8F                xgdx
+ C21A  C3000A            addd #10
+ C21D  8F                xgdx
+ C21E  35                txs
+ C21F  38                pulx
+ C220  39                rts
+                       ;  IX -> 0,x
+ C221                  _main::
+ C221                  test.100::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; int main(void) {
+                       ; 
+                       ;    presto_init();
+ C221  BDC4FA            jsr _presto_init
+ C224                  test.102::	
+                       ; #if TIMER1 != 0
+                       ;    one_tid=presto_create_task(One, task_one_stack, STACK_SIZE, 35);
+ C224  CC0023            ldd #35
+ C227  37                pshb
+ C228  36                psha
+ C229  CC0064            ldd #100
+ C22C  37                pshb
+ C22D  36                psha
+ C22E  CC992C            ldd #_task_one_stack
+ C231  37                pshb
+ C232  36                psha
+ C233  CCC085            ldd #_One
+ C236  BDC64E            jsr _presto_create_task
+ C239  BDCEC6            jsr __movspb
+ C23C  06                .byte 6
+ C23D  F78000            stab _one_tid
+ C240                  test.105::	
+                       ; #endif
+                       ; #if TIMER2 != 0
+                       ;    two_tid=presto_create_task(Two, task_two_stack, STACK_SIZE, 40);
+ C240  CC0028            ldd #40
+ C243  37                pshb
+ C244  36                psha
+ C245  CC0064            ldd #100
+ C248  37                pshb
+ C249  36                psha
+ C24A  CC98C8            ldd #_task_two_stack
+ C24D  37                pshb
+ C24E  36                psha
+ C24F  CCC0EC            ldd #_Two
+ C252  BDC64E            jsr _presto_create_task
+ C255  BDCEC6            jsr __movspb
+ C258  06                .byte 6
+ C259  F78001            stab _two_tid
+ C25C                  test.108::	
+                       ; #endif
+                       ; #if TIMER3 != 0
+                       ;    three_tid=presto_create_task(Three, task_three_stack, STACK_SIZE, 45);
+ C25C  CC002D            ldd #45
+ C25F  37                pshb
+ C260  36                psha
+ C261  CC0064            ldd #100
+ C264  37                pshb
+ C265  36                psha
+ C266  CC9864            ldd #_task_three_stack
+ C269  37                pshb
+ C26A  36                psha
+ C26B  CCC153            ldd #_Three
+ C26E  BDC64E            jsr _presto_create_task
+ C271  BDCEC6            jsr __movspb
+ C274  06                .byte 6
+ C275  F78002            stab _three_tid
+ C278                  test.111::	
+                       ; #endif
+                       ; #if TIMER4 != 0
+                       ;    four_tid=presto_create_task(Four, task_four_stack, STACK_SIZE, 50);
+ C278  CC0032            ldd #50
+ C27B  37                pshb
+ C27C  36                psha
+ C27D  CC0064            ldd #100
+ C280  37                pshb
+ C281  36                psha
+ C282  CC9800            ldd #_task_four_stack
+ C285  37                pshb
+ C286  36                psha
+ C287  CCC1BA            ldd #_Four
+ C28A  BDC64E            jsr _presto_create_task
+ C28D  BDCEC6            jsr __movspb
+ C290  06                .byte 6
+ C291  F78003            stab _four_tid
+ C294                  test.118::	
+                       ; #endif
+                       ; 
+                       ;    //motor_init();
+                       ;    //lcd_init();
+                       ;    //serial_init(9600);
+                       ;    //debugger_init();
+                       ;    presto_start_scheduler();
+ C294  BDC5F6            jsr _presto_start_scheduler
+ C297                  test.120::	
+                       ;    // we never get here
+                       ;    presto_fatal_error();
+ C297  BDC4B4            jsr _presto_fatal_error
+ C29A                  test.121::	
+                       ;    return 0;
+ C29A  CC0000            ldd #0
+ C29D  39                rts
+ C29E                  L28:
+ C29E  39                rts
+                         .area bss
+ 9800                  _task_four_stack::
+ 9800                    .blkb 100
+ 9864                  _task_three_stack::
+ 9864                    .blkb 100
+ 98C8                  _task_two_stack::
+ 98C8                    .blkb 100
+ 992C                  _task_one_stack::
+ 992C                    .blkb 100
+                         .area text
+--- 025F                 L12:
+--- 025F 00000000          .word 0,0
+                         .area text
+                       ;  IX -> 0,x
+                       ;          clock -> 2,x
+                       ;          ?temp -> 8,x
+ C2A3                  _clock_reset::
+ C2A3  BDCE7D            jsr __enterb
+ C2A6  46                .byte 0x46
+ C2A7                  clock.9::	
+                       ; 
+                       ; #include "clock.h"
+                       ; #include "types.h"
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; PRESTO_TIME_T clock_reset(void) {
+                       ;    PRESTO_TIME_T clock;
+                       ;    clock.l=0;
+ C2A7  CC0000            ldd #0
+ C2AA  ED04              std 4,x
+ C2AC                  clock.10::	
+                       ;    clock.h=0;
+ C2AC  CC0000            ldd #0
+ C2AF  ED02              std 2,x
+ C2B1                  clock.11::	
+                       ;    return clock;
+ C2B1  EC00              ldd 0,x
+ C2B3  C30002            addd #2
+ C2B6  188F              xgdy
+ C2B8  EC08              ldd 8,x
+ C2BA  3C                pshx
+ C2BB  8F                xgdx
+ C2BC  CC0004            ldd #4
+ C2BF  BDCF26            jsr __asgnblk
+ C2C2  38                pulx
+ C2C3                  L5:
+ C2C3  8F                xgdx
+ C2C4  C30006            addd #6
+ C2C7  8F                xgdx
+ C2C8  35                txs
+ C2C9  38                pulx
+ C2CA  1838              puly
+ C2CC  39                rts
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;           time -> 12,x
+                       ;          clock -> 10,x
+                       ;          ?temp -> 6,x
+ C2CD                  _clock_add::
+ C2CD  BDCE7D            jsr __enterb
+ C2D0  44                .byte 0x44
+ C2D1                  clock.17::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; PRESTO_TIME_T clock_add(PRESTO_TIME_T clock, unsigned short time) {
+                       ;    clock.l=clock.l+time;
+ C2D1  EC0A              ldd 10,x
+ C2D3  C30002            addd #2
+ C2D6  ED02              std 2,x
+ C2D8  1AEE02            ldy 2,x
+ C2DB  18EC00            ldd 0,y
+ C2DE  E30C              addd 12,x
+ C2E0  1AEE02            ldy 2,x
+ C2E3  18ED00            std 0,y
+ C2E6                  clock.18::	
+                       ;    if(clock.l<time) {
+ C2E6  EC0A              ldd 10,x
+ C2E8  C30002            addd #2
+ C2EB  188F              xgdy
+ C2ED  18EC00            ldd 0,y
+ C2F0  1AA30C            cpd 12,x
+ C2F3  240F              bhs L10
+ C2F5                  clock.20::	
+                       ;       // carry
+                       ;       clock.h++;
+ C2F5  1AEE0A            ldy 10,x
+ C2F8  18EC00            ldd 0,y
+ C2FB  C30001            addd #1
+ C2FE  1AEE0A            ldy 10,x
+ C301  18ED00            std 0,y
+ C304                  clock.21::	
+                       ;    }
+ C304                  L10:
+ C304                  clock.22::	
+                       ;    return clock;
+ C304  EC06              ldd 6,x
+ C306  1AEE0A            ldy 10,x
+ C309  3C                pshx
+ C30A  8F                xgdx
+ C30B  CC0004            ldd #4
+ C30E  BDCF26            jsr __asgnblk
+ C311  38                pulx
+ C312                  L8:
+ C312  8F                xgdx
+ C313  C30004            addd #4
+ C316  8F                xgdx
+ C317  35                txs
+ C318  38                pulx
+ C319  1838              puly
+ C31B  39                rts
+                       ;  IX -> 0,x
+                       ;              B -> 8,x
+                       ;              A -> 4,x
+ C31C                  _clock_compare::
+ C31C  37                pshb
+ C31D  36                psha
+ C31E  3C                pshx
+ C31F  30                tsx
+ C320  3C                pshx
+ C321  30                tsx
+ C322                  clock.28::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; signed char clock_compare(PRESTO_TIME_T A,PRESTO_TIME_T B) {
+                       ;    if(A.h < B.h) return -1;
+ C322  1AEE04            ldy 4,x
+ C325  18EC00            ldd 0,y
+ C328  1AEE08            ldy 8,x
+ C32B  CDA300            cpd 0,y
+ C32E  240D              bhs L13
+ C330  CCFFFF            ldd #-1
+ C333  8F                xgdx
+ C334  C30002            addd #2
+ C337  8F                xgdx
+ C338  35                txs
+ C339  38                pulx
+ C33A  1838              puly
+ C33C  39                rts
+ C33D                  L13:
+ C33D                  clock.29::	
+                       ;    if(A.h > B.h) return 1;
+ C33D  1AEE04            ldy 4,x
+ C340  18EC00            ldd 0,y
+ C343  1AEE08            ldy 8,x
+ C346  CDA300            cpd 0,y
+ C349  230D              bls L15
+ C34B  CC0001            ldd #1
+ C34E  8F                xgdx
+ C34F  C30002            addd #2
+ C352  8F                xgdx
+ C353  35                txs
+ C354  38                pulx
+ C355  1838              puly
+ C357  39                rts
+ C358                  L15:
+ C358                  clock.31::	
+                       ;    // we now know that A.h == B.h
+                       ;    if(A.l < B.l) return -1;
+ C358  EC04              ldd 4,x
+ C35A  C30002            addd #2
+ C35D  188F              xgdy
+ C35F  18EC00            ldd 0,y
+ C362  37                pshb ; 
+ C363  36                psha ; spill
+ C364  EC08              ldd 8,x
+ C366  C30002            addd #2
+ C369  188F              xgdy
+ C36B  32                pula ; 
+ C36C  33                pulb ; reload
+ C36D  CDA300            cpd 0,y
+ C370  240D              bhs L17
+ C372  CCFFFF            ldd #-1
+ C375  8F                xgdx
+ C376  C30002            addd #2
+ C379  8F                xgdx
+ C37A  35                txs
+ C37B  38                pulx
+ C37C  1838              puly
+ C37E  39                rts
+ C37F                  L17:
+ C37F                  clock.32::	
+                       ;    if(A.l > B.l) return 1;
+ C37F  EC04              ldd 4,x
+ C381  C30002            addd #2
+ C384  188F              xgdy
+ C386  18EC00            ldd 0,y
+ C389  37                pshb ; 
+ C38A  36                psha ; spill
+ C38B  EC08              ldd 8,x
+ C38D  C30002            addd #2
+ C390  188F              xgdy
+ C392  32                pula ; 
+ C393  33                pulb ; reload
+ C394  CDA300            cpd 0,y
+ C397  230D              bls L19
+ C399  CC0001            ldd #1
+ C39C  8F                xgdx
+ C39D  C30002            addd #2
+ C3A0  8F                xgdx
+ C3A1  35                txs
+ C3A2  38                pulx
+ C3A3  1838              puly
+ C3A5  39                rts
+ C3A6                  L19:
+ C3A6                  clock.33::	
+                       ;    return 0;
+ C3A6  CC0000            ldd #0
+ C3A9  8F                xgdx
+ C3AA  C30002            addd #2
+ C3AD  8F                xgdx
+ C3AE  35                txs
+ C3AF  38                pulx
+ C3B0  1838              puly
+ C3B2  39                rts
+ C3B3                  L12:
+ C3B3  8F                xgdx
+ C3B4  C30002            addd #2
+ C3B7  8F                xgdx
+ C3B8  35                txs
+ C3B9  38                pulx
+ C3BA  1838              puly
+ C3BC  39                rts
+                         .area memory(abs)
+                         .org 0xffd6
+ FFD6                  _normal_interrupt_vectors::
+ FFD6  C462              .word _inert_sci_isr
+ FFD8  C464              .word _inert_spi_isr
+ FFDA  C466              .word _inert_paie_isr
+ FFDC  C468              .word _inert_pao_isr
+ FFDE  C46A              .word _inert_tof_isr
+ FFE0  C46C              .word _inert_toc5_isr
+ FFE2  C46E              .word _inert_toc4_isr
+ FFE4  C470              .word _inert_toc3_isr
+ FFE6  C472              .word _inert_toc2_isr
+ FFE8  C474              .word _inert_toc1_isr
+ FFEA  C476              .word _inert_tic3_isr
+ FFEC  C478              .word _inert_tic2_isr
+ FFEE  C47A              .word _inert_tic1_isr
+ FFF0  C47C              .word _inert_rti_isr
+ FFF2  C47E              .word _inert_irq_isr
+ FFF4  C480              .word _inert_xirq_isr
+ FFF6  C482              .word _inert_swi_isr
+ FFF8  C484              .word _inert_illop_isr
+ FFFA  C486              .word _inert_cop_isr
+ FFFC  C488              .word _inert_clm_isr
+ FFFE  C48A              .word _inert_reset_isr
+                         .area data
+                         .area text
+                       ;  IX -> 0,x
+ C3BD                  __HC11Setup::
+ C3BD  0F                    sei
+ C3BE                  system.113::	
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   C O M M E N T A R Y
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   D E P E N D E N C I E S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #include "hc11regs.h"
+                       ; #include "system.h"
+                       ; #include "kernel\kernel.h"
+                       ; //#include "services\serial.h"
+                       ; //#include "services\motors.h"
+                       ; //#include "services\sound.h"
+                       ; 
+                       ; // ICC only
+                       ; extern void _start();   // entry point in crt11.s
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   C O N S T A N T S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   D A T A   T Y P E S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   S T A T I C   F U N C T I O N   P R O T O T Y P E S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #pragma interrupt presto_swi
+                       ; void presto_swi(void);
+                       ; 
+                       ; #pragma interrupt inert_isr
+                       ; void inert_isr(void);
+                       ; 
+                       ; void inert_sci_isr(void);
+                       ; void inert_spi_isr(void);
+                       ; void inert_paie_isr(void);
+                       ; void inert_pao_isr(void);
+                       ; void inert_tof_isr(void);
+                       ; void inert_toc5_isr(void);
+                       ; void inert_toc4_isr(void);
+                       ; void inert_toc3_isr(void);
+                       ; void inert_toc2_isr(void);
+                       ; void inert_toc1_isr(void);
+                       ; void inert_tic3_isr(void);
+                       ; void inert_tic2_isr(void);
+                       ; void inert_tic1_isr(void);
+                       ; void inert_rti_isr(void);
+                       ; void inert_irq_isr(void);
+                       ; void inert_xirq_isr(void);
+                       ; void inert_swi_isr(void);
+                       ; void inert_illop_isr(void);
+                       ; void inert_cop_isr(void);
+                       ; void inert_clm_isr(void);
+                       ; void inert_reset_isr(void);
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   S T A T I C   G L O B A L   D A T A
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // INTERRUPT VECTORS
+                       ; 
+                       ; #pragma abs_address:0xFFD6 // for NORMAL and EXPANDED MULTIPLEXED modes
+                       ; void (*normal_interrupt_vectors[])() = {
+                       ;    inert_sci_isr,      // SCI    -   presto_serial_isr
+                       ;    inert_spi_isr,      // SPI
+                       ;    inert_paie_isr,     // PAIE
+                       ;    inert_pao_isr,      // PAO
+                       ;    inert_tof_isr,      // TOF
+                       ;    inert_toc5_isr,     // TOC5
+                       ;    inert_toc4_isr,     // TOC4
+                       ;    inert_toc3_isr,     // TOC3   -   motor_isr
+                       ;    inert_toc2_isr,     // TOC2   -   presto_system_isr
+                       ;    inert_toc1_isr,     // TOC1
+                       ;    inert_tic3_isr,     // TIC3
+                       ;    inert_tic2_isr,     // TIC2
+                       ;    inert_tic1_isr,     // TIC1
+                       ;    inert_rti_isr,      // RTI
+                       ;    inert_irq_isr,      // IRQ
+                       ;    inert_xirq_isr,     // XIRQ
+                       ;    inert_swi_isr,      // SWI
+                       ;    inert_illop_isr,    // ILLOP
+                       ;    inert_cop_isr,      // COP
+                       ;    inert_clm_isr,      // CLM
+                       ;    inert_reset_isr     // RESET
+                       ; };
+                       ; #pragma end_abs_address
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   E X P O R T E D   F U N C T I O N S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   S T A T I C   F U N C T I O N S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // This function is called from the startup (crt11.s) before interrupts have
+                       ; // been turned on but after the stack has been set up.
+                       ; 
+                       ; void _HC11Setup() {
+                       ; 
+                       ;    INTR_OFF();
+                       ; 
+                       ;    // RAM would start at $0000 if it were enabled
+                       ;    // control registers are mapped to locations $1000-$103F (default)
+                       ;    INIT=0x01;
+ C3BE  C601              ldab #1
+ C3C0  F7103D            stab 0x103d
+ C3C3                  system.117::	
+                       ; 
+                       ;    // disable output compare interrupts for TOC1,TOC2,TOC3,TOC4,TOC5
+                       ;    // disable input capture interrupts for TIC1,TIC2,TIC3
+                       ;    TMSK1=0x00;
+ C3C3  7F1022            clr 0x1022
+ C3C6                  system.121::	
+                       ; 
+                       ;    // set prescaler for timer to 1
+                       ;    // disable TOF, RTIF, PAOVF, PAIF interrupts
+                       ;    TMSK2=0x00;
+ C3C6  7F1024            clr 0x1024
+ C3C9                  system.124::	
+                       ; 
+                       ;    // disable SPI subsystem, disable SPI interrupt
+                       ;    SPCR=0x04;
+ C3C9  C604              ldab #4
+ C3CB  F71028            stab 0x1028
+ C3CE                  system.127::	
+                       ; 
+                       ;    // disable all serial interrupts
+                       ;    SCCR2=0x00;
+ C3CE  7F102D            clr 0x102d
+ C3D1                  system.130::	
+                       ; 
+                       ;    // disable parallel I/O (and strobe A interrupt)
+                       ;    PIOC=0x00;
+ C3D1  7F1002            clr 0x1002
+ C3D4                  system.133::	
+                       ; 
+                       ;    // disable SECURITY and COP, disable ROM and EEPROM
+                       ;    CONFIG=0x0C;
+ C3D4  C60C              ldab #12
+ C3D6  F7103F            stab 0x103f
+ C3D9                  system.138::	
+                       ; 
+                       ;    // turn on the A2D subsystem (wait 100 usec before using)
+                       ;    // use "E clock" to drive the A2D
+                       ;    // disable COP clock monitor (interrupt)
+                       ;    OPTION=0xA0;  // OPTION_ADPU=1,OPTION_CSEL=0
+ C3D9  C6A0              ldab #160
+ C3DB  F71039            stab 0x1039
+ C3DE                  system.140::	
+                       ; 
+                       ;    normal_interrupt_vectors[INTR_SCI]=  inert_sci_isr;
+ C3DE  CCC462            ldd #_inert_sci_isr
+ C3E1  FDFFD6            std _normal_interrupt_vectors
+ C3E4                  system.141::	
+                       ;    normal_interrupt_vectors[INTR_SPI]=  inert_spi_isr;
+ C3E4  CCC464            ldd #_inert_spi_isr
+ C3E7  FDFFD8            std _normal_interrupt_vectors+2
+ C3EA                  system.142::	
+                       ;    normal_interrupt_vectors[INTR_PAIE]= inert_paie_isr;
+ C3EA  CCC466            ldd #_inert_paie_isr
+ C3ED  FDFFDA            std _normal_interrupt_vectors+4
+ C3F0                  system.143::	
+                       ;    normal_interrupt_vectors[INTR_PAO]=  inert_pao_isr;
+ C3F0  CCC468            ldd #_inert_pao_isr
+ C3F3  FDFFDC            std _normal_interrupt_vectors+6
+ C3F6                  system.144::	
+                       ;    normal_interrupt_vectors[INTR_TOF]=  inert_tof_isr;
+ C3F6  CCC46A            ldd #_inert_tof_isr
+ C3F9  FDFFDE            std _normal_interrupt_vectors+8
+ C3FC                  system.145::	
+                       ;    normal_interrupt_vectors[INTR_TOC5]= inert_toc5_isr;
+ C3FC  CCC46C            ldd #_inert_toc5_isr
+ C3FF  FDFFE0            std _normal_interrupt_vectors+10
+ C402                  system.146::	
+                       ;    normal_interrupt_vectors[INTR_TOC4]= inert_toc4_isr;
+ C402  CCC46E            ldd #_inert_toc4_isr
+ C405  FDFFE2            std _normal_interrupt_vectors+12
+ C408                  system.147::	
+                       ;    normal_interrupt_vectors[INTR_TOC3]= inert_toc3_isr;
+ C408  CCC470            ldd #_inert_toc3_isr
+ C40B  FDFFE4            std _normal_interrupt_vectors+14
+ C40E                  system.148::	
+                       ;    normal_interrupt_vectors[INTR_TOC2]= inert_toc2_isr;
+ C40E  CCC472            ldd #_inert_toc2_isr
+ C411  FDFFE6            std _normal_interrupt_vectors+16
+ C414                  system.149::	
+                       ;    normal_interrupt_vectors[INTR_TOC1]= inert_toc1_isr;
+ C414  CCC474            ldd #_inert_toc1_isr
+ C417  FDFFE8            std _normal_interrupt_vectors+18
+ C41A                  system.150::	
+                       ;    normal_interrupt_vectors[INTR_TIC3]= inert_tic3_isr;
+ C41A  CCC476            ldd #_inert_tic3_isr
+ C41D  FDFFEA            std _normal_interrupt_vectors+20
+ C420                  system.151::	
+                       ;    normal_interrupt_vectors[INTR_TIC2]= inert_tic2_isr;
+ C420  CCC478            ldd #_inert_tic2_isr
+ C423  FDFFEC            std _normal_interrupt_vectors+22
+ C426                  system.152::	
+                       ;    normal_interrupt_vectors[INTR_TIC1]= inert_tic1_isr;
+ C426  CCC47A            ldd #_inert_tic1_isr
+ C429  FDFFEE            std _normal_interrupt_vectors+24
+ C42C                  system.153::	
+                       ;    normal_interrupt_vectors[INTR_RTI]=  inert_rti_isr;
+ C42C  CCC47C            ldd #_inert_rti_isr
+ C42F  FDFFF0            std _normal_interrupt_vectors+26
+ C432                  system.154::	
+                       ;    normal_interrupt_vectors[INTR_IRQ]=  inert_irq_isr;
+ C432  CCC47E            ldd #_inert_irq_isr
+ C435  FDFFF2            std _normal_interrupt_vectors+28
+ C438                  system.155::	
+                       ;    normal_interrupt_vectors[INTR_XIRQ]= inert_xirq_isr;
+ C438  CCC480            ldd #_inert_xirq_isr
+ C43B  FDFFF4            std _normal_interrupt_vectors+30
+ C43E                  system.156::	
+                       ;    normal_interrupt_vectors[INTR_SWI]=  inert_swi_isr;
+ C43E  CCC482            ldd #_inert_swi_isr
+ C441  FDFFF6            std _normal_interrupt_vectors+32
+ C444                  system.157::	
+                       ;    normal_interrupt_vectors[INTR_ILLOP]=presto_fatal_error;
+ C444  CCC4B4            ldd #_presto_fatal_error
+ C447  FDFFF8            std _normal_interrupt_vectors+34
+ C44A                  system.158::	
+                       ;    normal_interrupt_vectors[INTR_COP]=  inert_cop_isr;
+ C44A  CCC486            ldd #_inert_cop_isr
+ C44D  FDFFFA            std _normal_interrupt_vectors+36
+ C450                  system.159::	
+                       ;    normal_interrupt_vectors[INTR_CLM]=  inert_clm_isr;
+ C450  CCC488            ldd #_inert_clm_isr
+ C453  FDFFFC            std _normal_interrupt_vectors+38
+ C456                  system.160::	
+                       ;    normal_interrupt_vectors[INTR_RESET]=_start;
+ C456  CCC000            ldd #__start
+ C459  FDFFFE            std _normal_interrupt_vectors+40
+ C45C                  system.165::	
+                       ; 
+                       ;    // get out of SPECIAL TEST operating mode
+                       ;    // go into EXPANDED MULTIPLEXED operating mode
+                       ;    // promote IRQ interrupt priority
+                       ;    HPRIO=0x25;
+ C45C  C625              ldab #37
+ C45E  F7103C            stab 0x103c
+ C461                  system.168::	
+                       ; 
+                       ;    //INTR_ON();
+                       ; }
+ C461                  L11:
+ C461  39                rts
+                       ;  IX -> 0,x
+ C462                  _inert_sci_isr::
+ C462  3B                rti
+ C463                  system.172::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void inert_sci_isr(void)   { asm("rti"); }
+ C463                  L32:
+ C463  39                rts
+                       ;  IX -> 0,x
+ C464                  _inert_spi_isr::
+ C464  3B                rti
+ C465                  system.173::	
+                       ; void inert_spi_isr(void)   { asm("rti"); }
+ C465                  L33:
+ C465  39                rts
+                       ;  IX -> 0,x
+ C466                  _inert_paie_isr::
+ C466  3B                rti
+ C467                  system.174::	
+                       ; void inert_paie_isr(void)  { asm("rti"); }
+ C467                  L34:
+ C467  39                rts
+                       ;  IX -> 0,x
+ C468                  _inert_pao_isr::
+ C468  3B                rti
+ C469                  system.175::	
+                       ; void inert_pao_isr(void)   { asm("rti"); }
+ C469                  L35:
+ C469  39                rts
+                       ;  IX -> 0,x
+ C46A                  _inert_tof_isr::
+ C46A  3B                rti
+ C46B                  system.176::	
+                       ; void inert_tof_isr(void)   { asm("rti"); }
+ C46B                  L36:
+ C46B  39                rts
+                       ;  IX -> 0,x
+ C46C                  _inert_toc5_isr::
+ C46C  3B                rti
+ C46D                  system.177::	
+                       ; void inert_toc5_isr(void)  { asm("rti"); }
+ C46D                  L37:
+ C46D  39                rts
+                       ;  IX -> 0,x
+ C46E                  _inert_toc4_isr::
+ C46E  3B                rti
+ C46F                  system.178::	
+                       ; void inert_toc4_isr(void)  { asm("rti"); }
+ C46F                  L38:
+ C46F  39                rts
+                       ;  IX -> 0,x
+ C470                  _inert_toc3_isr::
+ C470  3B                rti
+ C471                  system.179::	
+                       ; void inert_toc3_isr(void)  { asm("rti"); }
+ C471                  L39:
+ C471  39                rts
+                       ;  IX -> 0,x
+ C472                  _inert_toc2_isr::
+ C472  3B                rti
+ C473                  system.180::	
+                       ; void inert_toc2_isr(void)  { asm("rti"); }
+ C473                  L40:
+ C473  39                rts
+                       ;  IX -> 0,x
+ C474                  _inert_toc1_isr::
+ C474  3B                rti
+ C475                  system.181::	
+                       ; void inert_toc1_isr(void)  { asm("rti"); }
+ C475                  L41:
+ C475  39                rts
+                       ;  IX -> 0,x
+ C476                  _inert_tic3_isr::
+ C476  3B                rti
+ C477                  system.182::	
+                       ; void inert_tic3_isr(void)  { asm("rti"); }
+ C477                  L42:
+ C477  39                rts
+                       ;  IX -> 0,x
+ C478                  _inert_tic2_isr::
+ C478  3B                rti
+ C479                  system.183::	
+                       ; void inert_tic2_isr(void)  { asm("rti"); }
+ C479                  L43:
+ C479  39                rts
+                       ;  IX -> 0,x
+ C47A                  _inert_tic1_isr::
+ C47A  3B                rti
+ C47B                  system.184::	
+                       ; void inert_tic1_isr(void)  { asm("rti"); }
+ C47B                  L44:
+ C47B  39                rts
+                       ;  IX -> 0,x
+ C47C                  _inert_rti_isr::
+ C47C  3B                rti
+ C47D                  system.185::	
+                       ; void inert_rti_isr(void)   { asm("rti"); }
+ C47D                  L45:
+ C47D  39                rts
+                       ;  IX -> 0,x
+ C47E                  _inert_irq_isr::
+ C47E  3B                rti
+ C47F                  system.186::	
+                       ; void inert_irq_isr(void)   { asm("rti"); }
+ C47F                  L46:
+ C47F  39                rts
+                       ;  IX -> 0,x
+ C480                  _inert_xirq_isr::
+ C480  3B                rti
+ C481                  system.187::	
+                       ; void inert_xirq_isr(void)  { asm("rti"); }
+ C481                  L47:
+ C481  39                rts
+                       ;  IX -> 0,x
+ C482                  _inert_swi_isr::
+ C482  3B                rti
+ C483                  system.188::	
+                       ; void inert_swi_isr(void)   { asm("rti"); }
+ C483                  L48:
+ C483  39                rts
+                       ;  IX -> 0,x
+ C484                  _inert_illop_isr::
+ C484  3B                rti
+ C485                  system.189::	
+                       ; void inert_illop_isr(void) { asm("rti"); }
+ C485                  L49:
+ C485  39                rts
+                       ;  IX -> 0,x
+ C486                  _inert_cop_isr::
+ C486  3B                rti
+ C487                  system.190::	
+                       ; void inert_cop_isr(void)   { asm("rti"); }
+ C487                  L50:
+ C487  39                rts
+                       ;  IX -> 0,x
+ C488                  _inert_clm_isr::
+ C488  3B                rti
+ C489                  system.191::	
+                       ; void inert_clm_isr(void)   { asm("rti"); }
+ C489                  L51:
+ C489  39                rts
+                       ;  IX -> 0,x
+ C48A                  _inert_reset_isr::
+ C48A  3B                rti
+ C48B                  system.192::	
+                       ; void inert_reset_isr(void) { asm("rti"); }
+ C48B                  L52:
+ C48B  39                rts
+                       ;  IX -> 0,x
+                       ;         vector -> 8,x
+                       ;           intr -> 5,x
+ C48C                  _set_interrupt::
+ C48C  37                pshb
+ C48D  36                psha
+ C48E  3C                pshx
+ C48F  30                tsx
+ C490  3C                pshx
+ C491  30                tsx
+ C492  EC04              ldd 4,x
+ C494  E705              stab 5,x
+ C496                  system.198::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; //extern void os_set_irq(int number, void (*fn)() );
+                       ; void set_interrupt(BYTE intr, void (*vector)(void)) {
+                       ;    if(intr<=INTR_RESET) {
+ C496  E605              ldab 5,x
+ C498  C114              cmpb #20
+ C49A  220E              bhi L54
+ C49C                  system.199::	
+                       ;       normal_interrupt_vectors[intr]=vector;
+ C49C  E605              ldab 5,x
+ C49E  4F                clra
+ C49F  05                lsld
+ C4A0  C3FFD6            addd #_normal_interrupt_vectors
+ C4A3  188F              xgdy
+ C4A5  EC08              ldd 8,x
+ C4A7  18ED00            std 0,y
+ C4AA                  system.200::	
+                       ;    }
+ C4AA                  L54:
+ C4AA                  system.201::	
+                       ; }
+ C4AA                  L53:
+ C4AA  8F                xgdx
+ C4AB  C30002            addd #2
+ C4AE  8F                xgdx
+ C4AF  35                txs
+ C4B0  38                pulx
+ C4B1  1838              puly
+ C4B3  39                rts
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;          delay -> 3,x
+ C4B4                  _presto_fatal_error::
+ C4B4  BDCE7D            jsr __enterb
+ C4B7  04                .byte 0x4
+ C4B8  0F                    sei
+ C4B9  8EB5FF            lds #init_sp
+ C4BC                  system.219::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   S A F E T Y   C H E C K
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // this is the memory location for the motor controller
+                       ; #define ERROR_PORT *(unsigned char *)(0x7FFF)
+                       ; 
+                       ; void presto_fatal_error(void) {
+                       ;    // should never get here
+                       ;    BYTE delay;
+                       ;    INTR_OFF();
+                       ; 
+                       ;    // reload the original stack pointer, so we don't trash anything else
+                       ;    asm("lds #init_sp");
+                       ; 
+                       ;    // speaker is always an output
+                       ;    BITSET(DDRD,4);              // LED is an output
+ C4BC  18CE1009          ldy #0x1009
+ C4C0  181C0010          bset 0,y,#16
+ C4C4  202A              bra L58
+ C4C6                  L57:
+ C4C6                  system.222::	
+                       ;    while(1) {
+                       ;       // toggle speaker
+                       ;       BITNOT(PORTA,3);
+ C4C6  F61000            ldab 0x1000 ; vol
+ C4C9  4F                clra
+ C4CA  8800              eora #0
+ C4CC  C808              eorb #8
+ C4CE  F71000            stab 0x1000
+ C4D1                  system.224::	
+                       ;       // LED on
+                       ;       BITCLR(PORTD,4);
+ C4D1  18CE1008          ldy #0x1008
+ C4D5  181D0010          bclr 0,y,~#-17
+ C4D9  2005              bra L61
+ C4DB                  L60:
+ C4DB                  system.229::	
+                       ;       // delay
+                       ;       while(--delay>0) {
+                       ;          // This will force the motor lights to blink so fast
+                       ;          // that all eight of them will appear to be on.
+                       ;          ERROR_PORT=delay;
+ C4DB  E603              ldab 3,x
+ C4DD  F77FFF            stab 0x7fff
+ C4E0                  system.230::	
+                       ;       }
+ C4E0                  L61:
+ C4E0  E603              ldab 3,x
+ C4E2  4F                clra
+ C4E3  830001            subd #1
+ C4E6  E702              stab 2,x
+ C4E8  E703              stab 3,x
+ C4EA  E602              ldab 2,x
+ C4EC  C100              cmpb #0
+ C4EE  22EB              bhi L60
+ C4F0                  system.231::	
+                       ;    }
+ C4F0                  L58:
+ C4F0  20D4              bra L57
+ C4F2                  L56:
+ C4F2  8F                xgdx
+ C4F3  C30004            addd #4
+ C4F6  8F                xgdx
+ C4F7  35                txs
+ C4F8  38                pulx
+ C4F9  39                rts
+                         .area memory(abs)
+                         .org 0xbfd6
+ BFD6                  _special_interrupt_vectors::
+ BFD6  C462              .word _inert_sci_isr
+ BFD8  C464              .word _inert_spi_isr
+ BFDA  C466              .word _inert_paie_isr
+ BFDC  C468              .word _inert_pao_isr
+ BFDE  C46A              .word _inert_tof_isr
+ BFE0  C46C              .word _inert_toc5_isr
+ BFE2  C46E              .word _inert_toc4_isr
+ BFE4  C470              .word _inert_toc3_isr
+ BFE6  C472              .word _inert_toc2_isr
+ BFE8  C474              .word _inert_toc1_isr
+ BFEA  C476              .word _inert_tic3_isr
+ BFEC  C478              .word _inert_tic2_isr
+ BFEE  C47A              .word _inert_tic1_isr
+ BFF0  C47C              .word _inert_rti_isr
+ BFF2  C47E              .word _inert_irq_isr
+ BFF4  C480              .word _inert_xirq_isr
+ BFF6  C482              .word _inert_swi_isr
+ BFF8  C484              .word _inert_illop_isr
+ BFFA  C486              .word _inert_cop_isr
+ BFFC  C488              .word _inert_clm_isr
+ BFFE  C000              .word __start
+                         .area data
+                         .area data
+ 8008                  _global_new_sp::
+ 8008                    .blkb 2
+                         .area idata
+--- 0000 0000              .word 0
+                         .area data
+ 800A                  _global_old_sp_p::
+ 800A                    .blkb 2
+                         .area idata
+--- 0002 0000              .word 0
+                         .area data
+ 800C                  _global_new_fn::
+ 800C                    .blkb 2
+                         .area idata
+--- 0004 0000              .word 0
+                         .area data
+ 800E                  _current_tcb_p::
+ 800E                    .blkb 2
+                         .area idata
+--- 0006 0000              .word 0
+                         .area data
+ 8010                  _current_tid::
+ 8010                    .blkb 1
+                         .area idata
+--- 0008 00                .byte 0
+                         .area data
+ 8011                  _tcb_head_p::
+ 8011                    .blkb 2
+                         .area idata
+--- 0009 0000              .word 0
+                         .area data
+ 8013                  _free_tcb_p::
+ 8013                    .blkb 2
+                         .area idata
+--- 000B 0000              .word 0
+                         .area data
+ 8015                  _presto_initialized::
+ 8015                    .blkb 1
+                         .area idata
+--- 000D 00                .byte 0
+                         .area data
+ 8016                  _free_mail_p::
+ 8016                    .blkb 2
+                         .area idata
+--- 000E 0000              .word 0
+                         .area data
+ 8018                  _po_mail_p::
+ 8018                    .blkb 2
+                         .area idata
+--- 0010 0000              .word 0
+                         .area text
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;          ?temp -> 4,x
+                       ;          ?temp -> 2,x
+                       ;          ?temp -> 4,x
+                       ;          count -> 7,x
+ C4FA                  _presto_init::
+ C4FA  BDCE7D            jsr __enterb
+ C4FD  08                .byte 0x8
+ C4FE                  kernel.80::	
+                       ; 
+                       ; #include "hc11regs.h"
+                       ; #include "system.h"
+                       ; #include "presto.h"
+                       ; #include "kernel\kernel.h"
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #define CYCLES_PER_MS     2000
+                       ; #define MS_PER_TICK       100
+                       ; #define CYCLES_PER_TICK   CYCLES_PER_MS*MS_PER_TICK
+                       ; #define IDLE_PRIORITY     0
+                       ; #define IDLE_STACK_SIZE   50
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #define DISABLE_CCR_INTERRUPT_BIT      asm("oraa #0x10");
+                       ; #define ENABLE_CCR_INTERRUPT_BIT      asm("anda ~#0x10");
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // GLOBAL VARIABLES
+                       ; // These are used to pass arguments to inline assembly routines
+                       ; 
+                       ; /*static*/ BYTE * global_new_sp=NULL;
+                       ; /*static*/ BYTE ** global_old_sp_p=NULL;
+                       ; /*static*/ void (*global_new_fn)(void)=NULL;
+                       ; /*static*/ BYTE * global_save_sp;     // do not put this on the stack (BOOM)
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // STATIC GLOBAL VARIABLES
+                       ; 
+                       ; /*static*/ PRESTO_TCB_T * current_tcb_p=NULL;
+                       ; /*static*/ PRESTO_TID_T current_tid=0;
+                       ; /*static*/ PRESTO_TCB_T * tcb_head_p=NULL;
+                       ; /*static*/ PRESTO_TCB_T * free_tcb_p=NULL;
+                       ; /*static*/ PRESTO_TCB_T tcb_list[MAX_TASKS];
+                       ; 
+                       ; /*static*/ PRESTO_TIME_T presto_master_clock;
+                       ; /*static*/ BYTE presto_initialized=0;
+                       ; 
+                       ; // idle task stuff
+                       ; /*static*/ BYTE idle_stack[IDLE_STACK_SIZE];
+                       ; /*static*/ PRESTO_TCB_T * idle_tcb_p;
+                       ; /*static*/ BYTE idle_tid;
+                       ; 
+                       ; // mail stuff
+                       ; /*static*/ PRESTO_MESSAGE_T * free_mail_p=NULL;
+                       ; /*static*/ PRESTO_MESSAGE_T * po_mail_p=NULL;
+                       ; /*static*/ PRESTO_MESSAGE_T mail_list[MAX_MESSAGES];
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; // FUNCTION PROTOTYPES
+                       ; 
+                       ; /*static*/ PRESTO_TCB_T * presto_next_tcb_to_run(void);
+                       ; /*static*/ void presto_start_master_timer(void);
+                       ; /*static*/ void presto_restart_master_timer(void);
+                       ; /*static*/ void idle_task(void);
+                       ; /*static*/ BYTE deliver_mail(void);
+                       ; /*static*/ PRESTO_TCB_T * tid_to_tcbptr(BYTE tid);
+                       ; /*static*/ void print_tcb_list(void);
+                       ; /*static*/ void print_mail_list(void);
+                       ; /*static*/ void idle_task(void);
+                       ; 
+                       ; void presto_system_isr_wrapper(void);
+                       ; void presto_system_isr(void);
+                       ; void context_switch_wrapper(void);
+                       ; void context_switch(void);
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   I N I T I A L I Z A T I O N
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void presto_init(void) {
+                       ;    BYTE count;
+                       ; 
+                       ;    // initialize once and only once
+                       ;    if(presto_initialized) return;
+ C4FE  7D8015            tst _presto_initialized
+ C501  2703              beq L12
+ C503  7EC5EE            jmp L11
+ C506                  L12:
+ C506                  kernel.81::	
+                       ;    presto_initialized++;
+ C506  F68015            ldab _presto_initialized
+ C509  4F                clra
+ C50A  C30001            addd #1
+ C50D  F78015            stab _presto_initialized
+ C510                  kernel.84::	
+                       ; 
+                       ;    // initialize master clock
+                       ;    presto_master_clock=clock_reset();
+ C510  CC9B05            ldd #_presto_master_clock
+ C513  BDC2A3            jsr _clock_reset
+ C516                  kernel.87::	
+                       ; 
+                       ;    // initialize TCB list
+                       ;    for(count=0;count<MAX_TASKS;count++) {
+ C516  6F07              clr 7,x
+ C518  2050              bra L17
+ C51A                  L14:
+ C51A                  kernel.88::	
+                       ;       tcb_list[count].next=&tcb_list[count+1];
+ C51A  E607              ldab 7,x
+ C51C  4F                clra
+ C51D  188F              xgdy
+ C51F  CC0012            ldd #18
+ C522  BDCE1E            jsr __muli
+ C525  ED04              std 4,x
+ C527  C39B15            addd #_tcb_list+12
+ C52A  188F              xgdy
+ C52C  EC04              ldd 4,x
+ C52E  C39B1B            addd #_tcb_list+18
+ C531  18ED00            std 0,y
+ C534                  kernel.89::	
+                       ;       tcb_list[count].task_id=count;
+ C534  E607              ldab 7,x
+ C536  4F                clra
+ C537  ED02              std 2,x
+ C539  CC0012            ldd #18
+ C53C  1AEE02            ldy 2,x
+ C53F  BDCE1E            jsr __muli
+ C542  C39B09            addd #_tcb_list
+ C545  188F              xgdy
+ C547  E603              ldab 3,x
+ C549  18E700            stab 0,y
+ C54C                  kernel.90::	
+                       ;       tcb_list[count].state=STATE_INACTIVE;
+ C54C  E607              ldab 7,x
+ C54E  4F                clra
+ C54F  188F              xgdy
+ C551  CC0012            ldd #18
+ C554  BDCE1E            jsr __muli
+ C557  C39B13            addd #_tcb_list+10
+ C55A  188F              xgdy
+ C55C  CC0002            ldd #2
+ C55F  18ED00            std 0,y
+ C562                  kernel.91::	
+                       ;    }
+ C562                  L15:
+ C562  E607              ldab 7,x
+ C564  4F                clra
+ C565  C30001            addd #1
+ C568  E707              stab 7,x
+ C56A                  L17:
+ C56A  E607              ldab 7,x
+ C56C  C106              cmpb #6
+ C56E  25AA              blo L14
+ C570                  kernel.92::	
+                       ;    tcb_list[MAX_TASKS-1].next=NULL;
+ C570  CC0000            ldd #0
+ C573  FD9B6F            std _tcb_list+90+12
+ C576                  kernel.93::	
+                       ;    free_tcb_p=&tcb_list[0];
+ C576  CC9B09            ldd #_tcb_list
+ C579  FD8013            std _free_tcb_p
+ C57C                  kernel.96::	
+                       ; 
+                       ;    // initialize mail list
+                       ;    for(count=0;count<MAX_MESSAGES;count++) {
+ C57C  6F07              clr 7,x
+ C57E  2031              bra L26
+ C580                  L23:
+ C580                  kernel.97::	
+                       ;       mail_list[count].next=&mail_list[count+1];  // goes past end of array - OK
+ C580  E607              ldab 7,x
+ C582  4F                clra
+ C583  05                lsld
+ C584  05                lsld
+ C585  05                lsld
+ C586  05                lsld
+ C587  ED04              std 4,x
+ C589  C3999E            addd #_mail_list+14
+ C58C  188F              xgdy
+ C58E  EC04              ldd 4,x
+ C590  C399A0            addd #_mail_list+16
+ C593  18ED00            std 0,y
+ C596                  kernel.98::	
+                       ;       mail_list[count].serial_number=count;
+ C596  E607              ldab 7,x
+ C598  4F                clra
+ C599  ED02              std 2,x
+ C59B  05                lsld
+ C59C  05                lsld
+ C59D  05                lsld
+ C59E  05                lsld
+ C59F  C39990            addd #_mail_list
+ C5A2  188F              xgdy
+ C5A4  EC02              ldd 2,x
+ C5A6  18ED00            std 0,y
+ C5A9                  kernel.99::	
+                       ;    }
+ C5A9                  L24:
+ C5A9  E607              ldab 7,x
+ C5AB  4F                clra
+ C5AC  C30001            addd #1
+ C5AF  E707              stab 7,x
+ C5B1                  L26:
+ C5B1  E607              ldab 7,x
+ C5B3  C114              cmpb #20
+ C5B5  25C9              blo L23
+ C5B7                  kernel.100::	
+                       ;    mail_list[MAX_MESSAGES-1].next=NULL;
+ C5B7  CC0000            ldd #0
+ C5BA  FD9ACE            std _mail_list+304+14
+ C5BD                  kernel.101::	
+                       ;    free_mail_p=&mail_list[0];
+ C5BD  CC9990            ldd #_mail_list
+ C5C0  FD8016            std _free_mail_p
+ C5C3                  kernel.105::	
+                       ; 
+                       ;    // initialize idle task
+                       ;    // must be done after presto_initialized++ because of initialization check
+                       ;    idle_tid=presto_create_task(idle_task,idle_stack,IDLE_STACK_SIZE,IDLE_PRIORITY);
+ C5C3  CC0000            ldd #0
+ C5C6  37                pshb
+ C5C7  36                psha
+ C5C8  CC0032            ldd #50
+ C5CB  37                pshb
+ C5CC  36                psha
+ C5CD  CC9AD3            ldd #_idle_stack
+ C5D0  37                pshb
+ C5D1  36                psha
+ C5D2  CCCD66            ldd #_idle_task
+ C5D5  BDC64E            jsr _presto_create_task
+ C5D8  BDCEC6            jsr __movspb
+ C5DB  06                .byte 6
+ C5DC  4F                clra
+ C5DD  5D                tstb
+ C5DE  2A01              bpl X0
+ C5E0  43                coma
+ C5E1                  X0:
+ C5E1  F79AD0            stab _idle_tid
+ C5E4                  kernel.106::	
+                       ;    idle_tcb_p=tid_to_tcbptr(idle_tid);
+ C5E4  F69AD0            ldab _idle_tid
+ C5E7  4F                clra
+ C5E8  BDCD69            jsr _tid_to_tcbptr
+ C5EB  FD9AD1            std _idle_tcb_p
+ C5EE                  kernel.107::	
+                       ; }
+ C5EE                  L11:
+ C5EE  8F                xgdx
+ C5EF  C30008            addd #8
+ C5F2  8F                xgdx
+ C5F3  35                txs
+ C5F4  38                pulx
+ C5F5  39                rts
+                       ;  IX -> 0,x
+ C5F6                  _presto_start_scheduler::
+ C5F6                  kernel.113::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void presto_start_scheduler(void) {
+                       ; 
+                       ;    if(presto_initialized==0) presto_fatal_error();
+ C5F6  7D8015            tst _presto_initialized
+ C5F9  2603              bne L32
+ C5FB  BDC4B4            jsr _presto_fatal_error
+ C5FE                  L32:
+ C5FE  0F                    sei
+ C5FF                  kernel.119::	
+                       ; 
+                       ;    // we're about to switch to our first task... interrupts off
+                       ;    INTR_OFF();
+                       ; 
+                       ;    //set_interrupt(INTR_TOC2, presto_system_isr_wrapper);
+                       ;    set_interrupt(INTR_TOC2, presto_system_isr);
+ C5FF  CCC809            ldd #_presto_system_isr
+ C602  37                pshb
+ C603  36                psha
+ C604  CC0008            ldd #8
+ C607  BDC48C            jsr _set_interrupt
+ C60A  1838              puly
+ C60C                  kernel.120::	
+                       ;    set_interrupt(INTR_SWI, context_switch);
+ C60C  CCC8AA            ldd #_context_switch
+ C60F  37                pshb
+ C610  36                psha
+ C611  CC0010            ldd #16
+ C614  BDC48C            jsr _set_interrupt
+ C617  1838              puly
+ C619                  kernel.123::	
+                       ; 
+                       ;    // start timer interrupts for pre-emption
+                       ;    presto_start_master_timer();
+ C619  BDCDC4            jsr _presto_start_master_timer
+ C61C                  kernel.127::	
+                       ; 
+                       ;    // pick next task to run
+                       ;    // first task in list is highest priority and is ready
+                       ;    current_tcb_p=tcb_head_p;
+ C61C  FC8011            ldd _tcb_head_p
+ C61F  FD800E            std _current_tcb_p
+ C622                  kernel.128::	
+                       ;    if(current_tcb_p==NULL) {
+ C622  FC800E            ldd _current_tcb_p
+ C625  2603              bne L34
+ C627                  kernel.129::	
+                       ;       presto_fatal_error();
+ C627  BDC4B4            jsr _presto_fatal_error
+ C62A                  kernel.130::	
+                       ;    }
+ C62A                  L34:
+ C62A                  kernel.131::	
+                       ;    current_tid=current_tcb_p->task_id;
+ C62A  18FE800E          ldy _current_tcb_p
+ C62E  18E600            ldab 0,y
+ C631  F78010            stab _current_tid
+ C634                  kernel.137::	
+                       ; 
+                       ;    // SET UP A NEW STACK AND START EXECUTION USING IT
+                       ; 
+                       ;    // these parameters will be used in inline assembly...
+                       ;    // must be put in global space, not on stack
+                       ;    global_new_sp=current_tcb_p->stack_ptr;
+ C634  FC800E            ldd _current_tcb_p
+ C637  C30002            addd #2
+ C63A  188F              xgdy
+ C63C  18EC00            ldd 0,y
+ C63F  FD8008            std _global_new_sp
+ C642  BE8008            lds _global_new_sp
+ C645  32                pula
+ C646  84EF              anda ~#0x10
+ C648  36                psha
+ C649  3B                rti
+ C64A                  kernel.153::	
+                       ; 
+                       ;    asm("lds _global_new_sp");
+                       ; 
+                       ;    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
+                       ;    // That way, the new task will have interrupts enabled when it wakes up.
+                       ;    asm("pula");
+                       ;    ENABLE_CCR_INTERRUPT_BIT;
+                       ;    asm("psha");
+                       ; 
+                       ;    // Normally, this function would end with an RTS, but we want to act EXACTLY
+                       ;    // the same as if we had just been inside of an interrupt.  So we manually
+                       ;    // call RTI here to pop the registers and "run" the new task.
+                       ;    asm("rti");
+                       ; 
+                       ;    // we never get here
+                       ;    presto_fatal_error();
+ C64A  BDC4B4            jsr _presto_fatal_error
+ C64D                  kernel.154::	
+                       ; }
+ C64D                  L31:
+ C64D  39                rts
+                       ;  IX -> 0,x
+                       ;            ptr -> 2,x
+                       ;      new_tcb_p -> 4,x
+                       ;       priority -> 17,x
+                       ;     stack_size -> 14,x
+                       ;          stack -> 12,x
+                       ;           func -> 8,x
+ C64E                  _presto_create_task::
+ C64E  BDCE7D            jsr __enterb
+ C651  46                .byte 0x46
+ C652  EC10              ldd 16,x
+ C654  E711              stab 17,x
+ C656                  kernel.164::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   T A S K   M A N A G E M E N T
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; PRESTO_TID_T presto_create_task( void (*func)(void), BYTE * stack, short stack_size, BYTE priority ) {
+                       ; 
+                       ;    PRESTO_TCB_T * new_tcb_p;
+                       ; 
+                       ;    if(presto_initialized==0) presto_fatal_error();
+ C656  7D8015            tst _presto_initialized
+ C659  2603              bne L37
+ C65B  BDC4B4            jsr _presto_fatal_error
+ C65E                  L37:
+ C65E                  kernel.166::	
+                       ; 
+                       ;    if(free_tcb_p==NULL) {
+ C65E  FC8013            ldd _free_tcb_p
+ C661  2610              bne L39
+ C663                  kernel.168::	
+                       ;       // There are no more TCB's left.
+                       ;       presto_fatal_error();
+ C663  BDC4B4            jsr _presto_fatal_error
+ C666                  kernel.169::	
+                       ;       return -1;
+ C666  CCFFFF            ldd #-1
+ C669  8F                xgdx
+ C66A  C30006            addd #6
+ C66D  8F                xgdx
+ C66E  35                txs
+ C66F  38                pulx
+ C670  1838              puly
+ C672  39                rts
+ C673                  L39:
+ C673  0F                    sei
+ C674                  kernel.176::	
+                       ;    }
+                       ; 
+                       ;    // we're about to mess with tasks, TCB's... interrupts off
+                       ;    INTR_OFF();
+                       ; 
+                       ;    // allocate TCB for new task
+                       ;    new_tcb_p=free_tcb_p;
+ C674  FC8013            ldd _free_tcb_p
+ C677  ED04              std 4,x
+ C679                  kernel.177::	
+                       ;    free_tcb_p=free_tcb_p->next;
+ C679  FC8013            ldd _free_tcb_p
+ C67C  C3000C            addd #12
+ C67F  188F              xgdy
+ C681  18EC00            ldd 0,y
+ C684  FD8013            std _free_tcb_p
+ C687                  kernel.181::	
+                       ; 
+                       ;    // initialize TCB elements
+                       ;    // new_tcb_p->task_id is already assigned
+                       ;    new_tcb_p->stack_top=stack+stack_size-1;
+ C687  EC04              ldd 4,x
+ C689  C30004            addd #4
+ C68C  188F              xgdy
+ C68E  EC0E              ldd 14,x
+ C690  E30C              addd 12,x
+ C692  C3FFFF            addd #-1
+ C695  18ED00            std 0,y
+ C698                  kernel.182::	
+                       ;    new_tcb_p->stack_bottom=stack;
+ C698  EC04              ldd 4,x
+ C69A  C30006            addd #6
+ C69D  188F              xgdy
+ C69F  EC0C              ldd 12,x
+ C6A1  18ED00            std 0,y
+ C6A4                  kernel.183::	
+                       ;    new_tcb_p->stack_ptr=new_tcb_p->stack_top;
+ C6A4  EC04              ldd 4,x
+ C6A6  C30004            addd #4
+ C6A9  188F              xgdy
+ C6AB  18EC00            ldd 0,y
+ C6AE  37                pshb ; 
+ C6AF  36                psha ; spill
+ C6B0  EC04              ldd 4,x
+ C6B2  C30002            addd #2
+ C6B5  188F              xgdy
+ C6B7  32                pula ; 
+ C6B8  33                pulb ; reload
+ C6B9  18ED00            std 0,y
+ C6BC                  kernel.184::	
+                       ;    new_tcb_p->priority=priority;
+ C6BC  EC04              ldd 4,x
+ C6BE  C30008            addd #8
+ C6C1  188F              xgdy
+ C6C3  E611              ldab 17,x
+ C6C5  18E700            stab 0,y
+ C6C8                  kernel.185::	
+                       ;    new_tcb_p->state=STATE_READY;
+ C6C8  EC04              ldd 4,x
+ C6CA  C3000A            addd #10
+ C6CD  188F              xgdy
+ C6CF  CC0000            ldd #0
+ C6D2  18ED00            std 0,y
+ C6D5                  kernel.186::	
+                       ;    new_tcb_p->mailbox_head=NULL;
+ C6D5  EC04              ldd 4,x
+ C6D7  C3000E            addd #14
+ C6DA  188F              xgdy
+ C6DC  CC0000            ldd #0
+ C6DF  18ED00            std 0,y
+ C6E2                  kernel.187::	
+                       ;    new_tcb_p->mailbox_tail=NULL;
+ C6E2  EC04              ldd 4,x
+ C6E4  C30010            addd #16
+ C6E7  188F              xgdy
+ C6E9  CC0000            ldd #0
+ C6EC  18ED00            std 0,y
+ C6EF                  kernel.193::	
+                       ; 
+                       ;    // SET UP NEW STACK USING ASSEMBLY LANGUAGE
+                       ; 
+                       ;    // these parameters will be used in inline assembly...
+                       ;    // must be put in global space, not on stack
+                       ;    global_new_sp=new_tcb_p->stack_ptr;
+ C6EF  EC04              ldd 4,x
+ C6F1  C30002            addd #2
+ C6F4  188F              xgdy
+ C6F6  18EC00            ldd 0,y
+ C6F9  FD8008            std _global_new_sp
+ C6FC                  kernel.194::	
+                       ;    global_new_fn=func;
+ C6FC  EC08              ldd 8,x
+ C6FE  FD800C            std _global_new_fn
+ C701  BF9B75            sts _global_save_sp
+ C704  BE8008            lds _global_new_sp
+ C707  CCC4B4            ldd #_presto_fatal_error
+ C70A  37                pshb
+ C70B  36                psha
+ C70C  FC800C            ldd _global_new_fn
+ C70F  37                pshb
+ C710  36                psha
+ C711  8600              ldaa #0
+ C713  36                psha
+ C714  36                psha
+ C715  36                psha
+ C716  36                psha
+ C717  36                psha
+ C718  36                psha
+ C719  36                psha
+ C71A  BF8008            sts _global_new_sp
+ C71D  BE9B75            lds _global_save_sp
+ C720                  kernel.231::	
+                       ; 
+                       ;    // store our own SP so we can work on the new task
+                       ;    asm("sts _global_save_sp");
+                       ; 
+                       ;    // load empty SP from task so we can initialize it
+                       ;    asm("lds _global_new_sp");
+                       ; 
+                       ;    // Set presto_fatal_error as the "return pc" of a new task.  If some bozo
+                       ;    // tries to return out of his task's main function, we will cause an alarm.
+                       ;    asm("ldd #_presto_fatal_error");
+                       ;    asm("pshb");
+                       ;    asm("psha");
+                       ; 
+                       ;    // push the actual function call on the stack
+                       ;    asm("ldd _global_new_fn");
+                       ;    asm("pshb");
+                       ;    asm("psha");
+                       ; 
+                       ;    // push any old stinkin' registers onto the stack
+                       ;    // they'll be pulled off when we start running
+                       ;    // we push in interrupt-stack order
+                       ;    asm("ldaa #0");
+                       ;    asm("psha"); // Y(L) register
+                       ;    asm("psha"); // Y(H) register
+                       ;    asm("psha"); // X(L) register
+                       ;    asm("psha"); // X(H) register
+                       ;    asm("psha"); // A register
+                       ;    asm("psha"); // B register
+                       ;    asm("psha"); // Initial Condition Codes (I bit cleared)
+                       ; 
+                       ;    // save task SP in TCB
+                       ;    asm("sts _global_new_sp");
+                       ;    // re-load our own SP so we can return
+                       ;    asm("lds _global_save_sp");
+                       ; 
+                       ;    // recover the altered stack pointer and save it in the TCB
+                       ;    new_tcb_p->stack_ptr=global_new_sp;
+ C720  EC04              ldd 4,x
+ C722  C30002            addd #2
+ C725  188F              xgdy
+ C727  FC8008            ldd _global_new_sp
+ C72A  18ED00            std 0,y
+ C72D                  kernel.235::	
+                       ; 
+                       ;    // INSERT NEW TCB INTO LIST IN PRIORITY ORDER
+                       ; 
+                       ;    if(tcb_head_p==NULL) {
+ C72D  FC8011            ldd _tcb_head_p
+ C730  2615              bne L41
+ C732                  kernel.237::	
+                       ;       // we are the first TCB in the list
+                       ;       tcb_head_p=new_tcb_p;
+ C732  EC04              ldd 4,x
+ C734  FD8011            std _tcb_head_p
+ C737                  kernel.238::	
+                       ;       new_tcb_p->next=NULL;
+ C737  EC04              ldd 4,x
+ C739  C3000C            addd #12
+ C73C  188F              xgdy
+ C73E  CC0000            ldd #0
+ C741  18ED00            std 0,y
+ C744                  kernel.239::	
+                       ;    } else if((new_tcb_p->priority)>(tcb_head_p->priority)) {
+ C744  7EC7DE            jmp L42
+ C747                  L41:
+ C747  EC04              ldd 4,x
+ C749  C30008            addd #8
+ C74C  188F              xgdy
+ C74E  18E600            ldab 0,y
+ C751  37                pshb ; 
+ C752  36                psha ; spill
+ C753  FC8011            ldd _tcb_head_p
+ C756  C30008            addd #8
+ C759  188F              xgdy
+ C75B  32                pula ; 
+ C75C  33                pulb ; reload
+ C75D  18E100            cmpb 0,y
+ C760  2315              bls L43
+ C762                  kernel.241::	
+                       ;       // advance to the head of the class!
+                       ;       new_tcb_p->next=tcb_head_p;
+ C762  EC04              ldd 4,x
+ C764  C3000C            addd #12
+ C767  188F              xgdy
+ C769  FC8011            ldd _tcb_head_p
+ C76C  18ED00            std 0,y
+ C76F                  kernel.242::	
+                       ;       tcb_head_p=new_tcb_p;
+ C76F  EC04              ldd 4,x
+ C771  FD8011            std _tcb_head_p
+ C774                  kernel.243::	
+                       ;    } else {
+ C774  7EC7DE            jmp L44
+ C777                  L43:
+ C777                  kernel.244::	
+                       ;       PRESTO_TCB_T * ptr=tcb_head_p;
+ C777  FC8011            ldd _tcb_head_p
+ C77A  ED02              std 2,x
+ C77C  2030              bra L46
+ C77E                  L45:
+ C77E                  kernel.246::	
+                       ;       while(ptr->next!=NULL) {
+                       ;          if((new_tcb_p->priority)>(ptr->next->priority)) break;
+ C77E  EC02              ldd 2,x
+ C780  C3000C            addd #12
+ C783  188F              xgdy
+ C785  18EC00            ldd 0,y
+ C788  C30008            addd #8
+ C78B  188F              xgdy
+ C78D  EC04              ldd 4,x
+ C78F  C30008            addd #8
+ C792  183C              pshy ; spill
+ C794  188F              xgdy
+ C796  18E600            ldab 0,y
+ C799  1838              puly ; reload
+ C79B  18E100            cmpb 0,y
+ C79E  2302              bls L48
+ C7A0  2018              bra L47
+ C7A2                  L48:
+ C7A2                  kernel.247::	
+                       ;          ptr=ptr->next;
+ C7A2  EC02              ldd 2,x
+ C7A4  C3000C            addd #12
+ C7A7  188F              xgdy
+ C7A9  18EC00            ldd 0,y
+ C7AC  ED02              std 2,x
+ C7AE                  kernel.248::	
+                       ;       }
+ C7AE                  L46:
+ C7AE  EC02              ldd 2,x
+ C7B0  C3000C            addd #12
+ C7B3  188F              xgdy
+ C7B5  18EC00            ldd 0,y
+ C7B8  26C4              bne L45
+ C7BA                  L47:
+ C7BA                  kernel.252::	
+                       ; 
+                       ;       // ptr->next is either NULL or lower priority than us
+                       ;       // either way, we want to get inserted between ptr and ptr->next
+                       ;       new_tcb_p->next=ptr->next;
+ C7BA  EC02              ldd 2,x
+ C7BC  C3000C            addd #12
+ C7BF  188F              xgdy
+ C7C1  18EC00            ldd 0,y
+ C7C4  37                pshb ; 
+ C7C5  36                psha ; spill
+ C7C6  EC04              ldd 4,x
+ C7C8  C3000C            addd #12
+ C7CB  188F              xgdy
+ C7CD  32                pula ; 
+ C7CE  33                pulb ; reload
+ C7CF  18ED00            std 0,y
+ C7D2                  kernel.253::	
+                       ;       ptr->next=new_tcb_p;
+ C7D2  EC02              ldd 2,x
+ C7D4  C3000C            addd #12
+ C7D7  188F              xgdy
+ C7D9  EC04              ldd 4,x
+ C7DB  18ED00            std 0,y
+ C7DE                  kernel.254::	
+                       ;    }
+ C7DE                  L44:
+ C7DE                  L42:
+ C7DE  0E                    cli
+ C7DF                  kernel.259::	
+                       ; 
+                       ;    // we're done messing with the task list... interrupts back on
+                       ;    INTR_ON();
+                       ; 
+                       ;    return new_tcb_p->task_id;
+ C7DF  1AEE04            ldy 4,x
+ C7E2  18E600            ldab 0,y
+ C7E5  4F                clra
+ C7E6  5D                tstb
+ C7E7  2A01              bpl X1
+ C7E9  43                coma
+ C7EA                  X1:
+ C7EA  8F                xgdx
+ C7EB  C30006            addd #6
+ C7EE  8F                xgdx
+ C7EF  35                txs
+ C7F0  38                pulx
+ C7F1  1838              puly
+ C7F3  39                rts
+ C7F4                  L36:
+ C7F4  8F                xgdx
+ C7F5  C30006            addd #6
+ C7F8  8F                xgdx
+ C7F9  35                txs
+ C7FA  38                pulx
+ C7FB  1838              puly
+ C7FD  39                rts
+                       ;  IX -> 0,x
+ C7FE                  _presto_kill_self::
+ C7FE                  kernel.266::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void presto_kill_self(void) {
+                       ;    // TODO - remove TCB from list
+                       ;    presto_fatal_error();
+ C7FE  BDC4B4            jsr _presto_fatal_error
+ C801                  kernel.267::	
+                       ; }
+ C801                  L50:
+ C801  39                rts
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;          ?temp -> 4,x
+ C802                  _presto_system_isr_wrapper::
+ C802  BDCE7D            jsr __enterb
+ C805  08                .byte 0x8
+ C806                  kernel.283::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   C O N T E X T   S W I T C H I N G   ( I N T E R R U P T )
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; #pragma interrupt presto_system_isr_wrapper
+                       ; void presto_system_isr_wrapper(void) {
+                       ; 
+                       ;    // The ICC compiler adds a "jsr __enterb" at the beginning of my interrupt
+                       ;    // service routine.  Apparently, it is concerned with preserving the state
+                       ;    // of the X register, and it tries to push it onto the stack and then do some
+                       ;    // funny math.  At the end of the ISR, it tries to undo all of the mess, and
+                       ;    // it even ends the ISR with a jump instruction.  Yikes!  I use this label
+                       ;    // to by-pass this destructive behavior at the top, and later I use an
+                       ;    // inline "RTI" instruction to by-pass the stuff at the bottom.
+                       ;    presto_fatal_error();
+ C806  BDC4B4            jsr _presto_fatal_error
+ C809                  	_presto_system_isr::
+ C809                  kernel.289::	
+                       ;    asm("_presto_system_isr::");
+                       ; 
+                       ;    // interrupts are disabled at this time
+                       ; 
+                       ;    // take care of clock things
+                       ;    presto_master_clock=clock_add(presto_master_clock,MS_PER_TICK);
+ C809  CC0064            ldd #100
+ C80C  37                pshb
+ C80D  36                psha
+ C80E  EC00              ldd 0,x
+ C810  C30004            addd #4
+ C813  18CE9B05          ldy #_presto_master_clock
+ C817  3C                pshx
+ C818  8F                xgdx
+ C819  CC0004            ldd #4
+ C81C  BDCF26            jsr __asgnblk
+ C81F  38                pulx
+ C820  EC00              ldd 0,x
+ C822  C30004            addd #4
+ C825  37                pshb
+ C826  36                psha
+ C827  CC9B05            ldd #_presto_master_clock
+ C82A  BDC2CD            jsr _clock_add
+ C82D  1838              puly
+ C82F  1838              puly
+ C831                  kernel.290::	
+                       ;    presto_restart_master_timer();
+ C831  BDCDF9            jsr _presto_restart_master_timer
+ C834                  kernel.293::	
+                       ; 
+                       ;    // check mail
+                       ;    if(deliver_mail()>0) {
+ C834  BDCC70            jsr _deliver_mail
+ C837  C100              cmpb #0
+ C839  235F              bls L52
+ C83B                  kernel.296::	
+                       ; 
+                       ;       // check to see if we've clobbered our stack
+                       ;       if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
+ C83B  FC800E            ldd _current_tcb_p
+ C83E  C30002            addd #2
+ C841  188F              xgdy
+ C843  18EC00            ldd 0,y
+ C846  ED02              std 2,x
+ C848  FC800E            ldd _current_tcb_p
+ C84B  C30004            addd #4
+ C84E  188F              xgdy
+ C850  EC02              ldd 2,x
+ C852  CDA300            cpd 0,y
+ C855  220F              bhi L56
+ C857  FC800E            ldd _current_tcb_p
+ C85A  C30006            addd #6
+ C85D  188F              xgdy
+ C85F  EC02              ldd 2,x
+ C861  CDA300            cpd 0,y
+ C864  2403              bhs L54
+ C866                  L56:
+ C866                  kernel.298::	
+                       ;       ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
+                       ;          presto_fatal_error();
+ C866  BDC4B4            jsr _presto_fatal_error
+ C869                  L54:
+ C869                  kernel.304::	
+                       ; 
+                       ;       // these parameters will be used in inline assembly...
+                       ;       // must be put in global space, not on stack
+                       ; 
+                       ;       // the ISR will save old SP in old TCB
+                       ;       global_old_sp_p=&(current_tcb_p->stack_ptr);
+ C869  FC800E            ldd _current_tcb_p
+ C86C  C30002            addd #2
+ C86F  FD800A            std _global_old_sp_p
+ C872                  kernel.307::	
+                       ; 
+                       ;       // pick next task to run
+                       ;       current_tcb_p=presto_next_tcb_to_run();
+ C872  BDC94C            jsr _presto_next_tcb_to_run
+ C875  FD800E            std _current_tcb_p
+ C878                  kernel.308::	
+                       ;       current_tid=current_tcb_p->task_id;
+ C878  18FE800E          ldy _current_tcb_p
+ C87C  18E600            ldab 0,y
+ C87F  F78010            stab _current_tid
+ C882                  kernel.311::	
+                       ; 
+                       ;       // end of ISR will set up new stack
+                       ;       global_new_sp=current_tcb_p->stack_ptr;
+ C882  FC800E            ldd _current_tcb_p
+ C885  C30002            addd #2
+ C888  188F              xgdy
+ C88A  18EC00            ldd 0,y
+ C88D  FD8008            std _global_new_sp
+ C890  18FE800A          ldy _global_old_sp_p
+ C894  18AF00            sts 0,y
+ C897  BE8008            lds _global_new_sp
+ C89A                  kernel.319::	
+                       ; 
+                       ; // WHAT??? CHANGE STACK POINTER WITHOUT SAVING REGISTERS???
+                       ; 
+                       ;       // swap the stack pointers
+                       ;       asm("ldy _global_old_sp_p");
+                       ;       asm("sts 0,y");
+                       ;       asm("lds _global_new_sp");
+                       ;    }
+ C89A                  L52:
+ C89A  3B                rti
+ C89B                  kernel.339::	
+                       ; 
+                       ; /*
+                       ;    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
+                       ;    // That way, the new task will have interrupts enabled when it wakes up.
+                       ;    asm("pula");
+                       ;    ENABLE_CCR_INTERRUPT_BIT;
+                       ;    asm("psha");
+                       ; */
+                       ; 
+                       ;    // The end of this function SHOULD be an RTI (instead of RTS), because it is
+                       ;    // an interrupt.  But the ICC compiler adds a lot of stuff at the beginning
+                       ;    // and the end of interrupt service routines.  Specifically, it is messing
+                       ;    // with the X register (pushing it onto the stack) because it uses that as
+                       ;    // a frame pointer.  So I will add my RTI here explicitly, to force the
+                       ;    // behavior that I want.
+                       ;    // Now we will pop the stack and "run" the new task.
+                       ;    asm("rti");
+                       ; 
+                       ;    // we never get here
+                       ;    presto_fatal_error();
+ C89B  BDC4B4            jsr _presto_fatal_error
+ C89E                  kernel.340::	
+                       ; }
+ C89E                  L51:
+ C89E  8F                xgdx
+ C89F  C30008            addd #8
+ C8A2  8F                xgdx
+ C8A3  35                txs
+ C8A4  38                pulx
+ C8A5  39                rts
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;          ?temp -> 4,x
+ C8A6                  _context_switch_wrapper::
+ C8A6  BDCE7D            jsr __enterb
+ C8A9  06                .byte 0x6
+ C8AA                  	_context_switch::
+ C8AA                  kernel.351::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; void context_switch_wrapper(void) {
+                       ; 
+                       ;    asm("_context_switch::");
+                       ; 
+                       ; // REGISTERS PUSHED THE FIRST TIME WHEN SWI EXECUTED!!
+                       ; 
+                       ;    // check to see if the old task has clobbered its stack
+                       ;    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
+ C8AA  FC800E            ldd _current_tcb_p
+ C8AD  C30002            addd #2
+ C8B0  188F              xgdy
+ C8B2  18EC00            ldd 0,y
+ C8B5  ED04              std 4,x
+ C8B7  FC800E            ldd _current_tcb_p
+ C8BA  C30004            addd #4
+ C8BD  188F              xgdy
+ C8BF  EC04              ldd 4,x
+ C8C1  CDA300            cpd 0,y
+ C8C4  220F              bhi L60
+ C8C6  FC800E            ldd _current_tcb_p
+ C8C9  C30006            addd #6
+ C8CC  188F              xgdy
+ C8CE  EC04              ldd 4,x
+ C8D0  CDA300            cpd 0,y
+ C8D3  2403              bhs L58
+ C8D5                  L60:
+ C8D5                  kernel.353::	
+                       ;    ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
+                       ;       presto_fatal_error();
+ C8D5  BDC4B4            jsr _presto_fatal_error
+ C8D8                  L58:
+ C8D8                  kernel.356::	
+                       ; 
+                       ;    // the inline asm will save old SP in old TCB
+                       ;    global_old_sp_p=&(current_tcb_p->stack_ptr);
+ C8D8  FC800E            ldd _current_tcb_p
+ C8DB  C30002            addd #2
+ C8DE  FD800A            std _global_old_sp_p
+ C8E1                  kernel.359::	
+                       ; 
+                       ;    // pick next task to run
+                       ;    current_tcb_p=presto_next_tcb_to_run();
+ C8E1  BDC94C            jsr _presto_next_tcb_to_run
+ C8E4  FD800E            std _current_tcb_p
+ C8E7                  kernel.360::	
+                       ;    current_tid=current_tcb_p->task_id;
+ C8E7  18FE800E          ldy _current_tcb_p
+ C8EB  18E600            ldab 0,y
+ C8EE  F78010            stab _current_tid
+ C8F1                  kernel.363::	
+                       ; 
+                       ;    // check to see if the new task has clobbered its stack
+                       ;    if(((current_tcb_p->stack_ptr)>(current_tcb_p->stack_top))
+ C8F1  FC800E            ldd _current_tcb_p
+ C8F4  C30002            addd #2
+ C8F7  188F              xgdy
+ C8F9  18EC00            ldd 0,y
+ C8FC  ED02              std 2,x
+ C8FE  FC800E            ldd _current_tcb_p
+ C901  C30004            addd #4
+ C904  188F              xgdy
+ C906  EC02              ldd 2,x
+ C908  CDA300            cpd 0,y
+ C90B  220F              bhi L63
+ C90D  FC800E            ldd _current_tcb_p
+ C910  C30006            addd #6
+ C913  188F              xgdy
+ C915  EC02              ldd 2,x
+ C917  CDA300            cpd 0,y
+ C91A  2403              bhs L61
+ C91C                  L63:
+ C91C                  kernel.365::	
+                       ;    ||((current_tcb_p->stack_ptr)<(current_tcb_p->stack_bottom)))
+                       ;       presto_fatal_error();
+ C91C  BDC4B4            jsr _presto_fatal_error
+ C91F                  L61:
+ C91F                  kernel.370::	
+                       ; 
+                       ;    // call asm routine to set up new stack
+                       ;    // when we return, we'll be another process
+                       ;    // the asm routine will re-enable interrupts
+                       ;    global_new_sp=current_tcb_p->stack_ptr;
+ C91F  FC800E            ldd _current_tcb_p
+ C922  C30002            addd #2
+ C925  188F              xgdy
+ C927  18EC00            ldd 0,y
+ C92A  FD8008            std _global_new_sp
+ C92D  183C              pshy
+ C92F  3C                pshx
+ C930  36                psha
+ C931  37                pshb
+ C932  07                tpa
+ C933  84EF              anda ~#0x10
+ C935  36                psha
+ C936  18FE800A          ldy _global_old_sp_p
+ C93A  18AF00            sts 0,y
+ C93D  BE8008            lds _global_new_sp
+ C940  3B                rti
+ C941                  kernel.402::	
+                       ; 
+                       ; // REGISTERS PUSHED A SECOND TIME HERE!!
+                       ; 
+                       ;    // save the registers (in the same order that an interrupt does)
+                       ;    asm("pshy");  // 2 bytes (Low, then High)
+                       ;    asm("pshx");  // 2 bytes (Low, then High)
+                       ;    asm("psha");  // 1 byte
+                       ;    asm("pshb");  // 1 byte
+                       ;    asm("tpa");
+                       ;    ENABLE_CCR_INTERRUPT_BIT;  // enable interrupts in pushed CC register
+                       ;    asm("psha");  // 1 byte, the condition codes
+                       ; 
+                       ;    // swap the stack pointers
+                       ;    asm("ldy _global_old_sp_p");
+                       ;    asm("sts 0,y");
+                       ;    asm("lds _global_new_sp");
+                       ; 
+                       ; /*
+                       ;    // Clear interrupt mask bit (to enable ints) in the CC register on the stack.
+                       ;    // That way, the new task will have interrupts enabled when it wakes up.
+                       ;    asm("pula");
+                       ;    ENABLE_CCR_INTERRUPT_BIT;
+                       ;    asm("psha");
+                       ; */
+                       ; 
+                       ;    // Normally, this function would end with an RTS, but we want to act EXACTLY
+                       ;    // the same as if we had just been inside of an interrupt.  So we manually
+                       ;    // call RTI here to pop the registers and "run" the new task.
+                       ;    asm("rti");
+                       ; 
+                       ;    // we never get here
+                       ;    presto_fatal_error();
+ C941  BDC4B4            jsr _presto_fatal_error
+ C944                  kernel.403::	
+                       ; }
+ C944                  L57:
+ C944  8F                xgdx
+ C945  C30006            addd #6
+ C948  8F                xgdx
+ C949  35                txs
+ C94A  38                pulx
+ C94B  39                rts
+                       ;  IX -> 0,x
+                       ;            ptr -> 2,x
+ C94C                  _presto_next_tcb_to_run::
+ C94C  BDCE7D            jsr __enterb
+ C94F  04                .byte 0x4
+ C950                  kernel.412::	
+                       ; 
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   S C H E D U L I N G
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ PRESTO_TCB_T * presto_next_tcb_to_run(void) {
+                       ;    // pick highest priority ready task to run
+                       ;    PRESTO_TCB_T * ptr=tcb_head_p;
+ C950  FC8011            ldd _tcb_head_p
+ C953  ED02              std 2,x
+ C955  2022              bra L66
+ C957                  L65:
+ C957                  kernel.414::	
+                       ;    while(ptr!=NULL) {
+                       ;       if(ptr->state==STATE_READY) return ptr;
+ C957  EC02              ldd 2,x
+ C959  C3000A            addd #10
+ C95C  188F              xgdy
+ C95E  18EC00            ldd 0,y
+ C961  260A              bne L68
+ C963  EC02              ldd 2,x
+ C965  8F                xgdx
+ C966  C30004            addd #4
+ C969  8F                xgdx
+ C96A  35                txs
+ C96B  38                pulx
+ C96C  39                rts
+ C96D                  L68:
+ C96D                  kernel.415::	
+                       ;       ptr=ptr->next;
+ C96D  EC02              ldd 2,x
+ C96F  C3000C            addd #12
+ C972  188F              xgdy
+ C974  18EC00            ldd 0,y
+ C977  ED02              std 2,x
+ C979                  kernel.416::	
+                       ;    }
+ C979                  L66:
+ C979  EC02              ldd 2,x
+ C97B  26DA              bne L65
+ C97D                  kernel.418::	
+                       ;    // should never get here
+                       ;    presto_fatal_error();
+ C97D  BDC4B4            jsr _presto_fatal_error
+ C980                  kernel.419::	
+                       ;    return NULL;
+ C980  CC0000            ldd #0
+ C983  8F                xgdx
+ C984  C30004            addd #4
+ C987  8F                xgdx
+ C988  35                txs
+ C989  38                pulx
+ C98A  39                rts
+ C98B                  L64:
+ C98B  8F                xgdx
+ C98C  C30004            addd #4
+ C98F  8F                xgdx
+ C990  35                txs
+ C991  38                pulx
+ C992  39                rts
+                       ;  IX -> 0,x
+                       ;          ?temp -> 2,x
+                       ;        payload -> 12,x
+                       ;             to -> 9,x
+ C993                  _presto_send_message::
+ C993  BDCE7D            jsr __enterb
+ C996  46                .byte 0x46
+ C997                  kernel.427::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   M E S S A G E S   A N D   T I M E R S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; BYTE presto_send_message(PRESTO_TID_T to, PRESTO_MAIL_T payload) {
+                       ;    return presto_timer(to,0,payload);
+ C997  EC00              ldd 0,x
+ C999  C30002            addd #2
+ C99C  1AEE0C            ldy 12,x
+ C99F  3C                pshx
+ C9A0  8F                xgdx
+ C9A1  CC0004            ldd #4
+ C9A4  BDCF26            jsr __asgnblk
+ C9A7  38                pulx
+ C9A8  EC00              ldd 0,x
+ C9AA  C30002            addd #2
+ C9AD  37                pshb
+ C9AE  36                psha
+ C9AF  CC0000            ldd #0
+ C9B2  37                pshb
+ C9B3  36                psha
+ C9B4  E609              ldab 9,x
+ C9B6  4F                clra
+ C9B7  5D                tstb
+ C9B8  2A01              bpl X2
+ C9BA  43                coma
+ C9BB                  X2:
+ C9BB  BDC9D7            jsr _presto_timer
+ C9BE  1838              puly
+ C9C0  1838              puly
+ C9C2  4F                clra
+ C9C3  8F                xgdx
+ C9C4  C30006            addd #6
+ C9C7  8F                xgdx
+ C9C8  35                txs
+ C9C9  38                pulx
+ C9CA  1838              puly
+ C9CC  39                rts
+ C9CD                  L70:
+ C9CD  8F                xgdx
+ C9CE  C30006            addd #6
+ C9D1  8F                xgdx
+ C9D2  35                txs
+ C9D3  38                pulx
+ C9D4  1838              puly
+ C9D6  39                rts
+                       ;  IX -> 0,x
+                       ;  func temp: 2,x - 6,x
+                       ;          ?temp -> 6,x
+                       ;          ?temp -> 10,x
+                       ;          msg_p -> 14,x
+                       ;          ?temp -> 16,x
+                       ;          ?temp -> 20,x
+                       ;          ?temp -> 24,x
+                       ;          ?temp -> 28,x
+                       ;        tcb_ptr -> 32,x
+                       ;     new_mail_p -> 34,x
+                       ;        payload -> 44,x
+                       ;          delay -> 42,x
+                       ;             to -> 39,x
+ C9D7                  _presto_timer::
+ C9D7  BDCE7D            jsr __enterb
+ C9DA  64                .byte 0x64
+ C9DB  0F                    sei
+ C9DC                  kernel.440::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; BYTE presto_timer(PRESTO_TID_T to, unsigned short delay, PRESTO_MAIL_T payload) {
+                       ;    PRESTO_MESSAGE_T * new_mail_p;
+                       ;    PRESTO_TCB_T * tcb_ptr;
+                       ; 
+                       ;    // we're going to mess with the PO mail list... interrupts off
+                       ;    INTR_OFF();
+                       ; 
+                       ;    // check to see if there's room
+                       ;    if(free_mail_p==NULL) {
+ C9DC  FC8016            ldd _free_mail_p
+ C9DF  2603              bne L72
+ C9E1                  kernel.441::	
+                       ;       presto_fatal_error();
+ C9E1  BDC4B4            jsr _presto_fatal_error
+ C9E4                  kernel.442::	
+                       ;    }
+ C9E4                  L72:
+ C9E4                  kernel.445::	
+                       ; 
+                       ;    // check to see that the recipient is an alive task
+                       ;    tcb_ptr=tid_to_tcbptr(to);
+ C9E4  E627              ldab 39,x
+ C9E6  4F                clra
+ C9E7  5D                tstb
+ C9E8  2A01              bpl X3
+ C9EA  43                coma
+ C9EB                  X3:
+ C9EB  4F                clra
+ C9EC  BDCD69            jsr _tid_to_tcbptr
+ C9EF  ED20              std 32,x
+ C9F1                  kernel.446::	
+                       ;    if(tcb_ptr==NULL) {
+ C9F1  EC20              ldd 32,x
+ C9F3  2603              bne L74
+ C9F5                  kernel.447::	
+                       ;       presto_fatal_error();
+ C9F5  BDC4B4            jsr _presto_fatal_error
+ C9F8                  kernel.448::	
+                       ;    }
+ C9F8                  L74:
+ C9F8                  kernel.451::	
+                       ; 
+                       ;    // allocate space for a new message
+                       ;    new_mail_p=free_mail_p;
+ C9F8  FC8016            ldd _free_mail_p
+ C9FB  ED22              std 34,x
+ C9FD                  kernel.452::	
+                       ;    free_mail_p=free_mail_p->next;
+ C9FD  FC8016            ldd _free_mail_p
+ CA00  C3000E            addd #14
+ CA03  188F              xgdy
+ CA05  18EC00            ldd 0,y
+ CA08  FD8016            std _free_mail_p
+ CA0B                  kernel.456::	
+                       ; 
+                       ;    // fill in the blanks
+                       ;    // new_mail_p->serial_number;   already set
+                       ;    new_mail_p->from_tid=current_tcb_p->task_id;
+ CA0B  EC22              ldd 34,x
+ CA0D  C30002            addd #2
+ CA10  188F              xgdy
+ CA12  183C              pshy ; spill
+ CA14  18FE800E          ldy _current_tcb_p
+ CA18  18E600            ldab 0,y
+ CA1B  1838              puly ; reload
+ CA1D  18E700            stab 0,y
+ CA20                  kernel.457::	
+                       ;    new_mail_p->to_tcb_p=tcb_ptr;
+ CA20  EC22              ldd 34,x
+ CA22  C30004            addd #4
+ CA25  188F              xgdy
+ CA27  EC20              ldd 32,x
+ CA29  18ED00            std 0,y
+ CA2C                  kernel.458::	
+                       ;    new_mail_p->delivery_time=clock_add(presto_master_clock,delay);
+ CA2C  EC2A              ldd 42,x
+ CA2E  37                pshb
+ CA2F  36                psha
+ CA30  EC00              ldd 0,x
+ CA32  C3001C            addd #28
+ CA35  18CE9B05          ldy #_presto_master_clock
+ CA39  3C                pshx
+ CA3A  8F                xgdx
+ CA3B  CC0004            ldd #4
+ CA3E  BDCF26            jsr __asgnblk
+ CA41  38                pulx
+ CA42  EC00              ldd 0,x
+ CA44  C3001C            addd #28
+ CA47  37                pshb
+ CA48  36                psha
+ CA49  EC00              ldd 0,x
+ CA4B  C30018            addd #24
+ CA4E  BDC2CD            jsr _clock_add
+ CA51  1838              puly
+ CA53  1838              puly
+ CA55  EC00              ldd 0,x
+ CA57  C30018            addd #24
+ CA5A  188F              xgdy
+ CA5C  EC22              ldd 34,x
+ CA5E  C30006            addd #6
+ CA61  3C                pshx
+ CA62  8F                xgdx
+ CA63  CC0004            ldd #4
+ CA66  BDCF26            jsr __asgnblk
+ CA69  38                pulx
+ CA6A                  kernel.459::	
+                       ;    new_mail_p->payload=payload;
+ CA6A  EC22              ldd 34,x
+ CA6C  C3000A            addd #10
+ CA6F  1AEE2C            ldy 44,x
+ CA72  3C                pshx
+ CA73  8F                xgdx
+ CA74  CC0004            ldd #4
+ CA77  BDCF26            jsr __asgnblk
+ CA7A  38                pulx
+ CA7B                  kernel.462::	
+                       ; 
+                       ;    // insert new message into list in time order
+                       ;    if(po_mail_p==NULL) {
+ CA7B  FC8018            ldd _po_mail_p
+ CA7E  2615              bne L76
+ CA80                  kernel.465::	
+                       ; 
+                       ;       // we are the first message in PO
+                       ;       po_mail_p=new_mail_p;
+ CA80  EC22              ldd 34,x
+ CA82  FD8018            std _po_mail_p
+ CA85                  kernel.466::	
+                       ;       new_mail_p->next=NULL;
+ CA85  EC22              ldd 34,x
+ CA87  C3000E            addd #14
+ CA8A  188F              xgdy
+ CA8C  CC0000            ldd #0
+ CA8F  18ED00            std 0,y
+ CA92                  kernel.468::	
+                       ; 
+                       ;    } else if(clock_compare(po_mail_p->delivery_time,new_mail_p->delivery_time)>0) {
+ CA92  7ECB89            jmp L77
+ CA95                  L76:
+ CA95  EC00              ldd 0,x
+ CA97  C30014            addd #20
+ CA9A  37                pshb ; 
+ CA9B  36                psha ; spill
+ CA9C  EC22              ldd 34,x
+ CA9E  C30006            addd #6
+ CAA1  188F              xgdy
+ CAA3  32                pula ; 
+ CAA4  33                pulb ; reload
+ CAA5  3C                pshx
+ CAA6  8F                xgdx
+ CAA7  CC0004            ldd #4
+ CAAA  BDCF26            jsr __asgnblk
+ CAAD  38                pulx
+ CAAE  EC00              ldd 0,x
+ CAB0  C30014            addd #20
+ CAB3  37                pshb
+ CAB4  36                psha
+ CAB5  EC00              ldd 0,x
+ CAB7  C30010            addd #16
+ CABA  37                pshb ; 
+ CABB  36                psha ; spill
+ CABC  FC8018            ldd _po_mail_p
+ CABF  C30006            addd #6
+ CAC2  188F              xgdy
+ CAC4  32                pula ; 
+ CAC5  33                pulb ; reload
+ CAC6  3C                pshx
+ CAC7  8F                xgdx
+ CAC8  CC0004            ldd #4
+ CACB  BDCF26            jsr __asgnblk
+ CACE  38                pulx
+ CACF  EC00              ldd 0,x
+ CAD1  C30010            addd #16
+ CAD4  BDC31C            jsr _clock_compare
+ CAD7  1838              puly
+ CAD9  ED02              std 2,x
+ CADB  6D03              tst 3,x
+ CADD  2F15              ble L78
+ CADF                  kernel.471::	
+                       ; 
+                       ;       // advance to the head of the class!
+                       ;       new_mail_p->next=po_mail_p;
+ CADF  EC22              ldd 34,x
+ CAE1  C3000E            addd #14
+ CAE4  188F              xgdy
+ CAE6  FC8018            ldd _po_mail_p
+ CAE9  18ED00            std 0,y
+ CAEC                  kernel.472::	
+                       ;       po_mail_p=new_mail_p;
+ CAEC  EC22              ldd 34,x
+ CAEE  FD8018            std _po_mail_p
+ CAF1                  kernel.474::	
+                       ; 
+                       ;    } else {
+ CAF1  7ECB89            jmp L79
+ CAF4                  L78:
+ CAF4                  kernel.477::	
+                       ; 
+                       ;       // we are one of many messages in the PO
+                       ;       PRESTO_MESSAGE_T * msg_p=po_mail_p;
+ CAF4  FC8018            ldd _po_mail_p
+ CAF7  ED0E              std 14,x
+ CAF9  205B              bra L81
+ CAFB                  L80:
+ CAFB                  kernel.479::	
+                       ;       while(msg_p->next!=NULL) {
+                       ;          if(clock_compare(msg_p->next->delivery_time,new_mail_p->delivery_time)>0) break;
+ CAFB  EC00              ldd 0,x
+ CAFD  C3000A            addd #10
+ CB00  37                pshb ; 
+ CB01  36                psha ; spill
+ CB02  EC22              ldd 34,x
+ CB04  C30006            addd #6
+ CB07  188F              xgdy
+ CB09  32                pula ; 
+ CB0A  33                pulb ; reload
+ CB0B  3C                pshx
+ CB0C  8F                xgdx
+ CB0D  CC0004            ldd #4
+ CB10  BDCF26            jsr __asgnblk
+ CB13  38                pulx
+ CB14  EC00              ldd 0,x
+ CB16  C3000A            addd #10
+ CB19  37                pshb
+ CB1A  36                psha
+ CB1B  EC0E              ldd 14,x
+ CB1D  C3000E            addd #14
+ CB20  188F              xgdy
+ CB22  18EC00            ldd 0,y
+ CB25  C30006            addd #6
+ CB28  188F              xgdy
+ CB2A  EC00              ldd 0,x
+ CB2C  C30006            addd #6
+ CB2F  3C                pshx
+ CB30  8F                xgdx
+ CB31  CC0004            ldd #4
+ CB34  BDCF26            jsr __asgnblk
+ CB37  38                pulx
+ CB38  EC00              ldd 0,x
+ CB3A  C30006            addd #6
+ CB3D  BDC31C            jsr _clock_compare
+ CB40  1838              puly
+ CB42  ED04              std 4,x
+ CB44  6D05              tst 5,x
+ CB46  2F02              ble L83
+ CB48  201B              bra L82
+ CB4A                  L83:
+ CB4A                  kernel.480::	
+                       ;          msg_p=msg_p->next;
+ CB4A  EC0E              ldd 14,x
+ CB4C  C3000E            addd #14
+ CB4F  188F              xgdy
+ CB51  18EC00            ldd 0,y
+ CB54  ED0E              std 14,x
+ CB56                  kernel.481::	
+                       ;       }
+ CB56                  L81:
+ CB56  EC0E              ldd 14,x
+ CB58  C3000E            addd #14
+ CB5B  188F              xgdy
+ CB5D  18EC00            ldd 0,y
+ CB60  2703              beq X4
+ CB62  7ECAFB            jmp L80
+ CB65                  X4:
+ CB65                  L82:
+ CB65                  kernel.485::	
+                       ; 
+                       ;       // msg_p->next is either NULL or later delivery time than us
+                       ;       // either way, we want to get inserted between msg_p and msg_p->next
+                       ;       new_mail_p->next=msg_p->next;
+ CB65  EC0E              ldd 14,x
+ CB67  C3000E            addd #14
+ CB6A  188F              xgdy
+ CB6C  18EC00            ldd 0,y
+ CB6F  37                pshb ; 
+ CB70  36                psha ; spill
+ CB71  EC22              ldd 34,x
+ CB73  C3000E            addd #14
+ CB76  188F              xgdy
+ CB78  32                pula ; 
+ CB79  33                pulb ; reload
+ CB7A  18ED00            std 0,y
+ CB7D                  kernel.486::	
+                       ;       msg_p->next=new_mail_p;
+ CB7D  EC0E              ldd 14,x
+ CB7F  C3000E            addd #14
+ CB82  188F              xgdy
+ CB84  EC22              ldd 34,x
+ CB86  18ED00            std 0,y
+ CB89                  kernel.487::	
+                       ;    }
+ CB89                  L79:
+ CB89                  L77:
+ CB89  0E                    cli
+ CB8A                  kernel.492::	
+                       ; 
+                       ;    // we're done messing with the PO mail list... interrupts back on
+                       ;    INTR_ON();
+                       ; 
+                       ;    return 0;
+ CB8A  CC0000            ldd #0
+ CB8D  8F                xgdx
+ CB8E  C30024            addd #36
+ CB91  8F                xgdx
+ CB92  35                txs
+ CB93  38                pulx
+ CB94  1838              puly
+ CB96  39                rts
+ CB97                  L71:
+ CB97  8F                xgdx
+ CB98  C30024            addd #36
+ CB9B  8F                xgdx
+ CB9C  35                txs
+ CB9D  38                pulx
+ CB9E  1838              puly
+ CBA0  39                rts
+                       ;  IX -> 0,x
+                       ;          msg_p -> 2,x
+                       ;      payload_p -> 6,x
+ CBA1                  _presto_wait_for_message::
+ CBA1  BDCE7D            jsr __enterb
+ CBA4  44                .byte 0x44
+ CBA5  0F                    sei
+ CBA6                  kernel.504::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; BYTE presto_wait_for_message(PRESTO_MAIL_T * payload_p) {
+                       ;    PRESTO_MESSAGE_T * msg_p;
+                       ; 
+                       ;    // we're about to switch to a new task... interrupts off
+                       ;    INTR_OFF();
+                       ; 
+                       ;    // we will only sleep if there are no messages in our queue
+                       ;    if(current_tcb_p->mailbox_head==NULL) {
+ CBA6  FC800E            ldd _current_tcb_p
+ CBA9  C3000E            addd #14
+ CBAC  188F              xgdy
+ CBAE  18EC00            ldd 0,y
+ CBB1  260F              bne L86
+ CBB3                  kernel.506::	
+                       ;       // no mail, so we can sleep
+                       ;       current_tcb_p->state=STATE_BLOCKED;
+ CBB3  FC800E            ldd _current_tcb_p
+ CBB6  C3000A            addd #10
+ CBB9  188F              xgdy
+ CBBB  CC0001            ldd #1
+ CBBE  18ED00            std 0,y
+ CBC1  3F                swi
+ CBC2                  kernel.510::	
+                       ;       asm("swi");
+                       ;       // When we wake up, we'll be ready to recieve our mail.
+                       ;       // Interrupts will be enabled.
+                       ;    }
+ CBC2                  L86:
+ CBC2  0F                    sei
+ CBC3                  kernel.515::	
+                       ; 
+                       ;    // we're about to mess with the mail list... interrupts off
+                       ;    INTR_OFF();
+                       ;    // we're going to use this a lot, so dereference now
+                       ;    msg_p=current_tcb_p->mailbox_head;
+ CBC3  FC800E            ldd _current_tcb_p
+ CBC6  C3000E            addd #14
+ CBC9  188F              xgdy
+ CBCB  18EC00            ldd 0,y
+ CBCE  ED02              std 2,x
+ CBD0                  kernel.518::	
+                       ; 
+                       ;    // get one message from the task's mail queue
+                       ;    if(msg_p==NULL) {
+ CBD0  EC02              ldd 2,x
+ CBD2  2603              bne L88
+ CBD4                  kernel.520::	
+                       ;       // there are no messages in the task's mail list
+                       ;       presto_fatal_error();
+ CBD4  BDC4B4            jsr _presto_fatal_error
+ CBD7                  kernel.521::	
+                       ;    }
+ CBD7                  L88:
+ CBD7                  kernel.524::	
+                       ; 
+                       ;    // are we being paranoid?
+                       ;    if((msg_p->to_tcb_p)!=current_tcb_p) {
+ CBD7  EC02              ldd 2,x
+ CBD9  C30004            addd #4
+ CBDC  188F              xgdy
+ CBDE  18EC00            ldd 0,y
+ CBE1  1AB3800E          cpd _current_tcb_p
+ CBE5  2703              beq L90
+ CBE7                  kernel.525::	
+                       ;       presto_fatal_error();
+ CBE7  BDC4B4            jsr _presto_fatal_error
+ CBEA                  kernel.526::	
+                       ;    }
+ CBEA                  L90:
+ CBEA                  kernel.529::	
+                       ; 
+                       ;    // there is at least one message, get one
+                       ;    if (msg_p==current_tcb_p->mailbox_tail) {
+ CBEA  FC800E            ldd _current_tcb_p
+ CBED  C30010            addd #16
+ CBF0  188F              xgdy
+ CBF2  EC02              ldd 2,x
+ CBF4  CDA300            cpd 0,y
+ CBF7  261E              bne L92
+ CBF9                  kernel.531::	
+                       ;       // there is only one item in the list, take it
+                       ;       current_tcb_p->mailbox_head=NULL;
+ CBF9  FC800E            ldd _current_tcb_p
+ CBFC  C3000E            addd #14
+ CBFF  188F              xgdy
+ CC01  CC0000            ldd #0
+ CC04  18ED00            std 0,y
+ CC07                  kernel.532::	
+                       ;       current_tcb_p->mailbox_tail=NULL;
+ CC07  FC800E            ldd _current_tcb_p
+ CC0A  C30010            addd #16
+ CC0D  188F              xgdy
+ CC0F  CC0000            ldd #0
+ CC12  18ED00            std 0,y
+ CC15                  kernel.533::	
+                       ;    } else {
+ CC15  2019              bra L93
+ CC17                  L92:
+ CC17                  kernel.535::	
+                       ;       // there are many messages, take first
+                       ;       current_tcb_p->mailbox_head=msg_p->next;
+ CC17  EC02              ldd 2,x
+ CC19  C3000E            addd #14
+ CC1C  188F              xgdy
+ CC1E  18EC00            ldd 0,y
+ CC21  37                pshb ; 
+ CC22  36                psha ; spill
+ CC23  FC800E            ldd _current_tcb_p
+ CC26  C3000E            addd #14
+ CC29  188F              xgdy
+ CC2B  32                pula ; 
+ CC2C  33                pulb ; reload
+ CC2D  18ED00            std 0,y
+ CC30                  kernel.536::	
+                       ;    }
+ CC30                  L93:
+ CC30                  kernel.539::	
+                       ; 
+                       ;    // record the message id before we can get interrupted
+                       ;    if(payload_p!=NULL) *payload_p=msg_p->payload;
+ CC30  EC06              ldd 6,x
+ CC32  2712              beq L94
+ CC34  EC02              ldd 2,x
+ CC36  C3000A            addd #10
+ CC39  188F              xgdy
+ CC3B  EC06              ldd 6,x
+ CC3D  3C                pshx
+ CC3E  8F                xgdx
+ CC3F  CC0004            ldd #4
+ CC42  BDCF26            jsr __asgnblk
+ CC45  38                pulx
+ CC46                  L94:
+ CC46                  kernel.542::	
+                       ; 
+                       ;    // return the message to the free list
+                       ;    msg_p->next=free_mail_p;
+ CC46  EC02              ldd 2,x
+ CC48  C3000E            addd #14
+ CC4B  188F              xgdy
+ CC4D  FC8016            ldd _free_mail_p
+ CC50  18ED00            std 0,y
+ CC53                  kernel.543::	
+                       ;    free_mail_p=msg_p;
+ CC53  EC02              ldd 2,x
+ CC55  FD8016            std _free_mail_p
+ CC58  0E                    cli
+ CC59                  kernel.549::	
+                       ; 
+                       ;    // done messing with mail lists... interrupts back on
+                       ;    INTR_ON();
+                       ; 
+                       ;    // return the number of messages retrieved
+                       ;    return 1;
+ CC59  CC0001            ldd #1
+ CC5C  8F                xgdx
+ CC5D  C30004            addd #4
+ CC60  8F                xgdx
+ CC61  35                txs
+ CC62  38                pulx
+ CC63  1838              puly
+ CC65  39                rts
+ CC66                  L85:
+ CC66  8F                xgdx
+ CC67  C30004            addd #4
+ CC6A  8F                xgdx
+ CC6B  35                txs
+ CC6C  38                pulx
+ CC6D  1838              puly
+ CC6F  39                rts
+                       ;  IX -> 0,x
+                       ;  func temp: 2,x - 4,x
+                       ;          ?temp -> 4,x
+                       ;          ?temp -> 8,x
+                       ;          count -> 13,x
+                       ;          msg_p -> 14,x
+                       ;          tcb_p -> 16,x
+ CC70                  _deliver_mail::
+ CC70  BDCE7D            jsr __enterb
+ CC73  12                .byte 0x12
+ CC74                  kernel.555::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ BYTE deliver_mail(void) {
+                       ;    BYTE count=0;
+ CC74  6F0D              clr 13,x
+ CC76  7ECD08            jmp L98
+ CC79                  L97:
+ CC79                  kernel.560::	
+                       ;    PRESTO_MESSAGE_T * msg_p;
+                       ;    PRESTO_TCB_T * tcb_p;
+                       ;    while((po_mail_p!=NULL)&&(clock_compare(po_mail_p->delivery_time,presto_master_clock)<=0)) {
+                       ;       // we're going to use this a lot, so de-reference once
+                       ;       tcb_p=po_mail_p->to_tcb_p;
+ CC79  FC8018            ldd _po_mail_p
+ CC7C  C30004            addd #4
+ CC7F  188F              xgdy
+ CC81  18EC00            ldd 0,y
+ CC84  ED10              std 16,x
+ CC86                  kernel.561::	
+                       ;       if(tcb_p==NULL) presto_fatal_error();
+ CC86  EC10              ldd 16,x
+ CC88  2603              bne L100
+ CC8A  BDC4B4            jsr _presto_fatal_error
+ CC8D                  L100:
+ CC8D                  kernel.564::	
+                       ; 
+                       ;       // make receiver task ready
+                       ;       tcb_p->state=STATE_READY;
+ CC8D  EC10              ldd 16,x
+ CC8F  C3000A            addd #10
+ CC92  188F              xgdy
+ CC94  CC0000            ldd #0
+ CC97  18ED00            std 0,y
+ CC9A                  kernel.567::	
+                       ; 
+                       ;       // remove message from PO list
+                       ;       msg_p=po_mail_p;
+ CC9A  FC8018            ldd _po_mail_p
+ CC9D  ED0E              std 14,x
+ CC9F                  kernel.568::	
+                       ;       po_mail_p=po_mail_p->next;
+ CC9F  FC8018            ldd _po_mail_p
+ CCA2  C3000E            addd #14
+ CCA5  188F              xgdy
+ CCA7  18EC00            ldd 0,y
+ CCAA  FD8018            std _po_mail_p
+ CCAD                  kernel.571::	
+                       ; 
+                       ;       // move the message to the task's mail list
+                       ;       if(tcb_p->mailbox_head==NULL) {
+ CCAD  EC10              ldd 16,x
+ CCAF  C3000E            addd #14
+ CCB2  188F              xgdy
+ CCB4  18EC00            ldd 0,y
+ CCB7  261A              bne L102
+ CCB9                  kernel.574::	
+                       ; 
+                       ;          // we are the only message in the list
+                       ;          tcb_p->mailbox_head=msg_p;
+ CCB9  EC10              ldd 16,x
+ CCBB  C3000E            addd #14
+ CCBE  188F              xgdy
+ CCC0  EC0E              ldd 14,x
+ CCC2  18ED00            std 0,y
+ CCC5                  kernel.575::	
+                       ;          tcb_p->mailbox_tail=msg_p;
+ CCC5  EC10              ldd 16,x
+ CCC7  C30010            addd #16
+ CCCA  188F              xgdy
+ CCCC  EC0E              ldd 14,x
+ CCCE  18ED00            std 0,y
+ CCD1                  kernel.577::	
+                       ; 
+                       ;       } else {
+ CCD1  2020              bra L103
+ CCD3                  L102:
+ CCD3                  kernel.580::	
+                       ; 
+                       ;          // we are one of many, add to the tail of the list
+                       ;          tcb_p->mailbox_tail->next=msg_p;
+ CCD3  EC10              ldd 16,x
+ CCD5  C30010            addd #16
+ CCD8  188F              xgdy
+ CCDA  18EC00            ldd 0,y
+ CCDD  C3000E            addd #14
+ CCE0  188F              xgdy
+ CCE2  EC0E              ldd 14,x
+ CCE4  18ED00            std 0,y
+ CCE7                  kernel.581::	
+                       ;          tcb_p->mailbox_tail=msg_p;
+ CCE7  EC10              ldd 16,x
+ CCE9  C30010            addd #16
+ CCEC  188F              xgdy
+ CCEE  EC0E              ldd 14,x
+ CCF0  18ED00            std 0,y
+ CCF3                  kernel.583::	
+                       ; 
+                       ;       }
+ CCF3                  L103:
+ CCF3                  kernel.585::	
+                       ;       // no matter what, we are the last in the task's message list
+                       ;       msg_p->next=NULL;
+ CCF3  EC0E              ldd 14,x
+ CCF5  C3000E            addd #14
+ CCF8  188F              xgdy
+ CCFA  CC0000            ldd #0
+ CCFD  18ED00            std 0,y
+ CD00                  kernel.588::	
+                       ; 
+                       ;       // indicate that we moved one mail message
+                       ;       count++;
+ CD00  E60D              ldab 13,x
+ CD02  4F                clra
+ CD03  C30001            addd #1
+ CD06  E70D              stab 13,x
+ CD08                  kernel.589::	
+                       ;    }
+ CD08                  L98:
+ CD08  FC8018            ldd _po_mail_p
+ CD0B  2746              beq L104
+ CD0D  EC00              ldd 0,x
+ CD0F  C30008            addd #8
+ CD12  18CE9B05          ldy #_presto_master_clock
+ CD16  3C                pshx
+ CD17  8F                xgdx
+ CD18  CC0004            ldd #4
+ CD1B  BDCF26            jsr __asgnblk
+ CD1E  38                pulx
+ CD1F  EC00              ldd 0,x
+ CD21  C30008            addd #8
+ CD24  37                pshb
+ CD25  36                psha
+ CD26  EC00              ldd 0,x
+ CD28  C30004            addd #4
+ CD2B  37                pshb ; 
+ CD2C  36                psha ; spill
+ CD2D  FC8018            ldd _po_mail_p
+ CD30  C30006            addd #6
+ CD33  188F              xgdy
+ CD35  32                pula ; 
+ CD36  33                pulb ; reload
+ CD37  3C                pshx
+ CD38  8F                xgdx
+ CD39  CC0004            ldd #4
+ CD3C  BDCF26            jsr __asgnblk
+ CD3F  38                pulx
+ CD40  EC00              ldd 0,x
+ CD42  C30004            addd #4
+ CD45  BDC31C            jsr _clock_compare
+ CD48  1838              puly
+ CD4A  ED02              std 2,x
+ CD4C  6D03              tst 3,x
+ CD4E  2E03              bgt X5
+ CD50  7ECC79            jmp L97
+ CD53                  X5:
+ CD53                  L104:
+ CD53                  kernel.590::	
+                       ;    return count;
+ CD53  E60D              ldab 13,x
+ CD55  4F                clra
+ CD56  8F                xgdx
+ CD57  C30012            addd #18
+ CD5A  8F                xgdx
+ CD5B  35                txs
+ CD5C  38                pulx
+ CD5D  39                rts
+ CD5E                  L96:
+ CD5E  8F                xgdx
+ CD5F  C30012            addd #18
+ CD62  8F                xgdx
+ CD63  35                txs
+ CD64  38                pulx
+ CD65  39                rts
+                       ;  IX -> 0,x
+ CD66                  _idle_task::
+ CD66                  kernel.597::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   I D L E   T A S K
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ void idle_task(void) {
+ CD66                  L106:
+ CD66                  kernel.600::	
+                       ;    while(1) {
+                       ;       // do nothing
+                       ;    }
+ CD66                  L107:
+ CD66  20FE              bra L106
+ CD68                  L105:
+ CD68  39                rts
+                       ;  IX -> 0,x
+                       ;            tid -> 5,x
+ CD69                  _tid_to_tcbptr::
+ CD69  37                pshb
+ CD6A  36                psha
+ CD6B  3C                pshx
+ CD6C  30                tsx
+ CD6D  3C                pshx
+ CD6E  30                tsx
+ CD6F  EC04              ldd 4,x
+ CD71  E705              stab 5,x
+ CD73                  kernel.608::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   U T I L I T I E S
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ PRESTO_TCB_T * tid_to_tcbptr(BYTE tid) {
+                       ;    if(tid>=MAX_TASKS) presto_fatal_error();
+ CD73  E605              ldab 5,x
+ CD75  C106              cmpb #6
+ CD77  2503              blo L110
+ CD79  BDC4B4            jsr _presto_fatal_error
+ CD7C                  L110:
+ CD7C                  kernel.609::	
+                       ;    if(tcb_list[tid].state==STATE_INACTIVE) return NULL;
+ CD7C  E605              ldab 5,x
+ CD7E  4F                clra
+ CD7F  188F              xgdy
+ CD81  CC0012            ldd #18
+ CD84  BDCE1E            jsr __muli
+ CD87  C39B13            addd #_tcb_list+10
+ CD8A  188F              xgdy
+ CD8C  18EC00            ldd 0,y
+ CD8F  1A830002          cpd #2
+ CD93  260D              bne L112
+ CD95  CC0000            ldd #0
+ CD98  8F                xgdx
+ CD99  C30002            addd #2
+ CD9C  8F                xgdx
+ CD9D  35                txs
+ CD9E  38                pulx
+ CD9F  1838              puly
+ CDA1  39                rts
+ CDA2                  L112:
+ CDA2                  kernel.610::	
+                       ;    return &tcb_list[tid];
+ CDA2  E605              ldab 5,x
+ CDA4  4F                clra
+ CDA5  188F              xgdy
+ CDA7  CC0012            ldd #18
+ CDAA  BDCE1E            jsr __muli
+ CDAD  C39B09            addd #_tcb_list
+ CDB0  8F                xgdx
+ CDB1  C30002            addd #2
+ CDB4  8F                xgdx
+ CDB5  35                txs
+ CDB6  38                pulx
+ CDB7  1838              puly
+ CDB9  39                rts
+ CDBA                  L109:
+ CDBA  8F                xgdx
+ CDBB  C30002            addd #2
+ CDBE  8F                xgdx
+ CDBF  35                txs
+ CDC0  38                pulx
+ CDC1  1838              puly
+ CDC3  39                rts
+                       ;  IX -> 0,x
+                       ;  rMEM -> 2,x
+ CDC4                  _presto_start_master_timer::
+ CDC4  BDCE7D            jsr __enterb
+ CDC7  04                .byte 0x4
+ CDC8                  kernel.619::	
+                       ; }
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; //   H A R D W A R E   T I M E R / C O U N T E R
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ void presto_start_master_timer(void) {
+                       ;    // store (current plus CYCLES_PER_TICK)
+                       ;    TOC2 = TCNT + CYCLES_PER_TICK;
+ CDC8  CC07D0            ldd #2000
+ CDCB  18CE0064          ldy #100
+ CDCF  BDCE1E            jsr __muli
+ CDD2  ED02              std 2,x
+ CDD4  FC100E            ldd 0x100e ; vol
+ CDD7  E302              addd 2,x
+ CDD9  FD1018            std 0x1018
+ CDDC                  kernel.621::	
+                       ;    // request output compare interrupt
+                       ;    TMSK1 |= TMSK1_OC2I;
+ CDDC  18CE1022          ldy #0x1022
+ CDE0  181C0040          bset 0,y,#64
+ CDE4                  kernel.624::	
+                       ;    // clear the OUTPUT COMPARE flag
+                       ;    // writing O's makes no change, writing 1's clears the bit
+                       ;    TFLG1 = TFLG1_OC2F;
+ CDE4  C640              ldab #64
+ CDE6  F71023            stab 0x1023
+ CDE9                  kernel.626::	
+                       ;    // counter disconnected from output pin logic
+                       ;    TCTL1 &= ~(TCTL1_OM2|TCTL1_OL2);
+ CDE9  18CE1020          ldy #0x1020
+ CDED  181D00C0          bclr 0,y,~#-193
+ CDF1                  kernel.627::	
+                       ; }
+ CDF1                  L115:
+ CDF1  8F                xgdx
+ CDF2  C30004            addd #4
+ CDF5  8F                xgdx
+ CDF6  35                txs
+ CDF7  38                pulx
+ CDF8  39                rts
+                       ;  IX -> 0,x
+                       ;  rMEM -> 2,x
+ CDF9                  _presto_restart_master_timer::
+ CDF9  BDCE7D            jsr __enterb
+ CDFC  04                .byte 0x4
+ CDFD                  kernel.633::	
+                       ; 
+                       ; ////////////////////////////////////////////////////////////////////////////////
+                       ; 
+                       ; /*static*/ void presto_restart_master_timer(void) {
+                       ;    // store (last plus CYCLES_PER_TICK)
+                       ;    TOC2 = TOC2 + CYCLES_PER_TICK;
+ CDFD  CC07D0            ldd #2000
+ CE00  18CE0064          ldy #100
+ CE04  BDCE1E            jsr __muli
+ CE07  ED02              std 2,x
+ CE09  FC1018            ldd 0x1018 ; vol
+ CE0C  E302              addd 2,x
+ CE0E  FD1018            std 0x1018
+ CE11                  kernel.636::	
+                       ;    // clear the OUTPUT COMPARE flag
+                       ;    // writing O's makes no change, writing 1's clears the bit
+                       ;    TFLG1 = TFLG1_OC2F;
+ CE11  C640              ldab #64
+ CE13  F71023            stab 0x1023
+ CE16                  kernel.637::	
+                       ; }
+ CE16                  L116:
+ CE16  8F                xgdx
+ CE17  C30004            addd #4
+ CE1A  8F                xgdx
+ CE1B  35                txs
+ CE1C  38                pulx
+ CE1D  39                rts
+                         .area bss
+ 9990                  _mail_list::
+ 9990                    .blkb 320
+ 9AD0                  _idle_tid::
+ 9AD0                    .blkb 1
+ 9AD1                  _idle_tcb_p::
+ 9AD1                    .blkb 2
+ 9AD3                  _idle_stack::
+ 9AD3                    .blkb 50
+ 9B05                  _presto_master_clock::
+ 9B05                    .blkb 4
+ 9B09                  _tcb_list::
+ 9B09                    .blkb 108
+ 9B75                  _global_save_sp::
+ 9B75                    .blkb 2
