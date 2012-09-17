@@ -2,16 +2,18 @@
 MEMORY
 {
    /* 32k of "nothing" */
-   page0    (rw)  : ORIGIN =  0x0040, LENGTH =  0x0100 - 0x0040
-   nothing        : ORIGIN =  0x0100, LENGTH =  0x8000 - 0x0100
+   page0     (rw) : ORIGIN =  0x0040, LENGTH =  0x0100 - 0x0040
+   nothing1       : ORIGIN =  0x0100, LENGTH =  0x1000 - 0x0100
+   registers (rw) : ORIGIN =  0x1000, LENGTH =  0x1040 - 0x1000
+   nothing2       : ORIGIN =  0x1040, LENGTH =  0x8000 - 0x1040
 
    /* 16k of "ROM" */
    rom      (rwx) : ORIGIN =  0x8000, LENGTH =  0xBFD6 - 0x8000
-   specvect (r)   : ORIGIN =  0xBFD6, LENGTH =  0xC000 - 0xBFD6
+   specvect   (r) : ORIGIN =  0xBFD6, LENGTH =  0xC000 - 0xBFD6
 
    /* 16k of "RAM" */
-   ram      (rw)  : ORIGIN =  0xC000, LENGTH =  0xFFD6 - 0xC000
-   normvect (rw)  : ORIGIN =  0xFFD6, LENGTH = 0x10000 - 0xFFD6
+   ram       (rw) : ORIGIN =  0xC000, LENGTH =  0xFFD6 - 0xC000
+   normvect  (rw) : ORIGIN =  0xFFD6, LENGTH = 0x10000 - 0xFFD6
 
    /* 64k of "nothing" */
    trash          : ORIGIN = 0x10000, LENGTH = 0x10000

@@ -44,30 +44,26 @@
 //   M E M O R Y   P O O L S
 ////////////////////////////////////////////////////////////////////////////////
 
-#define PRESTO_MEM_NUM_POOLS     3
+#define PRESTO_MEM_NUM_POOLS     2
 
 // The memory pools should be defined in increasing size order.
 // For each pool, there is a SIZE and a QTY.  That is, there are
 // QTY number of SIZE-sized items in a single pool.
 
-#define PRESTO_MEM_ITEMSIZ1     10
-#define PRESTO_MEM_ITEMQTY1      5
+#define PRESTO_MEM_ITEMSIZ1      2
+#define PRESTO_MEM_ITEMQTY1     80
 
 #define PRESTO_MEM_ITEMSIZ2     20
 #define PRESTO_MEM_ITEMQTY2      2
 
-#define PRESTO_MEM_ITEMSIZ3     35
-#define PRESTO_MEM_ITEMQTY3      3
-
 // These should be updated to reflect the number of memory pools.
 
-#define PRESTO_MEM_POOL_SIZES  { PRESTO_MEM_ITEMSIZ1, PRESTO_MEM_ITEMSIZ2, PRESTO_MEM_ITEMSIZ3 }
-#define PRESTO_MEM_POOL_QTYS   { PRESTO_MEM_ITEMQTY1, PRESTO_MEM_ITEMQTY2, PRESTO_MEM_ITEMQTY3 }
-#define PRESTO_MEM_NUM_ITEMS   ( PRESTO_MEM_ITEMQTY1+ PRESTO_MEM_ITEMQTY2+ PRESTO_MEM_ITEMQTY3 )
+#define PRESTO_MEM_POOL_SIZES  { PRESTO_MEM_ITEMSIZ1, PRESTO_MEM_ITEMSIZ2 }
+#define PRESTO_MEM_POOL_QTYS   { PRESTO_MEM_ITEMQTY1, PRESTO_MEM_ITEMQTY2 }
+#define PRESTO_MEM_NUM_ITEMS   ( PRESTO_MEM_ITEMQTY1+ PRESTO_MEM_ITEMQTY2 )
 
 #define PRESTO_MEM_TOTALBYTES (( PRESTO_MEM_ITEMQTY1 * PRESTO_MEM_ITEMSIZ1 )+ \
-                               ( PRESTO_MEM_ITEMQTY2 * PRESTO_MEM_ITEMSIZ2 )+ \
-                               ( PRESTO_MEM_ITEMQTY3 * PRESTO_MEM_ITEMSIZ3 ))
+                               ( PRESTO_MEM_ITEMQTY2 * PRESTO_MEM_ITEMSIZ2 ))
 
 ////////////////////////////////////////////////////////////////////////////////
 

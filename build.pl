@@ -9,25 +9,32 @@ use File::Copy;
 # turn debug info on/off
 $debug=0;
 
+heading("PREPARING");
+prepare();
+
+heading("CONFIGURATION");
 setup_project();
 setup_compiler();
 setup_linker();
-prepare();
+
+heading("COMPILING AND ASSEMBLING");
 compile_stage();
+
+heading("LINKING");
 link_stage();
-show_target_file();
+
+heading("SHOW THE RESULTS");
+#show_target_file();
 generate_listing();
 show_memory_usage();
-cleanup();
+
 exit;
 
 ################################################################################
+#   C U S T O M I Z E   T H I S   P A R T
+################################################################################
 
 sub setup_project {
-   print("--- CONFIGURATION ---\n");
-
-   # SETTING UP THE PROJECT
-
    print("setting up project...");
    $OBJ_DIR="obj";
    $TARGET="presto";
@@ -43,11 +50,14 @@ sub setup_project {
                "presto\\kernel\\timer.c",
                "presto\\kernel\\semaphore.c",
                "presto\\kernel\\memory.c",
+               #"app\\inversion.c",
                "app\\main.c",
                "app\\debugger.c",
                "services\\serial.c",
                "services\\string.c",
    );
+
+   @INCLUDE_DIRS=("$BUILD_DIR","$BUILD_DIR\\presto",".");
 
    print("OK\n");
 }
@@ -56,8 +66,8 @@ sub setup_project {
 
 sub setup_compiler {
    print("setting up compiler...");
-   $compiler_home="c:\\programs\\hc11\\gnu";
-   add_to_path("$compiler_home\\bin");
+   $COMPILER_HOME="c:\\programs\\hc11\\gnu";
+   add_to_path("$COMPILER_HOME\\bin");
    print("OK\n");
 }
 
@@ -65,16 +75,15 @@ sub setup_compiler {
 
 sub setup_linker {
    print("setting up linker...");
-   $lib_dir=$compiler_home."\\lib";
+   $LIB_DIR=$COMPILER_HOME."\\lib";
    print("OK\n");
 }
 
 ################################################################################
+#   T H I S   S T U F F   S H O U L D   S T A Y   T H E   S A M E
+################################################################################
 
 sub prepare {
-
-   print("--- PREPARING ---\n");
-
    # CLEANING UP OLD FILES
 
    print("deleting old target file...");
@@ -89,21 +98,96 @@ sub prepare {
 
    # REMEMBER WHERE YOU STARTED
 
-   chop($build_dir=`cd`);
-   $build_dir=~s/^[A-Za-z]://g;  # remove C:
+   print("remembering build directory...");
+   chop($BUILD_DIR=`cd`);
+   $BUILD_DIR=~s/^[A-Za-z]://g;  # remove C:
+   print("OK\n");
+}
 
-   print("\n");
+################################################################################
+
+my %filetimes;
+
+sub source_time {
+   my $givenfile=$_[0];
+   my $prefix="  ".$_[1];
+   my $src_ext=extension_of($givenfile);
+   my $fullpathname;
+   if($src_ext eq "c") {
+      $fullpathname="$BUILD_DIR/$givenfile";
+   } elsif($src_ext eq "h") {
+      # find the H file in the include path
+      $fullpathname=find_include_file_in_path($givenfile);
+      if(length($fullpathname)==0) {
+         # H file not found in include path
+         return -M $givenfile;
+      }
+   } else {
+      # not a C or H file
+      return -M $givenfile;
+   }
+
+   if(!defined($filetimes{$fullpathname})) {
+      $filetimes{$fullpathname}= -M $fullpathname;
+      my @all_includes=determine_source_dependencies($fullpathname);
+      my $one_include;
+      foreach $one_include (@all_includes) {
+         my $st=source_time($one_include,$prefix);
+         if($st<$filetimes{$fullpathname}) {
+            $filetimes{$fullpathname}=$st;
+         }
+      }
+   }
+
+   return $filetimes{$fullpathname};
+}
+
+################################################################################
+
+sub determine_source_dependencies {
+   my $source_file=$_[0];
+   my @includes=();
+   open(SRCFILE,"<$source_file");
+   my $line;
+   while ($line=<SRCFILE>) {
+      $line=~s/\012//g;
+      $line=~s/\015//g;
+      if (index($line,"#include")>-1) {
+         $match=$line;
+         $match=~s/^ *#include +\"//g;
+         $match=~s/\" *$//g;
+         push(@includes,$match);
+      }
+   }
+   close(SRCFILE);
+   return @includes;
+}
+
+################################################################################
+
+sub find_include_file_in_path {
+   my $h_file=$_[0];
+   my $dir;
+   foreach $dir (@INCLUDE_DIRS) {
+      if(-f "$dir/$h_file") {
+         return "$dir/$h_file";
+      }
+   }
+   return "";
 }
 
 ################################################################################
 
 sub compile_stage {
 
-   print("--- COMPILING AND ASSEMBLING ---\n");
-
    $indent="   ";
    @OBJS=();
    $total_errors=0;
+   my $include_path="";
+
+   foreach $dir (@INCLUDE_DIRS) {
+      $include_path=$include_path."-I$dir "
+   }
 
    # LOOPING THROUGH OBJECT FILES
 
@@ -135,7 +219,7 @@ sub compile_stage {
       if ( ! -e "$obj_path" ) {
          $work=1;
       } else {
-         $filetime= -M $src_path;
+         $filetime=source_time($src_path);
          $objtime= -M $obj_path;
          if ( $filetime < $objtime ) {
             $work=1;
@@ -152,7 +236,7 @@ sub compile_stage {
             $errors+=run("gcc.exe "
                         ."-m68hc11 "
                         ."-DGCC "
-                        ."-I$build_dir -I. -I$build_dir\\presto "
+                        .$include_path
                         ."-mshort "
                         ."-O "  # was ."O0 "  # oh-zero
                         ."-fomit-frame-pointer "
@@ -162,26 +246,26 @@ sub compile_stage {
                         ."-g "
                         ."-Wall "
                         #."-Werror "
-                        ."-Wa,-L,-ahlns=$build_dir\\$OBJ_DIR\\$src_base.lst "
-                        ."-o $build_dir\\$OBJ_DIR\\$src_base.o "
+                        ."-Wa,-L,-ahlns=$BUILD_DIR\\$OBJ_DIR\\$src_base.lst "
+                        ."-o $BUILD_DIR\\$OBJ_DIR\\$src_base.o "
                         ."$src_name");
             print("OK\n");
             #print($indent."GENERATING LISTINGS...");
             #if($debug) { print("\n"); }
-            #chdir("$build_dir\\$OBJ_DIR");
+            #chdir("$BUILD_DIR\\$OBJ_DIR");
             #$errors+=run("objdump.exe --source $src_base.o > $src_base.lst ");
             #print("OK\n");
-            chdir($build_dir);
+            chdir($BUILD_DIR);
          } elsif($src_ext eq "s") {
             print($indent."ASSEMBLING...");
             if ($debug) { print("\n"); }
             chdir($src_dir);
             $errors+=run("as.exe "
-                        ."-a -L -ahlns=$build_dir\\$OBJ_DIR\\$src_base.lst "
-                        ."-o $build_dir\\$OBJ_DIR\\$src_base.o "
+                        ."-a -L -ahlns=$BUILD_DIR\\$OBJ_DIR\\$src_base.lst "
+                        ."-o $BUILD_DIR\\$OBJ_DIR\\$src_base.o "
                         ."$src_name");
             print("OK\n");
-            chdir($build_dir);
+            chdir($BUILD_DIR);
          } else {
             print("HUH?\n");
          }
@@ -204,10 +288,6 @@ sub compile_stage {
 
    }
 
-   # END OF --- COMPILING AND ASSEMBLING ---
-
-   print("\n");
-
 }
 
 ################################################################################
@@ -220,7 +300,7 @@ sub link_stage {
       return;
    }
 
-   chdir("$build_dir\\$OBJ_DIR");
+   chdir("$BUILD_DIR\\$OBJ_DIR");
 
    $ofiles="";
    foreach $obj_file (@OBJS) {
@@ -242,7 +322,7 @@ sub link_stage {
       ."--oformat=elf32-m68hc11 "
       ."-o $TARGET.elf "
       ."$ofiles "
-      ."-L$lib_dir -lgcc");
+      ."-L$LIB_DIR -lgcc");
    print("OK\n");
    print("\n");
 
@@ -260,7 +340,7 @@ sub link_stage {
 
 
    $total_errors+=$errors;
-   chdir($build_dir);
+   chdir($BUILD_DIR);
 }
 
 ################################################################################
@@ -270,7 +350,6 @@ sub show_target_file {
    if ($total_errors > 0) {
       return;
    }
-   print("--- TARGET IS READY -- SHOW THE RESULTS ---\n");
    run("dir $OBJ_DIR\\$TARGET.s19");
    print("\n");
 }
@@ -283,7 +362,7 @@ sub generate_listing {
       return;
    }
 
-   chdir("$build_dir\\$OBJ_DIR");
+   chdir("$BUILD_DIR\\$OBJ_DIR");
 
    print("GENERATING LISTING...\n");
    $errors+=run("objdump.exe "
@@ -296,7 +375,7 @@ sub generate_listing {
    print("\n");
 
    $total_errors+=$errors;
-   chdir($build_dir);
+   chdir($BUILD_DIR);
 }
 
 ################################################################################
@@ -306,6 +385,9 @@ sub show_memory_usage {
    if ($total_errors > 0) {
       return;
    }
+
+   print("MEMORY USAGE\n");
+   print("------------\n");
 
    my $tempfile="headers.txt";  #$TARGET.".tmp";
    run("objdump.exe -h $OBJ_DIR\\$TARGET.elf > $tempfile");
@@ -349,21 +431,8 @@ sub show_memory_usage {
    close(TEMP);
    unlink($tempfile);
 
-
-
-   #print("SECTIONS\n");
-   #print("------------\n");
-   #foreach $section (sort keys %memusage_sectsize) {
-   #   printf("%s %d\n",$section,$memusage_sectsize{$section});
-   #}
-   #print("\n");
-
-
-
    my $rom_space=0;
    my $ram_space=0;
-   print("MEMORY USAGE\n");
-   print("------------\n");
    foreach $section (sort @memusage_romsections) {
       printf("ROM  %-15s %d\n",$section,$memusage_sectsize{$section});
       $rom_space+=$memusage_sectsize{$section};
@@ -399,30 +468,19 @@ sub section_info {
 }
 
 ################################################################################
-
-sub cleanup {
-   print("--- CLEAN UP ---\n");
-   print("removing intermediate files...");
-   #unlink <*.s>;
-   #unlink <*.i>;
-   print("OK\n");
-
-}
-
-################################################################################
 #   F U N C T I O N S
 ################################################################################
 
-sub start_action {
+sub heading {
    my $string=$_[0];
-   print("$string...");
-}
-
-################################################################################
-
-sub end_action {
-   my $string=$_[0];
-   print("$string\n");
+   my $text_width=60;
+   $string=~s/\n//g;
+   $string=~s/^ +//g;
+   my $count=($text_width-length($string)-2)/2;
+   my $spaces= "-" x $count;
+   print("\n");
+   print("$spaces $string $spaces\n");
+   print("\n");
 }
 
 ################################################################################

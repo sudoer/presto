@@ -42,23 +42,25 @@ void premain() {
 
    // THE FOLLOWING (*) REGISTERS MAY ONLY BE ALTERED WITHIN THE FIRST 64 CLOCK CYCLES
 
-   // 11110000 * map internal 1k RAM to $0000-$00FF (default)
-   // 00001111 * map control registers to $1000-$103F (default)
+   // 11110000 * map internal 1k RAM to $0000-$00FF (0000)
+   // 00001111 * map control registers to $1000-$103F (0001)
    INIT=0x01;
 
-   // 11110000 - disable TOF, RTIF, PAOVF, PAIF interrupts
-   // 00000011 * set prescaler for timer to 16
+   // 11110000 - disable TOF, RTIF, PAOVF, PAIF interrupts (0000)
+   // 00001100 - ??????????? (00)
+   // 00000011 * set prescaler for timer to 16 (11)
    TMSK2=0x03;
 
    // turn on the A2D subsystem (wait 100 usec before using)
    // use "E clock" to drive the A2D
    // disable COP clock monitor (interrupt)
-   // 10000000 - A/D system powered up
-   // 01000000 - A/D and EE use E-clock
-   // 00100000 * IRQ is edge-sensitive
-   // 00010000 * no startup delay
-   // 00001000 - disable clock monitor
-   // 00000011 * watchdog rate
+   // 10000000 - A/D system powered up (1)
+   // 01000000 - A/D and EE use E-clock (0)
+   // 00100000 * IRQ is edge-sensitive (1)
+   // 00010000 * no startup delay (0)
+   // 00001000 - disable clock monitor (0)
+   // 00000100 - ???????????? (0)
+   // 00000011 * watchdog rate (11)
    OPTION=0xA3;  // OPTION_ADPU=1,OPTION_CSEL=0
 
 
@@ -94,10 +96,12 @@ void premain() {
 
    // get out of SPECIAL TEST operating mode
    // go into NORMAL EXPANDED MULTIPLEXED operating mode
-   // no bootstrap ROM, no visibility of internal reads
-   // promote IRQ interrupt priority
-   // (must be in a SPECIAL mode to change this)
-   HPRIO=0x25;
+   // 10000000 - bootstrap ROM disabled (0)
+   // 01000000 - switch to NORMAL mode (0)
+   // 00100000 - that is, normal EXPANDED mode (1)
+   // 00010000 - internal read visibility off (0)
+   // 00001111 - interrupt promotion = TOC2 (1100)
+   HPRIO=0x2C;
 
 }
 

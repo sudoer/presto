@@ -142,42 +142,43 @@ void presto_memory_debug(void) {
    char prt[PRT];
 
    short pool;
+   short count;
    MEMORY_ITEM_T * ptr;
 
    for(pool=0;pool<PRESTO_MEM_NUM_POOLS;pool++) {
       serial_send_string("pool=");
       string_IntegerToString(pool,prt,PRT);
       serial_send_string(prt);
+      serial_send_string("\r\n");
 
-      //serial_send_string("num_items=");
-      //string_IntegerToString(mempools[pool].num_items,prt,PRT);
-      //serial_send_string(prt);
-      //serial_send_string("\r\n");
-
-      serial_send_string("(");
-      string_IntegerToString(mempools[pool].item_size,prt,PRT);
+      serial_send_string("num_items=");
+      string_IntegerToString(mempools[pool].num_items,prt,PRT);
       serial_send_string(prt);
-      serial_send_string(")");
+      serial_send_string("\r\n");
 
-      //serial_send_string("free_items=");
-      //string_IntegerToString(mempools[pool].free_items,prt,PRT);
-      //serial_send_string(prt);
-      //serial_send_string("\r\n");
+      serial_send_string("free_items=");
+      string_IntegerToString(mempools[pool].free_items,prt,PRT);
+      serial_send_string(prt);
+      serial_send_string("\r\n");
 
-      //serial_send_string("used_bytes=");
-      //string_IntegerToString(mempools[pool].used_bytes,prt,PRT);
-      //serial_send_string(prt);
-      //serial_send_string("\r\n");
+      serial_send_string("used_bytes=");
+      string_IntegerToString(mempools[pool].used_bytes,prt,PRT);
+      serial_send_string(prt);
+      serial_send_string("\r\n");
 
+      serial_send_string("free_list");
       serial_send_string("->");
+      count=0;
       ptr=mempools[pool].free_list;
       while(ptr!=NULL) {
          string_IntegerToString(ptr->debug_item_number,prt,PRT);
          serial_send_string(prt);
          serial_send_string("->");
          ptr=ptr->point.next;
+         if(++count>8) ptr=NULL;
       }
       serial_send_string("x\r\n");
+      serial_send_string("\r\n");
    }
    serial_send_string("\r\n");
 

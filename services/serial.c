@@ -18,7 +18,7 @@
 //   C O N S T A N T S
 ////////////////////////////////////////////////////////////////////////////////
 
-#define TX_BUFFER_SIZE 200
+#define TX_BUFFER_SIZE 300
 #define RX_BUFFER_SIZE 200
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,28 +101,22 @@ static void clear_buffers(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void serial_send_byte(BYTE send) {
-   // disable TX interrupt
-   MASKCLR(SCCR2,SCCR2_TIE);
    // queue up one byte to send
    cq_put_byte(&com1_tx_queue,send);
-   // re-enable the TX interrupt
+   // enable the TX interrupt
    MASKSET(SCCR2,SCCR2_TIE);
-   return;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void serial_send_string(char * send) {
-   // disable TX interrupt
-   MASKCLR(SCCR2,SCCR2_TIE);
    // queue up the bytes to send
    while (*send) {
       cq_put_byte(&com1_tx_queue,*send);
       send++;
    }
-   // re-enable the TX interrupt
+   // enable the TX interrupt
    MASKSET(SCCR2,SCCR2_TIE);
-   return;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -131,12 +125,10 @@ void serial_send_string(char * send) {
 
 BOOLEAN serial_recv(BYTE * r) {
    BOOLEAN b;
-   // disable RX interrupt
-   // MASKCLR(SCCR2,SCCR2_RIE);
    // read one byte from the serial RX queue
    b=cq_get_byte(&com1_rx_queue, r);
-   // re-enable the RX interrupt
-   // MASKSET(SCCR2,SCCR2_RIE);
+   // enable the RX interrupt
+   MASKSET(SCCR2,SCCR2_RIE);
    return b;
 }
 
@@ -145,12 +137,10 @@ BOOLEAN serial_recv(BYTE * r) {
 int serial_recv_string(BYTE * recv, uint8 maxlen) {
    int count=0;
    BYTE * ptr=recv;
-   // disable RX interrupt
-   // MASKCLR(SCCR2,SCCR2_RIE);
    // read the serial RX queue until it is empty or we are full
    while (cq_get_byte(&com1_rx_queue,ptr++)&&(count<maxlen)) count++;
-   // re-enable the RX interrupt
-   // MASKSET(SCCR2,SCCR2_RIE);
+   // enable the RX interrupt
+   MASKSET(SCCR2,SCCR2_RIE);
    return count;
 }
 
@@ -263,7 +253,7 @@ static cq_size_t cq_put_byte(circ_queue * queue, BYTE b) {
       queue->tail++;
       overwrite++;
       // If the tail points past the queue
-      if (queue->tail > (queue->buffer + queue->max_size - 1)) {
+      if (queue->tail > queue->end) {
          // point the tail at the beginning of the circular queue.
          queue->tail = queue->buffer;
       }

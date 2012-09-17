@@ -1,3 +1,15 @@
+2003.06.01
+
+Build script now recursively looks at includes to determine affected
+files.  Also has nicer output.
+
+Bugs ironed out of serial (TX) system.
+
+Saved a copy of inversion.c, which might make a good demo if someone
+wants to see it.
+
+---
+
 2003.05.29
 
 Dynamic memory allocation works.  Very configurable and fast.

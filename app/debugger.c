@@ -20,7 +20,7 @@
 //   C O N S T A N T S
 ////////////////////////////////////////////////////////////////////////////////
 
-#define DEBUGGER_STACK_SIZE 256
+#define DEBUGGER_STACK_SIZE 200
 #define TIMER_FLAG  0x02
 #define SERIAL_FLAG 0x01
 
@@ -56,40 +56,38 @@ void debugger_init(void) {
 //   S T A T I C   F U N C T I O N S
 ////////////////////////////////////////////////////////////////////////////////
 
-#define PTRS 11
-#define WIDE 20
+#define LOOP  100
+#define PTRS  100
 extern void presto_memory_debug(void);
 
+BYTE * m[PTRS];
 static void debugger(void) {
 
-   BYTE * m[PTRS];
    int i;
    int j;
    int k;
 
-   unsigned short amount=8;
+   unsigned short amount=1;
 
    serial_send_string("hello world\r\n");
    while (1) {
 
-      for(k=0;k<1000;k++) {
+      for(k=0;k<LOOP;k++) {
 
          for(i=0,j=0;i<PTRS;i++,j=(j+5)%PTRS) {
             m[j]=presto_memory_allocate(amount);
          }
+         if (k==0) presto_memory_debug();
+
+
          for(i=0,j=0;i<PTRS;i++,j=(j+7)%PTRS) {
             presto_memory_free(m[j]);
          }
-         for(i=0,j=0;i<PTRS;i++,j=(j+9)%PTRS) {
-            m[j]=presto_memory_allocate(amount);
-         }
-         for(i=0,j=0;i<PTRS;i++,j=(j+6)%PTRS) {
-            presto_memory_free(m[j]);
-         }
+         if (k==0) presto_memory_debug();
 
       }
 
-      presto_memory_debug();
+      presto_timer_wait(500,0x01);
 
    }
 }
