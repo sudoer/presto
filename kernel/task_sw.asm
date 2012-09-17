@@ -1,10 +1,10 @@
 
-.area data
+.area DATA
    _presto_asm_save_sp:
    .word 1
-.area idata
+.area IDATA
    .word 0    ; _presto_asm_save_sp
-.area text
+.area CODE
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

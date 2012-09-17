@@ -81,6 +81,7 @@ void motor_init(void) {
    motor_set_speed(1,0);
    motor_set_speed(2,0);
    motor_set_speed(3,0);
+   apply_motor_pwm();
    set_interrupt(INTR_TOC3, motor_isr);
    // store (current plus MOTOR_CYCLES)
    TOC3 = TCNT + MOTOR_CYCLES;

@@ -1,0 +1,321 @@
+ASxxxx Linker V02.01 MSOE,  page 1.
+Hexidecimal
+
+Area       Addr   Size   Decimal Bytes (Attributes)
+----       ----   ----   ------- ----- ------------
+.  .ABS.   0000   0000 =      0. bytes (ABS,OVR)
+
+      Value  Global      Value  Global      Value  Global      Value  Global
+      -----  ------      -----  ------      -----  ------      -----  ------
+       0000  ___main  |   0000  s_REGS   |   0000  s__CODE  |   0000  s_DIRECT
+       0000  _start   |   0000  ZB1      |   0000  ZB2      |   0000  ZD0     
+       0000  ZB3      |   0000  ZD1      |   0000  ZB4      |   0000  ZD2     
+       0000  ZD5      |   0000  ZD6      |   0000  ZD7      |   0000  ZD8     
+       0000  ZXT      |   0000  ___mulhi |   0002  l_DIRECT |   0002  l_IDATA 
+       0002  l_DATA   |   001C  l_STARTU |   002B  l__DATA  |   0056  l_CODE  
+       0EA2  l__BSS   |   1040  l_REGS   |   272E  l__CODE  |   272E  s__DATA 
+       8000  s_STARTU |   9800  s__BSS   |   A6A2  s_DATA   |   A6A4  s_IDATA 
+       BFD6  s_BOOTLI |   C000  s_CODE   |   C000  l_BOOTLI
+ASxxxx Linker V02.01 MSOE,  page 2.
+Hexidecimal
+
+Area       Addr   Size   Decimal Bytes (Attributes)
+----       ----   ----   ------- ----- ------------
+_CODE      0000   272E =  10030. bytes (REL,CON)
+
+      Value  Global      Value  Global      Value  Global      Value  Global
+      -----  ------      -----  ------      -----  ------      -----  ------
+       0000  _presto_ |   0132  _presto_ |   0243  _presto_ |   0283  _presto_
+       02F1  _presto_ |   02FB  _presto_ |   03C7  _presto_ |   03F3  _presto_
+       05E1  _presto_ |   0607  _presto_ |   0752  _clock_r |   0777  _clock_a
+       07D2  _clock_c |   0834  __HC11Se |   0851  _set_int |   0858  _presto_
+       08B5  _ods_set |   08CC  _debugge |   107C  _lcd_ini |   10C1  _lcd_cle
+       1129  _lcd_pri |   1165  _lcd_got |   1193  _lcd_pri |   1231  _ascii_t
+       129F  _lcd_raw |   1433  _presto_ |   1490  _presto_ |   14F3  _presto_
+       1520  _presto_ |   15D4  _presto_ |   1611  _input_s |   1659  _input_s
+       17DE  _input_s |   1806  _input_s |   183B  _motor_i |   18BF  _motor_g
+       1923  _motor_s |   1A71  _serial_ |   1AC1  _serial_ |   1AFA  _serial_
+       1B56  _serial_ |   1BA2  _serial_ |   1E26  _sound_t |   1E43  _sound_o
+       1EA5  _sound_o |   1ED8  _sound_i |   1EFB  _string_ |   1F35  _string_
+       1F70  _string_ |   1F96  _string_ |   1FE2  _string_ |   2016  _string_
+       210E  _string_ |   2235  _string_ |   22DD  _string_ |   2341  _string_
+       23AD  _string_ |   2440  _string_ |   24B7  _string_ |   24FD  _LcdTask
+       2596  _Zero    |   2603  _One     |   2658  _Two     |   26AD  _Three  
+       271E  _main   
+ASxxxx Linker V02.01 MSOE,  page 3.
+Hexidecimal
+
+Area       Addr   Size   Decimal Bytes (Attributes)
+----       ----   ----   ------- ----- ------------
+_DATA      272E   002B =     43. bytes (REL,CON)
+
+      Value  Global      Value  Global      Value  Global      Value  Global
+      -----  ------      -----  ------      -----  ------      -----  ------
+       272E  _presto_ |   2730  _presto_ |   2732  _presto_
+ASxxxx Linker V02.01 MSOE,  page 4.
+Hexidecimal
+
+Area       Addr   Size   Decimal Bytes (Attributes)
+----       ----   ----   ------- ----- ------------
+_BSS       9800   0EA2 =   3746. bytes (REL,CON)
+
+      Value  Global      Value  Global      Value  Global      Value  Global
+      -----  ------      -----  ------      -----  ------      -----  ------
+       9800  _presto_ |   A19B  _beep_to
+ASxxxx Linker V02.01 MSOE,  page 5.
+Hexidecimal
+
+Area       Addr   Size   Decimal Bytes (Attributes)
+----       ----   ----   ------- ----- ------------
+DATA       A6A2   0002 =      2. bytes (REL,CON)
+
+      Value  Global      Value  Global      Value  Global      Value  Global
+      -----  ------      -----  ------      -----  ------      -----  ------
+ASxxxx Linker V02.01 MSOE,  page 6.
+Hexidecimal
+
+Area       Addr   Size   Decimal Bytes (Attributes)
+----       ----   ----   ------- ----- ------------
+IDATA      A6A4   0002 =      2. bytes (REL,CON)
+
+      Value  Global      Value  Global      Value  Global      Value  Global
+      -----  ------      -----  ------      -----  ------      -----  ------
+ASxxxx Linker V02.01 MSOE,  page 7.
+Hexidecimal
+
+Area       Addr   Size   Decimal Bytes (Attributes)
+----       ----   ----   ------- ----- ------------
+CODE       C000   0056 =     86. bytes (REL,CON)
+
+      Value  Global      Value  Global      Value  Global      Value  Global
+      -----  ------      -----  ------      -----  ------      -----  ------
+       C000  _presto_ |   C017  _presto_ |   C026  _presto_ |   C034  _presto_
+       C055  _inert_i
+ASxxxx Linker V02.01 MSOE,  page 8.
+Hexidecimal
+
+Area       Addr   Size   Decimal Bytes (Attributes)
+----       ----   ----   ------- ----- ------------
+DIRECT     0000   0002 =      2. bytes (ABS,OVR,PAG)
+
+      Value  Global      Value  Global      Value  Global      Value  Global
+      -----  ------      -----  ------      -----  ------      -----  ------
+       0000  _os_null
+ASxxxx Linker V02.01 MSOE,  page 9.
+Hexidecimal
+
+Area       Addr   Size   Decimal Bytes (Attributes)
+----       ----   ----   ------- ----- ------------
+REGS       0000   1040 =   4160. bytes (ABS,OVR)
+
+      Value  Global      Value  Global      Value  Global      Value  Global
+      -----  ------      -----  ------      -----  ------      -----  ------
+       1000  _porta   |   1002  _pioc    |   1003  _portc   |   1004  _portb  
+       1005  _portcl  |   1007  _ddrc    |   1008  _portd   |   1009  _ddrd   
+       100A  _porte   |   100B  _cforc   |   100C  _oc1m    |   100D  _oc1d   
+       100E  _tcnt    |   1010  _tic1    |   1012  _tic2    |   1014  _tic3   
+       1016  _toc1    |   1018  _toc2    |   101A  _toc3    |   101C  _toc4   
+       101E  _ti4     |   1020  _tctl1   |   1021  _tctl2   |   1022  _tmsk1  
+       1023  _tflg1   |   1024  _tmsk2   |   1025  _tflg2   |   1026  _pactl  
+       1027  _pacnt   |   1028  _spcr    |   1029  _spsr    |   102A  _spdr   
+       102B  _baud    |   102C  _sccr1   |   102D  _sccr2   |   102E  _scsr   
+       102F  _scdr    |   1030  _adctl   |   1031  _adr1    |   1032  _adr2   
+       1033  _adr3    |   1034  _adr4    |   1035  _bprot   |   1036  _eprog  
+       1039  _option  |   103A  _coprst  |   103B  _pprog   |   103C  _hprio  
+       103D  _init    |   103E  _test1   |   103F  _config 
+ASxxxx Linker V02.01 MSOE,  page 10.
+Hexidecimal
+
+Area       Addr   Size   Decimal Bytes (Attributes)
+----       ----   ----   ------- ----- ------------
+STARTUP    8000   001C =     28. bytes (ABS,OVR)
+
+      Value  Global      Value  Global      Value  Global      Value  Global
+      -----  ------      -----  ------      -----  ------      -----  ------
+       8000  __start  |   801A  __exit  
+ASxxxx Linker V02.01 MSOE,  page 11.
+Hexidecimal
+
+Area       Addr   Size   Decimal Bytes (Attributes)
+----       ----   ----   ------- ----- ------------
+BOOTLIST   BFD6   C000 =  49152. bytes (ABS,OVR)
+
+      Value  Global      Value  Global      Value  Global      Value  Global
+      -----  ------      -----  ------      -----  ------      -----  ------
+ASxxxx Linker V02.01 MSOE,  page 12.
+
+Files Linked                              [ module(s) ]
+
+kernel                                    [ kernel.c ]
+task_sw                                   [  ]
+clock                                     [ clock.c ]
+system                                    [ system.c ]
+crt0                                      [ crt0.s ]
+debugger                                  [ debugger.c ]
+lcd                                       [ lcd.c ]
+i2c                                       [ i2c.c ]
+inputs                                    [ inputs.c ]
+motors                                    [ motors.c ]
+serial                                    [ serial.c ]
+sound                                     [ sound.c ]
+string                                    [ string.c ]
+test                                      [ test.c ]
+
+ASxxxx Linker V02.01 MSOE,  page 13.
+
+User Base Address Definitions
+
+STARTUP=0x8000
+BOOTLIST=0xBFD6
+_BSS=0x9800
+CODE=0xC000
+STACK=0xB000.0xB5FF
+
+
+?ASlink-Warning-Undefined Global ___main referenced by module test.c
+
+?ASlink-Warning-Undefined Global _start referenced by module crt0.s
+
+?ASlink-Warning-Undefined Global ZB1 referenced by module kernel.c
+
+?ASlink-Warning-Undefined Global ZB1 referenced by module debugger.c
+
+?ASlink-Warning-Undefined Global ZB1 referenced by module lcd.c
+
+?ASlink-Warning-Undefined Global ZB1 referenced by module i2c.c
+
+?ASlink-Warning-Undefined Global ZB1 referenced by module inputs.c
+
+?ASlink-Warning-Undefined Global ZB1 referenced by module motors.c
+
+?ASlink-Warning-Undefined Global ZB1 referenced by module serial.c
+
+?ASlink-Warning-Undefined Global ZB1 referenced by module string.c
+
+?ASlink-Warning-Undefined Global ZB2 referenced by module i2c.c
+
+?ASlink-Warning-Undefined Global ZB2 referenced by module inputs.c
+
+?ASlink-Warning-Undefined Global ZB2 referenced by module string.c
+
+?ASlink-Warning-Undefined Global ZD0 referenced by module kernel.c
+
+?ASlink-Warning-Undefined Global ZD0 referenced by module clock.c
+
+?ASlink-Warning-Undefined Global ZD0 referenced by module debugger.c
+
+?ASlink-Warning-Undefined Global ZD0 referenced by module lcd.c
+
+?ASlink-Warning-Undefined Global ZD0 referenced by module i2c.c
+
+?ASlink-Warning-Undefined Global ZD0 referenced by module inputs.c
+
+?ASlink-Warning-Undefined Global ZD0 referenced by module motors.c
+
+?ASlink-Warning-Undefined Global ZD0 referenced by module serial.c
+
+?ASlink-Warning-Undefined Global ZD0 referenced by module sound.c
+
+?ASlink-Warning-Undefined Global ZD0 referenced by module string.c
+
+?ASlink-Warning-Undefined Global ZD0 referenced by module test.c
+
+?ASlink-Warning-Undefined Global ZB3 referenced by module string.c
+
+?ASlink-Warning-Undefined Global ZD1 referenced by module motors.c
+
+?ASlink-Warning-Undefined Global ZD1 referenced by module serial.c
+
+?ASlink-Warning-Undefined Global ZD1 referenced by module string.c
+
+?ASlink-Warning-Undefined Global ZB4 referenced by module string.c
+
+?ASlink-Warning-Undefined Global ZD2 referenced by module string.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module kernel.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module clock.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module system.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module debugger.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module lcd.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module i2c.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module inputs.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module motors.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module serial.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module sound.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module string.c
+
+?ASlink-Warning-Undefined Global ZD5 referenced by module test.c
+
+?ASlink-Warning-Undefined Global ZD6 referenced by module kernel.c
+
+?ASlink-Warning-Undefined Global ZD6 referenced by module clock.c
+
+?ASlink-Warning-Undefined Global ZD6 referenced by module system.c
+
+?ASlink-Warning-Undefined Global ZD6 referenced by module debugger.c
+
+?ASlink-Warning-Undefined Global ZD6 referenced by module lcd.c
+
+?ASlink-Warning-Undefined Global ZD6 referenced by module i2c.c
+
+?ASlink-Warning-Undefined Global ZD6 referenced by module inputs.c
+
+?ASlink-Warning-Undefined Global ZD6 referenced by module motors.c
+
+?ASlink-Warning-Undefined Global ZD6 referenced by module serial.c
+
+?ASlink-Warning-Undefined Global ZD6 referenced by module string.c
+
+?ASlink-Warning-Undefined Global ZD6 referenced by module test.c
+
+?ASlink-Warning-Undefined Global ZD7 referenced by module kernel.c
+
+?ASlink-Warning-Undefined Global ZD7 referenced by module clock.c
+
+?ASlink-Warning-Undefined Global ZD7 referenced by module debugger.c
+
+?ASlink-Warning-Undefined Global ZD7 referenced by module lcd.c
+
+?ASlink-Warning-Undefined Global ZD7 referenced by module i2c.c
+
+?ASlink-Warning-Undefined Global ZD7 referenced by module inputs.c
+
+?ASlink-Warning-Undefined Global ZD7 referenced by module motors.c
+
+?ASlink-Warning-Undefined Global ZD7 referenced by module serial.c
+
+?ASlink-Warning-Undefined Global ZD7 referenced by module string.c
+
+?ASlink-Warning-Undefined Global ZD8 referenced by module kernel.c
+
+?ASlink-Warning-Undefined Global ZD8 referenced by module debugger.c
+
+?ASlink-Warning-Undefined Global ZD8 referenced by module lcd.c
+
+?ASlink-Warning-Undefined Global ZD8 referenced by module motors.c
+
+?ASlink-Warning-Undefined Global ZD8 referenced by module serial.c
+
+?ASlink-Warning-Undefined Global ZD8 referenced by module string.c
+
+?ASlink-Warning-Undefined Global ZXT referenced by module debugger.c
+
+?ASlink-Warning-Undefined Global ZXT referenced by module lcd.c
+
+?ASlink-Warning-Undefined Global ZXT referenced by module inputs.c
+
+?ASlink-Warning-Undefined Global ZXT referenced by module serial.c
+
+?ASlink-Warning-Undefined Global ZXT referenced by module test.c
+
+?ASlink-Warning-Undefined Global ___mulhi3 referenced by module string.c

@@ -1,0 +1,1004 @@
+                              1 ;;;-----------------------------------------
+                              2 ;;; Start MC6811 gcc assembly output
+                              3 ;;; gcc compiler compiled on TBD
+                              4 ;;; OPTIONS:	-mlong_branch optimize  
+                              5 ;;; OPTIONS:	 peephole !omit_frame_pointer !signed-char
+                              6 ;;; Source:		utils\string.c
+                              7 ;;; Destination:	string.s
+                              8 ;;; Compiled:	Tue Oct 24 21:55:31 2000
+                              9 ;;; (META)compiled by GNU C version 2.8.1.
+                             10 ;;;-----------------------------------------
+                             11 	.module string.c
+                             12 	.area	_CODE
+                             13 	.globl	_string_IsSpace
+   0000                      14 _string_IsSpace:
+                             15 ;;;-----------------------------------------
+                             16 ;;;  PROLOGUE for string_IsSpace
+                             17 ;;;-----------------------------------------
+   0000 18 3C                18 	pshy	; Save stack frame
+   0002 18 30                19 	tsy	; Set current stack frame
+   0004 DE 00                20 	ldx	*ZD5
+   0006 3C                   21 	pshx	; pushed register *ZD5
+   0007 8F                   22 	xgdx	; saving D register
+   0008 D6 00                23 	ldab	*ZB1
+   000A 37                   24 	pshb	; pushed register *ZB1
+   000B 8F                   25 	xgdx	; restoring D register
+                             26 ;;;END PROLOGUE
+   000C D6 01                27 	ldab	*ZD0+1
+   000E C8 20                28 	eorb	#32
+   0010 D7 01                29 	stab	*ZD5+1	; xorqi3: *ZD0 by #32 -> *ZD5
+   0012 D6 01                30 	ldab	*ZD5+1
+   0014 D7 00                31 	stab	*ZB1	; movqi: *ZD5 -> *ZB1
+   0016 D6 00                32 	ldab	*ZB1
+   0018 4F                   33 	clra
+   0019 DD 00                34 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   001B DC 00                35 	ldd	*ZD5
+   001D C3 FF FF             36 	addd	#-1
+   0020 DD 00                37 	std	*ZD5	; addhi3: *ZD5 by #-1 -> *ZD5
+   0022 DC 00                38 	ldd	*ZD5
+   0024 CE 00 0F             39 	ldx	#15
+   0027 2F 04                40 	ble	1$
+   0029 04                   41 	lsrd
+   002A 09                   42 	dex
+   002B 26 FC                43 	bne	.-2
+                             44 1$:
+   002D DD 00                45 	std	*ZD0	; lshrhi3: *ZD5 by #15 -> *ZD0
+                             46 ;;;EPILOGUE
+   002F 8F                   47 	xgdx	; saving D register
+   0030 33                   48 	pulb	; Pulling register *ZB1
+   0031 D7 00                49 	stab	*ZB1
+   0033 8F                   50 	xgdx	; restoring D register
+   0034 38                   51 	pulx	; Pulling register *ZD5
+   0035 DF 00                52 	stx	*ZD5
+   0037 18 38                53 	puly	; Restore stack frame
+   0039 39                   54 	rts	; return from function
+                             55 ;;;-----------------------------------------
+                             56 ;;; END EPILOGUE for string_IsSpace
+                             57 ;;;-----------------------------------------
+                             58 	.globl	_string_IsNumber
+   003A                      59 _string_IsNumber:
+                             60 ;;;-----------------------------------------
+                             61 ;;;  PROLOGUE for string_IsNumber
+                             62 ;;;-----------------------------------------
+   003A 18 3C                63 	pshy	; Save stack frame
+   003C 18 30                64 	tsy	; Set current stack frame
+   003E DE 00                65 	ldx	*ZD5
+   0040 3C                   66 	pshx	; pushed register *ZD5
+                             67 ;;;END PROLOGUE
+   0041 D6 01                68 	ldab	*ZD0+1
+   0043 CB D0                69 	addb	#-48
+   0045 D7 01                70 	stab	*ZD5+1	; addqi3: *ZD0 by #-48 -> *ZD5
+   0047 D6 01                71 	ldab	*ZD5+1
+   0049 C1 09                72 	cmpb	#9	; cmpqi *ZD5 with #9
+   004B 22 03                73 	bhi	.+5
+   004D 7E 00 62             74 	jmp	L7	; (bleu) long branch
+   0050 D6 01                75 	ldab	*ZD0+1
+   0052 C1 2D                76 	cmpb	#45	; cmpqi *ZD0 with #45
+   0054 26 03                77 	bne	.+5
+   0056 7E 00 62             78 	jmp	L7	; (beq) long branch
+   0059 D6 01                79 	ldab	*ZD0+1
+   005B C1 2B                80 	cmpb	#43	; cmpqi *ZD0 with #43
+   005D 27 03                81 	beq	.+5
+   005F 7E 00 6A             82 	jmp	L6	; (bne) long branch
+   0062                      83 L7:
+   0062 CC 00 01             84 	ldd	#1
+   0065 DD 00                85 	std	*ZD0	; movhi: #1 -> *ZD0
+   0067 7E 00 6F             86 	jmp	L8
+   006A                      87 L6:
+   006A CC 00 00             88 	ldd	#0
+   006D DD 00                89 	std	*ZD0	; movhi: #0 -> *ZD0
+   006F                      90 L8:
+                             91 ;;;EPILOGUE
+   006F 38                   92 	pulx	; Pulling register *ZD5
+   0070 DF 00                93 	stx	*ZD5
+   0072 18 38                94 	puly	; Restore stack frame
+   0074 39                   95 	rts	; return from function
+                             96 ;;;-----------------------------------------
+                             97 ;;; END EPILOGUE for string_IsNumber
+                             98 ;;;-----------------------------------------
+                             99 	.globl	_string_IsDigit
+   0075                     100 _string_IsDigit:
+                            101 ;;;-----------------------------------------
+                            102 ;;;  PROLOGUE for string_IsDigit
+                            103 ;;;-----------------------------------------
+   0075 18 3C               104 	pshy	; Save stack frame
+   0077 18 30               105 	tsy	; Set current stack frame
+   0079 DE 00               106 	ldx	*ZD5
+   007B 3C                  107 	pshx	; pushed register *ZD5
+                            108 ;;;END PROLOGUE
+   007C D6 01               109 	ldab	*ZD0+1
+   007E CB D0               110 	addb	#-48
+   0080 D7 01               111 	stab	*ZD5+1	; addqi3: *ZD0 by #-48 -> *ZD5
+   0082 CC 00 01            112 	ldd	#1
+   0085 DD 00               113 	std	*ZD0	; movhi: #1 -> *ZD0
+   0087 D6 01               114 	ldab	*ZD5+1
+   0089 C1 09               115 	cmpb	#9	; cmpqi *ZD5 with #9
+   008B 22 03               116 	bhi	.+5
+   008D 7E 00 95            117 	jmp	L11	; (bleu) long branch
+   0090 CC 00 00            118 	ldd	#0
+   0093 DD 00               119 	std	*ZD0	; movhi: #0 -> *ZD0
+   0095                     120 L11:
+                            121 ;;;EPILOGUE
+   0095 38                  122 	pulx	; Pulling register *ZD5
+   0096 DF 00               123 	stx	*ZD5
+   0098 18 38               124 	puly	; Restore stack frame
+   009A 39                  125 	rts	; return from function
+                            126 ;;;-----------------------------------------
+                            127 ;;; END EPILOGUE for string_IsDigit
+                            128 ;;;-----------------------------------------
+                            129 	.globl	_string_IsHexDigit
+   009B                     130 _string_IsHexDigit:
+                            131 ;;;-----------------------------------------
+                            132 ;;;  PROLOGUE for string_IsHexDigit
+                            133 ;;;-----------------------------------------
+   009B 18 3C               134 	pshy	; Save stack frame
+   009D 18 30               135 	tsy	; Set current stack frame
+   009F DE 00               136 	ldx	*ZD5
+   00A1 3C                  137 	pshx	; pushed register *ZD5
+                            138 ;;;END PROLOGUE
+   00A2 D6 01               139 	ldab	*ZD0+1
+   00A4 CB D0               140 	addb	#-48
+   00A6 D7 01               141 	stab	*ZD5+1	; addqi3: *ZD0 by #-48 -> *ZD5
+   00A8 D6 01               142 	ldab	*ZD5+1
+   00AA C1 09               143 	cmpb	#9	; cmpqi *ZD5 with #9
+   00AC 22 03               144 	bhi	.+5
+   00AE 7E 00 DC            145 	jmp	L14	; (bleu) long branch
+   00B1 D6 01               146 	ldab	*ZD0+1
+   00B3 CB BF               147 	addb	#-65
+   00B5 D7 01               148 	stab	*ZD5+1	; addqi3: *ZD0 by #-65 -> *ZD5
+   00B7 D6 01               149 	ldab	*ZD5+1
+   00B9 C1 05               150 	cmpb	#5	; cmpqi *ZD5 with #5
+   00BB 22 03               151 	bhi	.+5
+   00BD 7E 00 DC            152 	jmp	L14	; (bleu) long branch
+   00C0 D6 01               153 	ldab	*ZD0+1
+   00C2 CB 9F               154 	addb	#-97
+   00C4 D7 01               155 	stab	*ZD5+1	; addqi3: *ZD0 by #-97 -> *ZD5
+   00C6 CC 00 01            156 	ldd	#1
+   00C9 DD 00               157 	std	*ZD0	; movhi: #1 -> *ZD0
+   00CB D6 01               158 	ldab	*ZD5+1
+   00CD C1 05               159 	cmpb	#5	; cmpqi *ZD5 with #5
+   00CF 22 03               160 	bhi	.+5
+   00D1 7E 00 E1            161 	jmp	L16	; (bleu) long branch
+   00D4 CC 00 00            162 	ldd	#0
+   00D7 DD 00               163 	std	*ZD0	; movhi: #0 -> *ZD0
+   00D9 7E 00 E1            164 	jmp	L16
+   00DC                     165 L14:
+   00DC CC 00 01            166 	ldd	#1
+   00DF DD 00               167 	std	*ZD0	; movhi: #1 -> *ZD0
+   00E1                     168 L16:
+                            169 ;;;EPILOGUE
+   00E1 38                  170 	pulx	; Pulling register *ZD5
+   00E2 DF 00               171 	stx	*ZD5
+   00E4 18 38               172 	puly	; Restore stack frame
+   00E6 39                  173 	rts	; return from function
+                            174 ;;;-----------------------------------------
+                            175 ;;; END EPILOGUE for string_IsHexDigit
+                            176 ;;;-----------------------------------------
+                            177 	.globl	_string_DigitToInteger
+   00E7                     178 _string_DigitToInteger:
+                            179 ;;;-----------------------------------------
+                            180 ;;;  PROLOGUE for string_DigitToInteger
+                            181 ;;;-----------------------------------------
+   00E7 18 3C               182 	pshy	; Save stack frame
+   00E9 18 30               183 	tsy	; Set current stack frame
+   00EB DE 00               184 	ldx	*ZD5
+   00ED 3C                  185 	pshx	; pushed register *ZD5
+   00EE 8F                  186 	xgdx	; saving D register
+   00EF D6 00               187 	ldab	*ZB1
+   00F1 37                  188 	pshb	; pushed register *ZB1
+   00F2 8F                  189 	xgdx	; restoring D register
+                            190 ;;;END PROLOGUE
+   00F3 D6 01               191 	ldab	*ZD0+1
+   00F5 CB D0               192 	addb	#-48
+   00F7 D7 01               193 	stab	*ZD5+1	; addqi3: *ZD0 by #-48 -> *ZD5
+   00F9 CC 00 00            194 	ldd	#0
+   00FC DD 00               195 	std	*ZD0	; movhi: #0 -> *ZD0
+   00FE D6 01               196 	ldab	*ZD5+1
+   0100 C1 09               197 	cmpb	#9	; cmpqi *ZD5 with #9
+   0102 23 03               198 	bls	.+5
+   0104 7E 01 10            199 	jmp	L19	; (bgtu) long branch
+   0107 D6 01               200 	ldab	*ZD5+1
+   0109 D7 00               201 	stab	*ZB1	; movqi: *ZD5 -> *ZB1
+   010B D6 00               202 	ldab	*ZB1
+   010D 4F                  203 	clra
+   010E DD 00               204 	std	*ZD0	; zero_extendqihi2: *ZB1 -> *ZD0
+   0110                     205 L19:
+                            206 ;;;EPILOGUE
+   0110 8F                  207 	xgdx	; saving D register
+   0111 33                  208 	pulb	; Pulling register *ZB1
+   0112 D7 00               209 	stab	*ZB1
+   0114 8F                  210 	xgdx	; restoring D register
+   0115 38                  211 	pulx	; Pulling register *ZD5
+   0116 DF 00               212 	stx	*ZD5
+   0118 18 38               213 	puly	; Restore stack frame
+   011A 39                  214 	rts	; return from function
+                            215 ;;;-----------------------------------------
+                            216 ;;; END EPILOGUE for string_DigitToInteger
+                            217 ;;;-----------------------------------------
+                            218 	.globl	_string_StringToInteger
+   011B                     219 _string_StringToInteger:
+                            220 ;;;-----------------------------------------
+                            221 ;;;  PROLOGUE for string_StringToInteger
+                            222 ;;;-----------------------------------------
+   011B 18 3C               223 	pshy	; Save stack frame
+   011D 18 30               224 	tsy	; Set current stack frame
+   011F DE 00               225 	ldx	*ZD5
+   0121 3C                  226 	pshx	; pushed register *ZD5
+   0122 DE 00               227 	ldx	*ZD6
+   0124 3C                  228 	pshx	; pushed register *ZD6
+   0125 DE 00               229 	ldx	*ZD7
+   0127 3C                  230 	pshx	; pushed register *ZD7
+   0128 DE 00               231 	ldx	*ZD8
+   012A 3C                  232 	pshx	; pushed register *ZD8
+   012B 8F                  233 	xgdx	; saving D register
+   012C D6 00               234 	ldab	*ZB1
+   012E 37                  235 	pshb	; pushed register *ZB1
+   012F D6 00               236 	ldab	*ZB2
+   0131 37                  237 	pshb	; pushed register *ZB2
+   0132 8F                  238 	xgdx	; restoring D register
+                            239 ;;;END PROLOGUE
+   0133 DC 00               240 	ldd	*ZD0
+   0135 DD 00               241 	std	*ZD8	; movhi: *ZD0 -> *ZD8
+   0137 C6 00               242 	ldab	#0
+   0139 D7 00               243 	stab	*ZB1	; movqi: #0 -> *ZB1
+   013B DE 00               244 	ldx	*ZD8
+   013D E6 00               245 	ldab	0,x
+   013F C1 20               246 	cmpb	#32	; cmpqi 0,x with #32
+   0141 27 03               247 	beq	.+5
+   0143 7E 01 5F            248 	jmp	L22	; (bne) long branch
+   0146                     249 L23:
+   0146 7C 00 00            250 	inc	*ZB1	; addqi3: *ZB1 by #1 -> *ZB1
+   0149 D6 00               251 	ldab	*ZB1
+   014B 4F                  252 	clra
+   014C DD 00               253 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   014E DC 00               254 	ldd	*ZD8
+   0150 D3 00               255 	addd	*ZD5
+   0152 DD 00               256 	std	*ZD5	; addhi3: *ZD8 by *ZD5 -> *ZD5
+   0154 DE 00               257 	ldx	*ZD5
+   0156 E6 00               258 	ldab	0,x
+   0158 C1 20               259 	cmpb	#32	; cmpqi 0,x with #32
+   015A 26 03               260 	bne	.+5
+   015C 7E 01 46            261 	jmp	L23	; (beq) long branch
+   015F                     262 L22:
+   015F D6 00               263 	ldab	*ZB1
+   0161 4F                  264 	clra
+   0162 DD 00               265 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   0164 DC 00               266 	ldd	*ZD8
+   0166 D3 00               267 	addd	*ZD5
+   0168 DD 00               268 	std	*ZD5	; addhi3: *ZD8 by *ZD5 -> *ZD5
+   016A DE 00               269 	ldx	*ZD5
+   016C E6 00               270 	ldab	0,x
+   016E D7 01               271 	stab	*ZD5+1	; movqi: 0,x -> *ZD5
+   0170 C6 01               272 	ldab	#1
+   0172 D7 00               273 	stab	*ZB2	; movqi: #1 -> *ZB2
+   0174 D6 01               274 	ldab	*ZD5+1
+   0176 C1 2D               275 	cmpb	#45	; cmpqi *ZD5 with #45
+   0178 27 03               276 	beq	.+5
+   017A 7E 01 8A            277 	jmp	L35	; (bne) long branch
+   017D C6 FF               278 	ldab	#-1
+   017F D7 00               279 	stab	*ZB2	; movqi: #-1 -> *ZB2
+   0181 D6 01               280 	ldab	*ZD5+1
+   0183 C1 2D               281 	cmpb	#45	; cmpqi *ZD5 with #45
+   0185 26 03               282 	bne	.+5
+   0187 7E 01 93            283 	jmp	L29	; (beq) long branch
+   018A                     284 L35:
+   018A D6 01               285 	ldab	*ZD5+1
+   018C C1 2B               286 	cmpb	#43	; cmpqi *ZD5 with #43
+   018E 27 03               287 	beq	.+5
+   0190 7E 01 96            288 	jmp	L28	; (bne) long branch
+   0193                     289 L29:
+   0193 7C 00 00            290 	inc	*ZB1	; addqi3: *ZB1 by #1 -> *ZB1
+   0196                     291 L28:
+   0196 CC 00 00            292 	ldd	#0
+   0199 DD 00               293 	std	*ZD6	; movhi: #0 -> *ZD6
+   019B 7E 01 CC            294 	jmp	L36
+   019E                     295 L33:
+   019E DC 00               296 	ldd	*ZD6
+   01A0 05                  297 	asld
+   01A1 05                  298 	asld
+   01A2 DD 00               299 	std	*ZD5	; ashlhi3: *ZD6 by #2 -> *ZD5
+   01A4 DC 00               300 	ldd	*ZD5
+   01A6 D3 00               301 	addd	*ZD6
+   01A8 DD 00               302 	std	*ZD5	; addhi3: *ZD5 by *ZD6 -> *ZD5
+   01AA DC 00               303 	ldd	*ZD5
+   01AC 05                  304 	asld
+   01AD DD 00               305 	std	*ZD5	; ashlhi3: *ZD5 by #1 -> *ZD5
+   01AF DC 00               306 	ldd	*ZD5
+   01B1 C3 FF D0            307 	addd	#-48
+   01B4 DD 00               308 	std	*ZD6	; addhi3: *ZD5 by #-48 -> *ZD6
+   01B6 DC 00               309 	ldd	*ZD8
+   01B8 D3 00               310 	addd	*ZD7
+   01BA DD 00               311 	std	*ZD5	; addhi3: *ZD8 by *ZD7 -> *ZD5
+   01BC DE 00               312 	ldx	*ZD5
+   01BE E6 00               313 	ldab	0,x
+   01C0 4F                  314 	clra
+   01C1 DD 00               315 	std	*ZD5	; zero_extendqihi2: 0,x -> *ZD5
+   01C3 DC 00               316 	ldd	*ZD6
+   01C5 D3 00               317 	addd	*ZD5
+   01C7 DD 00               318 	std	*ZD6	; addhi3: *ZD6 by *ZD5 -> *ZD6
+   01C9 7C 00 00            319 	inc	*ZB1	; addqi3: *ZB1 by #1 -> *ZB1
+   01CC                     320 L36:
+   01CC D6 00               321 	ldab	*ZB1
+   01CE 4F                  322 	clra
+   01CF DD 00               323 	std	*ZD7	; zero_extendqihi2: *ZB1 -> *ZD7
+   01D1 DC 00               324 	ldd	*ZD8
+   01D3 D3 00               325 	addd	*ZD7
+   01D5 DD 00               326 	std	*ZD5	; addhi3: *ZD8 by *ZD7 -> *ZD5
+   01D7 DE 00               327 	ldx	*ZD5
+   01D9 E6 00               328 	ldab	0,x
+   01DB CB D0               329 	addb	#-48
+   01DD D7 01               330 	stab	*ZD5+1	; addqi3: 0,x by #-48 -> *ZD5
+   01DF D6 01               331 	ldab	*ZD5+1
+   01E1 C1 09               332 	cmpb	#9	; cmpqi *ZD5 with #9
+   01E3 22 03               333 	bhi	.+5
+   01E5 7E 01 9E            334 	jmp	L33	; (bleu) long branch
+   01E8 D6 00               335 	ldab	*ZB2
+   01EA 4F                  336 	clra
+   01EB 5D                  337 	tstb
+   01EC 2C 01               338 	bge	.+3
+   01EE 4A                  339 	deca
+   01EF DD 00               340 	std	*ZD5	; extendqihi2: *ZB2 -> *ZD5
+   01F1 DC 00               341 	ldd	*ZD5
+   01F3 DE 00               342 	ldx	*ZD6
+   01F5 3C                  343 	pshx
+   01F6 BD 00 00            344 	jsr	___mulhi3
+   01F9 38                  345 	pulx
+   01FA DD 00               346 	std	*ZD0	; mulhi3: *ZD5 by *ZD6 -> *ZD0
+                            347 ;;;EPILOGUE
+   01FC 8F                  348 	xgdx	; saving D register
+   01FD 33                  349 	pulb	; Pulling register *ZB2
+   01FE D7 00               350 	stab	*ZB2
+   0200 33                  351 	pulb	; Pulling register *ZB1
+   0201 D7 00               352 	stab	*ZB1
+   0203 8F                  353 	xgdx	; restoring D register
+   0204 38                  354 	pulx	; Pulling register *ZD8
+   0205 DF 00               355 	stx	*ZD8
+   0207 38                  356 	pulx	; Pulling register *ZD7
+   0208 DF 00               357 	stx	*ZD7
+   020A 38                  358 	pulx	; Pulling register *ZD6
+   020B DF 00               359 	stx	*ZD6
+   020D 38                  360 	pulx	; Pulling register *ZD5
+   020E DF 00               361 	stx	*ZD5
+   0210 18 38               362 	puly	; Restore stack frame
+   0212 39                  363 	rts	; return from function
+                            364 ;;;-----------------------------------------
+                            365 ;;; END EPILOGUE for string_StringToInteger
+                            366 ;;;-----------------------------------------
+                            367 	.globl	_string_IntegerToString
+   0213                     368 _string_IntegerToString:
+                            369 ;;;-----------------------------------------
+                            370 ;;;  PROLOGUE for string_IntegerToString
+                            371 ;;;-----------------------------------------
+   0213 18 3C               372 	pshy	; Save stack frame
+   0215 18 30               373 	tsy	; Set current stack frame
+   0217 DE 00               374 	ldx	*ZD1
+   0219 3C                  375 	pshx	; pushed register *ZD1
+   021A DE 00               376 	ldx	*ZD5
+   021C 3C                  377 	pshx	; pushed register *ZD5
+   021D DE 00               378 	ldx	*ZD6
+   021F 3C                  379 	pshx	; pushed register *ZD6
+   0220 DE 00               380 	ldx	*ZD7
+   0222 3C                  381 	pshx	; pushed register *ZD7
+   0223 DE 00               382 	ldx	*ZD8
+   0225 3C                  383 	pshx	; pushed register *ZD8
+   0226 8F                  384 	xgdx	; saving D register
+   0227 D6 00               385 	ldab	*ZB1
+   0229 37                  386 	pshb	; pushed register *ZB1
+   022A D6 00               387 	ldab	*ZB2
+   022C 37                  388 	pshb	; pushed register *ZB2
+   022D D6 00               389 	ldab	*ZB3
+   022F 37                  390 	pshb	; pushed register *ZB3
+   0230 8F                  391 	xgdx	; restoring D register
+                            392 ;;;END PROLOGUE
+   0231 DC 00               393 	ldd	*ZD0
+   0233 DD 00               394 	std	*ZD7	; movhi: *ZD0 -> *ZD7
+   0235 18 EC 04            395 	ldd	4,y
+   0238 DD 00               396 	std	*ZD8	; movhi: 4,y -> *ZD8
+   023A 18 E6 06            397 	ldab	6,y
+   023D D7 00               398 	stab	*ZB3	; movqi: 6,y -> *ZB3
+   023F C6 00               399 	ldab	#0
+   0241 D7 00               400 	stab	*ZB2	; movqi: #0 -> *ZB2
+   0243 DC 00               401 	ldd	*ZD0	; tsthi: R:*ZD0
+   0245 2D 03               402 	blt	.+5
+   0247 7E 02 63            403 	jmp	L38	; (bge) long branch
+   024A D6 00               404 	ldab	*ZB2
+   024C D1 00               405 	cmpb	*ZB3	; cmpqi *ZB2 with *ZB3
+   024E 25 03               406 	blo	.+5
+   0250 7E 02 5D            407 	jmp	L39	; (bgeu) long branch
+   0253 C6 2D               408 	ldab	#45
+   0255 DE 00               409 	ldx	*ZD8
+   0257 E7 00               410 	stab	0,x	; movqi: #45 -> 0,x
+   0259 C6 01               411 	ldab	#1
+   025B D7 00               412 	stab	*ZB2	; movqi: #1 -> *ZB2
+   025D                     413 L39:
+   025D 4F                  414 	clra
+   025E 5F                  415 	clrb
+   025F 93 00               416 	subd	*ZD0
+   0261 DD 00               417 	std	*ZD7	; neghi2: *ZD0 -> *ZD7
+   0263                     418 L38:
+   0263 CC 00 01            419 	ldd	#1
+   0266 DD 00               420 	std	*ZD6	; movhi: #1 -> *ZD6
+   0268 DC 00               421 	ldd	*ZD7
+   026A 1A 83 00 09         422 	cpd	#9	; cmphi *ZD7 with #9
+   026E 22 03               423 	bhi	.+5
+   0270 7E 02 EB            424 	jmp	L51	; (bleu) long branch
+   0273                     425 L42:
+   0273 DC 00               426 	ldd	*ZD6
+   0275 05                  427 	asld
+   0276 05                  428 	asld
+   0277 DD 00               429 	std	*ZD5	; ashlhi3: *ZD6 by #2 -> *ZD5
+   0279 DC 00               430 	ldd	*ZD5
+   027B D3 00               431 	addd	*ZD6
+   027D DD 00               432 	std	*ZD5	; addhi3: *ZD5 by *ZD6 -> *ZD5
+   027F DC 00               433 	ldd	*ZD5
+   0281 05                  434 	asld
+   0282 DD 00               435 	std	*ZD6	; ashlhi3: *ZD5 by #1 -> *ZD6
+   0284 DC 00               436 	ldd	*ZD5
+   0286 05                  437 	asld
+   0287 05                  438 	asld
+   0288 05                  439 	asld
+   0289 DD 00               440 	std	*ZD5	; ashlhi3: *ZD5 by #3 -> *ZD5
+   028B DC 00               441 	ldd	*ZD5
+   028D D3 00               442 	addd	*ZD6
+   028F DD 00               443 	std	*ZD5	; addhi3: *ZD5 by *ZD6 -> *ZD5
+   0291 DC 00               444 	ldd	*ZD5
+   0293 05                  445 	asld
+   0294 DD 00               446 	std	*ZD5	; ashlhi3: *ZD5 by #1 -> *ZD5
+   0296 DC 00               447 	ldd	*ZD5
+   0298 1A 93 00            448 	cpd	*ZD7	; cmphi *ZD5 with *ZD7
+   029B 22 03               449 	bhi	.+5
+   029D 7E 02 73            450 	jmp	L42	; (bleu) long branch
+   02A0 7E 02 EB            451 	jmp	L51
+   02A3                     452 L46:
+   02A3 DC 00               453 	ldd	*ZD7
+   02A5 DE 00               454 	ldx	*ZD6
+   02A7 02                  455 	idiv
+   02A8 DF 00               456 	stx	*ZD1	; udivhi3: *ZD7 by *ZD6 -> *ZD1
+   02AA D6 01               457 	ldab	*ZD1+1
+   02AC D7 00               458 	stab	*ZB1	; movqi: *ZD1 -> *ZB1
+   02AE D6 00               459 	ldab	*ZB1
+   02B0 4F                  460 	clra
+   02B1 DD 00               461 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   02B3 DC 00               462 	ldd	*ZD5
+   02B5 DE 00               463 	ldx	*ZD6
+   02B7 3C                  464 	pshx
+   02B8 BD 00 00            465 	jsr	___mulhi3
+   02BB 38                  466 	pulx
+   02BC DD 00               467 	std	*ZD5	; mulhi3: *ZD5 by *ZD6 -> *ZD5
+   02BE DC 00               468 	ldd	*ZD7
+   02C0 93 00               469 	subd	*ZD5
+   02C2 DD 00               470 	std	*ZD7	; subhi3: *ZD7 by *ZD5 -> *ZD7
+   02C4 D6 00               471 	ldab	*ZB2
+   02C6 D1 00               472 	cmpb	*ZB3	; cmpqi *ZB2 with *ZB3
+   02C8 25 03               473 	blo	.+5
+   02CA 7E 02 E3            474 	jmp	L47	; (bgeu) long branch
+   02CD D6 00               475 	ldab	*ZB2
+   02CF 4F                  476 	clra
+   02D0 DD 00               477 	std	*ZD5	; zero_extendqihi2: *ZB2 -> *ZD5
+   02D2 DC 00               478 	ldd	*ZD8
+   02D4 D3 00               479 	addd	*ZD5
+   02D6 DD 00               480 	std	*ZD5	; addhi3: *ZD8 by *ZD5 -> *ZD5
+   02D8 D6 00               481 	ldab	*ZB1
+   02DA CB 30               482 	addb	#48
+   02DC DE 00               483 	ldx	*ZD5
+   02DE E7 00               484 	stab	0,x	; addqi3: *ZB1 by #48 -> 0,x
+   02E0 7C 00 00            485 	inc	*ZB2	; addqi3: *ZB2 by #1 -> *ZB2
+   02E3                     486 L47:
+   02E3 DC 00               487 	ldd	*ZD6
+   02E5 CE 00 0A            488 	ldx	#10
+   02E8 02                  489 	idiv
+   02E9 DF 00               490 	stx	*ZD6	; udivhi3: *ZD6 by #10 -> *ZD6
+   02EB                     491 L51:
+   02EB DC 00               492 	ldd	*ZD6	; tsthi: R:*ZD6
+   02ED 27 03               493 	beq	.+5
+   02EF 7E 02 A3            494 	jmp	L46	; (bne) long branch
+   02F2 D6 00               495 	ldab	*ZB2
+   02F4 D1 00               496 	cmpb	*ZB3	; cmpqi *ZB2 with *ZB3
+   02F6 25 03               497 	blo	.+5
+   02F8 7E 03 0C            498 	jmp	L49	; (bgeu) long branch
+   02FB D6 00               499 	ldab	*ZB2
+   02FD 4F                  500 	clra
+   02FE DD 00               501 	std	*ZD5	; zero_extendqihi2: *ZB2 -> *ZD5
+   0300 DC 00               502 	ldd	*ZD8
+   0302 D3 00               503 	addd	*ZD5
+   0304 DD 00               504 	std	*ZD5	; addhi3: *ZD8 by *ZD5 -> *ZD5
+   0306 C6 00               505 	ldab	#0
+   0308 DE 00               506 	ldx	*ZD5
+   030A E7 00               507 	stab	0,x	; movqi: #0 -> 0,x
+   030C                     508 L49:
+   030C D6 00               509 	ldab	*ZB3
+   030E 4F                  510 	clra
+   030F DD 00               511 	std	*ZD5	; zero_extendqihi2: *ZB3 -> *ZD5
+   0311 DC 00               512 	ldd	*ZD8
+   0313 D3 00               513 	addd	*ZD5
+   0315 DD 00               514 	std	*ZD5	; addhi3: *ZD8 by *ZD5 -> *ZD5
+   0317 C6 00               515 	ldab	#0
+   0319 DE 00               516 	ldx	*ZD5
+   031B E7 00               517 	stab	0,x	; movqi: #0 -> 0,x
+                            518 ;;;EPILOGUE
+   031D 8F                  519 	xgdx	; saving D register
+   031E 33                  520 	pulb	; Pulling register *ZB3
+   031F D7 00               521 	stab	*ZB3
+   0321 33                  522 	pulb	; Pulling register *ZB2
+   0322 D7 00               523 	stab	*ZB2
+   0324 33                  524 	pulb	; Pulling register *ZB1
+   0325 D7 00               525 	stab	*ZB1
+   0327 8F                  526 	xgdx	; restoring D register
+   0328 38                  527 	pulx	; Pulling register *ZD8
+   0329 DF 00               528 	stx	*ZD8
+   032B 38                  529 	pulx	; Pulling register *ZD7
+   032C DF 00               530 	stx	*ZD7
+   032E 38                  531 	pulx	; Pulling register *ZD6
+   032F DF 00               532 	stx	*ZD6
+   0331 38                  533 	pulx	; Pulling register *ZD5
+   0332 DF 00               534 	stx	*ZD5
+   0334 38                  535 	pulx	; Pulling register *ZD1
+   0335 DF 00               536 	stx	*ZD1
+   0337 18 38               537 	puly	; Restore stack frame
+   0339 39                  538 	rts	; return from function
+                            539 ;;;-----------------------------------------
+                            540 ;;; END EPILOGUE for string_IntegerToString
+                            541 ;;;-----------------------------------------
+                            542 	.globl	_string_IntegerToHex
+   033A                     543 _string_IntegerToHex:
+                            544 ;;;-----------------------------------------
+                            545 ;;;  PROLOGUE for string_IntegerToHex
+                            546 ;;;-----------------------------------------
+   033A 18 3C               547 	pshy	; Save stack frame
+   033C 18 30               548 	tsy	; Set current stack frame
+   033E DE 00               549 	ldx	*ZD5
+   0340 3C                  550 	pshx	; pushed register *ZD5
+   0341 DE 00               551 	ldx	*ZD6
+   0343 3C                  552 	pshx	; pushed register *ZD6
+   0344 DE 00               553 	ldx	*ZD7
+   0346 3C                  554 	pshx	; pushed register *ZD7
+   0347 8F                  555 	xgdx	; saving D register
+   0348 D6 00               556 	ldab	*ZB1
+   034A 37                  557 	pshb	; pushed register *ZB1
+   034B D6 00               558 	ldab	*ZB2
+   034D 37                  559 	pshb	; pushed register *ZB2
+   034E D6 00               560 	ldab	*ZB3
+   0350 37                  561 	pshb	; pushed register *ZB3
+   0351 D6 00               562 	ldab	*ZB4
+   0353 37                  563 	pshb	; pushed register *ZB4
+   0354 8F                  564 	xgdx	; restoring D register
+                            565 ;;;END PROLOGUE
+   0355 DC 00               566 	ldd	*ZD0
+   0357 DD 00               567 	std	*ZD6	; movhi: *ZD0 -> *ZD6
+   0359 18 EC 04            568 	ldd	4,y
+   035C DD 00               569 	std	*ZD7	; movhi: 4,y -> *ZD7
+   035E 18 E6 06            570 	ldab	6,y
+   0361 D7 00               571 	stab	*ZB3	; movqi: 6,y -> *ZB3
+   0363 D6 00               572 	ldab	*ZB3
+   0365 D7 00               573 	stab	*ZB2	; movqi: *ZB3 -> *ZB2
+   0367 26 03               574 	bne	.+5
+   0369 7E 03 B7            575 	jmp	L54	; (beq) long branch
+   036C                     576 L56:
+   036C D6 01               577 	ldab	*ZD6+1
+   036E D7 00               578 	stab	*ZB4	; movqi: *ZD6 -> *ZB4
+   0370 D6 00               579 	ldab	*ZB4
+   0372 C4 0F               580 	andb	#15
+   0374 D7 00               581 	stab	*ZB1	; andqi3: *ZB4 by #15 -> *ZB1
+   0376 D6 00               582 	ldab	*ZB2
+   0378 4F                  583 	clra
+   0379 DD 00               584 	std	*ZD5	; zero_extendqihi2: *ZB2 -> *ZD5
+   037B DC 00               585 	ldd	*ZD5
+   037D D3 00               586 	addd	*ZD7
+   037F DD 00               587 	std	*ZD5	; addhi3: *ZD5 by *ZD7 -> *ZD5
+   0381 DC 00               588 	ldd	*ZD5
+   0383 C3 FF FF            589 	addd	#-1
+   0386 DD 00               590 	std	*ZD5	; addhi3: *ZD5 by #-1 -> *ZD5
+   0388 D6 00               591 	ldab	*ZB1
+   038A C1 09               592 	cmpb	#9	; cmpqi *ZB1 with #9
+   038C 23 03               593 	bls	.+5
+   038E 7E 03 9C            594 	jmp	L57	; (bgtu) long branch
+   0391 D6 00               595 	ldab	*ZB1
+   0393 CA 30               596 	orab	#48
+   0395 DE 00               597 	ldx	*ZD5
+   0397 E7 00               598 	stab	0,x	; iorqi3: *ZB1 by #48 -> 0,x
+   0399 7E 03 A4            599 	jmp	L58
+   039C                     600 L57:
+   039C D6 00               601 	ldab	*ZB1
+   039E CB 37               602 	addb	#55
+   03A0 DE 00               603 	ldx	*ZD5
+   03A2 E7 00               604 	stab	0,x	; addqi3: *ZB1 by #55 -> 0,x
+   03A4                     605 L58:
+   03A4 DC 00               606 	ldd	*ZD6
+   03A6 04                  607 	lsrd
+   03A7 04                  608 	lsrd
+   03A8 04                  609 	lsrd
+   03A9 04                  610 	lsrd
+   03AA DD 00               611 	std	*ZD6	; lshrhi3: *ZD6 by #4 -> *ZD6
+   03AC D6 00               612 	ldab	*ZB2
+   03AE CB FF               613 	addb	#-1
+   03B0 D7 00               614 	stab	*ZB2	; addqi3: *ZB2 by #-1 -> *ZB2
+   03B2 27 03               615 	beq	.+5
+   03B4 7E 03 6C            616 	jmp	L56	; (bne) long branch
+   03B7                     617 L54:
+   03B7 D6 00               618 	ldab	*ZB3
+   03B9 4F                  619 	clra
+   03BA DD 00               620 	std	*ZD5	; zero_extendqihi2: *ZB3 -> *ZD5
+   03BC DC 00               621 	ldd	*ZD7
+   03BE D3 00               622 	addd	*ZD5
+   03C0 DD 00               623 	std	*ZD5	; addhi3: *ZD7 by *ZD5 -> *ZD5
+   03C2 C6 00               624 	ldab	#0
+   03C4 DE 00               625 	ldx	*ZD5
+   03C6 E7 00               626 	stab	0,x	; movqi: #0 -> 0,x
+                            627 ;;;EPILOGUE
+   03C8 8F                  628 	xgdx	; saving D register
+   03C9 33                  629 	pulb	; Pulling register *ZB4
+   03CA D7 00               630 	stab	*ZB4
+   03CC 33                  631 	pulb	; Pulling register *ZB3
+   03CD D7 00               632 	stab	*ZB3
+   03CF 33                  633 	pulb	; Pulling register *ZB2
+   03D0 D7 00               634 	stab	*ZB2
+   03D2 33                  635 	pulb	; Pulling register *ZB1
+   03D3 D7 00               636 	stab	*ZB1
+   03D5 8F                  637 	xgdx	; restoring D register
+   03D6 38                  638 	pulx	; Pulling register *ZD7
+   03D7 DF 00               639 	stx	*ZD7
+   03D9 38                  640 	pulx	; Pulling register *ZD6
+   03DA DF 00               641 	stx	*ZD6
+   03DC 38                  642 	pulx	; Pulling register *ZD5
+   03DD DF 00               643 	stx	*ZD5
+   03DF 18 38               644 	puly	; Restore stack frame
+   03E1 39                  645 	rts	; return from function
+                            646 ;;;-----------------------------------------
+                            647 ;;; END EPILOGUE for string_IntegerToHex
+                            648 ;;;-----------------------------------------
+                            649 	.globl	_string_HexDigitToInteger
+   03E2                     650 _string_HexDigitToInteger:
+                            651 ;;;-----------------------------------------
+                            652 ;;;  PROLOGUE for string_HexDigitToInteger
+                            653 ;;;-----------------------------------------
+   03E2 18 3C               654 	pshy	; Save stack frame
+   03E4 18 30               655 	tsy	; Set current stack frame
+   03E6 DE 00               656 	ldx	*ZD5
+   03E8 3C                  657 	pshx	; pushed register *ZD5
+   03E9 8F                  658 	xgdx	; saving D register
+   03EA D6 00               659 	ldab	*ZB1
+   03EC 37                  660 	pshb	; pushed register *ZB1
+   03ED 8F                  661 	xgdx	; restoring D register
+                            662 ;;;END PROLOGUE
+   03EE D6 01               663 	ldab	*ZD0+1
+   03F0 CB D0               664 	addb	#-48
+   03F2 D7 01               665 	stab	*ZD5+1	; addqi3: *ZD0 by #-48 -> *ZD5
+   03F4 D6 01               666 	ldab	*ZD5+1
+   03F6 C1 09               667 	cmpb	#9	; cmpqi *ZD5 with #9
+   03F8 22 03               668 	bhi	.+5
+   03FA 7E 04 32            669 	jmp	L65	; (bleu) long branch
+   03FD D6 01               670 	ldab	*ZD0+1
+   03FF CB BF               671 	addb	#-65
+   0401 D7 01               672 	stab	*ZD5+1	; addqi3: *ZD0 by #-65 -> *ZD5
+   0403 D6 01               673 	ldab	*ZD5+1
+   0405 C1 05               674 	cmpb	#5	; cmpqi *ZD5 with #5
+   0407 23 03               675 	bls	.+5
+   0409 7E 04 15            676 	jmp	L62	; (bgtu) long branch
+   040C D6 01               677 	ldab	*ZD0+1
+   040E CB C9               678 	addb	#201
+   0410 D7 01               679 	stab	*ZD5+1	; addqi3: *ZD0 by #201 -> *ZD5
+   0412 7E 04 32            680 	jmp	L65
+   0415                     681 L62:
+   0415 D6 01               682 	ldab	*ZD0+1
+   0417 CB 9F               683 	addb	#-97
+   0419 D7 01               684 	stab	*ZD5+1	; addqi3: *ZD0 by #-97 -> *ZD5
+   041B D6 01               685 	ldab	*ZD5+1
+   041D C1 05               686 	cmpb	#5	; cmpqi *ZD5 with #5
+   041F 22 03               687 	bhi	.+5
+   0421 7E 04 2C            688 	jmp	L63	; (bleu) long branch
+   0424 CC 00 00            689 	ldd	#0
+   0427 DD 00               690 	std	*ZD0	; movhi: #0 -> *ZD0
+   0429 7E 04 3B            691 	jmp	L64
+   042C                     692 L63:
+   042C D6 01               693 	ldab	*ZD0+1
+   042E CB A9               694 	addb	#169
+   0430 D7 01               695 	stab	*ZD5+1	; addqi3: *ZD0 by #169 -> *ZD5
+   0432                     696 L65:
+   0432 D6 01               697 	ldab	*ZD5+1
+   0434 D7 00               698 	stab	*ZB1	; movqi: *ZD5 -> *ZB1
+   0436 D6 00               699 	ldab	*ZB1
+   0438 4F                  700 	clra
+   0439 DD 00               701 	std	*ZD0	; zero_extendqihi2: *ZB1 -> *ZD0
+   043B                     702 L64:
+                            703 ;;;EPILOGUE
+   043B 8F                  704 	xgdx	; saving D register
+   043C 33                  705 	pulb	; Pulling register *ZB1
+   043D D7 00               706 	stab	*ZB1
+   043F 8F                  707 	xgdx	; restoring D register
+   0440 38                  708 	pulx	; Pulling register *ZD5
+   0441 DF 00               709 	stx	*ZD5
+   0443 18 38               710 	puly	; Restore stack frame
+   0445 39                  711 	rts	; return from function
+                            712 ;;;-----------------------------------------
+                            713 ;;; END EPILOGUE for string_HexDigitToInteger
+                            714 ;;;-----------------------------------------
+                            715 	.globl	_string_HexToInteger
+   0446                     716 _string_HexToInteger:
+                            717 ;;;-----------------------------------------
+                            718 ;;;  PROLOGUE for string_HexToInteger
+                            719 ;;;-----------------------------------------
+   0446 18 3C               720 	pshy	; Save stack frame
+   0448 18 30               721 	tsy	; Set current stack frame
+   044A DE 00               722 	ldx	*ZD5
+   044C 3C                  723 	pshx	; pushed register *ZD5
+   044D DE 00               724 	ldx	*ZD6
+   044F 3C                  725 	pshx	; pushed register *ZD6
+   0450 DE 00               726 	ldx	*ZD7
+   0452 3C                  727 	pshx	; pushed register *ZD7
+   0453 8F                  728 	xgdx	; saving D register
+   0454 D6 00               729 	ldab	*ZB1
+   0456 37                  730 	pshb	; pushed register *ZB1
+   0457 8F                  731 	xgdx	; restoring D register
+                            732 ;;;END PROLOGUE
+   0458 CC 00 00            733 	ldd	#0
+   045B DD 00               734 	std	*ZD6	; movhi: #0 -> *ZD6
+   045D DC 00               735 	ldd	*ZD0
+   045F DD 00               736 	std	*ZD7	; movhi: *ZD0 -> *ZD7
+   0461                     737 L67:
+   0461 DE 00               738 	ldx	*ZD7
+   0463 E6 00               739 	ldab	0,x
+   0465 D7 01               740 	stab	*ZD0+1	; movqi: 0,x -> *ZD0
+   0467 BD 00 9B            741 	jsr	_string_IsHexDigit	; CALL: R:*ZD0 = _string_IsHexDigit (0 bytes)
+   046A DC 00               742 	ldd	*ZD0	; tsthi: R:*ZD0
+   046C 26 03               743 	bne	.+5
+   046E 7E 04 9D            744 	jmp	L68	; (beq) long branch
+   0471 DE 00               745 	ldx	*ZD7
+   0473 E6 00               746 	ldab	0,x
+   0475 D7 01               747 	stab	*ZD0+1	; movqi: 0,x -> *ZD0
+   0477 BD 03 E2            748 	jsr	_string_HexDigitToInteger	; CALL: R:*ZD0 = _string_HexDigitToInteger (0 bytes)
+   047A D6 01               749 	ldab	*ZD0+1
+   047C C1 10               750 	cmpb	#16	; cmpqi *ZD0 with #16
+   047E 26 03               751 	bne	.+5
+   0480 7E 04 9D            752 	jmp	L68	; (beq) long branch
+   0483 DC 00               753 	ldd	*ZD6
+   0485 05                  754 	asld
+   0486 05                  755 	asld
+   0487 05                  756 	asld
+   0488 05                  757 	asld
+   0489 DD 00               758 	std	*ZD6	; ashlhi3: *ZD6 by #4 -> *ZD6
+   048B D6 01               759 	ldab	*ZD0+1
+   048D D7 00               760 	stab	*ZB1	; movqi: *ZD0 -> *ZB1
+   048F D6 00               761 	ldab	*ZB1
+   0491 4F                  762 	clra
+   0492 DD 00               763 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   0494 DC 00               764 	ldd	*ZD6
+   0496 D3 00               765 	addd	*ZD5
+   0498 DD 00               766 	std	*ZD6	; addhi3: *ZD6 by *ZD5 -> *ZD6
+   049A 7E 04 61            767 	jmp	L67
+   049D                     768 L68:
+   049D DC 00               769 	ldd	*ZD6
+   049F DD 00               770 	std	*ZD0	; movhi: *ZD6 -> *ZD0
+                            771 ;;;EPILOGUE
+   04A1 8F                  772 	xgdx	; saving D register
+   04A2 33                  773 	pulb	; Pulling register *ZB1
+   04A3 D7 00               774 	stab	*ZB1
+   04A5 8F                  775 	xgdx	; restoring D register
+   04A6 38                  776 	pulx	; Pulling register *ZD7
+   04A7 DF 00               777 	stx	*ZD7
+   04A9 38                  778 	pulx	; Pulling register *ZD6
+   04AA DF 00               779 	stx	*ZD6
+   04AC 38                  780 	pulx	; Pulling register *ZD5
+   04AD DF 00               781 	stx	*ZD5
+   04AF 18 38               782 	puly	; Restore stack frame
+   04B1 39                  783 	rts	; return from function
+                            784 ;;;-----------------------------------------
+                            785 ;;; END EPILOGUE for string_HexToInteger
+                            786 ;;;-----------------------------------------
+                            787 	.globl	_string_Copy
+   04B2                     788 _string_Copy:
+                            789 ;;;-----------------------------------------
+                            790 ;;;  PROLOGUE for string_Copy
+                            791 ;;;-----------------------------------------
+   04B2 18 3C               792 	pshy	; Save stack frame
+   04B4 18 30               793 	tsy	; Set current stack frame
+   04B6 DE 00               794 	ldx	*ZD1
+   04B8 3C                  795 	pshx	; pushed register *ZD1
+   04B9 DE 00               796 	ldx	*ZD2
+   04BB 3C                  797 	pshx	; pushed register *ZD2
+   04BC DE 00               798 	ldx	*ZD5
+   04BE 3C                  799 	pshx	; pushed register *ZD5
+   04BF DE 00               800 	ldx	*ZD6
+   04C1 3C                  801 	pshx	; pushed register *ZD6
+   04C2 DE 00               802 	ldx	*ZD7
+   04C4 3C                  803 	pshx	; pushed register *ZD7
+   04C5 DE 00               804 	ldx	*ZD8
+   04C7 3C                  805 	pshx	; pushed register *ZD8
+   04C8 8F                  806 	xgdx	; saving D register
+   04C9 D6 00               807 	ldab	*ZB1
+   04CB 37                  808 	pshb	; pushed register *ZB1
+   04CC D6 00               809 	ldab	*ZB2
+   04CE 37                  810 	pshb	; pushed register *ZB2
+   04CF 8F                  811 	xgdx	; restoring D register
+                            812 ;;;END PROLOGUE
+   04D0 DC 00               813 	ldd	*ZD0
+   04D2 DD 00               814 	std	*ZD8	; movhi: *ZD0 -> *ZD8
+   04D4 18 EC 04            815 	ldd	4,y
+   04D7 DD 00               816 	std	*ZD2	; movhi: 4,y -> *ZD2
+   04D9 18 E6 06            817 	ldab	6,y
+   04DC D7 01               818 	stab	*ZD1+1	; movqi: 6,y -> *ZD1
+   04DE C6 00               819 	ldab	#0
+   04E0 D7 00               820 	stab	*ZB1	; movqi: #0 -> *ZB1
+   04E2 7E 05 0A            821 	jmp	L77
+   04E5                     822 L76:
+   04E5 D6 00               823 	ldab	*ZB1
+   04E7 4F                  824 	clra
+   04E8 DD 00               825 	std	*ZD7	; zero_extendqihi2: *ZB1 -> *ZD7
+   04EA DC 00               826 	ldd	*ZD2
+   04EC D3 00               827 	addd	*ZD7
+   04EE DD 00               828 	std	*ZD5	; addhi3: *ZD2 by *ZD7 -> *ZD5
+   04F0 DE 00               829 	ldx	*ZD5
+   04F2 E6 00               830 	ldab	0,x
+   04F4 D7 01               831 	stab	*ZD6+1	; movqi: 0,x -> *ZD6
+   04F6 26 03               832 	bne	.+5
+   04F8 7E 05 17            833 	jmp	L73	; (beq) long branch
+   04FB DC 00               834 	ldd	*ZD8
+   04FD D3 00               835 	addd	*ZD7
+   04FF DD 00               836 	std	*ZD5	; addhi3: *ZD8 by *ZD7 -> *ZD5
+   0501 D6 01               837 	ldab	*ZD6+1
+   0503 DE 00               838 	ldx	*ZD5
+   0505 E7 00               839 	stab	0,x	; movqi: *ZD6 -> 0,x
+   0507 7C 00 00            840 	inc	*ZB1	; addqi3: *ZB1 by #1 -> *ZB1
+   050A                     841 L77:
+   050A D6 01               842 	ldab	*ZD1+1
+   050C D7 00               843 	stab	*ZB2	; movqi: *ZD1 -> *ZB2
+   050E D6 00               844 	ldab	*ZB1
+   0510 D1 00               845 	cmpb	*ZB2	; cmpqi *ZB1 with *ZB2
+   0512 24 03               846 	bhs	.+5
+   0514 7E 04 E5            847 	jmp	L76	; (bltu) long branch
+   0517                     848 L73:
+   0517 D6 00               849 	ldab	*ZB1
+   0519 4F                  850 	clra
+   051A DD 00               851 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   051C DC 00               852 	ldd	*ZD8
+   051E D3 00               853 	addd	*ZD5
+   0520 DD 00               854 	std	*ZD5	; addhi3: *ZD8 by *ZD5 -> *ZD5
+   0522 C6 00               855 	ldab	#0
+   0524 DE 00               856 	ldx	*ZD5
+   0526 E7 00               857 	stab	0,x	; movqi: #0 -> 0,x
+                            858 ;;;EPILOGUE
+   0528 8F                  859 	xgdx	; saving D register
+   0529 33                  860 	pulb	; Pulling register *ZB2
+   052A D7 00               861 	stab	*ZB2
+   052C 33                  862 	pulb	; Pulling register *ZB1
+   052D D7 00               863 	stab	*ZB1
+   052F 8F                  864 	xgdx	; restoring D register
+   0530 38                  865 	pulx	; Pulling register *ZD8
+   0531 DF 00               866 	stx	*ZD8
+   0533 38                  867 	pulx	; Pulling register *ZD7
+   0534 DF 00               868 	stx	*ZD7
+   0536 38                  869 	pulx	; Pulling register *ZD6
+   0537 DF 00               870 	stx	*ZD6
+   0539 38                  871 	pulx	; Pulling register *ZD5
+   053A DF 00               872 	stx	*ZD5
+   053C 38                  873 	pulx	; Pulling register *ZD2
+   053D DF 00               874 	stx	*ZD2
+   053F 38                  875 	pulx	; Pulling register *ZD1
+   0540 DF 00               876 	stx	*ZD1
+   0542 18 38               877 	puly	; Restore stack frame
+   0544 39                  878 	rts	; return from function
+                            879 ;;;-----------------------------------------
+                            880 ;;; END EPILOGUE for string_Copy
+                            881 ;;;-----------------------------------------
+                            882 	.globl	_string_NextWord
+   0545                     883 _string_NextWord:
+                            884 ;;;-----------------------------------------
+                            885 ;;;  PROLOGUE for string_NextWord
+                            886 ;;;-----------------------------------------
+   0545 18 3C               887 	pshy	; Save stack frame
+   0547 18 30               888 	tsy	; Set current stack frame
+   0549 DE 00               889 	ldx	*ZD5
+   054B 3C                  890 	pshx	; pushed register *ZD5
+   054C DE 00               891 	ldx	*ZD6
+   054E 3C                  892 	pshx	; pushed register *ZD6
+   054F DE 00               893 	ldx	*ZD7
+   0551 3C                  894 	pshx	; pushed register *ZD7
+   0552 DE 00               895 	ldx	*ZD8
+   0554 3C                  896 	pshx	; pushed register *ZD8
+                            897 ;;;END PROLOGUE
+   0555 DC 00               898 	ldd	*ZD0
+   0557 DD 00               899 	std	*ZD8	; movhi: *ZD0 -> *ZD8
+   0559 CC 00 01            900 	ldd	#1
+   055C DD 00               901 	std	*ZD7	; movhi: #1 -> *ZD7
+   055E CC 00 00            902 	ldd	#0
+   0561 DD 00               903 	std	*ZD6	; movhi: #0 -> *ZD6
+   0563                     904 L81:
+   0563 DC 00               905 	ldd	*ZD8
+   0565 D3 00               906 	addd	*ZD6
+   0567 DD 00               907 	std	*ZD5	; addhi3: *ZD8 by *ZD6 -> *ZD5
+   0569 DE 00               908 	ldx	*ZD5
+   056B E6 00               909 	ldab	0,x
+   056D D7 01               910 	stab	*ZD5+1	; movqi: 0,x -> *ZD5
+   056F 26 03               911 	bne	.+5
+   0571 7E 05 A7            912 	jmp	L80	; (beq) long branch
+   0574 DC 00               913 	ldd	*ZD7	; tsthi: R:*ZD7
+   0576 26 03               914 	bne	.+5
+   0578 7E 05 91            915 	jmp	L83	; (beq) long branch
+   057B D6 01               916 	ldab	*ZD5+1
+   057D D7 01               917 	stab	*ZD0+1	; movqi: *ZD5 -> *ZD0
+   057F BD 00 00            918 	jsr	_string_IsSpace	; CALL: R:*ZD0 = _string_IsSpace (0 bytes)
+   0582 DC 00               919 	ldd	*ZD0	; tsthi: R:*ZD0
+   0584 26 03               920 	bne	.+5
+   0586 7E 05 9F            921 	jmp	L85	; (beq) long branch
+   0589 CC 00 00            922 	ldd	#0
+   058C DD 00               923 	std	*ZD7	; movhi: #0 -> *ZD7
+   058E 7E 05 9F            924 	jmp	L85
+   0591                     925 L83:
+   0591 D6 01               926 	ldab	*ZD5+1
+   0593 D7 01               927 	stab	*ZD0+1	; movqi: *ZD5 -> *ZD0
+   0595 BD 00 00            928 	jsr	_string_IsSpace	; CALL: R:*ZD0 = _string_IsSpace (0 bytes)
+   0598 DC 00               929 	ldd	*ZD0	; tsthi: R:*ZD0
+   059A 26 03               930 	bne	.+5
+   059C 7E 05 A7            931 	jmp	L80	; (beq) long branch
+   059F                     932 L85:
+   059F DE 00               933 	ldx	*ZD6
+   05A1 08                  934 	inx
+   05A2 DF 00               935 	stx	*ZD6	; addhi3: *ZD6 by #1 -> *ZD6
+   05A4 7E 05 63            936 	jmp	L81
+   05A7                     937 L80:
+   05A7 DC 00               938 	ldd	*ZD8
+   05A9 D3 00               939 	addd	*ZD6
+   05AB DD 00               940 	std	*ZD0	; addhi3: *ZD8 by *ZD6 -> *ZD0
+                            941 ;;;EPILOGUE
+   05AD 38                  942 	pulx	; Pulling register *ZD8
+   05AE DF 00               943 	stx	*ZD8
+   05B0 38                  944 	pulx	; Pulling register *ZD7
+   05B1 DF 00               945 	stx	*ZD7
+   05B3 38                  946 	pulx	; Pulling register *ZD6
+   05B4 DF 00               947 	stx	*ZD6
+   05B6 38                  948 	pulx	; Pulling register *ZD5
+   05B7 DF 00               949 	stx	*ZD5
+   05B9 18 38               950 	puly	; Restore stack frame
+   05BB 39                  951 	rts	; return from function
+                            952 ;;;-----------------------------------------
+                            953 ;;; END EPILOGUE for string_NextWord
+                            954 ;;;-----------------------------------------
+                            955 	.globl	_string_SkipSpaces
+   05BC                     956 _string_SkipSpaces:
+                            957 ;;;-----------------------------------------
+                            958 ;;;  PROLOGUE for string_SkipSpaces
+                            959 ;;;-----------------------------------------
+   05BC 18 3C               960 	pshy	; Save stack frame
+   05BE 18 30               961 	tsy	; Set current stack frame
+   05C0 DE 00               962 	ldx	*ZD5
+   05C2 3C                  963 	pshx	; pushed register *ZD5
+   05C3 DE 00               964 	ldx	*ZD6
+   05C5 3C                  965 	pshx	; pushed register *ZD6
+   05C6 DE 00               966 	ldx	*ZD7
+   05C8 3C                  967 	pshx	; pushed register *ZD7
+                            968 ;;;END PROLOGUE
+   05C9 DC 00               969 	ldd	*ZD0
+   05CB DD 00               970 	std	*ZD7	; movhi: *ZD0 -> *ZD7
+   05CD CC 00 00            971 	ldd	#0
+   05D0 DD 00               972 	std	*ZD6	; movhi: #0 -> *ZD6
+   05D2                     973 L91:
+   05D2 DC 00               974 	ldd	*ZD7
+   05D4 D3 00               975 	addd	*ZD6
+   05D6 DD 00               976 	std	*ZD5	; addhi3: *ZD7 by *ZD6 -> *ZD5
+   05D8 DE 00               977 	ldx	*ZD5
+   05DA E6 00               978 	ldab	0,x
+   05DC D7 01               979 	stab	*ZD0+1	; movqi: 0,x -> *ZD0
+   05DE BD 00 00            980 	jsr	_string_IsSpace	; CALL: R:*ZD0 = _string_IsSpace (0 bytes)
+   05E1 DC 00               981 	ldd	*ZD0	; tsthi: R:*ZD0
+   05E3 26 03               982 	bne	.+5
+   05E5 7E 05 F0            983 	jmp	L90	; (beq) long branch
+   05E8 DE 00               984 	ldx	*ZD6
+   05EA 08                  985 	inx
+   05EB DF 00               986 	stx	*ZD6	; addhi3: *ZD6 by #1 -> *ZD6
+   05ED 7E 05 D2            987 	jmp	L91
+   05F0                     988 L90:
+   05F0 DC 00               989 	ldd	*ZD7
+   05F2 D3 00               990 	addd	*ZD6
+   05F4 DD 00               991 	std	*ZD0	; addhi3: *ZD7 by *ZD6 -> *ZD0
+                            992 ;;;EPILOGUE
+   05F6 38                  993 	pulx	; Pulling register *ZD7
+   05F7 DF 00               994 	stx	*ZD7
+   05F9 38                  995 	pulx	; Pulling register *ZD6
+   05FA DF 00               996 	stx	*ZD6
+   05FC 38                  997 	pulx	; Pulling register *ZD5
+   05FD DF 00               998 	stx	*ZD5
+   05FF 18 38               999 	puly	; Restore stack frame
+   0601 39                 1000 	rts	; return from function
+                           1001 ;;;-----------------------------------------
+                           1002 ;;; END EPILOGUE for string_SkipSpaces
+                           1003 ;;;-----------------------------------------
+                           1004 	; END

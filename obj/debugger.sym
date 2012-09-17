@@ -1,0 +1,102 @@
+ASxxxx Assembler V01.50  (Motorola 6811), page 1.
+
+Symbol Table
+
+  0 L10                                046F R
+  0 L11                                040B R
+  0 L13                                0447 R
+  0 L15                                0482 R
+  0 L16                                04C7 R
+  0 L20                                04C2 R
+  0 L24                                04DE R
+  0 L25                                0523 R
+  0 L29                                051E R
+  0 L33                                053A R
+  0 L34                                0601 R
+  0 L35                                0572 R
+  0 L39                                0576 R
+  0 L43                                0597 R
+  0 L44                                05FC R
+  0 L45                                05E9 R
+  0 L52                                0630 R
+  0 L54                                0650 R
+  0 L56                                03ED R
+  0 L57                                04CE R
+  0 L58                                052A R
+  0 L59                                0608 R
+  0 L6                                 0658 R
+  0 L60                                0655 R
+  0 L65                                0694 R
+  0 L66                                06A9 R
+  0 L67                                06BE R
+  0 L68                                06E5 R
+  0 L7                                 0406 R
+  0 L71                                0733 R
+  0 L72                                0710 R
+  0 L74                                0764 R
+  0 L78                                0794 R
+  0 LC0                                0022 R
+  0 LC1                                002A R
+  0 LC10                               029A R
+  0 LC11                               02B0 R
+  0 LC12                               02D2 R
+  0 LC13                               02FD R
+  0 LC14                               0329 R
+  0 LC15                               0345 R
+  0 LC16                               0358 R
+  0 LC17                               036C R
+  0 LC18                               0378 R
+  0 LC19                               0383 R
+  0 LC2                                0032 R
+  0 LC20                               0669 R
+  0 LC3                                00D4 R
+  0 LC4                                017C R
+  0 LC5                                0183 R
+  0 LC6                                022E R
+  0 LC7                                0248 R
+  0 LC8                                0264 R
+  0 LC9                                027E R
+    ZB1                                **** GX
+    ZD0                                **** GX
+    ZD5                                **** GX
+    ZD6                                **** GX
+    ZD7                                **** GX
+    ZD8                                **** GX
+    ZXT                                **** GX
+  1 _cmdline.14                        0000 R
+  0 _debugger                          067B R
+  0 _debugger_init                     0000 GR
+  1 _debugger_stack                    0029 R
+  1 _debugger_tid                      0129 R
+  0 _feedback_analog                   0035 R
+  0 _feedback_digital                  00DD R
+  0 _feedback_motor                    018B R
+    _input_sample_analog               **** GX
+    _input_sample_digital              **** GX
+    _input_start_button                **** GX
+    _input_stop_button                 **** GX
+  0 _interpret_command                 03A1 R
+    _motor_get_speed                   **** GX
+    _motor_set_speed                   **** GX
+    _presto_create_task                **** GX
+    _presto_get_message                **** GX
+    _presto_sleep                      **** GX
+    _presto_timer                      **** GX
+  0 _prompt                            066C R
+    _serial_recv                       **** GX
+    _serial_send_byte                  **** GX
+    _serial_send_string                **** GX
+    _string_IntegerToHex               **** GX
+    _string_IntegerToString            **** GX
+    _string_IsDigit                    **** GX
+    _string_IsNumber                   **** GX
+    _string_NextWord                   **** GX
+    _string_SkipSpaces                 **** GX
+    _string_StringToInteger            **** GX
+
+ASxxxx Assembler V01.50  (Motorola 6811), page 2.
+
+Area Table
+
+   0 _CODE                              size  7B0   flags 0
+   1 _BSS                               size  12A   flags 0

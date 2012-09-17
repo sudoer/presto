@@ -1,0 +1,411 @@
+                              1 ;;;-----------------------------------------
+                              2 ;;; Start MC6811 gcc assembly output
+                              3 ;;; gcc compiler compiled on TBD
+                              4 ;;; OPTIONS:	-mlong_branch optimize  
+                              5 ;;; OPTIONS:	 peephole !omit_frame_pointer !signed-char
+                              6 ;;; Source:		services\motors.c
+                              7 ;;; Destination:	motors.s
+                              8 ;;; Compiled:	Tue Oct 24 21:55:22 2000
+                              9 ;;; (META)compiled by GNU C version 2.8.1.
+                             10 ;;;-----------------------------------------
+                             11 	.module motors.c
+                             12 	.area	_DATA
+   0000                      13 _speed_2_pwm:
+   0000 00 00                14 	.word	0
+   0002 80 80                15 	.word	-32640
+   0004 88 88                16 	.word	-30584
+   0006 AA AA                17 	.word	-21846
+   0008 EE EE                18 	.word	-4370
+   000A FE FE                19 	.word	-258
+   000C FF FF                20 	.word	-1
+   000E                      21 _current_motor_speed:
+   000E 00                   22 	.byte	0
+   000F 00                   23 	.byte	0
+   0010 00                   24 	.byte	0
+   0011 00                   25 	.byte	0
+   0012                      26 _current_motor_dir:
+   0012 00                   27 	.byte	0
+   0013 00                   28 	.byte	0
+   0014 00                   29 	.byte	0
+   0015 00                   30 	.byte	0
+                             31 	; extern	_motor_set_speed
+                             32 	; extern	_set_interrupt
+                             33 	.area	_CODE
+                             34 	.globl	_motor_init
+   0000                      35 _motor_init:
+                             36 ;;;-----------------------------------------
+                             37 ;;;  PROLOGUE for motor_init
+                             38 ;;;-----------------------------------------
+   0000 18 3C                39 	pshy	; Save stack frame
+   0002 18 30                40 	tsy	; Set current stack frame
+   0004 DE 00                41 	ldx	*ZD5
+   0006 3C                   42 	pshx	; pushed register *ZD5
+                             43 ;;;END PROLOGUE
+                             44 ; Begin inline assembler code
+   0007 0F                   45 		sei
+                             46 ; End of inline assembler code
+   0008 C6 00                47 	ldab	#0
+   000A F7 7F FF             48 	stab	32767	; movqi: #0 -> 32767
+   000D C6 00                49 	ldab	#0
+   000F 37                   50 	pshb		; movqi: #0 -> ,-sp
+   0010 C6 00                51 	ldab	#0
+   0012 D7 01                52 	stab	*ZD0+1	; movqi: #0 -> *ZD0
+   0014 BD 00 E8             53 	jsr	_motor_set_speed	; CALL: (VOIDmode) _motor_set_speed (1 bytes)
+   0017 C6 00                54 	ldab	#0
+   0019 37                   55 	pshb		; movqi: #0 -> ,-sp
+   001A C6 01                56 	ldab	#1
+   001C D7 01                57 	stab	*ZD0+1	; movqi: #1 -> *ZD0
+   001E BD 00 E8             58 	jsr	_motor_set_speed	; CALL: (VOIDmode) _motor_set_speed (1 bytes)
+   0021 C6 00                59 	ldab	#0
+   0023 37                   60 	pshb		; movqi: #0 -> ,-sp
+   0024 C6 02                61 	ldab	#2
+   0026 D7 01                62 	stab	*ZD0+1	; movqi: #2 -> *ZD0
+   0028 BD 00 E8             63 	jsr	_motor_set_speed	; CALL: (VOIDmode) _motor_set_speed (1 bytes)
+   002B C6 00                64 	ldab	#0
+   002D 37                   65 	pshb		; movqi: #0 -> ,-sp
+   002E C6 03                66 	ldab	#3
+   0030 D7 01                67 	stab	*ZD0+1	; movqi: #3 -> *ZD0
+   0032 BD 00 E8             68 	jsr	_motor_set_speed	; CALL: (VOIDmode) _motor_set_speed (1 bytes)
+   0035 BD 01 8E             69 	jsr	_apply_motor_pwm	; CALL: (VOIDmode) _apply_motor_pwm (0 bytes)
+   0038 CE 01 5E             70 	ldx	#_motor_isr
+   003B 3C                   71 	pshx		; movhi: #_motor_isr -> ,--sp
+   003C CC 00 07             72 	ldd	#7
+   003F DD 00                73 	std	*ZD0	; movhi: #7 -> *ZD0
+   0041 BD 00 00             74 	jsr	_set_interrupt	; CALL: R:*ZD0 = _set_interrupt (2 bytes)
+   0044 FC 10 0E             75 	ldd	4110
+   0047 DD 00                76 	std	*ZD5	; movhi: 4110 -> *ZD5
+   0049 DC 00                77 	ldd	*ZD5
+   004B C3 4E 21             78 	addd	#20001
+   004E DD 00                79 	std	*ZD5	; addhi3: *ZD5 by #20001 -> *ZD5
+   0050 DC 00                80 	ldd	*ZD5
+   0052 FD 10 1A             81 	std	4122	; movhi: *ZD5 -> 4122
+   0055 F6 10 22             82 	ldab	4130
+   0058 D7 01                83 	stab	*ZD5+1	; movqi: 4130 -> *ZD5
+   005A D6 01                84 	ldab	*ZD5+1
+   005C CA 20                85 	orab	#32
+   005E D7 01                86 	stab	*ZD5+1	; iorqi3: *ZD5 by #32 -> *ZD5
+   0060 D6 01                87 	ldab	*ZD5+1
+   0062 F7 10 22             88 	stab	4130	; movqi: *ZD5 -> 4130
+   0065 C6 20                89 	ldab	#32
+   0067 F7 10 23             90 	stab	4131	; movqi: #32 -> 4131
+   006A F6 10 20             91 	ldab	4128
+   006D D7 01                92 	stab	*ZD5+1	; movqi: 4128 -> *ZD5
+   006F D6 01                93 	ldab	*ZD5+1
+   0071 C4 CF                94 	andb	#207
+   0073 D7 01                95 	stab	*ZD5+1	; andqi3: *ZD5 by #207 -> *ZD5
+   0075 D6 01                96 	ldab	*ZD5+1
+   0077 F7 10 20             97 	stab	4128	; movqi: *ZD5 -> 4128
+                             98 ; Begin inline assembler code
+   007A 0E                   99 		cli
+                            100 ; End of inline assembler code
+   007B 38                  101 	pulx
+   007C 38                  102 	pulx
+   007D 38                  103 	pulx		; addhi3: sp by #6 -> sp
+                            104 ;;;EPILOGUE
+   007E 38                  105 	pulx	; Pulling register *ZD5
+   007F DF 00               106 	stx	*ZD5
+   0081 18 38               107 	puly	; Restore stack frame
+   0083 39                  108 	rts	; return from function
+                            109 ;;;-----------------------------------------
+                            110 ;;; END EPILOGUE for motor_init
+                            111 ;;;-----------------------------------------
+                            112 	.globl	_motor_get_speed
+   0084                     113 _motor_get_speed:
+                            114 ;;;-----------------------------------------
+                            115 ;;;  PROLOGUE for motor_get_speed
+                            116 ;;;-----------------------------------------
+   0084 18 3C               117 	pshy	; Save stack frame
+   0086 18 30               118 	tsy	; Set current stack frame
+   0088 DE 00               119 	ldx	*ZD5
+   008A 3C                  120 	pshx	; pushed register *ZD5
+   008B DE 00               121 	ldx	*ZD6
+   008D 3C                  122 	pshx	; pushed register *ZD6
+   008E 8F                  123 	xgdx	; saving D register
+   008F D6 00               124 	ldab	*ZB1
+   0091 37                  125 	pshb	; pushed register *ZB1
+   0092 8F                  126 	xgdx	; restoring D register
+                            127 ;;;END PROLOGUE
+   0093 D6 01               128 	ldab	*ZD0+1
+   0095 C1 03               129 	cmpb	#3	; cmpqi *ZD0 with #3
+   0097 22 03               130 	bhi	.+5
+   0099 7E 00 A4            131 	jmp	L3	; (bleu) long branch
+   009C CC 00 00            132 	ldd	#0
+   009F DD 00               133 	std	*ZD0	; movhi: #0 -> *ZD0
+   00A1 7E 00 DA            134 	jmp	L5
+   00A4                     135 L3:
+   00A4 D6 01               136 	ldab	*ZD0+1
+   00A6 D7 00               137 	stab	*ZB1	; movqi: *ZD0 -> *ZB1
+   00A8 D6 00               138 	ldab	*ZB1
+   00AA 4F                  139 	clra
+   00AB DD 00               140 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   00AD E6 00               141 	ldab	0,x
+   00AF D7 01               142 	stab	*ZD6+1	; movqi: 0,x -> *ZD6
+   00B1 DE 00               143 	ldx	*ZD5
+   00B3 8F                  144 	xgdx
+   00B4 C3 00 12            145 	addd	#_current_motor_dir
+   00B7 8F                  146 	xgdx
+                            147 ;;; (output_swap_regx: addr computed)
+   00B8 E6 00               148 	ldab	0,x
+   00BA C1 0F               149 	cmpb	#15	; cmpqi 0,x with #15
+   00BC 26 03               150 	bne	.+5
+   00BE 7E 00 C8            151 	jmp	L4	; (beq) long branch
+   00C1 D6 01               152 	ldab	*ZD6+1
+   00C3 D7 00               153 	stab	*ZB1	; movqi: *ZD6 -> *ZB1
+   00C5 7E 00 D1            154 	jmp	L6
+   00C8                     155 L4:
+   00C8 D6 01               156 	ldab	*ZD6+1
+   00CA 50                  157 	negb
+   00CB D7 01               158 	stab	*ZD5+1	; negqi2: *ZD6 -> *ZD5
+   00CD D6 01               159 	ldab	*ZD5+1
+   00CF D7 00               160 	stab	*ZB1	; movqi: *ZD5 -> *ZB1
+   00D1                     161 L6:
+   00D1 D6 00               162 	ldab	*ZB1
+   00D3 4F                  163 	clra
+   00D4 5D                  164 	tstb
+   00D5 2C 01               165 	bge	.+3
+   00D7 4A                  166 	deca
+   00D8 DD 00               167 	std	*ZD0	; extendqihi2: *ZB1 -> *ZD0
+   00DA                     168 L5:
+                            169 ;;;EPILOGUE
+   00DA 8F                  170 	xgdx	; saving D register
+   00DB 33                  171 	pulb	; Pulling register *ZB1
+   00DC D7 00               172 	stab	*ZB1
+   00DE 8F                  173 	xgdx	; restoring D register
+   00DF 38                  174 	pulx	; Pulling register *ZD6
+   00E0 DF 00               175 	stx	*ZD6
+   00E2 38                  176 	pulx	; Pulling register *ZD5
+   00E3 DF 00               177 	stx	*ZD5
+   00E5 18 38               178 	puly	; Restore stack frame
+   00E7 39                  179 	rts	; return from function
+                            180 ;;;-----------------------------------------
+                            181 ;;; END EPILOGUE for motor_get_speed
+                            182 ;;;-----------------------------------------
+                            183 	.globl	_motor_set_speed
+   00E8                     184 _motor_set_speed:
+                            185 ;;;-----------------------------------------
+                            186 ;;;  PROLOGUE for motor_set_speed
+                            187 ;;;-----------------------------------------
+   00E8 18 3C               188 	pshy	; Save stack frame
+   00EA 18 30               189 	tsy	; Set current stack frame
+   00EC DE 00               190 	ldx	*ZD5
+   00EE 3C                  191 	pshx	; pushed register *ZD5
+   00EF DE 00               192 	ldx	*ZD6
+   00F1 3C                  193 	pshx	; pushed register *ZD6
+   00F2 DE 00               194 	ldx	*ZD7
+   00F4 3C                  195 	pshx	; pushed register *ZD7
+   00F5 8F                  196 	xgdx	; saving D register
+   00F6 D6 00               197 	ldab	*ZB1
+   00F8 37                  198 	pshb	; pushed register *ZB1
+   00F9 8F                  199 	xgdx	; restoring D register
+                            200 ;;;END PROLOGUE
+   00FA D6 01               201 	ldab	*ZD0+1
+   00FC D7 01               202 	stab	*ZD7+1	; movqi: *ZD0 -> *ZD7
+   00FE 18 E6 04            203 	ldab	4,y
+   0101 D7 01               204 	stab	*ZD6+1	; movqi: 4,y -> *ZD6
+   0103 D6 01               205 	ldab	*ZD0+1
+   0105 C1 03               206 	cmpb	#3	; cmpqi *ZD0 with #3
+   0107 23 03               207 	bls	.+5
+   0109 7E 01 4A            208 	jmp	L8	; (bgtu) long branch
+   010C D6 01               209 	ldab	*ZD0+1
+   010E D7 00               210 	stab	*ZB1	; movqi: *ZD0 -> *ZB1
+   0110 D6 00               211 	ldab	*ZB1
+   0112 4F                  212 	clra
+   0113 DD 00               213 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   0115 C6 00               214 	ldab	#0
+   0117 E7 00               215 	stab	0,x	; movqi: #0 -> 0,x
+   0119 D6 01               216 	ldab	*ZD6+1	; tstqi: R:*ZD6
+   011B 2C 03               217 	bge	.+5
+   011D 7E 01 27            218 	jmp	L9	; (blt) long branch
+   0120 C6 00               219 	ldab	#0
+   0122 E7 00               220 	stab	0,x	; movqi: #0 -> 0,x
+   0124 7E 01 30            221 	jmp	L10
+   0127                     222 L9:
+   0127 D6 01               223 	ldab	*ZD6+1
+   0129 50                  224 	negb
+   012A D7 01               225 	stab	*ZD6+1	; negqi2: *ZD6 -> *ZD6
+   012C C6 0F               226 	ldab	#15
+   012E E7 00               227 	stab	0,x	; movqi: #15 -> 0,x
+   0130                     228 L10:
+   0130 D6 01               229 	ldab	*ZD6+1
+   0132 C1 06               230 	cmpb	#6	; cmpqi *ZD6 with #6
+   0134 2E 03               231 	bgt	.+5
+   0136 7E 01 3D            232 	jmp	L11	; (ble) long branch
+   0139 C6 06               233 	ldab	#6
+   013B D7 01               234 	stab	*ZD6+1	; movqi: #6 -> *ZD6
+   013D                     235 L11:
+   013D D6 01               236 	ldab	*ZD7+1
+   013F D7 00               237 	stab	*ZB1	; movqi: *ZD7 -> *ZB1
+   0141 D6 00               238 	ldab	*ZB1
+   0143 4F                  239 	clra
+   0144 DD 00               240 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   0146 D6 01               241 	ldab	*ZD6+1
+   0148 E7 00               242 	stab	0,x	; movqi: *ZD6 -> 0,x
+   014A                     243 L8:
+   014A BD 01 8E            244 	jsr	_apply_motor_pwm	; CALL: (VOIDmode) _apply_motor_pwm (0 bytes)
+                            245 ;;;EPILOGUE
+   014D 8F                  246 	xgdx	; saving D register
+   014E 33                  247 	pulb	; Pulling register *ZB1
+   014F D7 00               248 	stab	*ZB1
+   0151 8F                  249 	xgdx	; restoring D register
+   0152 38                  250 	pulx	; Pulling register *ZD7
+   0153 DF 00               251 	stx	*ZD7
+   0155 38                  252 	pulx	; Pulling register *ZD6
+   0156 DF 00               253 	stx	*ZD6
+   0158 38                  254 	pulx	; Pulling register *ZD5
+   0159 DF 00               255 	stx	*ZD5
+   015B 18 38               256 	puly	; Restore stack frame
+   015D 39                  257 	rts	; return from function
+                            258 ;;;-----------------------------------------
+                            259 ;;; END EPILOGUE for motor_set_speed
+                            260 ;;;-----------------------------------------
+   015E                     261 _motor_isr:
+                            262 ;;;-----------------------------------------
+                            263 ;;;  PROLOGUE for motor_isr
+                            264 ;;;-----------------------------------------
+   015E 18 3C               265 	pshy	; Save stack frame
+   0160 18 30               266 	tsy	; Set current stack frame
+                            267 ;;;END PROLOGUE
+   0162 BD 01 8E            268 	jsr	_apply_motor_pwm	; CALL: (VOIDmode) _apply_motor_pwm (0 bytes)
+   0165 BD 01 6B            269 	jsr	_restart_motor_timer	; CALL: (VOIDmode) _restart_motor_timer (0 bytes)
+                            270 ;;;EPILOGUE
+   0168 18 38               271 	puly	; Restore stack frame
+   016A 39                  272 	rts	; return from function
+                            273 ;;;-----------------------------------------
+                            274 ;;; END EPILOGUE for motor_isr
+                            275 ;;;-----------------------------------------
+   016B                     276 _restart_motor_timer:
+                            277 ;;;-----------------------------------------
+                            278 ;;;  PROLOGUE for restart_motor_timer
+                            279 ;;;-----------------------------------------
+   016B 18 3C               280 	pshy	; Save stack frame
+   016D 18 30               281 	tsy	; Set current stack frame
+   016F DE 00               282 	ldx	*ZD5
+   0171 3C                  283 	pshx	; pushed register *ZD5
+                            284 ;;;END PROLOGUE
+   0172 FC 10 1A            285 	ldd	4122
+   0175 DD 00               286 	std	*ZD5	; movhi: 4122 -> *ZD5
+   0177 DC 00               287 	ldd	*ZD5
+   0179 C3 4E 21            288 	addd	#20001
+   017C DD 00               289 	std	*ZD5	; addhi3: *ZD5 by #20001 -> *ZD5
+   017E DC 00               290 	ldd	*ZD5
+   0180 FD 10 1A            291 	std	4122	; movhi: *ZD5 -> 4122
+   0183 C6 20               292 	ldab	#32
+   0185 F7 10 23            293 	stab	4131	; movqi: #32 -> 4131
+                            294 ;;;EPILOGUE
+   0188 38                  295 	pulx	; Pulling register *ZD5
+   0189 DF 00               296 	stx	*ZD5
+   018B 18 38               297 	puly	; Restore stack frame
+   018D 39                  298 	rts	; return from function
+                            299 ;;;-----------------------------------------
+                            300 ;;; END EPILOGUE for restart_motor_timer
+                            301 ;;;-----------------------------------------
+                            302 	.area	_DATA
+   0016                     303 _speed_mask.12:
+   0016 00 01               304 	.word	1
+                            305 	.area	_CODE
+   018E                     306 _apply_motor_pwm:
+                            307 ;;;-----------------------------------------
+                            308 ;;;  PROLOGUE for apply_motor_pwm
+                            309 ;;;-----------------------------------------
+   018E 18 3C               310 	pshy	; Save stack frame
+   0190 18 30               311 	tsy	; Set current stack frame
+   0192 DE 00               312 	ldx	*ZD1
+   0194 3C                  313 	pshx	; pushed register *ZD1
+   0195 DE 00               314 	ldx	*ZD5
+   0197 3C                  315 	pshx	; pushed register *ZD5
+   0198 DE 00               316 	ldx	*ZD6
+   019A 3C                  317 	pshx	; pushed register *ZD6
+   019B DE 00               318 	ldx	*ZD7
+   019D 3C                  319 	pshx	; pushed register *ZD7
+   019E DE 00               320 	ldx	*ZD8
+   01A0 3C                  321 	pshx	; pushed register *ZD8
+   01A1 8F                  322 	xgdx	; saving D register
+   01A2 D6 00               323 	ldab	*ZB1
+   01A4 37                  324 	pshb	; pushed register *ZB1
+   01A5 8F                  325 	xgdx	; restoring D register
+                            326 ;;;END PROLOGUE
+   01A6 C6 00               327 	ldab	#0
+   01A8 D7 01               328 	stab	*ZD8+1	; movqi: #0 -> *ZD8
+   01AA C6 11               329 	ldab	#17
+   01AC D7 01               330 	stab	*ZD7+1	; movqi: #17 -> *ZD7
+   01AE D6 01               331 	ldab	*ZD8+1
+   01B0 D7 00               332 	stab	*ZB1	; movqi: *ZD8 -> *ZB1
+   01B2 FC 00 16            333 	ldd	_speed_mask.12
+   01B5 DD 00               334 	std	*ZD1	; movhi: _speed_mask.12 -> *ZD1
+   01B7                     335 L18:
+   01B7 D6 00               336 	ldab	*ZB1
+   01B9 4F                  337 	clra
+   01BA DD 00               338 	std	*ZD6	; zero_extendqihi2: *ZB1 -> *ZD6
+   01BC E6 00               339 	ldab	0,x
+   01BE 4F                  340 	clra
+   01BF DD 00               341 	std	*ZD5	; zero_extendqihi2: 0,x -> *ZD5
+   01C1 DC 00               342 	ldd	*ZD5
+   01C3 05                  343 	asld
+   01C4 DD 00               344 	std	*ZD5	; ashlhi3: *ZD5 by #1 -> *ZD5
+   01C6 DE 00               345 	ldx	*ZD5
+   01C8 8F                  346 	xgdx
+   01C9 C3 00 00            347 	addd	#_speed_2_pwm
+   01CC 8F                  348 	xgdx
+                            349 ;;; (output_swap_regx: addr computed)
+   01CD EC 00               350 	ldd	0,x
+   01CF 94 00               351 	anda	*ZD1
+   01D1 D4 01               352 	andb	*ZD1+1
+   01D3 DD 00               353 	std	*ZD5	; andhi3: 0,x by *ZD1 -> *ZD5
+   01D5 26 03               354 	bne	.+5
+   01D7 7E 01 F3            355 	jmp	L19	; (beq) long branch
+   01DA DE 00               356 	ldx	*ZD6
+   01DC 8F                  357 	xgdx
+   01DD C3 00 12            358 	addd	#_current_motor_dir
+   01E0 8F                  359 	xgdx
+                            360 ;;; (output_swap_regx: addr computed)
+   01E1 E6 00               361 	ldab	0,x
+   01E3 CA F0               362 	orab	#240
+   01E5 D7 01               363 	stab	*ZD5+1	; iorqi3: 0,x by #240 -> *ZD5
+   01E7 D6 01               364 	ldab	*ZD5+1
+   01E9 D4 01               365 	andb	*ZD7+1
+   01EB D7 01               366 	stab	*ZD5+1	; andqi3: *ZD5 by *ZD7 -> *ZD5
+   01ED D6 01               367 	ldab	*ZD8+1
+   01EF DA 01               368 	orab	*ZD5+1
+   01F1 D7 01               369 	stab	*ZD8+1	; iorqi3: *ZD8 by *ZD5 -> *ZD8
+   01F3                     370 L19:
+   01F3 D6 01               371 	ldab	*ZD7+1
+   01F5 58                  372 	aslb
+   01F6 D7 01               373 	stab	*ZD7+1	; ashlqi3: *ZD7 by #1 -> *ZD7
+   01F8 7C 00 00            374 	inc	*ZB1	; addqi3: *ZB1 by #1 -> *ZB1
+   01FB D6 00               375 	ldab	*ZB1
+   01FD C1 03               376 	cmpb	#3	; cmpqi *ZB1 with #3
+   01FF 22 03               377 	bhi	.+5
+   0201 7E 01 B7            378 	jmp	L18	; (bleu) long branch
+   0204 FC 00 16            379 	ldd	_speed_mask.12
+   0207 05                  380 	asld
+   0208 DD 00               381 	std	*ZD5	; ashlhi3: _speed_mask.12 by #1 -> *ZD5
+   020A DC 00               382 	ldd	*ZD5
+   020C FD 00 16            383 	std	_speed_mask.12	; movhi: *ZD5 -> _speed_mask.12
+   020F 27 03               384 	beq	.+5
+   0211 7E 02 1A            385 	jmp	L21	; (bne) long branch
+   0214 CC 00 01            386 	ldd	#1
+   0217 FD 00 16            387 	std	_speed_mask.12	; movhi: #1 -> _speed_mask.12
+   021A                     388 L21:
+   021A D6 01               389 	ldab	*ZD8+1
+   021C F7 7F FF            390 	stab	32767	; movqi: *ZD8 -> 32767
+                            391 ;;;EPILOGUE
+   021F 8F                  392 	xgdx	; saving D register
+   0220 33                  393 	pulb	; Pulling register *ZB1
+   0221 D7 00               394 	stab	*ZB1
+   0223 8F                  395 	xgdx	; restoring D register
+   0224 38                  396 	pulx	; Pulling register *ZD8
+   0225 DF 00               397 	stx	*ZD8
+   0227 38                  398 	pulx	; Pulling register *ZD7
+   0228 DF 00               399 	stx	*ZD7
+   022A 38                  400 	pulx	; Pulling register *ZD6
+   022B DF 00               401 	stx	*ZD6
+   022D 38                  402 	pulx	; Pulling register *ZD5
+   022E DF 00               403 	stx	*ZD5
+   0230 38                  404 	pulx	; Pulling register *ZD1
+   0231 DF 00               405 	stx	*ZD1
+   0233 18 38               406 	puly	; Restore stack frame
+   0235 39                  407 	rts	; return from function
+                            408 ;;;-----------------------------------------
+                            409 ;;; END EPILOGUE for apply_motor_pwm
+                            410 ;;;-----------------------------------------
+                            411 	; END

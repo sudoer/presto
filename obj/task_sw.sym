@@ -1,0 +1,28 @@
+ASxxxx Assembler V01.50  (Motorola 6811), page 1.
+
+Symbol Table
+
+    CCR_INTERRUPT                   =  0010 
+    ISR_LED_MASK                    =  0010 
+    ISR_LED_PORT                    =  1008 
+    _presto_asm_new_fn                 **** GX
+    _presto_asm_new_sp                 **** GX
+    _presto_asm_old_sp_p               **** GX
+  1 _presto_asm_save_sp                0000 R
+    _presto_asm_swap                   **** GX
+    _presto_kill_self                  **** GX
+    _presto_service_timer_interrupt    **** GX
+  3 _presto_setup_new_task             0034 GR
+  3 _presto_start_task_switching       0026 GR
+  3 _presto_switch_tasks               0017 GR
+  3 _presto_system_isr                 0000 GR
+  3 psi_rti                            0011 R
+
+ASxxxx Assembler V01.50  (Motorola 6811), page 2.
+
+Area Table
+
+   0 _CODE                              size    0   flags 0
+   1 DATA                               size    2   flags 0
+   2 IDATA                              size    2   flags 0
+   3 CODE                               size   55   flags 0

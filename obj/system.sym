@@ -1,0 +1,17 @@
+ASxxxx Assembler V01.50  (Motorola 6811), page 1.
+
+Symbol Table
+
+  0 L10                                006B R
+  0 L7                                 0044 R
+    ZD5                                **** GX
+    ZD6                                **** GX
+  0 __HC11Setup                        0000 GR
+  0 _presto_fatal_error                0024 GR
+  0 _set_interrupt                     001D GR
+
+ASxxxx Assembler V01.50  (Motorola 6811), page 2.
+
+Area Table
+
+   0 _CODE                              size   81   flags 0

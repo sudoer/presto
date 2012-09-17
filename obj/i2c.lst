@@ -1,0 +1,304 @@
+                              1 ;;;-----------------------------------------
+                              2 ;;; Start MC6811 gcc assembly output
+                              3 ;;; gcc compiler compiled on TBD
+                              4 ;;; OPTIONS:	-mlong_branch optimize  
+                              5 ;;; OPTIONS:	 peephole !omit_frame_pointer !signed-char
+                              6 ;;; Source:		services\i2c.c
+                              7 ;;; Destination:	i2c.s
+                              8 ;;; Compiled:	Tue Oct 24 21:55:17 2000
+                              9 ;;; (META)compiled by GNU C version 2.8.1.
+                             10 ;;;-----------------------------------------
+                             11 	.module i2c.c
+                             12 	.area	_CODE
+                             13 	.globl	_presto_i2c_init
+   0000                      14 _presto_i2c_init:
+                             15 ;;;-----------------------------------------
+                             16 ;;;  PROLOGUE for presto_i2c_init
+                             17 ;;;-----------------------------------------
+   0000 18 3C                18 	pshy	; Save stack frame
+   0002 18 30                19 	tsy	; Set current stack frame
+   0004 DE 00                20 	ldx	*ZD5
+   0006 3C                   21 	pshx	; pushed register *ZD5
+                             22 ;;;END PROLOGUE
+   0007 F6 10 09             23 	ldab	4105
+   000A D7 01                24 	stab	*ZD5+1	; movqi: 4105 -> *ZD5
+   000C D6 01                25 	ldab	*ZD5+1
+   000E CA 04                26 	orab	#4
+   0010 D7 01                27 	stab	*ZD5+1	; iorqi3: *ZD5 by #4 -> *ZD5
+   0012 D6 01                28 	ldab	*ZD5+1
+   0014 F7 10 09             29 	stab	4105	; movqi: *ZD5 -> 4105
+   0017 F6 10 09             30 	ldab	4105
+   001A D7 01                31 	stab	*ZD5+1	; movqi: 4105 -> *ZD5
+   001C D6 01                32 	ldab	*ZD5+1
+   001E CA 20                33 	orab	#32
+   0020 D7 01                34 	stab	*ZD5+1	; iorqi3: *ZD5 by #32 -> *ZD5
+   0022 D6 01                35 	ldab	*ZD5+1
+   0024 F7 10 09             36 	stab	4105	; movqi: *ZD5 -> 4105
+   0027 F6 10 08             37 	ldab	4104
+   002A D7 01                38 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   002C D6 01                39 	ldab	*ZD5+1
+   002E C4 DF                40 	andb	#223
+   0030 D7 01                41 	stab	*ZD5+1	; andqi3: *ZD5 by #223 -> *ZD5
+   0032 D6 01                42 	ldab	*ZD5+1
+   0034 F7 10 08             43 	stab	4104	; movqi: *ZD5 -> 4104
+   0037 F6 10 08             44 	ldab	4104
+   003A D7 01                45 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   003C D6 01                46 	ldab	*ZD5+1
+   003E CA 04                47 	orab	#4
+   0040 D7 01                48 	stab	*ZD5+1	; iorqi3: *ZD5 by #4 -> *ZD5
+   0042 D6 01                49 	ldab	*ZD5+1
+   0044 F7 10 08             50 	stab	4104	; movqi: *ZD5 -> 4104
+   0047 F6 10 08             51 	ldab	4104
+   004A D7 01                52 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   004C D6 01                53 	ldab	*ZD5+1
+   004E CA 20                54 	orab	#32
+   0050 D7 01                55 	stab	*ZD5+1	; iorqi3: *ZD5 by #32 -> *ZD5
+   0052 D6 01                56 	ldab	*ZD5+1
+   0054 F7 10 08             57 	stab	4104	; movqi: *ZD5 -> 4104
+                             58 ;;;EPILOGUE
+   0057 38                   59 	pulx	; Pulling register *ZD5
+   0058 DF 00                60 	stx	*ZD5
+   005A 18 38                61 	puly	; Restore stack frame
+   005C 39                   62 	rts	; return from function
+                             63 ;;;-----------------------------------------
+                             64 ;;; END EPILOGUE for presto_i2c_init
+                             65 ;;;-----------------------------------------
+                             66 	; extern	_presto_i2c_start
+                             67 	; extern	_presto_i2c_send_byte
+                             68 	; extern	_presto_i2c_stop
+                             69 	.globl	_presto_i2c_send
+   005D                      70 _presto_i2c_send:
+                             71 ;;;-----------------------------------------
+                             72 ;;;  PROLOGUE for presto_i2c_send
+                             73 ;;;-----------------------------------------
+   005D 18 3C                74 	pshy	; Save stack frame
+   005F 18 30                75 	tsy	; Set current stack frame
+   0061 DE 00                76 	ldx	*ZD5
+   0063 3C                   77 	pshx	; pushed register *ZD5
+   0064 DE 00                78 	ldx	*ZD6
+   0066 3C                   79 	pshx	; pushed register *ZD6
+   0067 DE 00                80 	ldx	*ZD7
+   0069 3C                   81 	pshx	; pushed register *ZD7
+   006A 8F                   82 	xgdx	; saving D register
+   006B D6 00                83 	ldab	*ZB1
+   006D 37                   84 	pshb	; pushed register *ZB1
+   006E D6 00                85 	ldab	*ZB2
+   0070 37                   86 	pshb	; pushed register *ZB2
+   0071 8F                   87 	xgdx	; restoring D register
+                             88 ;;;END PROLOGUE
+   0072 DC 00                89 	ldd	*ZD0
+   0074 DD 00                90 	std	*ZD7	; movhi: *ZD0 -> *ZD7
+   0076 18 E6 04             91 	ldab	4,y
+   0079 D7 01                92 	stab	*ZD6+1	; movqi: 4,y -> *ZD6
+   007B C6 00                93 	ldab	#0
+   007D D7 00                94 	stab	*ZB1	; movqi: #0 -> *ZB1
+   007F BD 00 C0             95 	jsr	_presto_i2c_start	; CALL: (VOIDmode) _presto_i2c_start (0 bytes)
+   0082 7E 00 9C             96 	jmp	L7
+   0085                      97 L5:
+   0085 D6 00                98 	ldab	*ZB1
+   0087 4F                   99 	clra
+   0088 DD 00               100 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   008A DC 00               101 	ldd	*ZD7
+   008C D3 00               102 	addd	*ZD5
+   008E DD 00               103 	std	*ZD5	; addhi3: *ZD7 by *ZD5 -> *ZD5
+   0090 7C 00 00            104 	inc	*ZB1	; addqi3: *ZB1 by #1 -> *ZB1
+   0093 DE 00               105 	ldx	*ZD5
+   0095 E6 00               106 	ldab	0,x
+   0097 D7 01               107 	stab	*ZD0+1	; movqi: 0,x -> *ZD0
+   0099 BD 00 ED            108 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   009C                     109 L7:
+   009C D6 01               110 	ldab	*ZD6+1
+   009E D7 00               111 	stab	*ZB2	; movqi: *ZD6 -> *ZB2
+   00A0 D6 00               112 	ldab	*ZB1
+   00A2 D1 00               113 	cmpb	*ZB2	; cmpqi *ZB1 with *ZB2
+   00A4 24 03               114 	bhs	.+5
+   00A6 7E 00 85            115 	jmp	L5	; (bltu) long branch
+   00A9 BD 01 A1            116 	jsr	_presto_i2c_stop	; CALL: (VOIDmode) _presto_i2c_stop (0 bytes)
+                            117 ;;;EPILOGUE
+   00AC 8F                  118 	xgdx	; saving D register
+   00AD 33                  119 	pulb	; Pulling register *ZB2
+   00AE D7 00               120 	stab	*ZB2
+   00B0 33                  121 	pulb	; Pulling register *ZB1
+   00B1 D7 00               122 	stab	*ZB1
+   00B3 8F                  123 	xgdx	; restoring D register
+   00B4 38                  124 	pulx	; Pulling register *ZD7
+   00B5 DF 00               125 	stx	*ZD7
+   00B7 38                  126 	pulx	; Pulling register *ZD6
+   00B8 DF 00               127 	stx	*ZD6
+   00BA 38                  128 	pulx	; Pulling register *ZD5
+   00BB DF 00               129 	stx	*ZD5
+   00BD 18 38               130 	puly	; Restore stack frame
+   00BF 39                  131 	rts	; return from function
+                            132 ;;;-----------------------------------------
+                            133 ;;; END EPILOGUE for presto_i2c_send
+                            134 ;;;-----------------------------------------
+                            135 	.globl	_presto_i2c_start
+   00C0                     136 _presto_i2c_start:
+                            137 ;;;-----------------------------------------
+                            138 ;;;  PROLOGUE for presto_i2c_start
+                            139 ;;;-----------------------------------------
+   00C0 18 3C               140 	pshy	; Save stack frame
+   00C2 18 30               141 	tsy	; Set current stack frame
+   00C4 DE 00               142 	ldx	*ZD5
+   00C6 3C                  143 	pshx	; pushed register *ZD5
+                            144 ;;;END PROLOGUE
+   00C7 F6 10 08            145 	ldab	4104
+   00CA D7 01               146 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   00CC D6 01               147 	ldab	*ZD5+1
+   00CE C4 DF               148 	andb	#223
+   00D0 D7 01               149 	stab	*ZD5+1	; andqi3: *ZD5 by #223 -> *ZD5
+   00D2 D6 01               150 	ldab	*ZD5+1
+   00D4 F7 10 08            151 	stab	4104	; movqi: *ZD5 -> 4104
+   00D7 F6 10 08            152 	ldab	4104
+   00DA D7 01               153 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   00DC D6 01               154 	ldab	*ZD5+1
+   00DE C4 FB               155 	andb	#251
+   00E0 D7 01               156 	stab	*ZD5+1	; andqi3: *ZD5 by #251 -> *ZD5
+   00E2 D6 01               157 	ldab	*ZD5+1
+   00E4 F7 10 08            158 	stab	4104	; movqi: *ZD5 -> 4104
+                            159 ;;;EPILOGUE
+   00E7 38                  160 	pulx	; Pulling register *ZD5
+   00E8 DF 00               161 	stx	*ZD5
+   00EA 18 38               162 	puly	; Restore stack frame
+   00EC 39                  163 	rts	; return from function
+                            164 ;;;-----------------------------------------
+                            165 ;;; END EPILOGUE for presto_i2c_start
+                            166 ;;;-----------------------------------------
+                            167 	.globl	_presto_i2c_send_byte
+   00ED                     168 _presto_i2c_send_byte:
+                            169 ;;;-----------------------------------------
+                            170 ;;;  PROLOGUE for presto_i2c_send_byte
+                            171 ;;;-----------------------------------------
+   00ED 18 3C               172 	pshy	; Save stack frame
+   00EF 18 30               173 	tsy	; Set current stack frame
+   00F1 DE 00               174 	ldx	*ZD5
+   00F3 3C                  175 	pshx	; pushed register *ZD5
+   00F4 DE 00               176 	ldx	*ZD6
+   00F6 3C                  177 	pshx	; pushed register *ZD6
+   00F7 DE 00               178 	ldx	*ZD7
+   00F9 3C                  179 	pshx	; pushed register *ZD7
+                            180 ;;;END PROLOGUE
+   00FA D6 01               181 	ldab	*ZD0+1
+   00FC D7 01               182 	stab	*ZD7+1	; movqi: *ZD0 -> *ZD7
+   00FE C6 80               183 	ldab	#128
+   0100 D7 01               184 	stab	*ZD6+1	; movqi: #128 -> *ZD6
+   0102                     185 L13:
+   0102 D6 01               186 	ldab	*ZD7+1
+   0104 D4 01               187 	andb	*ZD6+1
+   0106 D7 01               188 	stab	*ZD5+1	; andqi3: *ZD7 by *ZD6 -> *ZD5
+   0108 26 03               189 	bne	.+5
+   010A 7E 01 1B            190 	jmp	L14	; (beq) long branch
+   010D F6 10 08            191 	ldab	4104
+   0110 D7 01               192 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   0112 D6 01               193 	ldab	*ZD5+1
+   0114 CA 20               194 	orab	#32
+   0116 D7 01               195 	stab	*ZD5+1	; iorqi3: *ZD5 by #32 -> *ZD5
+   0118 7E 01 26            196 	jmp	L17
+   011B                     197 L14:
+   011B F6 10 08            198 	ldab	4104
+   011E D7 01               199 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   0120 D6 01               200 	ldab	*ZD5+1
+   0122 C4 DF               201 	andb	#223
+   0124 D7 01               202 	stab	*ZD5+1	; andqi3: *ZD5 by #223 -> *ZD5
+   0126                     203 L17:
+   0126 D6 01               204 	ldab	*ZD5+1
+   0128 F7 10 08            205 	stab	4104	; movqi: *ZD5 -> 4104
+   012B F6 10 08            206 	ldab	4104
+   012E D7 01               207 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   0130 D6 01               208 	ldab	*ZD5+1
+   0132 CA 04               209 	orab	#4
+   0134 D7 01               210 	stab	*ZD5+1	; iorqi3: *ZD5 by #4 -> *ZD5
+   0136 D6 01               211 	ldab	*ZD5+1
+   0138 F7 10 08            212 	stab	4104	; movqi: *ZD5 -> 4104
+   013B F6 10 08            213 	ldab	4104
+   013E D7 01               214 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   0140 D6 01               215 	ldab	*ZD5+1
+   0142 C4 FB               216 	andb	#251
+   0144 D7 01               217 	stab	*ZD5+1	; andqi3: *ZD5 by #251 -> *ZD5
+   0146 D6 01               218 	ldab	*ZD5+1
+   0148 F7 10 08            219 	stab	4104	; movqi: *ZD5 -> 4104
+   014B D6 01               220 	ldab	*ZD6+1
+   014D 54                  221 	lsrb
+   014E D7 01               222 	stab	*ZD6+1	; lshrqi3: *ZD6 by #1 -> *ZD6
+   0150 27 03               223 	beq	.+5
+   0152 7E 01 02            224 	jmp	L13	; (bne) long branch
+   0155 F6 10 09            225 	ldab	4105
+   0158 D7 01               226 	stab	*ZD5+1	; movqi: 4105 -> *ZD5
+   015A D6 01               227 	ldab	*ZD5+1
+   015C C4 DF               228 	andb	#223
+   015E D7 01               229 	stab	*ZD5+1	; andqi3: *ZD5 by #223 -> *ZD5
+   0160 D6 01               230 	ldab	*ZD5+1
+   0162 F7 10 09            231 	stab	4105	; movqi: *ZD5 -> 4105
+   0165 F6 10 08            232 	ldab	4104
+   0168 D7 01               233 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   016A D6 01               234 	ldab	*ZD5+1
+   016C CA 04               235 	orab	#4
+   016E D7 01               236 	stab	*ZD5+1	; iorqi3: *ZD5 by #4 -> *ZD5
+   0170 D6 01               237 	ldab	*ZD5+1
+   0172 F7 10 08            238 	stab	4104	; movqi: *ZD5 -> 4104
+   0175 F6 10 08            239 	ldab	4104
+   0178 D7 01               240 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   017A D6 01               241 	ldab	*ZD5+1
+   017C C4 FB               242 	andb	#251
+   017E D7 01               243 	stab	*ZD5+1	; andqi3: *ZD5 by #251 -> *ZD5
+   0180 D6 01               244 	ldab	*ZD5+1
+   0182 F7 10 08            245 	stab	4104	; movqi: *ZD5 -> 4104
+   0185 F6 10 09            246 	ldab	4105
+   0188 D7 01               247 	stab	*ZD5+1	; movqi: 4105 -> *ZD5
+   018A D6 01               248 	ldab	*ZD5+1
+   018C CA 20               249 	orab	#32
+   018E D7 01               250 	stab	*ZD5+1	; iorqi3: *ZD5 by #32 -> *ZD5
+   0190 D6 01               251 	ldab	*ZD5+1
+   0192 F7 10 09            252 	stab	4105	; movqi: *ZD5 -> 4105
+                            253 ;;;EPILOGUE
+   0195 38                  254 	pulx	; Pulling register *ZD7
+   0196 DF 00               255 	stx	*ZD7
+   0198 38                  256 	pulx	; Pulling register *ZD6
+   0199 DF 00               257 	stx	*ZD6
+   019B 38                  258 	pulx	; Pulling register *ZD5
+   019C DF 00               259 	stx	*ZD5
+   019E 18 38               260 	puly	; Restore stack frame
+   01A0 39                  261 	rts	; return from function
+                            262 ;;;-----------------------------------------
+                            263 ;;; END EPILOGUE for presto_i2c_send_byte
+                            264 ;;;-----------------------------------------
+                            265 	.globl	_presto_i2c_stop
+   01A1                     266 _presto_i2c_stop:
+                            267 ;;;-----------------------------------------
+                            268 ;;;  PROLOGUE for presto_i2c_stop
+                            269 ;;;-----------------------------------------
+   01A1 18 3C               270 	pshy	; Save stack frame
+   01A3 18 30               271 	tsy	; Set current stack frame
+   01A5 DE 00               272 	ldx	*ZD5
+   01A7 3C                  273 	pshx	; pushed register *ZD5
+                            274 ;;;END PROLOGUE
+   01A8 F6 10 08            275 	ldab	4104
+   01AB D7 01               276 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   01AD D6 01               277 	ldab	*ZD5+1
+   01AF C4 DF               278 	andb	#223
+   01B1 D7 01               279 	stab	*ZD5+1	; andqi3: *ZD5 by #223 -> *ZD5
+   01B3 D6 01               280 	ldab	*ZD5+1
+   01B5 F7 10 08            281 	stab	4104	; movqi: *ZD5 -> 4104
+   01B8 F6 10 08            282 	ldab	4104
+   01BB D7 01               283 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   01BD D6 01               284 	ldab	*ZD5+1
+   01BF CA 04               285 	orab	#4
+   01C1 D7 01               286 	stab	*ZD5+1	; iorqi3: *ZD5 by #4 -> *ZD5
+   01C3 D6 01               287 	ldab	*ZD5+1
+   01C5 F7 10 08            288 	stab	4104	; movqi: *ZD5 -> 4104
+   01C8 F6 10 08            289 	ldab	4104
+   01CB D7 01               290 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   01CD D6 01               291 	ldab	*ZD5+1
+   01CF CA 20               292 	orab	#32
+   01D1 D7 01               293 	stab	*ZD5+1	; iorqi3: *ZD5 by #32 -> *ZD5
+   01D3 D6 01               294 	ldab	*ZD5+1
+   01D5 F7 10 08            295 	stab	4104	; movqi: *ZD5 -> 4104
+                            296 ;;;EPILOGUE
+   01D8 38                  297 	pulx	; Pulling register *ZD5
+   01D9 DF 00               298 	stx	*ZD5
+   01DB 18 38               299 	puly	; Restore stack frame
+   01DD 39                  300 	rts	; return from function
+                            301 ;;;-----------------------------------------
+                            302 ;;; END EPILOGUE for presto_i2c_stop
+                            303 ;;;-----------------------------------------
+                            304 	; END

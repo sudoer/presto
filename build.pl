@@ -41,6 +41,7 @@ $TARGET="hbtest";
             "kernel\\task_sw.asm",
             "kernel\\clock.c",
             "kernel\\system.c",
+            "kernel\\crt0.asm",
             "services\\debugger.c",
             "services\\lcd.c",
             "services\\i2c.c",
@@ -154,12 +155,14 @@ print("\n");
 
 print("--- COMPILING AND ASSEMBLING ---\n");
 
+$indent="   ";
+
 # LOOPING THROUGH OBJECT FILES
 
 @OBJS=();
 $total_errors=0;
 foreach $src_path (@SRC_FILES) {
-   print("FILE $src_path...");
+   print("FILE $src_path\n");
    $errors=0;
 
    # DETERMINE FILE NAMES, BASE NAMES, EXTENSIONS, PATHS
@@ -168,14 +171,11 @@ foreach $src_path (@SRC_FILES) {
    $src_name=basename($src_path);
    $src_base=chop_extension($src_name);
    $src_ext=extension_of($src_path);
-   if($debug) {
-      print("\n");   # break out of line
-      print("src_name=[$src_name]\n");
-      print("src_path=[$src_path]\n");
-      print("src_base=[$src_base]\n");
-      print("src_dir=[$src_dir]\n");
-      print("src_ext=[$src_ext]\n");
-   }
+   debug("src_name=[$src_name]");
+   debug("src_path=[$src_path]");
+   debug("src_base=[$src_base]");
+   debug("src_dir=[$src_dir]");
+   debug("src_ext=[$src_ext]");
 
    if($compiler eq $icc) {
       $obj_name="$src_base.o";
@@ -184,10 +184,8 @@ foreach $src_path (@SRC_FILES) {
    }
 
    $obj_path="$OBJ_DIR\\$obj_name";
-   if($debug) {
-      print("obj_name=[$obj_name]\n");
-      print("obj_path=[$obj_path]\n");
-   }
+   debug("obj_name=[$obj_name]");
+   debug("obj_path=[$obj_path]");
 
    # DETERMINE IF WE NEED TO DO ANYTHING FOR THIS FILE
 
@@ -206,14 +204,16 @@ foreach $src_path (@SRC_FILES) {
 
    if( $work == 1 ) {
       if($src_ext eq "c") {
-         print("COMPILING\n");
          if($compiler eq $icc) {
             # -c for compile to object code
             # -l for interspersed C/asm listings
             # -e for C++ comments
             # -I for include file directories
+            print($indent."COMPILING...");
             $errors|=run("icc11 -c -l -e -I. -D$compiler -o $obj_path $src_path");
+            print("OK\n");
          } elsif($compiler eq $gcc) {
+            print($indent."COMPILING...");
             $temp=chop_extension($src_name);
             $errors|=run("xgcc -S -O2 -mlong_branch -I. -D$compiler -Wa,$gnu_asm_opts -o $temp.s $src_path");
             # GCC produces some strange assembly
@@ -223,26 +223,34 @@ foreach $src_path (@SRC_FILES) {
             #      where it leaves off the offset, and just uses X as an address.
             #      So I just add a "0," in front of the X to make the assembler
             #      happy.
+            print("OK\n");
+            print($indent."FIXING...");
             search_and_replace("$temp.s",
                ".module $src_path",".module $src_name",
                "ldd\tx","ldd 0,x",
                "std\tx","std 0,x");
+            print("OK\n");
+            print($indent."ASSEMBLING...");
             $errors|=run("$gnu_asm_exe $gnu_asm_opts -o$obj_path $temp.s");
             move_file("$temp.s",$OBJ_DIR);
             move_file("$temp.lst",$OBJ_DIR);
             move_file("$temp.rel",$OBJ_DIR);
             move_file("$temp.sym",$OBJ_DIR);
+            print("OK\n");
          }
       } elsif( $src_ext eq "asm" ) {
-         print("ASSEMBLING\n");
          if($compiler eq $icc) {
+            print($indent."ASSEMBLING...");
             $errors|=run("ias6811 -o $obj_path $src_path");
             move_file(chop_extension($src_path).".lis",$OBJ_DIR);
+            print("OK\n");
          } elsif($compiler eq $gcc) {
+            print($indent."ASSEMBLING...");
             $errors|=run("$gnu_asm_exe $gnu_asm_opts -o$obj_path $src_path");
             move_file(chop_extension($src_path).".lst",$OBJ_DIR);
             move_file(chop_extension($src_path).".rel",$OBJ_DIR);
             move_file(chop_extension($src_path).".sym",$OBJ_DIR);
+            print("OK\n");
          }
       } else {
          print("HUH?\n");
@@ -251,9 +259,7 @@ foreach $src_path (@SRC_FILES) {
       print("OK\n");
    }
 
-   if($debug) {
-      print("\n");
-   }
+   print("\n");
 
    # RECORD THE FILES THAT WE NEED TO LINK TOGETHER
 
@@ -287,9 +293,9 @@ print("\n");
 #       STACK   B000-B5FF  1536      INITIAL STACK
 #     NOTHING   B600-B7FF   512      EEPROM
 #     NOTHING   B800-BFBF   ~2k      NOTHING
-# INT VECTORS   BFC0-BFFF    64      SPECIAL INTERRUPTS
+# INT VECTORS   BFC0-BFFF    64      SPECIAL INTERRUPTS (HANDYBOARD)
 #        TEXT   C000-FFBF  ~16k      CODE INSTRUCTIONS, CONSTANT DATA
-# INT VECTORS   FFC0-FFFF    64      NORMAL INTERRUPTS
+# INT VECTORS   FFC0-FFFF    64      NORMAL INTERRUPTS (SIMULATOR)
 
 if($total_errors gt 0) {
    print("errors compiling, skipping the link stage\n");
@@ -305,6 +311,7 @@ if($total_errors gt 0) {
          "-dinit_sp:0xb5ff ".
          "-dheap_size:0x0 ".
          "-m ");
+      print("OK\n");
       print("creating linker parm file...");
       open(TEMP1,">BUILD.TMP");
       print TEMP1 "-L$icc11_lib -o $TARGET.S19 @OBJS";   # TODO - LIBS
@@ -335,18 +342,24 @@ if($total_errors gt 0) {
       # -e end of input to linker
       print("creating linker parm file with map and options...");
       chdir($OBJ_DIR);
+#        DATA   8000-97FF    6k      GLOBAL VARIABLES
+#         BSS   9800-AFFF    6k      INITIALIZED GLOBAL VARIABLES
+#       STACK   B000-B5FF  1536      INITIAL STACK
+#     NOTHING   B600-B7FF   512      EEPROM
+#     NOTHING   B800-BFBF   ~2k      NOTHING
+# INT VECTORS   BFD6-BFFF    64      SPECIAL INTERRUPTS
+#        TEXT   C000-FFBF  ~16k      CODE INSTRUCTIONS, CONSTANT DATA
+# INT VECTORS   FFD6-FFFF    64      NORMAL INTERRUPTS
       open(TEMP1,">$TARGET.lnk");
       print TEMP1 "-mszu\n";
-      print TEMP1 "-bROMCODE=\n";
-      print TEMP1 "-b_LOADER=\n";
-      print TEMP1 "-b_BSS=\n";
-      print TEMP1 "-b_CODE=\n";
-      print TEMP1 "-bSTACK=\n";
-      print TEMP1 "-bABS=\n";
-      print TEMP1 "-g heap_size=0x0\n";
+      print TEMP1 "-bSTARTUP=0x8000\n";
+      print TEMP1 "-bBOOTLIST=0xBFD6\n";
+      print TEMP1 "-b_BSS=0x9800\n";
+      print TEMP1 "-bCODE=0xC000\n";
+      print TEMP1 "-bSTACK=0xB000.0xB5FF\n";
       print TEMP1 "-k $gcc_lib\\\n";
       print TEMP1 "-k .\\$OBJ_DIR\\\n";
-      print TEMP1 "-l system\n";
+      print TEMP1 "-l .\n";  # system\n";
       foreach $obj (@OBJS) {
          print TEMP1 chop_extension(basename($obj))."\n";
       }
@@ -356,6 +369,10 @@ if($total_errors gt 0) {
       print("linking...");
       run("aslink -f $TARGET");                                # TODO - LIBS
       print("OK\n");
+
+      # the stupid linker ends up naming the file after the first source file
+      # here, we rename it to what WE want to call it
+      move_file(chop_extension(basename($SRC_FILES[0])).".S19",$TARGET.".S19");
 
       print("cleaning up...");
       unlink("$TARGET.lnk");
@@ -399,6 +416,29 @@ print("done\n");
 
 ################################################################################
 #   F U N C T I O N S
+################################################################################
+
+sub start_action {
+   my $string=$_[0];
+   print("$string...");
+}
+
+################################################################################
+
+sub end_action {
+   my $string=$_[0];
+   print("$string\n");
+}
+
+################################################################################
+
+sub debug {
+   my $string=$_[0];
+   if($debug) {
+      print("   $string\n");
+   }
+}
+
 ################################################################################
 
 # search_and_replace(file,search1,replace1,search2,replace2,...)

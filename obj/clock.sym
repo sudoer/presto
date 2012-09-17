@@ -1,0 +1,21 @@
+ASxxxx Assembler V01.50  (Motorola 6811), page 1.
+
+Symbol Table
+
+  0 L3                                 0064 R
+  0 L6                                 00AF R
+  0 L7                                 00D5 R
+  0 L9                                 00DA R
+    ZD0                                **** GX
+    ZD5                                **** GX
+    ZD6                                **** GX
+    ZD7                                **** GX
+  0 _clock_add                         0025 GR
+  0 _clock_compare                     0080 GR
+  0 _clock_reset                       0000 GR
+
+ASxxxx Assembler V01.50  (Motorola 6811), page 2.
+
+Area Table
+
+   0 _CODE                              size   E2   flags 0

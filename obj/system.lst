@@ -1,0 +1,114 @@
+                              1 ;;;-----------------------------------------
+                              2 ;;; Start MC6811 gcc assembly output
+                              3 ;;; gcc compiler compiled on TBD
+                              4 ;;; OPTIONS:	-mlong_branch optimize  
+                              5 ;;; OPTIONS:	 peephole !omit_frame_pointer !signed-char
+                              6 ;;; Source:		kernel\system.c
+                              7 ;;; Destination:	system.s
+                              8 ;;; Compiled:	Tue Oct 24 21:55:07 2000
+                              9 ;;; (META)compiled by GNU C version 2.8.1.
+                             10 ;;;-----------------------------------------
+                             11 	.module system.c
+                             12 	.area	_CODE
+                             13 	.globl	__HC11Setup
+   0000                      14 __HC11Setup:
+                             15 ;;;-----------------------------------------
+                             16 ;;;  PROLOGUE for _HC11Setup
+                             17 ;;;-----------------------------------------
+   0000 18 3C                18 	pshy	; Save stack frame
+   0002 18 30                19 	tsy	; Set current stack frame
+                             20 ;;;END PROLOGUE
+                             21 ; Begin inline assembler code
+   0004 0F                   22 		sei
+                             23 ; End of inline assembler code
+   0005 C6 00                24 	ldab	#0
+   0007 F7 10 22             25 	stab	4130	; movqi: #0 -> 4130
+   000A C6 00                26 	ldab	#0
+   000C F7 10 24             27 	stab	4132	; movqi: #0 -> 4132
+   000F C6 0C                28 	ldab	#12
+   0011 F7 10 3F             29 	stab	4159	; movqi: #12 -> 4159
+   0014 C6 A0                30 	ldab	#160
+   0016 F7 10 39             31 	stab	4153	; movqi: #160 -> 4153
+                             32 ; Begin inline assembler code
+   0019 0E                   33 		cli
+                             34 ; End of inline assembler code
+                             35 ;;;EPILOGUE
+   001A 18 38                36 	puly	; Restore stack frame
+   001C 39                   37 	rts	; return from function
+                             38 ;;;-----------------------------------------
+                             39 ;;; END EPILOGUE for _HC11Setup
+                             40 ;;;-----------------------------------------
+                             41 	.globl	_set_interrupt
+   001D                      42 _set_interrupt:
+                             43 ;;;-----------------------------------------
+                             44 ;;;  PROLOGUE for set_interrupt
+                             45 ;;;-----------------------------------------
+   001D 18 3C                46 	pshy	; Save stack frame
+   001F 18 30                47 	tsy	; Set current stack frame
+                             48 ;;;END PROLOGUE
+                             49 ;;;EPILOGUE
+   0021 18 38                50 	puly	; Restore stack frame
+   0023 39                   51 	rts	; return from function
+                             52 ;;;-----------------------------------------
+                             53 ;;; END EPILOGUE for set_interrupt
+                             54 ;;;-----------------------------------------
+                             55 	.globl	_presto_fatal_error
+   0024                      56 _presto_fatal_error:
+                             57 ;;;-----------------------------------------
+                             58 ;;;  PROLOGUE for presto_fatal_error
+                             59 ;;;-----------------------------------------
+   0024 18 3C                60 	pshy	; Save stack frame
+   0026 18 30                61 	tsy	; Set current stack frame
+   0028 DE 00                62 	ldx	*ZD5
+   002A 3C                   63 	pshx	; pushed register *ZD5
+   002B DE 00                64 	ldx	*ZD6
+   002D 3C                   65 	pshx	; pushed register *ZD6
+                             66 ;;;END PROLOGUE
+   002E CC 00 00             67 	ldd	#0
+   0031 DD 00                68 	std	*ZD6	; movhi: #0 -> *ZD6
+                             69 ; Begin inline assembler code
+   0033 0F                   70 		sei
+                             71 ; End of inline assembler code
+   0034 F6 10 09             72 	ldab	4105
+   0037 D7 01                73 	stab	*ZD5+1	; movqi: 4105 -> *ZD5
+   0039 D6 01                74 	ldab	*ZD5+1
+   003B CA 10                75 	orab	#16
+   003D D7 01                76 	stab	*ZD5+1	; iorqi3: *ZD5 by #16 -> *ZD5
+   003F D6 01                77 	ldab	*ZD5+1
+   0041 F7 10 09             78 	stab	4105	; movqi: *ZD5 -> 4105
+   0044                      79 L7:
+   0044 F6 10 00             80 	ldab	4096
+   0047 D7 01                81 	stab	*ZD5+1	; movqi: 4096 -> *ZD5
+   0049 D6 01                82 	ldab	*ZD5+1
+   004B C8 08                83 	eorb	#8
+   004D D7 01                84 	stab	*ZD5+1	; xorqi3: *ZD5 by #8 -> *ZD5
+   004F D6 01                85 	ldab	*ZD5+1
+   0051 F7 10 00             86 	stab	4096	; movqi: *ZD5 -> 4096
+   0054 F6 10 08             87 	ldab	4104
+   0057 D7 01                88 	stab	*ZD5+1	; movqi: 4104 -> *ZD5
+   0059 D6 01                89 	ldab	*ZD5+1
+   005B C4 EF                90 	andb	#239
+   005D D7 01                91 	stab	*ZD5+1	; andqi3: *ZD5 by #239 -> *ZD5
+   005F D6 01                92 	ldab	*ZD5+1
+   0061 F7 10 08             93 	stab	4104	; movqi: *ZD5 -> 4104
+   0064 DC 00                94 	ldd	*ZD6	; tsthi: R:*ZD6
+   0066 26 03                95 	bne	.+5
+   0068 7E 00 44             96 	jmp	L7	; (beq) long branch
+   006B                      97 L10:
+   006B DE 00                98 	ldx	*ZD6
+   006D 08                   99 	inx
+   006E DF 00               100 	stx	*ZD6	; addhi3: *ZD6 by #1 -> *ZD6
+   0070 27 03               101 	beq	.+5
+   0072 7E 00 6B            102 	jmp	L10	; (bne) long branch
+   0075 7E 00 44            103 	jmp	L7
+                            104 ;;;EPILOGUE
+   0078 38                  105 	pulx	; Pulling register *ZD6
+   0079 DF 00               106 	stx	*ZD6
+   007B 38                  107 	pulx	; Pulling register *ZD5
+   007C DF 00               108 	stx	*ZD5
+   007E 18 38               109 	puly	; Restore stack frame
+   0080 39                  110 	rts	; return from function
+                            111 ;;;-----------------------------------------
+                            112 ;;; END EPILOGUE for presto_fatal_error
+                            113 ;;;-----------------------------------------
+                            114 	; END

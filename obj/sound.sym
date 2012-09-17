@@ -1,0 +1,19 @@
+ASxxxx Assembler V01.50  (Motorola 6811), page 1.
+
+Symbol Table
+
+  0 L3                                 0079 R
+    ZD0                                **** GX
+    ZD5                                **** GX
+  1 _beep_tone                         0000 GR
+  0 _sound_isr                         00B2 GR
+  0 _sound_off                         007F GR
+  0 _sound_on                          001D GR
+  0 _sound_tick                        0000 GR
+
+ASxxxx Assembler V01.50  (Motorola 6811), page 2.
+
+Area Table
+
+   0 _CODE                              size   D5   flags 0
+   1 _BSS                               size    2   flags 0

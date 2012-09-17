@@ -1,0 +1,155 @@
+                              1 ;;;-----------------------------------------
+                              2 ;;; Start MC6811 gcc assembly output
+                              3 ;;; gcc compiler compiled on TBD
+                              4 ;;; OPTIONS:	-mlong_branch optimize  
+                              5 ;;; OPTIONS:	 peephole !omit_frame_pointer !signed-char
+                              6 ;;; Source:		kernel\clock.c
+                              7 ;;; Destination:	clock.s
+                              8 ;;; Compiled:	Tue Oct 24 21:55:04 2000
+                              9 ;;; (META)compiled by GNU C version 2.8.1.
+                             10 ;;;-----------------------------------------
+                             11 	.module clock.c
+                             12 	.area	_CODE
+                             13 	.globl	_clock_reset
+   0000                      14 _clock_reset:
+                             15 ;;;-----------------------------------------
+                             16 ;;;  PROLOGUE for clock_reset
+                             17 ;;;-----------------------------------------
+   0000 3C                   18 	pshx	; allocate 2 byte auto variable
+   0001 3C                   19 	pshx	; allocate 2 byte auto variable
+   0002 18 3C                20 	pshy	; Save stack frame
+   0004 18 30                21 	tsy	; Set current stack frame
+                             22 ;;;END PROLOGUE
+   0006 CC 00 00             23 	ldd	#0
+   0009 18 ED 04             24 	std	4,y	; movhi: #0 -> 4,y
+   000C CC 00 00             25 	ldd	#0
+   000F 18 ED 02             26 	std	2,y	; movhi: #0 -> 2,y
+   0012 CC 00 00             27 	ldd	#0
+   0015 DE 00                28 	ldx	*ZD0
+   0017 ED 00                29 	std	0,x	; movhi: #0 -> 0,x
+   0019 18 EC 04             30 	ldd	4,y
+   001C DE 00                31 	ldx	*ZD0
+   001E ED 02                32 	std	2,x	; movhi: 4,y -> 2,x
+                             33 ;;;EPILOGUE
+   0020 18 38                34 	puly	; Restore stack frame
+   0022 38                   35 	pulx	; deallocate 2 byte auto variable
+   0023 38                   36 	pulx	; deallocate 2 byte auto variable
+   0024 39                   37 	rts	; return from function
+                             38 ;;;-----------------------------------------
+                             39 ;;; END EPILOGUE for clock_reset
+                             40 ;;;-----------------------------------------
+                             41 	.globl	_clock_add
+   0025                      42 _clock_add:
+                             43 ;;;-----------------------------------------
+                             44 ;;;  PROLOGUE for clock_add
+                             45 ;;;-----------------------------------------
+   0025 3C                   46 	pshx	; allocate 2 byte auto variable
+   0026 3C                   47 	pshx	; allocate 2 byte auto variable
+   0027 18 3C                48 	pshy	; Save stack frame
+   0029 18 30                49 	tsy	; Set current stack frame
+   002B DE 00                50 	ldx	*ZD5
+   002D 3C                   51 	pshx	; pushed register *ZD5
+   002E DE 00                52 	ldx	*ZD6
+   0030 3C                   53 	pshx	; pushed register *ZD6
+   0031 DE 00                54 	ldx	*ZD7
+   0033 3C                   55 	pshx	; pushed register *ZD7
+                             56 ;;;END PROLOGUE
+   0034 DC 00                57 	ldd	*ZD0
+   0036 18 ED 02             58 	std	2,y	; movhi: *ZD0 -> 2,y
+   0039 EC 00                59 	ldd 0,x
+   003B 18 ED 04             60 	std	4,y	; movhi: x -> 4,y
+   003E 18 EC 08             61 	ldd	8,y
+   0041 DD 00                62 	std	*ZD6	; movhi: 8,y -> *ZD6
+   0043 EC 00                63 	ldd 0,x
+   0045 D3 00                64 	addd	*ZD6
+   0047 DD 00                65 	std	*ZD5	; addhi3: x by *ZD6 -> *ZD5
+   0049 DC 00                66 	ldd	*ZD5
+   004B 18 ED 04             67 	std	4,y	; movhi: *ZD5 -> 4,y
+   004E DC 00                68 	ldd	*ZD5
+   0050 1A 93 00             69 	cpd	*ZD6	; cmphi *ZD5 with *ZD6
+   0053 25 03                70 	blo	.+5
+   0055 7E 00 64             71 	jmp	L3	; (bgeu) long branch
+   0058 DC 00                72 	ldd	*ZD0
+   005A C3 00 01             73 	addd	#1
+   005D DD 00                74 	std	*ZD7	; addhi3: *ZD0 by #1 -> *ZD7
+   005F DC 00                75 	ldd	*ZD7
+   0061 18 ED 02             76 	std	2,y	; movhi: *ZD7 -> 2,y
+   0064                      77 L3:
+   0064 18 EC 02             78 	ldd	2,y
+   0067 DE 00                79 	ldx	*ZD0
+   0069 ED 00                80 	std	0,x	; movhi: 2,y -> 0,x
+   006B 18 EC 04             81 	ldd	4,y
+   006E DE 00                82 	ldx	*ZD0
+   0070 ED 02                83 	std	2,x	; movhi: 4,y -> 2,x
+                             84 ;;;EPILOGUE
+   0072 38                   85 	pulx	; Pulling register *ZD7
+   0073 DF 00                86 	stx	*ZD7
+   0075 38                   87 	pulx	; Pulling register *ZD6
+   0076 DF 00                88 	stx	*ZD6
+   0078 38                   89 	pulx	; Pulling register *ZD5
+   0079 DF 00                90 	stx	*ZD5
+   007B 18 38                91 	puly	; Restore stack frame
+   007D 38                   92 	pulx	; deallocate 2 byte auto variable
+   007E 38                   93 	pulx	; deallocate 2 byte auto variable
+   007F 39                   94 	rts	; return from function
+                             95 ;;;-----------------------------------------
+                             96 ;;; END EPILOGUE for clock_add
+                             97 ;;;-----------------------------------------
+                             98 	.globl	_clock_compare
+   0080                      99 _clock_compare:
+                            100 ;;;-----------------------------------------
+                            101 ;;;  PROLOGUE for clock_compare
+                            102 ;;;-----------------------------------------
+   0080 3C                  103 	pshx	; allocate 2 byte auto variable
+   0081 3C                  104 	pshx	; allocate 2 byte auto variable
+   0082 18 3C               105 	pshy	; Save stack frame
+   0084 18 30               106 	tsy	; Set current stack frame
+   0086 DE 00               107 	ldx	*ZD5
+   0088 3C                  108 	pshx	; pushed register *ZD5
+                            109 ;;;END PROLOGUE
+   0089 DC 00               110 	ldd	*ZD0
+   008B 18 ED 02            111 	std	2,y	; movhi: *ZD0 -> 2,y
+   008E EC 00               112 	ldd 0,x
+   0090 18 ED 04            113 	std	4,y	; movhi: x -> 4,y
+   0093 18 EC 08            114 	ldd	8,y
+   0096 DD 00               115 	std	*ZD5	; movhi: 8,y -> *ZD5
+   0098 DC 00               116 	ldd	*ZD0
+   009A 1A 93 00            117 	cpd	*ZD5	; cmphi *ZD0 with *ZD5
+   009D 24 03               118 	bhs	.+5
+   009F 7E 00 D5            119 	jmp	L7	; (bltu) long branch
+   00A2 22 03               120 	bhi	.+5
+   00A4 7E 00 AF            121 	jmp	L6	; (bleu) long branch
+   00A7 CC 00 01            122 	ldd	#1
+   00AA DD 00               123 	std	*ZD0	; movhi: #1 -> *ZD0
+   00AC 7E 00 DA            124 	jmp	L9
+   00AF                     125 L6:
+   00AF 18 EC 0A            126 	ldd	10,y
+   00B2 DD 00               127 	std	*ZD5	; movhi: 10,y -> *ZD5
+   00B4 EC 00               128 	ldd 0,x
+   00B6 1A 93 00            129 	cpd	*ZD5	; cmphi x with *ZD5
+   00B9 24 03               130 	bhs	.+5
+   00BB 7E 00 D5            131 	jmp	L7	; (bltu) long branch
+   00BE CC 00 01            132 	ldd	#1
+   00C1 DD 00               133 	std	*ZD0	; movhi: #1 -> *ZD0
+   00C3 EC 00               134 	ldd 0,x
+   00C5 1A 93 00            135 	cpd	*ZD5	; cmphi x with *ZD5
+   00C8 23 03               136 	bls	.+5
+   00CA 7E 00 DA            137 	jmp	L9	; (bgtu) long branch
+   00CD CC 00 00            138 	ldd	#0
+   00D0 DD 00               139 	std	*ZD0	; movhi: #0 -> *ZD0
+   00D2 7E 00 DA            140 	jmp	L9
+   00D5                     141 L7:
+   00D5 CC FF FF            142 	ldd	#-1
+   00D8 DD 00               143 	std	*ZD0	; movhi: #-1 -> *ZD0
+   00DA                     144 L9:
+                            145 ;;;EPILOGUE
+   00DA 38                  146 	pulx	; Pulling register *ZD5
+   00DB DF 00               147 	stx	*ZD5
+   00DD 18 38               148 	puly	; Restore stack frame
+   00DF 38                  149 	pulx	; deallocate 2 byte auto variable
+   00E0 38                  150 	pulx	; deallocate 2 byte auto variable
+   00E1 39                  151 	rts	; return from function
+                            152 ;;;-----------------------------------------
+                            153 ;;; END EPILOGUE for clock_compare
+                            154 ;;;-----------------------------------------
+                            155 	; END

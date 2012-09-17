@@ -1,0 +1,375 @@
+                              1 ;;;-----------------------------------------
+                              2 ;;; Start MC6811 gcc assembly output
+                              3 ;;; gcc compiler compiled on TBD
+                              4 ;;; OPTIONS:	-mlong_branch optimize  
+                              5 ;;; OPTIONS:	 peephole !omit_frame_pointer !signed-char
+                              6 ;;; Source:		services\inputs.c
+                              7 ;;; Destination:	inputs.s
+                              8 ;;; Compiled:	Tue Oct 24 21:55:20 2000
+                              9 ;;; (META)compiled by GNU C version 2.8.1.
+                             10 ;;;-----------------------------------------
+                             11 	.module inputs.c
+                             12 	.area	_CODE
+                             13 	.globl	_input_sample_analog
+   0000                      14 _input_sample_analog:
+                             15 ;;;-----------------------------------------
+                             16 ;;;  PROLOGUE for input_sample_analog
+                             17 ;;;-----------------------------------------
+   0000 18 3C                18 	pshy	; Save stack frame
+   0002 18 30                19 	tsy	; Set current stack frame
+   0004 DE 00                20 	ldx	*ZD5
+   0006 3C                   21 	pshx	; pushed register *ZD5
+   0007 8F                   22 	xgdx	; saving D register
+   0008 D6 00                23 	ldab	*ZB1
+   000A 37                   24 	pshb	; pushed register *ZB1
+   000B 8F                   25 	xgdx	; restoring D register
+                             26 ;;;END PROLOGUE
+                             27 ; Begin inline assembler code
+   000C 0F                   28 		sei
+                             29 ; End of inline assembler code
+   000D D6 01                30 	ldab	*ZD0+1
+   000F C4 07                31 	andb	#7
+   0011 D7 01                32 	stab	*ZD5+1	; andqi3: *ZD0 by #7 -> *ZD5
+   0013 D6 01                33 	ldab	*ZD5+1
+   0015 F7 10 30             34 	stab	4144	; movqi: *ZD5 -> 4144
+   0018                      35 L2:
+   0018 F6 10 30             36 	ldab	4144
+   001B D7 01                37 	stab	*ZD5+1	; movqi: 4144 -> *ZD5
+   001D 2D 03                38 	blt	.+5
+   001F 7E 00 18             39 	jmp	L2	; (bge) long branch
+                             40 ; Begin inline assembler code
+   0022 0E                   41 		cli
+                             42 ; End of inline assembler code
+   0023 F6 10 31             43 	ldab	4145
+   0026 D7 00                44 	stab	*ZB1	; movqi: 4145 -> *ZB1
+   0028 D6 00                45 	ldab	*ZB1
+   002A 4F                   46 	clra
+   002B DD 00                47 	std	*ZD0	; zero_extendqihi2: *ZB1 -> *ZD0
+                             48 ;;;EPILOGUE
+   002D 8F                   49 	xgdx	; saving D register
+   002E 33                   50 	pulb	; Pulling register *ZB1
+   002F D7 00                51 	stab	*ZB1
+   0031 8F                   52 	xgdx	; restoring D register
+   0032 38                   53 	pulx	; Pulling register *ZD5
+   0033 DF 00                54 	stx	*ZD5
+   0035 18 38                55 	puly	; Restore stack frame
+   0037 39                   56 	rts	; return from function
+                             57 ;;;-----------------------------------------
+                             58 ;;; END EPILOGUE for input_sample_analog
+                             59 ;;;-----------------------------------------
+                             60 	; extern	_serial_send_string
+   0038                      61 LC0:
+   0038 5B                   62 	.ascii	"["
+   0039 00                   63 	.byte	0x0	
+                             64 	; extern	_string_IntegerToString
+   003A                      65 LC1:
+   003A 2C                   66 	.ascii	","
+   003B 00                   67 	.byte	0x0	
+   003C                      68 LC2:
+   003C 41                   69 	.ascii	"A"
+   003D 00                   70 	.byte	0x0	
+   003E                      71 LC3:
+   003E 42                   72 	.ascii	"B"
+   003F 00                   73 	.byte	0x0	
+   0040                      74 LC4:
+   0040 43                   75 	.ascii	"C"
+   0041 00                   76 	.byte	0x0	
+   0042                      77 LC5:
+   0042 44                   78 	.ascii	"D"
+   0043 00                   79 	.byte	0x0	
+   0044                      80 LC6:
+   0044 5D                   81 	.ascii	"]"
+   0045 0D                   82 	.byte	0xD	
+   0046 0A                   83 	.byte	0xA	
+   0047 00                   84 	.byte	0x0	
+                             85 	.globl	_input_sample_digital
+   0048                      86 _input_sample_digital:
+                             87 ;;;-----------------------------------------
+                             88 ;;;  PROLOGUE for input_sample_digital
+                             89 ;;;-----------------------------------------
+   0048 3C                   90 	pshx	; allocate 2 byte auto variable
+   0049 34                   91 	des	; allocate 1 byte auto variable
+   004A 18 3C                92 	pshy	; Save stack frame
+   004C 18 30                93 	tsy	; Set current stack frame
+   004E DE 00                94 	ldx	*ZD5
+   0050 3C                   95 	pshx	; pushed register *ZD5
+   0051 DE 00                96 	ldx	*ZD6
+   0053 3C                   97 	pshx	; pushed register *ZD6
+   0054 DE 00                98 	ldx	*ZD7
+   0056 3C                   99 	pshx	; pushed register *ZD7
+   0057 8F                  100 	xgdx	; saving D register
+   0058 D6 00               101 	ldab	*ZB1
+   005A 37                  102 	pshb	; pushed register *ZB1
+   005B D6 00               103 	ldab	*ZB2
+   005D 37                  104 	pshb	; pushed register *ZB2
+   005E 8F                  105 	xgdx	; restoring D register
+                            106 ;;;END PROLOGUE
+   005F D6 01               107 	ldab	*ZD0+1
+   0061 D7 01               108 	stab	*ZD6+1	; movqi: *ZD0 -> *ZD6
+   0063 CC 00 38            109 	ldd	#LC0
+   0066 DD 00               110 	std	*ZD0	; movhi: #LC0 -> *ZD0
+   0068 BD 00 00            111 	jsr	_serial_send_string	; CALL: (VOIDmode) _serial_send_string (0 bytes)
+   006B D6 01               112 	ldab	*ZD6+1
+   006D D7 00               113 	stab	*ZB2	; movqi: *ZD6 -> *ZB2
+   006F D6 00               114 	ldab	*ZB2
+   0071 4F                  115 	clra
+   0072 DD 00               116 	std	*ZD5	; zero_extendqihi2: *ZB2 -> *ZD5
+   0074 CE 00 02            117 	ldx	#2
+   0077 3C                  118 	pshx		; movhi: #2 -> ,--sp
+   0078 18 DF 00            119 	sty	*ZXT
+   007B DC 00               120 	ldd	*ZXT
+   007D C3 00 02            121 	addd	#2
+   0080 DD 00               122 	std	*ZD7	; addhi3: y by #2 -> *ZD7
+   0082 DE 00               123 	ldx	*ZD7
+   0084 3C                  124 	pshx		; movhi: *ZD7 -> ,--sp
+   0085 DC 00               125 	ldd	*ZD5
+   0087 DD 00               126 	std	*ZD0	; movhi: *ZD5 -> *ZD0
+   0089 BD 00 00            127 	jsr	_string_IntegerToString	; CALL: R:*ZD0 = _string_IntegerToString (4 bytes)
+   008C 18 DF 00            128 	sty	*ZXT
+   008F DC 00               129 	ldd	*ZXT
+   0091 C3 00 02            130 	addd	#2
+   0094 DD 00               131 	std	*ZD0	; addhi3: y by #2 -> *ZD0
+   0096 BD 00 00            132 	jsr	_serial_send_string	; CALL: (VOIDmode) _serial_send_string (0 bytes)
+   0099 CC 00 3A            133 	ldd	#LC1
+   009C DD 00               134 	std	*ZD0	; movhi: #LC1 -> *ZD0
+   009E BD 00 00            135 	jsr	_serial_send_string	; CALL: (VOIDmode) _serial_send_string (0 bytes)
+   00A1 38                  136 	pulx
+   00A2 38                  137 	pulx		; addhi3: sp by #4 -> sp
+   00A3 D6 01               138 	ldab	*ZD6+1
+   00A5 C1 09               139 	cmpb	#9	; cmpqi *ZD6 with #9
+   00A7 22 03               140 	bhi	.+5
+   00A9 7E 00 B4            141 	jmp	L7	; (bleu) long branch
+   00AC CC 00 00            142 	ldd	#0
+   00AF DD 00               143 	std	*ZD0	; movhi: #0 -> *ZD0
+   00B1 7E 01 B7            144 	jmp	L6
+   00B4                     145 L7:
+   00B4 DC 00               146 	ldd	*ZD5
+   00B6 1A 83 00 08         147 	cpd	#8	; cmphi *ZD5 with #8
+   00BA 26 03               148 	bne	.+5
+   00BC 7E 00 FD            149 	jmp	L10	; (beq) long branch
+   00BF 2F 03               150 	ble	.+5
+   00C1 7E 00 D2            151 	jmp	L14	; (bgt) long branch
+   00C4 DC 00               152 	ldd	*ZD5
+   00C6 1A 83 00 07         153 	cpd	#7	; cmphi *ZD5 with #7
+   00CA 26 03               154 	bne	.+5
+   00CC 7E 00 E0            155 	jmp	L9	; (beq) long branch
+   00CF 7E 01 4D            156 	jmp	L12
+   00D2                     157 L14:
+   00D2 DC 00               158 	ldd	*ZD5
+   00D4 1A 83 00 09         159 	cpd	#9	; cmphi *ZD5 with #9
+   00D8 26 03               160 	bne	.+5
+   00DA 7E 01 1F            161 	jmp	L11	; (beq) long branch
+   00DD 7E 01 4D            162 	jmp	L12
+   00E0                     163 L9:
+   00E0 F6 10 00            164 	ldab	4096
+   00E3 D7 01               165 	stab	*ZD5+1	; movqi: 4096 -> *ZD5
+   00E5 DC 00               166 	ldd	*ZD5
+   00E7 43                  167 	coma
+   00E8 53                  168 	comb
+   00E9 C3 00 00            169 	addd	#0
+   00EC DD 00               170 	std	*ZD5	; one_cmplhi2: *ZD5 -> *ZD5
+   00EE DC 00               171 	ldd	*ZD5
+   00F0 4F                  172 	clra
+   00F1 C4 01               173 	andb	#1
+   00F3 DD 00               174 	std	*ZD5	; andhi3: *ZD5 by #1 -> *ZD5
+   00F5 CC 00 3C            175 	ldd	#LC2
+   00F8 DD 00               176 	std	*ZD0	; movhi: #LC2 -> *ZD0
+   00FA 7E 01 79            177 	jmp	L16
+   00FD                     178 L10:
+   00FD F6 10 00            179 	ldab	4096
+   0100 D7 01               180 	stab	*ZD5+1	; movqi: 4096 -> *ZD5
+   0102 D6 01               181 	ldab	*ZD5+1
+   0104 54                  182 	lsrb
+   0105 D7 01               183 	stab	*ZD5+1	; lshrqi3: *ZD5 by #1 -> *ZD5
+   0107 DC 00               184 	ldd	*ZD5
+   0109 43                  185 	coma
+   010A 53                  186 	comb
+   010B C3 00 00            187 	addd	#0
+   010E DD 00               188 	std	*ZD5	; one_cmplhi2: *ZD5 -> *ZD5
+   0110 DC 00               189 	ldd	*ZD5
+   0112 4F                  190 	clra
+   0113 C4 01               191 	andb	#1
+   0115 DD 00               192 	std	*ZD5	; andhi3: *ZD5 by #1 -> *ZD5
+   0117 CC 00 3E            193 	ldd	#LC3
+   011A DD 00               194 	std	*ZD0	; movhi: #LC3 -> *ZD0
+   011C 7E 01 79            195 	jmp	L16
+   011F                     196 L11:
+   011F F6 10 00            197 	ldab	4096
+   0122 D7 01               198 	stab	*ZD5+1	; movqi: 4096 -> *ZD5
+   0124 D6 01               199 	ldab	*ZD5+1
+   0126 D7 00               200 	stab	*ZB2	; movqi: *ZD5 -> *ZB2
+   0128 D6 00               201 	ldab	*ZB2
+   012A 54                  202 	lsrb
+   012B 54                  203 	lsrb
+   012C 54                  204 	lsrb
+   012D 54                  205 	lsrb
+   012E 54                  206 	lsrb
+   012F 54                  207 	lsrb
+   0130 54                  208 	lsrb
+   0131 D7 00               209 	stab	*ZB1	; lshrqi3: *ZB2 by #7 -> *ZB1
+   0133 D6 00               210 	ldab	*ZB1
+   0135 4F                  211 	clra
+   0136 DD 00               212 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   0138 CC 00 01            213 	ldd	#1
+   013B DD 00               214 	std	*ZXT
+   013D DC 00               215 	ldd	*ZD5
+   013F 98 00               216 	eora	*ZXT
+   0141 D8 01               217 	eorb	*ZXT+1
+   0143 DD 00               218 	std	*ZD5	; eorhi3: *ZD5 by #1 -> *ZD5
+   0145 CC 00 40            219 	ldd	#LC4
+   0148 DD 00               220 	std	*ZD0	; movhi: #LC4 -> *ZD0
+   014A 7E 01 79            221 	jmp	L16
+   014D                     222 L12:
+   014D F6 7F FF            223 	ldab	32767
+   0150 4F                  224 	clra
+   0151 DD 00               225 	std	*ZD5	; zero_extendqihi2: 32767 -> *ZD5
+   0153 DC 00               226 	ldd	*ZD5
+   0155 DE 00               227 	ldx	*ZD6
+   0157 2F 05               228 	ble	1$
+   0159 47                  229 	asra
+   015A 56                  230 	rorb
+   015B 09                  231 	dex
+   015C 26 FB               232 	bne	.-3
+                            233 1$:
+   015E DD 00               234 	std	*ZD5	; ashrhi3: *ZD5 by *ZD6 -> *ZD5
+   0160 CC 00 01            235 	ldd	#1
+   0163 DD 00               236 	std	*ZXT
+   0165 DC 00               237 	ldd	*ZD5
+   0167 98 00               238 	eora	*ZXT
+   0169 D8 01               239 	eorb	*ZXT+1
+   016B DD 00               240 	std	*ZD5	; eorhi3: *ZD5 by #1 -> *ZD5
+   016D DC 00               241 	ldd	*ZD5
+   016F 4F                  242 	clra
+   0170 C4 01               243 	andb	#1
+   0172 DD 00               244 	std	*ZD5	; andhi3: *ZD5 by #1 -> *ZD5
+   0174 CC 00 42            245 	ldd	#LC5
+   0177 DD 00               246 	std	*ZD0	; movhi: #LC5 -> *ZD0
+   0179                     247 L16:
+   0179 BD 00 00            248 	jsr	_serial_send_string	; CALL: (VOIDmode) _serial_send_string (0 bytes)
+   017C CC 00 3A            249 	ldd	#LC1
+   017F DD 00               250 	std	*ZD0	; movhi: #LC1 -> *ZD0
+   0181 BD 00 00            251 	jsr	_serial_send_string	; CALL: (VOIDmode) _serial_send_string (0 bytes)
+   0184 CE 00 01            252 	ldx	#1
+   0187 3C                  253 	pshx		; movhi: #1 -> ,--sp
+   0188 18 DF 00            254 	sty	*ZXT
+   018B DC 00               255 	ldd	*ZXT
+   018D C3 00 02            256 	addd	#2
+   0190 DD 00               257 	std	*ZD7	; addhi3: y by #2 -> *ZD7
+   0192 DE 00               258 	ldx	*ZD7
+   0194 3C                  259 	pshx		; movhi: *ZD7 -> ,--sp
+   0195 DC 00               260 	ldd	*ZD5
+   0197 DD 00               261 	std	*ZD0	; movhi: *ZD5 -> *ZD0
+   0199 BD 00 00            262 	jsr	_string_IntegerToString	; CALL: R:*ZD0 = _string_IntegerToString (4 bytes)
+   019C 18 DF 00            263 	sty	*ZXT
+   019F DC 00               264 	ldd	*ZXT
+   01A1 C3 00 02            265 	addd	#2
+   01A4 DD 00               266 	std	*ZD0	; addhi3: y by #2 -> *ZD0
+   01A6 BD 00 00            267 	jsr	_serial_send_string	; CALL: (VOIDmode) _serial_send_string (0 bytes)
+   01A9 CC 00 44            268 	ldd	#LC6
+   01AC DD 00               269 	std	*ZD0	; movhi: #LC6 -> *ZD0
+   01AE BD 00 00            270 	jsr	_serial_send_string	; CALL: (VOIDmode) _serial_send_string (0 bytes)
+   01B1 DC 00               271 	ldd	*ZD5
+   01B3 DD 00               272 	std	*ZD0	; movhi: *ZD5 -> *ZD0
+   01B5 38                  273 	pulx
+   01B6 38                  274 	pulx		; addhi3: sp by #4 -> sp
+   01B7                     275 L6:
+                            276 ;;;EPILOGUE
+   01B7 8F                  277 	xgdx	; saving D register
+   01B8 33                  278 	pulb	; Pulling register *ZB2
+   01B9 D7 00               279 	stab	*ZB2
+   01BB 33                  280 	pulb	; Pulling register *ZB1
+   01BC D7 00               281 	stab	*ZB1
+   01BE 8F                  282 	xgdx	; restoring D register
+   01BF 38                  283 	pulx	; Pulling register *ZD7
+   01C0 DF 00               284 	stx	*ZD7
+   01C2 38                  285 	pulx	; Pulling register *ZD6
+   01C3 DF 00               286 	stx	*ZD6
+   01C5 38                  287 	pulx	; Pulling register *ZD5
+   01C6 DF 00               288 	stx	*ZD5
+   01C8 18 38               289 	puly	; Restore stack frame
+   01CA 38                  290 	pulx	; deallocate 2 byte auto variable
+   01CB 31                  291 	ins	; deallocate 1 byte auto variable
+   01CC 39                  292 	rts	; return from function
+                            293 ;;;-----------------------------------------
+                            294 ;;; END EPILOGUE for input_sample_digital
+                            295 ;;;-----------------------------------------
+                            296 	.globl	_input_stop_button
+   01CD                     297 _input_stop_button:
+                            298 ;;;-----------------------------------------
+                            299 ;;;  PROLOGUE for input_stop_button
+                            300 ;;;-----------------------------------------
+   01CD 18 3C               301 	pshy	; Save stack frame
+   01CF 18 30               302 	tsy	; Set current stack frame
+   01D1 DE 00               303 	ldx	*ZD5
+   01D3 3C                  304 	pshx	; pushed register *ZD5
+                            305 ;;;END PROLOGUE
+   01D4 F6 7F FF            306 	ldab	32767
+   01D7 54                  307 	lsrb
+   01D8 54                  308 	lsrb
+   01D9 54                  309 	lsrb
+   01DA 54                  310 	lsrb
+   01DB 54                  311 	lsrb
+   01DC 54                  312 	lsrb
+   01DD D7 01               313 	stab	*ZD5+1	; lshrqi3: 32767 by #6 -> *ZD5
+   01DF DC 00               314 	ldd	*ZD5
+   01E1 43                  315 	coma
+   01E2 53                  316 	comb
+   01E3 C3 00 00            317 	addd	#0
+   01E6 DD 00               318 	std	*ZD5	; one_cmplhi2: *ZD5 -> *ZD5
+   01E8 DC 00               319 	ldd	*ZD5
+   01EA 4F                  320 	clra
+   01EB C4 01               321 	andb	#1
+   01ED DD 00               322 	std	*ZD0	; andhi3: *ZD5 by #1 -> *ZD0
+                            323 ;;;EPILOGUE
+   01EF 38                  324 	pulx	; Pulling register *ZD5
+   01F0 DF 00               325 	stx	*ZD5
+   01F2 18 38               326 	puly	; Restore stack frame
+   01F4 39                  327 	rts	; return from function
+                            328 ;;;-----------------------------------------
+                            329 ;;; END EPILOGUE for input_stop_button
+                            330 ;;;-----------------------------------------
+                            331 	.globl	_input_start_button
+   01F5                     332 _input_start_button:
+                            333 ;;;-----------------------------------------
+                            334 ;;;  PROLOGUE for input_start_button
+                            335 ;;;-----------------------------------------
+   01F5 18 3C               336 	pshy	; Save stack frame
+   01F7 18 30               337 	tsy	; Set current stack frame
+   01F9 DE 00               338 	ldx	*ZD5
+   01FB 3C                  339 	pshx	; pushed register *ZD5
+   01FC 8F                  340 	xgdx	; saving D register
+   01FD D6 00               341 	ldab	*ZB1
+   01FF 37                  342 	pshb	; pushed register *ZB1
+   0200 8F                  343 	xgdx	; restoring D register
+                            344 ;;;END PROLOGUE
+   0201 F6 7F FF            345 	ldab	32767
+   0204 54                  346 	lsrb
+   0205 54                  347 	lsrb
+   0206 54                  348 	lsrb
+   0207 54                  349 	lsrb
+   0208 54                  350 	lsrb
+   0209 54                  351 	lsrb
+   020A 54                  352 	lsrb
+   020B D7 00               353 	stab	*ZB1	; lshrqi3: 32767 by #7 -> *ZB1
+   020D D6 00               354 	ldab	*ZB1
+   020F 4F                  355 	clra
+   0210 DD 00               356 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   0212 CC 00 01            357 	ldd	#1
+   0215 DD 00               358 	std	*ZXT
+   0217 DC 00               359 	ldd	*ZD5
+   0219 98 00               360 	eora	*ZXT
+   021B D8 01               361 	eorb	*ZXT+1
+   021D DD 00               362 	std	*ZD0	; eorhi3: *ZD5 by #1 -> *ZD0
+                            363 ;;;EPILOGUE
+   021F 8F                  364 	xgdx	; saving D register
+   0220 33                  365 	pulb	; Pulling register *ZB1
+   0221 D7 00               366 	stab	*ZB1
+   0223 8F                  367 	xgdx	; restoring D register
+   0224 38                  368 	pulx	; Pulling register *ZD5
+   0225 DF 00               369 	stx	*ZD5
+   0227 18 38               370 	puly	; Restore stack frame
+   0229 39                  371 	rts	; return from function
+                            372 ;;;-----------------------------------------
+                            373 ;;; END EPILOGUE for input_start_button
+                            374 ;;;-----------------------------------------
+                            375 	; END

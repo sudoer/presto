@@ -1,0 +1,49 @@
+ASxxxx Assembler V01.50  (Motorola 6811), page 1.
+
+Symbol Table
+
+  0 L16                                00AC R
+  0 L21                                0119 R
+  0 L26                                016E R
+  0 L31                                01C5 R
+  0 L36                                0228 R
+  0 L4                                 0020 R
+  0 L7                                 0056 R
+  0 L8                                 0066 R
+  0 L9                                 0077 R
+    ZD0                                **** GX
+    ZD5                                **** GX
+    ZD6                                **** GX
+    ZXT                                **** GX
+  0 _LcdTask                           0000 GR
+  0 _One                               0106 GR
+  0 _Three                             01B0 GR
+  0 _Two                               015B GR
+  0 _Zero                              0099 GR
+    ___main                            **** GX
+    _lcd_init                          **** GX
+    _lcd_print                         **** GX
+    _lcd_raw_char                      **** GX
+  1 _lcd_task_stack                    0000 R
+  1 _lcd_task_tid                      0500 R
+  0 _main                              0221 GR
+    _motor_set_speed                   **** GX
+  1 _one_tid                           0501 R
+    _presto_get_message                **** GX
+    _presto_send_message               **** GX
+    _presto_sleep                      **** GX
+    _presto_timer                      **** GX
+  1 _task_one_stack                    0100 R
+  1 _task_three_stack                  0300 R
+  1 _task_two_stack                    0200 R
+  1 _task_zero_stack                   0400 R
+  1 _three_tid                         0503 R
+  1 _two_tid                           0502 R
+  1 _zero_tid                          0504 R
+
+ASxxxx Assembler V01.50  (Motorola 6811), page 2.
+
+Area Table
+
+   0 _CODE                              size  231   flags 0
+   1 _BSS                               size  505   flags 0

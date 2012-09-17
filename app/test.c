@@ -6,20 +6,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define TIMER0     0
-#define TIMER1     0
-#define TIMER2     0
-#define TIMER3   279
-
-////////////////////////////////////////////////////////////////////////////////
-
-/*
 // system crashes after 21 seconds
 #define TIMER0    500      // 42*500=21000
 #define TIMER1    600      // 35*600=21000
 #define TIMER2    700      // 30*700=21000
 #define TIMER3    210      //
-*/
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -137,6 +128,12 @@ void Three(void) {
 ////////////////////////////////////////////////////////////////////////////////
 
 int main(void) {
+
+   while(1) {
+      lcd_init();
+   }
+
+/*
    presto_init();
    lcd_task_tid=presto_create_task(LcdTask, lcd_task_stack, STACK_SIZE, 50);
 #if TIMER0 != 0
@@ -157,6 +154,7 @@ int main(void) {
    debugger_init();
    presto_start_scheduler();
    // we never get here
+*/
    return 0;
 }
 

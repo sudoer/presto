@@ -1,0 +1,620 @@
+                              1 ;;;-----------------------------------------
+                              2 ;;; Start MC6811 gcc assembly output
+                              3 ;;; gcc compiler compiled on TBD
+                              4 ;;; OPTIONS:	-mlong_branch optimize  
+                              5 ;;; OPTIONS:	 peephole !omit_frame_pointer !signed-char
+                              6 ;;; Source:		services\lcd.c
+                              7 ;;; Destination:	lcd.s
+                              8 ;;; Compiled:	Tue Oct 24 21:55:14 2000
+                              9 ;;; (META)compiled by GNU C version 2.8.1.
+                             10 ;;;-----------------------------------------
+                             11 	.module lcd.c
+                             12 	.area	_DATA
+   0000                      13 _current_row:
+   0000 00                   14 	.byte	0
+   0001                      15 _current_col:
+   0001 00                   16 	.byte	0
+                             17 	; extern	_presto_i2c_init
+                             18 	; extern	_presto_i2c_send
+                             19 	; extern	_lcd_clear
+                             20 	.area	_CODE
+                             21 	.globl	_lcd_init
+   0000                      22 _lcd_init:
+                             23 ;;;-----------------------------------------
+                             24 ;;;  PROLOGUE for lcd_init
+                             25 ;;;-----------------------------------------
+   0000 3C                   26 	pshx	; allocate 2 byte auto variable
+   0001 3C                   27 	pshx	; allocate 2 byte auto variable
+   0002 3C                   28 	pshx	; allocate 2 byte auto variable
+   0003 18 3C                29 	pshy	; Save stack frame
+   0005 18 30                30 	tsy	; Set current stack frame
+                             31 ;;;END PROLOGUE
+   0007 C6 74                32 	ldab	#116
+   0009 18 E7 02             33 	stab	2,y	; movqi: #116 -> 2,y
+   000C C6 00                34 	ldab	#0
+   000E 18 E7 03             35 	stab	3,y	; movqi: #0 -> 3,y
+   0011 C6 3E                36 	ldab	#62
+   0013 18 E7 04             37 	stab	4,y	; movqi: #62 -> 4,y
+   0016 C6 0C                38 	ldab	#12
+   0018 18 E7 05             39 	stab	5,y	; movqi: #12 -> 5,y
+   001B C6 06                40 	ldab	#6
+   001D 18 E7 06             41 	stab	6,y	; movqi: #6 -> 6,y
+   0020 C6 A0                42 	ldab	#160
+   0022 18 E7 07             43 	stab	7,y	; movqi: #160 -> 7,y
+   0025 BD 00 00             44 	jsr	_presto_i2c_init	; CALL: (VOIDmode) _presto_i2c_init (0 bytes)
+   0028 C6 06                45 	ldab	#6
+   002A 37                   46 	pshb		; movqi: #6 -> ,-sp
+   002B 18 DF 00             47 	sty	*ZXT
+   002E DC 00                48 	ldd	*ZXT
+   0030 C3 00 02             49 	addd	#2
+   0033 DD 00                50 	std	*ZD0	; addhi3: y by #2 -> *ZD0
+   0035 BD 00 00             51 	jsr	_presto_i2c_send	; CALL: (VOIDmode) _presto_i2c_send (1 bytes)
+   0038 BD 00 45             52 	jsr	_lcd_clear	; CALL: (VOIDmode) _lcd_clear (0 bytes)
+   003B BD 02 86             53 	jsr	_send_entire_display	; CALL: (VOIDmode) _send_entire_display (0 bytes)
+   003E 33                   54 	pulb		; addhi3: sp by #1 -> sp
+                             55 ;;;EPILOGUE
+   003F 18 38                56 	puly	; Restore stack frame
+   0041 38                   57 	pulx	; deallocate 2 byte auto variable
+   0042 38                   58 	pulx	; deallocate 2 byte auto variable
+   0043 38                   59 	pulx	; deallocate 2 byte auto variable
+   0044 39                   60 	rts	; return from function
+                             61 ;;;-----------------------------------------
+                             62 ;;; END EPILOGUE for lcd_init
+                             63 ;;;-----------------------------------------
+                             64 	.globl	_lcd_clear
+   0045                      65 _lcd_clear:
+                             66 ;;;-----------------------------------------
+                             67 ;;;  PROLOGUE for lcd_clear
+                             68 ;;;-----------------------------------------
+   0045 18 3C                69 	pshy	; Save stack frame
+   0047 18 30                70 	tsy	; Set current stack frame
+   0049 DE 00                71 	ldx	*ZD5
+   004B 3C                   72 	pshx	; pushed register *ZD5
+   004C DE 00                73 	ldx	*ZD6
+   004E 3C                   74 	pshx	; pushed register *ZD6
+   004F DE 00                75 	ldx	*ZD7
+   0051 3C                   76 	pshx	; pushed register *ZD7
+   0052 8F                   77 	xgdx	; saving D register
+   0053 D6 00                78 	ldab	*ZB1
+   0055 37                   79 	pshb	; pushed register *ZB1
+   0056 8F                   80 	xgdx	; restoring D register
+                             81 ;;;END PROLOGUE
+   0057 C6 00                82 	ldab	#0
+   0059 D7 01                83 	stab	*ZD7+1	; movqi: #0 -> *ZD7
+   005B CC 00 00             84 	ldd	#0
+   005E DD 00                85 	std	*ZD6	; movhi: #0 -> *ZD6
+   0060                      86 L6:
+   0060 C6 00                87 	ldab	#0
+   0062 D7 00                88 	stab	*ZB1	; movqi: #0 -> *ZB1
+   0064                      89 L10:
+   0064 D6 00                90 	ldab	*ZB1
+   0066 4F                   91 	clra
+   0067 DD 00                92 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   0069 DC 00                93 	ldd	*ZD5
+   006B D3 00                94 	addd	*ZD6
+   006D DD 00                95 	std	*ZD5	; addhi3: *ZD5 by *ZD6 -> *ZD5
+   006F C6 A0                96 	ldab	#160
+   0071 E7 00                97 	stab	0,x	; movqi: #160 -> 0,x
+   0073 7C 00 00             98 	inc	*ZB1	; addqi3: *ZB1 by #1 -> *ZB1
+   0076 D6 00                99 	ldab	*ZB1
+   0078 C1 0B               100 	cmpb	#11	; cmpqi *ZB1 with #11
+   007A 22 03               101 	bhi	.+5
+   007C 7E 00 64            102 	jmp	L10	; (bleu) long branch
+   007F DC 00               103 	ldd	*ZD6
+   0081 C3 00 0C            104 	addd	#12
+   0084 DD 00               105 	std	*ZD6	; addhi3: *ZD6 by #12 -> *ZD6
+   0086 7C 00 01            106 	inc	*ZD7+1	; addqi3: *ZD7 by #1 -> *ZD7
+   0089 D6 01               107 	ldab	*ZD7+1
+   008B C1 02               108 	cmpb	#2	; cmpqi *ZD7 with #2
+   008D 22 03               109 	bhi	.+5
+   008F 7E 00 60            110 	jmp	L6	; (bleu) long branch
+   0092 C6 00               111 	ldab	#0
+   0094 F7 00 00            112 	stab	_current_row	; movqi: #0 -> _current_row
+   0097 C6 00               113 	ldab	#0
+   0099 F7 00 01            114 	stab	_current_col	; movqi: #0 -> _current_col
+                            115 ;;;EPILOGUE
+   009C 8F                  116 	xgdx	; saving D register
+   009D 33                  117 	pulb	; Pulling register *ZB1
+   009E D7 00               118 	stab	*ZB1
+   00A0 8F                  119 	xgdx	; restoring D register
+   00A1 38                  120 	pulx	; Pulling register *ZD7
+   00A2 DF 00               121 	stx	*ZD7
+   00A4 38                  122 	pulx	; Pulling register *ZD6
+   00A5 DF 00               123 	stx	*ZD6
+   00A7 38                  124 	pulx	; Pulling register *ZD5
+   00A8 DF 00               125 	stx	*ZD5
+   00AA 18 38               126 	puly	; Restore stack frame
+   00AC 39                  127 	rts	; return from function
+                            128 ;;;-----------------------------------------
+                            129 ;;; END EPILOGUE for lcd_clear
+                            130 ;;;-----------------------------------------
+                            131 	; extern	_lcd_goto_xy
+                            132 	.globl	_lcd_print_at
+   00AD                     133 _lcd_print_at:
+                            134 ;;;-----------------------------------------
+                            135 ;;;  PROLOGUE for lcd_print_at
+                            136 ;;;-----------------------------------------
+   00AD 18 3C               137 	pshy	; Save stack frame
+   00AF 18 30               138 	tsy	; Set current stack frame
+   00B1 DE 00               139 	ldx	*ZD5
+   00B3 3C                  140 	pshx	; pushed register *ZD5
+   00B4 DE 00               141 	ldx	*ZD6
+   00B6 3C                  142 	pshx	; pushed register *ZD6
+   00B7 DE 00               143 	ldx	*ZD7
+   00B9 3C                  144 	pshx	; pushed register *ZD7
+                            145 ;;;END PROLOGUE
+   00BA D6 01               146 	ldab	*ZD0+1
+   00BC D7 01               147 	stab	*ZD7+1	; movqi: *ZD0 -> *ZD7
+   00BE 18 E6 04            148 	ldab	4,y
+   00C1 D7 01               149 	stab	*ZD6+1	; movqi: 4,y -> *ZD6
+   00C3 18 EC 05            150 	ldd	5,y
+   00C6 DD 00               151 	std	*ZD5	; movhi: 5,y -> *ZD5
+   00C8 D6 01               152 	ldab	*ZD6+1
+   00CA 37                  153 	pshb		; movqi: *ZD6 -> ,-sp
+   00CB BD 00 E9            154 	jsr	_lcd_goto_xy	; CALL: (VOIDmode) _lcd_goto_xy (1 bytes)
+   00CE DE 00               155 	ldx	*ZD5
+   00D0 3C                  156 	pshx		; movhi: *ZD5 -> ,--sp
+   00D1 D6 01               157 	ldab	*ZD6+1
+   00D3 37                  158 	pshb		; movqi: *ZD6 -> ,-sp
+   00D4 D6 01               159 	ldab	*ZD7+1
+   00D6 D7 01               160 	stab	*ZD0+1	; movqi: *ZD7 -> *ZD0
+   00D8 BD 00 AD            161 	jsr	_lcd_print_at	; CALL: (VOIDmode) _lcd_print_at (3 bytes)
+   00DB 38                  162 	pulx
+   00DC 38                  163 	pulx		; addhi3: sp by #4 -> sp
+                            164 ;;;EPILOGUE
+   00DD 38                  165 	pulx	; Pulling register *ZD7
+   00DE DF 00               166 	stx	*ZD7
+   00E0 38                  167 	pulx	; Pulling register *ZD6
+   00E1 DF 00               168 	stx	*ZD6
+   00E3 38                  169 	pulx	; Pulling register *ZD5
+   00E4 DF 00               170 	stx	*ZD5
+   00E6 18 38               171 	puly	; Restore stack frame
+   00E8 39                  172 	rts	; return from function
+                            173 ;;;-----------------------------------------
+                            174 ;;; END EPILOGUE for lcd_print_at
+                            175 ;;;-----------------------------------------
+                            176 	.globl	_lcd_goto_xy
+   00E9                     177 _lcd_goto_xy:
+                            178 ;;;-----------------------------------------
+                            179 ;;;  PROLOGUE for lcd_goto_xy
+                            180 ;;;-----------------------------------------
+   00E9 18 3C               181 	pshy	; Save stack frame
+   00EB 18 30               182 	tsy	; Set current stack frame
+   00ED DE 00               183 	ldx	*ZD5
+   00EF 3C                  184 	pshx	; pushed register *ZD5
+                            185 ;;;END PROLOGUE
+   00F0 18 E6 04            186 	ldab	4,y
+   00F3 D7 01               187 	stab	*ZD5+1	; movqi: 4,y -> *ZD5
+   00F5 D6 01               188 	ldab	*ZD5+1
+   00F7 C1 0B               189 	cmpb	#11	; cmpqi *ZD5 with #11
+   00F9 23 03               190 	bls	.+5
+   00FB 7E 01 11            191 	jmp	L14	; (bgtu) long branch
+   00FE D6 01               192 	ldab	*ZD0+1
+   0100 C1 02               193 	cmpb	#2	; cmpqi *ZD0 with #2
+   0102 23 03               194 	bls	.+5
+   0104 7E 01 11            195 	jmp	L14	; (bgtu) long branch
+   0107 D6 01               196 	ldab	*ZD0+1
+   0109 F7 00 00            197 	stab	_current_row	; movqi: *ZD0 -> _current_row
+   010C D6 01               198 	ldab	*ZD5+1
+   010E F7 00 01            199 	stab	_current_col	; movqi: *ZD5 -> _current_col
+   0111                     200 L14:
+                            201 ;;;EPILOGUE
+   0111 38                  202 	pulx	; Pulling register *ZD5
+   0112 DF 00               203 	stx	*ZD5
+   0114 18 38               204 	puly	; Restore stack frame
+   0116 39                  205 	rts	; return from function
+                            206 ;;;-----------------------------------------
+                            207 ;;; END EPILOGUE for lcd_goto_xy
+                            208 ;;;-----------------------------------------
+                            209 	; extern	_ascii_to_lcd
+                            210 	.globl	_lcd_print
+   0117                     211 _lcd_print:
+                            212 ;;;-----------------------------------------
+                            213 ;;;  PROLOGUE for lcd_print
+                            214 ;;;-----------------------------------------
+   0117 18 3C               215 	pshy	; Save stack frame
+   0119 18 30               216 	tsy	; Set current stack frame
+   011B DE 00               217 	ldx	*ZD5
+   011D 3C                  218 	pshx	; pushed register *ZD5
+   011E DE 00               219 	ldx	*ZD6
+   0120 3C                  220 	pshx	; pushed register *ZD6
+   0121 DE 00               221 	ldx	*ZD7
+   0123 3C                  222 	pshx	; pushed register *ZD7
+   0124 8F                  223 	xgdx	; saving D register
+   0125 D6 00               224 	ldab	*ZB1
+   0127 37                  225 	pshb	; pushed register *ZB1
+   0128 8F                  226 	xgdx	; restoring D register
+                            227 ;;;END PROLOGUE
+   0129 DC 00               228 	ldd	*ZD0
+   012B DD 00               229 	std	*ZD7	; movhi: *ZD0 -> *ZD7
+   012D C6 00               230 	ldab	#0
+   012F D7 00               231 	stab	*ZB1	; movqi: #0 -> *ZB1
+   0131 DE 00               232 	ldx	*ZD7
+   0133 6D 00               233 	tst	0,x	; tstqi: MEM:0,x
+   0135 26 03               234 	bne	.+5
+   0137 7E 01 A1            235 	jmp	L19	; (beq) long branch
+   013A                     236 L20:
+   013A D6 00               237 	ldab	*ZB1
+   013C 4F                  238 	clra
+   013D DD 00               239 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   013F DC 00               240 	ldd	*ZD7
+   0141 D3 00               241 	addd	*ZD5
+   0143 DD 00               242 	std	*ZD5	; addhi3: *ZD7 by *ZD5 -> *ZD5
+   0145 DE 00               243 	ldx	*ZD5
+   0147 E6 00               244 	ldab	0,x
+   0149 D7 01               245 	stab	*ZD0+1	; movqi: 0,x -> *ZD0
+   014B BD 01 B5            246 	jsr	_ascii_to_lcd	; CALL: R:*ZD0 = _ascii_to_lcd (0 bytes)
+   014E F6 00 01            247 	ldab	_current_col
+   0151 4F                  248 	clra
+   0152 DD 00               249 	std	*ZD6	; zero_extendqihi2: _current_col -> *ZD6
+   0154 F6 00 00            250 	ldab	_current_row
+   0157 86 0C               251 	ldaa	#12
+   0159 3D                  252 	mul
+   015A DD 00               253 	std	*ZD5	; umulqihi3: _current_row by #12 -> *ZD5
+   015C DC 00               254 	ldd	*ZD6
+   015E D3 00               255 	addd	*ZD5
+   0160 DD 00               256 	std	*ZD5	; addhi3: *ZD6 by *ZD5 -> *ZD5
+   0162 D6 01               257 	ldab	*ZD0+1
+   0164 E7 00               258 	stab	0,x	; movqi: *ZD0 -> 0,x
+   0166 7C 00 01            259 	inc	_current_col	; addqi3: _current_col by #1 -> _current_col
+   0169 F6 00 01            260 	ldab	_current_col
+   016C C1 0B               261 	cmpb	#11	; cmpqi _current_col with #11
+   016E 22 03               262 	bhi	.+5
+   0170 7E 01 8A            263 	jmp	L21	; (bleu) long branch
+   0173 C6 00               264 	ldab	#0
+   0175 F7 00 01            265 	stab	_current_col	; movqi: #0 -> _current_col
+   0178 7C 00 00            266 	inc	_current_row	; addqi3: _current_row by #1 -> _current_row
+   017B F6 00 00            267 	ldab	_current_row
+   017E C1 02               268 	cmpb	#2	; cmpqi _current_row with #2
+   0180 22 03               269 	bhi	.+5
+   0182 7E 01 8A            270 	jmp	L21	; (bleu) long branch
+   0185 C6 00               271 	ldab	#0
+   0187 F7 00 00            272 	stab	_current_row	; movqi: #0 -> _current_row
+   018A                     273 L21:
+   018A 7C 00 00            274 	inc	*ZB1	; addqi3: *ZB1 by #1 -> *ZB1
+   018D D6 00               275 	ldab	*ZB1
+   018F 4F                  276 	clra
+   0190 DD 00               277 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   0192 DC 00               278 	ldd	*ZD7
+   0194 D3 00               279 	addd	*ZD5
+   0196 DD 00               280 	std	*ZD5	; addhi3: *ZD7 by *ZD5 -> *ZD5
+   0198 DE 00               281 	ldx	*ZD5
+   019A 6D 00               282 	tst	0,x	; tstqi: MEM:0,x
+   019C 27 03               283 	beq	.+5
+   019E 7E 01 3A            284 	jmp	L20	; (bne) long branch
+   01A1                     285 L19:
+   01A1 BD 02 86            286 	jsr	_send_entire_display	; CALL: (VOIDmode) _send_entire_display (0 bytes)
+                            287 ;;;EPILOGUE
+   01A4 8F                  288 	xgdx	; saving D register
+   01A5 33                  289 	pulb	; Pulling register *ZB1
+   01A6 D7 00               290 	stab	*ZB1
+   01A8 8F                  291 	xgdx	; restoring D register
+   01A9 38                  292 	pulx	; Pulling register *ZD7
+   01AA DF 00               293 	stx	*ZD7
+   01AC 38                  294 	pulx	; Pulling register *ZD6
+   01AD DF 00               295 	stx	*ZD6
+   01AF 38                  296 	pulx	; Pulling register *ZD5
+   01B0 DF 00               297 	stx	*ZD5
+   01B2 18 38               298 	puly	; Restore stack frame
+   01B4 39                  299 	rts	; return from function
+                            300 ;;;-----------------------------------------
+                            301 ;;; END EPILOGUE for lcd_print
+                            302 ;;;-----------------------------------------
+                            303 	.globl	_ascii_to_lcd
+   01B5                     304 _ascii_to_lcd:
+                            305 ;;;-----------------------------------------
+                            306 ;;;  PROLOGUE for ascii_to_lcd
+                            307 ;;;-----------------------------------------
+   01B5 18 3C               308 	pshy	; Save stack frame
+   01B7 18 30               309 	tsy	; Set current stack frame
+   01B9 DE 00               310 	ldx	*ZD5
+   01BB 3C                  311 	pshx	; pushed register *ZD5
+   01BC 8F                  312 	xgdx	; saving D register
+   01BD D6 00               313 	ldab	*ZB1
+   01BF 37                  314 	pshb	; pushed register *ZB1
+   01C0 8F                  315 	xgdx	; restoring D register
+                            316 ;;;END PROLOGUE
+   01C1 D6 01               317 	ldab	*ZD0+1
+   01C3 C1 24               318 	cmpb	#36	; cmpqi *ZD0 with #36
+   01C5 27 03               319 	beq	.+5
+   01C7 7E 01 D2            320 	jmp	L25	; (bne) long branch
+   01CA CC 00 82            321 	ldd	#130
+   01CD DD 00               322 	std	*ZD0	; movhi: #130 -> *ZD0
+   01CF 7E 02 18            323 	jmp	L33
+   01D2                     324 L25:
+   01D2 D6 01               325 	ldab	*ZD0+1
+   01D4 C1 40               326 	cmpb	#64	; cmpqi *ZD0 with #64
+   01D6 27 03               327 	beq	.+5
+   01D8 7E 01 E3            328 	jmp	L27	; (bne) long branch
+   01DB CC 00 C0            329 	ldd	#192
+   01DE DD 00               330 	std	*ZD0	; movhi: #192 -> *ZD0
+   01E0 7E 02 18            331 	jmp	L33
+   01E3                     332 L27:
+   01E3 D6 01               333 	ldab	*ZD0+1
+   01E5 CB DF               334 	addb	#-33
+   01E7 D7 01               335 	stab	*ZD5+1	; addqi3: *ZD0 by #-33 -> *ZD5
+   01E9 D6 01               336 	ldab	*ZD5+1
+   01EB C1 39               337 	cmpb	#57	; cmpqi *ZD5 with #57
+   01ED 22 03               338 	bhi	.+5
+   01EF 7E 02 09            339 	jmp	L31	; (bleu) long branch
+   01F2 D6 01               340 	ldab	*ZD0+1
+   01F4 CB 9F               341 	addb	#-97
+   01F6 D7 01               342 	stab	*ZD5+1	; addqi3: *ZD0 by #-97 -> *ZD5
+   01F8 D6 01               343 	ldab	*ZD5+1
+   01FA C1 19               344 	cmpb	#25	; cmpqi *ZD5 with #25
+   01FC 22 03               345 	bhi	.+5
+   01FE 7E 02 09            346 	jmp	L31	; (bleu) long branch
+   0201 CC 00 A0            347 	ldd	#160
+   0204 DD 00               348 	std	*ZD0	; movhi: #160 -> *ZD0
+   0206 7E 02 18            349 	jmp	L33
+   0209                     350 L31:
+   0209 D6 01               351 	ldab	*ZD0+1
+   020B CB 80               352 	addb	#128
+   020D D7 01               353 	stab	*ZD5+1	; addqi3: *ZD0 by #128 -> *ZD5
+   020F D6 01               354 	ldab	*ZD5+1
+   0211 D7 00               355 	stab	*ZB1	; movqi: *ZD5 -> *ZB1
+   0213 D6 00               356 	ldab	*ZB1
+   0215 4F                  357 	clra
+   0216 DD 00               358 	std	*ZD0	; zero_extendqihi2: *ZB1 -> *ZD0
+   0218                     359 L33:
+                            360 ;;;EPILOGUE
+   0218 8F                  361 	xgdx	; saving D register
+   0219 33                  362 	pulb	; Pulling register *ZB1
+   021A D7 00               363 	stab	*ZB1
+   021C 8F                  364 	xgdx	; restoring D register
+   021D 38                  365 	pulx	; Pulling register *ZD5
+   021E DF 00               366 	stx	*ZD5
+   0220 18 38               367 	puly	; Restore stack frame
+   0222 39                  368 	rts	; return from function
+                            369 ;;;-----------------------------------------
+                            370 ;;; END EPILOGUE for ascii_to_lcd
+                            371 ;;;-----------------------------------------
+                            372 	.globl	_lcd_raw_char
+   0223                     373 _lcd_raw_char:
+                            374 ;;;-----------------------------------------
+                            375 ;;;  PROLOGUE for lcd_raw_char
+                            376 ;;;-----------------------------------------
+   0223 18 3C               377 	pshy	; Save stack frame
+   0225 18 30               378 	tsy	; Set current stack frame
+   0227 DE 00               379 	ldx	*ZD5
+   0229 3C                  380 	pshx	; pushed register *ZD5
+   022A DE 00               381 	ldx	*ZD6
+   022C 3C                  382 	pshx	; pushed register *ZD6
+   022D DE 00               383 	ldx	*ZD7
+   022F 3C                  384 	pshx	; pushed register *ZD7
+   0230 8F                  385 	xgdx	; saving D register
+   0231 D6 00               386 	ldab	*ZB1
+   0233 37                  387 	pshb	; pushed register *ZB1
+   0234 8F                  388 	xgdx	; restoring D register
+                            389 ;;;END PROLOGUE
+   0235 D6 01               390 	ldab	*ZD0+1
+   0237 D7 01               391 	stab	*ZD7+1	; movqi: *ZD0 -> *ZD7
+   0239 18 E6 04            392 	ldab	4,y
+   023C D7 00               393 	stab	*ZB1	; movqi: 4,y -> *ZB1
+   023E D6 00               394 	ldab	*ZB1
+   0240 C1 0B               395 	cmpb	#11	; cmpqi *ZB1 with #11
+   0242 23 03               396 	bls	.+5
+   0244 7E 02 75            397 	jmp	L34	; (bgtu) long branch
+   0247 D6 01               398 	ldab	*ZD0+1
+   0249 C1 02               399 	cmpb	#2	; cmpqi *ZD0 with #2
+   024B 23 03               400 	bls	.+5
+   024D 7E 02 75            401 	jmp	L34	; (bgtu) long branch
+   0250 D6 00               402 	ldab	*ZB1
+   0252 4F                  403 	clra
+   0253 DD 00               404 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   0255 D6 01               405 	ldab	*ZD0+1
+   0257 86 0C               406 	ldaa	#12
+   0259 3D                  407 	mul
+   025A DD 00               408 	std	*ZD6	; umulqihi3: *ZD0 by #12 -> *ZD6
+   025C DC 00               409 	ldd	*ZD5
+   025E D3 00               410 	addd	*ZD6
+   0260 DD 00               411 	std	*ZD5	; addhi3: *ZD5 by *ZD6 -> *ZD5
+   0262 18 E6 05            412 	ldab	5,y
+   0265 E7 00               413 	stab	0,x	; movqi: 5,y -> 0,x
+   0267 BD 02 86            414 	jsr	_send_entire_display	; CALL: (VOIDmode) _send_entire_display (0 bytes)
+   026A D6 00               415 	ldab	*ZB1
+   026C 37                  416 	pshb		; movqi: *ZB1 -> ,-sp
+   026D D6 01               417 	ldab	*ZD7+1
+   026F D7 01               418 	stab	*ZD0+1	; movqi: *ZD7 -> *ZD0
+   0271 BD 03 28            419 	jsr	_send_one_char	; CALL: (VOIDmode) _send_one_char (1 bytes)
+   0274 33                  420 	pulb		; addhi3: sp by #1 -> sp
+   0275                     421 L34:
+                            422 ;;;EPILOGUE
+   0275 8F                  423 	xgdx	; saving D register
+   0276 33                  424 	pulb	; Pulling register *ZB1
+   0277 D7 00               425 	stab	*ZB1
+   0279 8F                  426 	xgdx	; restoring D register
+   027A 38                  427 	pulx	; Pulling register *ZD7
+   027B DF 00               428 	stx	*ZD7
+   027D 38                  429 	pulx	; Pulling register *ZD6
+   027E DF 00               430 	stx	*ZD6
+   0280 38                  431 	pulx	; Pulling register *ZD5
+   0281 DF 00               432 	stx	*ZD5
+   0283 18 38               433 	puly	; Restore stack frame
+   0285 39                  434 	rts	; return from function
+                            435 ;;;-----------------------------------------
+                            436 ;;; END EPILOGUE for lcd_raw_char
+                            437 ;;;-----------------------------------------
+                            438 	; extern	_presto_i2c_start
+                            439 	; extern	_presto_i2c_send_byte
+                            440 	; extern	_presto_i2c_stop
+   0286                     441 _send_entire_display:
+                            442 ;;;-----------------------------------------
+                            443 ;;;  PROLOGUE for send_entire_display
+                            444 ;;;-----------------------------------------
+   0286 18 3C               445 	pshy	; Save stack frame
+   0288 18 30               446 	tsy	; Set current stack frame
+   028A DE 00               447 	ldx	*ZD5
+   028C 3C                  448 	pshx	; pushed register *ZD5
+   028D DE 00               449 	ldx	*ZD6
+   028F 3C                  450 	pshx	; pushed register *ZD6
+   0290 DE 00               451 	ldx	*ZD7
+   0292 3C                  452 	pshx	; pushed register *ZD7
+   0293 DE 00               453 	ldx	*ZD8
+   0295 3C                  454 	pshx	; pushed register *ZD8
+   0296 8F                  455 	xgdx	; saving D register
+   0297 D6 00               456 	ldab	*ZB1
+   0299 37                  457 	pshb	; pushed register *ZB1
+   029A 8F                  458 	xgdx	; restoring D register
+                            459 ;;;END PROLOGUE
+   029B C6 00               460 	ldab	#0
+   029D D7 01               461 	stab	*ZD8+1	; movqi: #0 -> *ZD8
+   029F CC 00 00            462 	ldd	#0
+   02A2 DD 00               463 	std	*ZD6	; movhi: #0 -> *ZD6
+   02A4 C6 20               464 	ldab	#32
+   02A6 D7 01               465 	stab	*ZD7+1	; movqi: #32 -> *ZD7
+   02A8                     466 L41:
+   02A8 BD 00 00            467 	jsr	_presto_i2c_start	; CALL: (VOIDmode) _presto_i2c_start (0 bytes)
+   02AB C6 74               468 	ldab	#116
+   02AD D7 01               469 	stab	*ZD0+1	; movqi: #116 -> *ZD0
+   02AF BD 00 00            470 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   02B2 C6 00               471 	ldab	#0
+   02B4 D7 01               472 	stab	*ZD0+1	; movqi: #0 -> *ZD0
+   02B6 BD 00 00            473 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   02B9 D6 01               474 	ldab	*ZD7+1
+   02BB CA 80               475 	orab	#-128
+   02BD D7 01               476 	stab	*ZD0+1	; iorqi3: *ZD7 by #-128 -> *ZD0
+   02BF BD 00 00            477 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   02C2 BD 00 00            478 	jsr	_presto_i2c_stop	; CALL: (VOIDmode) _presto_i2c_stop (0 bytes)
+   02C5 BD 00 00            479 	jsr	_presto_i2c_start	; CALL: (VOIDmode) _presto_i2c_start (0 bytes)
+   02C8 C6 74               480 	ldab	#116
+   02CA D7 01               481 	stab	*ZD0+1	; movqi: #116 -> *ZD0
+   02CC BD 00 00            482 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   02CF C6 40               483 	ldab	#64
+   02D1 D7 01               484 	stab	*ZD0+1	; movqi: #64 -> *ZD0
+   02D3 BD 00 00            485 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   02D6 C6 00               486 	ldab	#0
+   02D8 D7 00               487 	stab	*ZB1	; movqi: #0 -> *ZB1
+   02DA                     488 L45:
+   02DA D6 00               489 	ldab	*ZB1
+   02DC 4F                  490 	clra
+   02DD DD 00               491 	std	*ZD5	; zero_extendqihi2: *ZB1 -> *ZD5
+   02DF DC 00               492 	ldd	*ZD5
+   02E1 D3 00               493 	addd	*ZD6
+   02E3 DD 00               494 	std	*ZD5	; addhi3: *ZD5 by *ZD6 -> *ZD5
+   02E5 E6 00               495 	ldab	0,x
+   02E7 D7 01               496 	stab	*ZD0+1	; movqi: 0,x -> *ZD0
+   02E9 BD 00 00            497 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   02EC 7C 00 00            498 	inc	*ZB1	; addqi3: *ZB1 by #1 -> *ZB1
+   02EF D6 00               499 	ldab	*ZB1
+   02F1 C1 0B               500 	cmpb	#11	; cmpqi *ZB1 with #11
+   02F3 22 03               501 	bhi	.+5
+   02F5 7E 02 DA            502 	jmp	L45	; (bleu) long branch
+   02F8 BD 00 00            503 	jsr	_presto_i2c_stop	; CALL: (VOIDmode) _presto_i2c_stop (0 bytes)
+   02FB DC 00               504 	ldd	*ZD6
+   02FD C3 00 0C            505 	addd	#12
+   0300 DD 00               506 	std	*ZD6	; addhi3: *ZD6 by #12 -> *ZD6
+   0302 D6 01               507 	ldab	*ZD7+1
+   0304 CB 20               508 	addb	#32
+   0306 D7 01               509 	stab	*ZD7+1	; addqi3: *ZD7 by #32 -> *ZD7
+   0308 7C 00 01            510 	inc	*ZD8+1	; addqi3: *ZD8 by #1 -> *ZD8
+   030B D6 01               511 	ldab	*ZD8+1
+   030D C1 02               512 	cmpb	#2	; cmpqi *ZD8 with #2
+   030F 22 03               513 	bhi	.+5
+   0311 7E 02 A8            514 	jmp	L41	; (bleu) long branch
+                            515 ;;;EPILOGUE
+   0314 8F                  516 	xgdx	; saving D register
+   0315 33                  517 	pulb	; Pulling register *ZB1
+   0316 D7 00               518 	stab	*ZB1
+   0318 8F                  519 	xgdx	; restoring D register
+   0319 38                  520 	pulx	; Pulling register *ZD8
+   031A DF 00               521 	stx	*ZD8
+   031C 38                  522 	pulx	; Pulling register *ZD7
+   031D DF 00               523 	stx	*ZD7
+   031F 38                  524 	pulx	; Pulling register *ZD6
+   0320 DF 00               525 	stx	*ZD6
+   0322 38                  526 	pulx	; Pulling register *ZD5
+   0323 DF 00               527 	stx	*ZD5
+   0325 18 38               528 	puly	; Restore stack frame
+   0327 39                  529 	rts	; return from function
+                            530 ;;;-----------------------------------------
+                            531 ;;; END EPILOGUE for send_entire_display
+                            532 ;;;-----------------------------------------
+   0328                     533 _send_one_char:
+                            534 ;;;-----------------------------------------
+                            535 ;;;  PROLOGUE for send_one_char
+                            536 ;;;-----------------------------------------
+   0328 18 3C               537 	pshy	; Save stack frame
+   032A 18 30               538 	tsy	; Set current stack frame
+   032C DE 00               539 	ldx	*ZD5
+   032E 3C                  540 	pshx	; pushed register *ZD5
+   032F DE 00               541 	ldx	*ZD6
+   0331 3C                  542 	pshx	; pushed register *ZD6
+   0332 DE 00               543 	ldx	*ZD7
+   0334 3C                  544 	pshx	; pushed register *ZD7
+   0335 8F                  545 	xgdx	; saving D register
+   0336 D6 00               546 	ldab	*ZB1
+   0338 37                  547 	pshb	; pushed register *ZB1
+   0339 8F                  548 	xgdx	; restoring D register
+                            549 ;;;END PROLOGUE
+   033A D6 01               550 	ldab	*ZD0+1
+   033C D7 01               551 	stab	*ZD7+1	; movqi: *ZD0 -> *ZD7
+   033E 18 E6 04            552 	ldab	4,y
+   0341 D7 01               553 	stab	*ZD6+1	; movqi: 4,y -> *ZD6
+   0343 BD 00 00            554 	jsr	_presto_i2c_start	; CALL: (VOIDmode) _presto_i2c_start (0 bytes)
+   0346 C6 74               555 	ldab	#116
+   0348 D7 01               556 	stab	*ZD0+1	; movqi: #116 -> *ZD0
+   034A BD 00 00            557 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   034D C6 00               558 	ldab	#0
+   034F D7 01               559 	stab	*ZD0+1	; movqi: #0 -> *ZD0
+   0351 BD 00 00            560 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   0354 D6 01               561 	ldab	*ZD7+1
+   0356 CB 01               562 	addb	#1
+   0358 D7 01               563 	stab	*ZD5+1	; addqi3: *ZD7 by #1 -> *ZD5
+   035A D6 01               564 	ldab	*ZD5+1
+   035C 58                  565 	aslb
+   035D 58                  566 	aslb
+   035E 58                  567 	aslb
+   035F 58                  568 	aslb
+   0360 58                  569 	aslb
+   0361 D7 01               570 	stab	*ZD5+1	; ashlqi3: *ZD5 by #5 -> *ZD5
+   0363 D6 01               571 	ldab	*ZD5+1
+   0365 DB 01               572 	addb	*ZD6+1
+   0367 D7 01               573 	stab	*ZD5+1	; addqi3: *ZD5 by *ZD6 -> *ZD5
+   0369 D6 01               574 	ldab	*ZD5+1
+   036B CA 80               575 	orab	#-128
+   036D D7 01               576 	stab	*ZD0+1	; iorqi3: *ZD5 by #-128 -> *ZD0
+   036F BD 00 00            577 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   0372 BD 00 00            578 	jsr	_presto_i2c_stop	; CALL: (VOIDmode) _presto_i2c_stop (0 bytes)
+   0375 BD 00 00            579 	jsr	_presto_i2c_start	; CALL: (VOIDmode) _presto_i2c_start (0 bytes)
+   0378 C6 74               580 	ldab	#116
+   037A D7 01               581 	stab	*ZD0+1	; movqi: #116 -> *ZD0
+   037C BD 00 00            582 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   037F C6 40               583 	ldab	#64
+   0381 D7 01               584 	stab	*ZD0+1	; movqi: #64 -> *ZD0
+   0383 BD 00 00            585 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   0386 D6 01               586 	ldab	*ZD6+1
+   0388 D7 00               587 	stab	*ZB1	; movqi: *ZD6 -> *ZB1
+   038A D6 00               588 	ldab	*ZB1
+   038C 4F                  589 	clra
+   038D DD 00               590 	std	*ZD6	; zero_extendqihi2: *ZB1 -> *ZD6
+   038F D6 01               591 	ldab	*ZD7+1
+   0391 86 0C               592 	ldaa	#12
+   0393 3D                  593 	mul
+   0394 DD 00               594 	std	*ZD5	; umulqihi3: *ZD7 by #12 -> *ZD5
+   0396 DC 00               595 	ldd	*ZD6
+   0398 D3 00               596 	addd	*ZD5
+   039A DD 00               597 	std	*ZD5	; addhi3: *ZD6 by *ZD5 -> *ZD5
+   039C E6 00               598 	ldab	0,x
+   039E D7 01               599 	stab	*ZD0+1	; movqi: 0,x -> *ZD0
+   03A0 BD 00 00            600 	jsr	_presto_i2c_send_byte	; CALL: (VOIDmode) _presto_i2c_send_byte (0 bytes)
+   03A3 BD 00 00            601 	jsr	_presto_i2c_stop	; CALL: (VOIDmode) _presto_i2c_stop (0 bytes)
+                            602 ;;;EPILOGUE
+   03A6 8F                  603 	xgdx	; saving D register
+   03A7 33                  604 	pulb	; Pulling register *ZB1
+   03A8 D7 00               605 	stab	*ZB1
+   03AA 8F                  606 	xgdx	; restoring D register
+   03AB 38                  607 	pulx	; Pulling register *ZD7
+   03AC DF 00               608 	stx	*ZD7
+   03AE 38                  609 	pulx	; Pulling register *ZD6
+   03AF DF 00               610 	stx	*ZD6
+   03B1 38                  611 	pulx	; Pulling register *ZD5
+   03B2 DF 00               612 	stx	*ZD5
+   03B4 18 38               613 	puly	; Restore stack frame
+   03B6 39                  614 	rts	; return from function
+                            615 ;;;-----------------------------------------
+                            616 ;;; END EPILOGUE for send_one_char
+                            617 ;;;-----------------------------------------
+                            618 	.area	_BSS
+   0000                     619 _display:	.blkb	36
+                            620 	; END

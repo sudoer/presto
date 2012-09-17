@@ -1,0 +1,93 @@
+XH
+H 6 areas 3A global symbols
+M crt0.s
+S _main Ref0000
+S _start Ref0000
+A _CODE size 17 flags 0
+S _ods_set_irq Def0000
+A DIRECT size 2 flags 1C
+S _os_null_ptr Def0000
+A REGS size 1040 flags C
+S _hprio Def103C
+S _porta Def1000
+S _bprot Def1035
+S _oc1d Def100D
+S _portb Def1004
+S _pprog Def103B
+S _adr1 Def1031
+S _tctl1 Def1020
+S _portc Def1003
+S _adr2 Def1032
+S _tctl2 Def1021
+S _portd Def1008
+S _adr3 Def1033
+S _porte Def100A
+S _adr4 Def1034
+S _pioc Def1002
+S _scdr Def102F
+S _tmsk1 Def1022
+S _oc1m Def100C
+S _test1 Def103E
+S _tmsk2 Def1024
+S _tic1 Def1010
+S _tic2 Def1012
+S _tic3 Def1014
+S _init Def103D
+S _config Def103F
+S _toc1 Def1016
+S _spcr Def1028
+S _toc2 Def1018
+S _spdr Def102A
+S _toc3 Def101A
+S _tcnt Def100E
+S _toc4 Def101C
+S _scsr Def102E
+S _adctl Def1030
+S _spsr Def1029
+S _cforc Def100B
+S _ti4 Def101E
+S _pactl Def1026
+S _portcl Def1005
+S _pacnt Def1027
+S _option Def1039
+S _coprst Def103A
+S _sccr1 Def102C
+S _baud Def102B
+S _eprog Def1036
+S _sccr2 Def102D
+S _ddrc Def1007
+S _tflg1 Def1023
+S _ddrd Def1009
+S _tflg2 Def1025
+A STARTUP size 1C flags C
+S __start Def0000
+S __exit Def001A
+A CODE size 1 flags 0
+S _inert_isr Def0000
+A BOOTLIST size C000 flags C
+T 00 00 86 FF B7 10 09 86 00 B7 10 08 86 FF B7
+R 00 00 00 03
+T 00 0D 10 08 20 EF CE 00 00 DF 00 00 0E BD 00 00
+R 00 00 00 03 29 0A 00 01 02 0E 00 00
+T 00 1A 20 FE
+R 00 00 00 03
+T 00 00 3B
+R 00 00 00 04
+T BF D6 00 00 00 00 00 00
+R 00 00 00 05 00 02 00 04 00 04 00 04 00 06 00 04
+T BF DC 00 00 00 00 00 00
+R 00 00 00 05 00 02 00 04 00 04 00 04 00 06 00 04
+T BF E2 00 00 00 00 00 00
+R 00 00 00 05 00 02 00 04 00 04 00 04 00 06 00 04
+T BF E8 00 00 00 00 00 00
+R 00 00 00 05 00 02 00 04 00 04 00 04 00 06 00 04
+T BF EE 00 00 00 00 00 00
+R 00 00 00 05 00 02 00 04 00 04 00 04 00 06 00 04
+T BF F4 00 00 00 00 00 00
+R 00 00 00 05 00 02 00 04 00 04 00 04 00 06 00 04
+T BF FA 00 00 00 00 00 00
+R 00 00 00 05 00 02 00 04 00 04 00 04 02 06 00 01
+T 00 00 18 3C 18 30 3C 18 EC 02 4F 05 C3 BF D0 8F
+R 00 00 00 00
+T 00 0E 18 EC 04 ED 00 38 18 38 39
+R 00 00 00 00

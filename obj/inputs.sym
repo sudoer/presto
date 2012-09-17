@@ -1,0 +1,39 @@
+ASxxxx Assembler V01.50  (Motorola 6811), page 1.
+
+Symbol Table
+
+  0 L10                                00FD R
+  0 L11                                011F R
+  0 L12                                014D R
+  0 L14                                00D2 R
+  0 L16                                0179 R
+  0 L2                                 0018 R
+  0 L6                                 01B7 R
+  0 L7                                 00B4 R
+  0 L9                                 00E0 R
+  0 LC0                                0038 R
+  0 LC1                                003A R
+  0 LC2                                003C R
+  0 LC3                                003E R
+  0 LC4                                0040 R
+  0 LC5                                0042 R
+  0 LC6                                0044 R
+    ZB1                                **** GX
+    ZB2                                **** GX
+    ZD0                                **** GX
+    ZD5                                **** GX
+    ZD6                                **** GX
+    ZD7                                **** GX
+    ZXT                                **** GX
+  0 _input_sample_analog               0000 GR
+  0 _input_sample_digital              0048 GR
+  0 _input_start_button                01F5 GR
+  0 _input_stop_button                 01CD GR
+    _serial_send_string                **** GX
+    _string_IntegerToString            **** GX
+
+ASxxxx Assembler V01.50  (Motorola 6811), page 2.
+
+Area Table
+
+   0 _CODE                              size  22A   flags 0

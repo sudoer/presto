@@ -1,0 +1,26 @@
+ASxxxx Assembler V01.50  (Motorola 6811), page 1.
+
+Symbol Table
+
+  0 L13                                0102 R
+  0 L14                                011B R
+  0 L17                                0126 R
+  0 L5                                 0085 R
+  0 L7                                 009C R
+    ZB1                                **** GX
+    ZB2                                **** GX
+    ZD0                                **** GX
+    ZD5                                **** GX
+    ZD6                                **** GX
+    ZD7                                **** GX
+  0 _presto_i2c_init                   0000 GR
+  0 _presto_i2c_send                   005D GR
+  0 _presto_i2c_send_byte              00ED GR
+  0 _presto_i2c_start                  00C0 GR
+  0 _presto_i2c_stop                   01A1 GR
+
+ASxxxx Assembler V01.50  (Motorola 6811), page 2.
+
+Area Table
+
+   0 _CODE                              size  1DE   flags 0

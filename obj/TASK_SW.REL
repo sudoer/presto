@@ -1,0 +1,34 @@
+XH
+H 4 areas A global symbols
+S _presto_asm_new_sp Ref0000
+S _presto_asm_old_sp_p Ref0000
+S _presto_kill_self Ref0000
+S _presto_service_timer_interrupt Ref0000
+S _presto_asm_swap Ref0000
+S _presto_asm_new_fn Ref0000
+A _CODE size 0 flags 0
+A DATA size 2 flags 0
+A IDATA size 2 flags 0
+A CODE size 55 flags 0
+S _presto_setup_new_task Def0034
+S _presto_start_task_switching Def0026
+S _presto_system_isr Def0000
+S _presto_switch_tasks Def0017
+T 00 00 00 01
+R 00 00 00 01
+T 00 00 00 00
+R 00 00 00 02
+T 00 00 0F BD 00 00 7D 00 00 27 08 FE 00 00 AF 00
+R 00 00 00 03 02 04 00 03 02 07 00 04 02 0C 00 01
+T 00 0E BE 00 00 32 B4 FF EF 36 3B 18 3C 3C 36 37
+R 00 00 00 03 02 03 00 00
+T 00 1C 07 B4 FF EF 36 FE 00 00 AF 00 BE 00 00 32
+R 00 00 00 03 02 08 00 01 02 0D 00 00
+T 00 2A 8A 10 06 33 32 38 18 38 0E 39 BF 00 00 BE
+R 00 00 00 03 00 0D 00 01
+T 00 38 00 00 CC 00 00 37 36 FC 00 00 37 36 18 3C
+R 00 00 00 03 02 02 00 00 02 05 00 02 02 0A 00 05
+T 00 46 3C 36 37 07 B4 FF EF 36 BF 00 00 BE 00 00
+R 00 00 00 03 02 0B 00 00 00 0E 00 01
+T 00 54 39
+R 00 00 00 03

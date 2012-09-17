@@ -44,7 +44,9 @@
 #include "services\motors.h"
 #include "services\sound.h"
 
-extern void _start();   // entry point in crt11.s
+#ifdef ICC
+   extern void _start();   // entry point in crt11.s
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -73,19 +75,17 @@ void _HC11Setup() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-#pragma interrupt_handler inert_isr
+/*
+#pragma interrupt inert_isr
 void inert_isr(void) {
 }
-
+*/
 ////////////////////////////////////////////////////////////////////////////////
 
 // address FFD6 for simulator
 // address BFD6 for handyboard
-#ifdef ICC
+/*
 #pragma abs_address:0xBFD6
-#endif
-
 static void (*special_interrupt_vectors[])() = {
    inert_isr,          // SCI    -   presto_serial_isr
    inert_isr,          // SPI
@@ -110,12 +110,14 @@ static void (*special_interrupt_vectors[])() = {
    _start              // RESET
 };
 #pragma end_abs_address
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 
+//extern void os_set_irq(int number, void (*fn)() );
 void set_interrupt(BYTE intr, void (*vector)(void)) {
    if(intr<=INTR_RESET) {
-      special_interrupt_vectors[intr]=vector;
+//    os_set_irq(intr,vector);
    }
 }
 
@@ -135,39 +137,6 @@ void presto_fatal_error(void) {
       while(delay!=0) delay++;
    }
 }
-
-////////////////////////////////////////////////////////////////////////////////
-//   ???
-////////////////////////////////////////////////////////////////////////////////
-
-/*
-void normal_mode(void) {
-   INTR_OFF();
-   set_interrupt(INTR_SCI  ,inert_isr);
-   set_interrupt(INTR_SPI  ,inert_isr);
-   set_interrupt(INTR_PAIE ,inert_isr);
-   set_interrupt(INTR_PAO  ,inert_isr);
-   set_interrupt(INTR_TOF  ,inert_isr);
-   set_interrupt(INTR_TOC5 ,inert_isr);
-   set_interrupt(INTR_TOC4 ,inert_isr);
-   set_interrupt(INTR_TOC3 ,inert_isr);
-   set_interrupt(INTR_TOC2 ,inert_isr);
-   set_interrupt(INTR_TOC1 ,inert_isr);
-   set_interrupt(INTR_TIC3 ,inert_isr);
-   set_interrupt(INTR_TIC2 ,inert_isr);
-   set_interrupt(INTR_TIC1 ,inert_isr);
-   set_interrupt(INTR_RTI  ,inert_isr);
-   set_interrupt(INTR_IRQ  ,inert_isr);
-   set_interrupt(INTR_XIRQ ,inert_isr);
-   set_interrupt(INTR_SWI  ,inert_isr);
-   set_interrupt(INTR_ILLOP,inert_isr);
-   set_interrupt(INTR_COP  ,inert_isr);
-   set_interrupt(INTR_CLM  ,inert_isr);
-   set_interrupt(INTR_RESET,_start);
-   HPRIO=0x2C;   // Expanded Multiplexed mode, promote TOC2
-   INTR_ON();
-};
-*/
 
 ////////////////////////////////////////////////////////////////////////////////
 
