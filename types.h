@@ -32,7 +32,7 @@ typedef unsigned long DWORD;
 
 typedef union MISCWORD {
    WORD w;
-   struct {BYTE l,h;} b;
+   struct {BYTE h,l;} b;
 } MISCWORD;
 
 typedef union MISCLONG {

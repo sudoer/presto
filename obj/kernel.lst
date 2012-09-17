@@ -1,0 +1,1653 @@
+   1                 	;;;-----------------------------------------
+   2                 	;;; Start MC68HC11 gcc assembly output
+   3                 	;;; gcc compiler 3.0.4 m68hc1x-20020922
+   4                 	;;; Command:	cc1 -lang-c -I\alan\play\hc11\presto -I. -iprefix c:\programs\hc11\gnu-m6811-elf\bin\.
+   5                 	;;; Compiled:	Thu Oct 10 23:49:39 2002
+   6                 	;;; (META)compiled by GNU C version 2.95.2 19991024 (release).
+   7                 	;;;-----------------------------------------
+   8                 		.file	"kernel.c"
+   9                 		.mode mshort
+  10                 		.globl	global_new_sp
+  11                 		.sect	.data
+  12                 		.type	global_new_sp,@object
+  13                 		.size	global_new_sp,2
+  14                 	global_new_sp:
+  15 0000 00 00       		.word	0
+  16                 		.globl	global_old_sp_p
+  17                 		.type	global_old_sp_p,@object
+  18                 		.size	global_old_sp_p,2
+  19                 	global_old_sp_p:
+  20 0002 00 00       		.word	0
+  21                 		.globl	global_new_fn
+  22                 		.type	global_new_fn,@object
+  23                 		.size	global_new_fn,2
+  24                 	global_new_fn:
+  25 0004 00 00       		.word	0
+  26                 		.globl	current_tcb_p
+  27                 		.type	current_tcb_p,@object
+  28                 		.size	current_tcb_p,2
+  29                 	current_tcb_p:
+  30 0006 00 00       		.word	0
+  31                 		.globl	current_tid
+  32                 		.type	current_tid,@object
+  33                 		.size	current_tid,1
+  34                 	current_tid:
+  35 0008 00          		.byte	0
+  36                 		.globl	tcb_head_p
+  37                 		.type	tcb_head_p,@object
+  38                 		.size	tcb_head_p,2
+  39                 	tcb_head_p:
+  40 0009 00 00       		.word	0
+  41                 		.globl	free_tcb_p
+  42                 		.type	free_tcb_p,@object
+  43                 		.size	free_tcb_p,2
+  44                 	free_tcb_p:
+  45 000b 00 00       		.word	0
+  46                 		.globl	presto_initialized
+  47                 		.type	presto_initialized,@object
+  48                 		.size	presto_initialized,1
+  49                 	presto_initialized:
+  50 000d 00          		.byte	0
+  51                 		.globl	free_mail_p
+  52                 		.type	free_mail_p,@object
+  53                 		.size	free_mail_p,2
+  54                 	free_mail_p:
+  55 000e 00 00       		.word	0
+  56                 		.globl	po_mail_p
+  57                 		.type	po_mail_p,@object
+  58                 		.size	po_mail_p,2
+  59                 	po_mail_p:
+  60 0010 00 00       		.word	0
+  61                 		; extern	clock_reset
+  62                 		; extern	presto_create_task
+  63                 		; extern	idle_task
+  64                 		; extern	tid_to_tcbptr
+  65                 		.sect	.text
+  66                 		.globl	presto_init
+  67                 		.type	presto_init,@function
+  68                 	presto_init:
+  69 0000 3C          		pshx
+  70 0001 3C          		pshx
+  71                 	; Begin inline assembler code
+  72                 	#APP
+  73 0002 36          		psha
+  74 0003 07          		tpa
+  75 0004 B7 00 00    		staa flag_mirror
+  76 0007 32          		pula
+  77 0008 0F          		sei
+  78                 	; End of inline assembler code
+  79                 	#NO_APP
+  80 0009 F6 00 00    		ldab	flag_mirror
+  81 000c 30          		tsx
+  82 000d E7 01       		stab	1,x
+  83 000f 18 30       		tsy
+  84 0011 18 E6 01    		ldab	1,y
+  85 0014 C4 10       		andb	#16
+  86 0016 C1 00       		cmpb	#0
+  87 0018 26 01       		bne	.L2
+  88                 	; Begin inline assembler code
+  89                 	#APP
+  90 001a 0E          		cli
+  91                 	; End of inline assembler code
+  92                 	#NO_APP
+  93                 	.L2:
+  94 001b F6 00 00    		ldab	presto_initialized
+  95 001e C1 00       		cmpb	#0
+  96 0020 27 03       		beq	.L3
+  97 0022 7E 00 00    		bra	.L1
+  98                 	.L3:
+  99 0025 7C 00 00    		inc	presto_initialized
+ 100 0028 CC 00 00    		ldd	#presto_master_clock
+ 101 002b BD 00 00    		bsr	clock_reset
+ 102 002e 18 30       		tsy
+ 103 0030 18 6F 00    		clr	0,y
+ 104                 	.L4:
+ 105 0033 18 30       		tsy
+ 106 0035 18 E6 00    		ldab	0,y
+ 107 0038 C1 04       		cmpb	#4
+ 108 003a 23 02       		bls	.L7
+ 109 003c 20 57       		bra	.L5
+ 110                 	.L7:
+ 111 003e 30          		tsx
+ 112 003f 4F          		clra
+ 113 0040 E6 00       		ldab	0,x
+ 114 0042 05          		asld
+ 115 0043 05          		asld
+ 116 0044 05          		asld
+ 117 0045 05          		asld
+ 118 0046 C3 00 0A    		addd	#10
+ 119 0049 37          		pshb
+ 120 004a 36          		psha
+ 121 004b 38          		pulx
+ 122 004c 8F          		xgdx
+ 123 004d C3 00 00    		addd	#tcb_list
+ 124 0050 8F          		xgdx
+ 125 0051 18 30       		tsy
+ 126 0053 4F          		clra
+ 127 0054 18 E6 00    		ldab	0,y
+ 128 0057 05          		asld
+ 129 0058 05          		asld
+ 130 0059 05          		asld
+ 131 005a 05          		asld
+ 132 005b C3 00 10    		addd	#tcb_list+16
+ 133 005e ED 00       		std	0,x
+ 134 0060 30          		tsx
+ 135 0061 4F          		clra
+ 136 0062 E6 00       		ldab	0,x
+ 137 0064 05          		asld
+ 138 0065 05          		asld
+ 139 0066 05          		asld
+ 140 0067 05          		asld
+ 141 0068 37          		pshb
+ 142 0069 36          		psha
+ 143 006a 38          		pulx
+ 144 006b 8F          		xgdx
+ 145 006c C3 00 00    		addd	#tcb_list
+ 146 006f 8F          		xgdx
+ 147 0070 18 E6 00    		ldab	0,y
+ 148 0073 E7 00       		stab	0,x
+ 149 0075 30          		tsx
+ 150 0076 4F          		clra
+ 151 0077 E6 00       		ldab	0,x
+ 152 0079 05          		asld
+ 153 007a 05          		asld
+ 154 007b 05          		asld
+ 155 007c 05          		asld
+ 156 007d C3 00 08    		addd	#8
+ 157 0080 C3 00 00    		addd	#tcb_list
+ 158 0083 CE 00 02    		ldx	#2
+ 159 0086 DD 00       		std	*_.tmp
+ 160 0088 18 DE 00    		ldy	*_.tmp
+ 161 008b CD EF 00    		stx	0,y
+ 162 008e 18 30       		tsy
+ 163 0090 18 6C 00    		inc	0,y
+ 164 0093 20 9E       		bra	.L4
+ 165                 	.L5:
+ 166 0095 7F 00 4B    		clr	tcb_list+75
+ 167 0098 7F 00 4A    		clr	tcb_list+74
+ 168 009b CE 00 00    		ldx	#tcb_list
+ 169 009e FF 00 00    		stx	free_tcb_p
+ 170 00a1 18 30       		tsy
+ 171 00a3 18 6F 00    		clr	0,y
+ 172                 	.L8:
+ 173 00a6 18 30       		tsy
+ 174 00a8 18 E6 00    		ldab	0,y
+ 175 00ab C1 13       		cmpb	#19
+ 176 00ad 23 02       		bls	.L11
+ 177 00af 20 3A       		bra	.L9
+ 178                 	.L11:
+ 179 00b1 C6 0F       		ldab	#15
+ 180 00b3 30          		tsx
+ 181 00b4 A6 00       		ldaa	0,x
+ 182 00b6 3D          		mul
+ 183 00b7 C3 00 0D    		addd	#13
+ 184 00ba 37          		pshb
+ 185 00bb 36          		psha
+ 186 00bc 38          		pulx
+ 187 00bd 8F          		xgdx
+ 188 00be C3 00 00    		addd	#mail_list
+ 189 00c1 8F          		xgdx
+ 190 00c2 C6 0F       		ldab	#15
+ 191 00c4 18 30       		tsy
+ 192 00c6 18 A6 00    		ldaa	0,y
+ 193 00c9 3D          		mul
+ 194 00ca C3 00 0F    		addd	#mail_list+15
+ 195 00cd ED 00       		std	0,x
+ 196 00cf C6 0F       		ldab	#15
+ 197 00d1 30          		tsx
+ 198 00d2 A6 00       		ldaa	0,x
+ 199 00d4 3D          		mul
+ 200 00d5 C3 00 00    		addd	#mail_list
+ 201 00d8 18 ED 02    		std	2,y
+ 202 00db 18 E6 00    		ldab	0,y
+ 203 00de 18 EE 02    		ldy	2,y
+ 204 00e1 18 6F 00    		clr	0,y
+ 205 00e4 18 E7 01    		stab	1,y
+ 206 00e7 6C 00       		inc	0,x
+ 207 00e9 20 BB       		bra	.L8
+ 208                 	.L9:
+ 209 00eb 7F 01 2B    		clr	mail_list+299
+ 210 00ee 7F 01 2A    		clr	mail_list+298
+ 211 00f1 CC 00 00    		ldd	#mail_list
+ 212 00f4 FD 00 00    		std	free_mail_p
+ 213 00f7 5F          		clrb
+ 214 00f8 37          		pshb
+ 215 00f9 34          		des
+ 216 00fa 18 CE 00 32 		ldy	#50
+ 217 00fe 18 3C       		pshy
+ 218 0100 CE 00 00    		ldx	#idle_stack
+ 219 0103 3C          		pshx
+ 220 0104 CC 00 00    		ldd	#idle_task
+ 221 0107 8D 15       		bsr	presto_create_task
+ 222 0109 18 38       		puly
+ 223 010b 18 38       		puly
+ 224 010d 18 38       		puly
+ 225 010f F7 00 00    		stab	idle_tid
+ 226 0112 F6 00 00    		ldab	idle_tid
+ 227 0115 BD 00 00    		bsr	tid_to_tcbptr
+ 228 0118 FD 00 00    		std	idle_tcb_p
+ 229                 	.L1:
+ 230 011b 38          		pulx
+ 231 011c 38          		pulx
+ 232 011d 39          		rts
+ 233                 	.Lfe1:
+ 234                 		.size	presto_init,.Lfe1-presto_init
+ 235                 		; extern	presto_fatal_error
+ 236                 		.globl	presto_create_task
+ 237                 		.type	presto_create_task,@function
+ 238                 	presto_create_task:
+ 239 011e 30          		tsx
+ 240 011f 8F          		xgdx
+ 241 0120 C3 FF F1    		addd	#-15
+ 242 0123 8F          		xgdx
+ 243 0124 35          		txs
+ 244 0125 30          		tsx
+ 245 0126 ED 00       		std	0,x
+ 246 0128 F6 00 00    		ldab	presto_initialized
+ 247 012b C1 00       		cmpb	#0
+ 248 012d 26 05       		bne	.L13
+ 249 012f C6 05       		ldab	#5
+ 250 0131 BD 00 00    		bsr	presto_fatal_error
+ 251                 	.L13:
+ 252 0134 FE 00 00    		ldx	free_tcb_p
+ 253 0137 8C 00 00    		cpx	#0
+ 254 013a 26 0B       		bne	.L14
+ 255 013c C6 06       		ldab	#6
+ 256 013e BD 00 00    		bsr	presto_fatal_error
+ 257 0141 CC FF FF    		ldd	#-1
+ 258 0144 7E 00 00    		bra	.L12
+ 259                 	.L14:
+ 260                 	; Begin inline assembler code
+ 261                 	#APP
+ 262 0147 36          		psha
+ 263 0148 07          		tpa
+ 264 0149 B7 00 00    		staa flag_mirror
+ 265 014c 32          		pula
+ 266 014d 0F          		sei
+ 267                 	; End of inline assembler code
+ 268                 	#NO_APP
+ 269 014e F6 00 00    		ldab	flag_mirror
+ 270 0151 18 30       		tsy
+ 271 0153 18 E7 08    		stab	8,y
+ 272 0156 FE 00 00    		ldx	free_tcb_p
+ 273 0159 18 30       		tsy
+ 274 015b CD EF 02    		stx	2,y
+ 275 015e FE 00 00    		ldx	free_tcb_p
+ 276 0161 EC 0A       		ldd	10,x
+ 277 0163 FD 00 00    		std	free_tcb_p
+ 278 0166 18 DF 00    		sty	*_.z
+ 279 0169 CD EE 02    		ldx	2,y
+ 280 016c DF 00       		stx	*_.xy
+ 281 016e DE 00       		ldx	*_.z
+ 282 0170 EC 11       		ldd	17,x
+ 283 0172 18 E3 13    		addd	19,y
+ 284 0175 C3 FF FF    		addd	#-1
+ 285 0178 DE 00       		ldx	*_.xy
+ 286 017a ED 03       		std	3,x
+ 287 017c 18 DF 00    		sty	*_.xy
+ 288 017f 18 DE 00    		ldy	*_.z
+ 289 0182 CD EE 02    		ldx	2,y
+ 290 0185 18 DE 00    		ldy	*_.xy
+ 291 0188 18 EE 11    		ldy	17,y
+ 292 018b 1A EF 05    		sty	5,x
+ 293 018e 18 DE 00    		ldy	*_.z
+ 294 0191 CD EE 02    		ldx	2,y
+ 295 0194 18 30       		tsy
+ 296 0196 18 E6 16    		ldab	22,y
+ 297 0199 E7 07       		stab	7,x
+ 298 019b 18 DF 00    		sty	*_.xy
+ 299 019e 18 DE 00    		ldy	*_.z
+ 300 01a1 CD EE 02    		ldx	2,y
+ 301 01a4 6F 09       		clr	9,x
+ 302 01a6 6F 08       		clr	8,x
+ 303 01a8 18 DE 00    		ldy	*_.xy
+ 304 01ab CD EE 02    		ldx	2,y
+ 305 01ae 6F 0D       		clr	13,x
+ 306 01b0 6F 0C       		clr	12,x
+ 307 01b2 18 DF 00    		sty	*_.xy
+ 308 01b5 18 DE 00    		ldy	*_.z
+ 309 01b8 CD EE 02    		ldx	2,y
+ 310 01bb 6F 0F       		clr	15,x
+ 311 01bd 6F 0E       		clr	14,x
+ 312 01bf 18 DE 00    		ldy	*_.xy
+ 313 01c2 CD EE 02    		ldx	2,y
+ 314 01c5 EC 03       		ldd	3,x
+ 315 01c7 18 DF 00    		sty	*_.xy
+ 316 01ca 18 DE 00    		ldy	*_.z
+ 317 01cd 18 ED 04    		std	4,y
+ 318 01d0 30          		tsx
+ 319 01d1 EC 00       		ldd	0,x
+ 320 01d3 ED 06       		std	6,x
+ 321 01d5 18 DE 00    		ldy	*_.xy
+ 322 01d8 18 08       		iny
+ 323 01da 18 08       		iny
+ 324 01dc 18 08       		iny
+ 325 01de 18 08       		iny
+ 326 01e0 CD EE 00    		ldx	0,y
+ 327 01e3 18 DF 00    		sty	*_.xy
+ 328 01e6 18 DE 00    		ldy	*_.z
+ 329 01e9 CD EF 0D    		stx	13,y
+ 330 01ec CD EE 0D    		ldx	13,y
+ 331 01ef 18 E6 07    		ldab	7,y
+ 332 01f2 18 E7 0B    		stab	11,y
+ 333 01f5 18 E6 0B    		ldab	11,y
+ 334 01f8 E7 00       		stab	0,x
+ 335 01fa 30          		tsx
+ 336 01fb 18 DE 00    		ldy	*_.xy
+ 337 01fe 18 DF 00    		sty	*_.xy
+ 338 0201 1A EE 0D    		ldy	13,x
+ 339 0204 18 09       		dey
+ 340 0206 1A EF 0D    		sty	13,x
+ 341 0209 EE 0D       		ldx	13,x
+ 342 020b 18 DF 00    		sty	*_.z
+ 343 020e 18 DE 00    		ldy	*_.xy
+ 344 0211 CD EF 00    		stx	0,y
+ 345 0214 18 30       		tsy
+ 346 0216 18 08       		iny
+ 347 0218 18 08       		iny
+ 348 021a 18 08       		iny
+ 349 021c 18 08       		iny
+ 350 021e CD EE 00    		ldx	0,y
+ 351 0221 18 DF 00    		sty	*_.xy
+ 352 0224 18 30       		tsy
+ 353 0226 CD EF 0D    		stx	13,y
+ 354 0229 CD EE 0D    		ldx	13,y
+ 355 022c 18 E6 06    		ldab	6,y
+ 356 022f 18 E7 0C    		stab	12,y
+ 357 0232 18 E6 0C    		ldab	12,y
+ 358 0235 E7 00       		stab	0,x
+ 359 0237 30          		tsx
+ 360 0238 18 DF 00    		sty	*_.z
+ 361 023b 18 DE 00    		ldy	*_.xy
+ 362 023e 18 DF 00    		sty	*_.xy
+ 363 0241 1A EE 0D    		ldy	13,x
+ 364 0244 18 09       		dey
+ 365 0246 1A EF 0D    		sty	13,x
+ 366 0249 EE 0D       		ldx	13,x
+ 367 024b 18 DF 00    		sty	*_.z
+ 368 024e 18 DE 00    		ldy	*_.xy
+ 369 0251 CD EF 00    		stx	0,y
+ 370 0254 18 30       		tsy
+ 371 0256 18 08       		iny
+ 372 0258 18 08       		iny
+ 373 025a 18 08       		iny
+ 374 025c 18 08       		iny
+ 375 025e CD EE 00    		ldx	0,y
+ 376 0261 18 DF 00    		sty	*_.xy
+ 377 0264 18 30       		tsy
+ 378 0266 CD EF 0D    		stx	13,y
+ 379 0269 CD EE 0D    		ldx	13,y
+ 380 026c C6 66       		ldab	#102
+ 381 026e E7 00       		stab	0,x
+ 382 0270 CD EE 0D    		ldx	13,y
+ 383 0273 09          		dex
+ 384 0274 CD EF 0D    		stx	13,y
+ 385 0277 18 EE 0D    		ldy	13,y
+ 386 027a 18 DF 00    		sty	*_.z
+ 387 027d 18 DE 00    		ldy	*_.xy
+ 388 0280 DE 00       		ldx	*_.z
+ 389 0282 CD EF 00    		stx	0,y
+ 390 0285 18 30       		tsy
+ 391 0287 18 08       		iny
+ 392 0289 18 08       		iny
+ 393 028b 18 08       		iny
+ 394 028d 18 08       		iny
+ 395 028f 18 EC 00    		ldd	0,y
+ 396 0292 30          		tsx
+ 397 0293 ED 0D       		std	13,x
+ 398 0295 18 DF 00    		sty	*_.xy
+ 399 0298 18 30       		tsy
+ 400 029a CD EE 0D    		ldx	13,y
+ 401 029d C6 55       		ldab	#85
+ 402 029f E7 00       		stab	0,x
+ 403 02a1 CD EE 0D    		ldx	13,y
+ 404 02a4 09          		dex
+ 405 02a5 CD EF 0D    		stx	13,y
+ 406 02a8 18 EE 0D    		ldy	13,y
+ 407 02ab 18 DF 00    		sty	*_.z
+ 408 02ae 18 DE 00    		ldy	*_.xy
+ 409 02b1 DE 00       		ldx	*_.z
+ 410 02b3 CD EF 00    		stx	0,y
+ 411 02b6 18 30       		tsy
+ 412 02b8 18 08       		iny
+ 413 02ba 18 08       		iny
+ 414 02bc 18 08       		iny
+ 415 02be 18 08       		iny
+ 416 02c0 18 EC 00    		ldd	0,y
+ 417 02c3 30          		tsx
+ 418 02c4 ED 0D       		std	13,x
+ 419 02c6 18 DF 00    		sty	*_.xy
+ 420 02c9 18 30       		tsy
+ 421 02cb CD EE 0D    		ldx	13,y
+ 422 02ce C6 44       		ldab	#68
+ 423 02d0 E7 00       		stab	0,x
+ 424 02d2 CD EE 0D    		ldx	13,y
+ 425 02d5 09          		dex
+ 426 02d6 CD EF 0D    		stx	13,y
+ 427 02d9 18 EE 0D    		ldy	13,y
+ 428 02dc 18 DF 00    		sty	*_.z
+ 429 02df 18 DE 00    		ldy	*_.xy
+ 430 02e2 DE 00       		ldx	*_.z
+ 431 02e4 CD EF 00    		stx	0,y
+ 432 02e7 18 30       		tsy
+ 433 02e9 18 08       		iny
+ 434 02eb 18 08       		iny
+ 435 02ed 18 08       		iny
+ 436 02ef 18 08       		iny
+ 437 02f1 18 EC 00    		ldd	0,y
+ 438 02f4 30          		tsx
+ 439 02f5 ED 0D       		std	13,x
+ 440 02f7 18 DF 00    		sty	*_.xy
+ 441 02fa 18 30       		tsy
+ 442 02fc CD EE 0D    		ldx	13,y
+ 443 02ff C6 33       		ldab	#51
+ 444 0301 E7 00       		stab	0,x
+ 445 0303 CD EE 0D    		ldx	13,y
+ 446 0306 09          		dex
+ 447 0307 CD EF 0D    		stx	13,y
+ 448 030a 18 EE 0D    		ldy	13,y
+ 449 030d 18 DF 00    		sty	*_.z
+ 450 0310 18 DE 00    		ldy	*_.xy
+ 451 0313 DE 00       		ldx	*_.z
+ 452 0315 CD EF 00    		stx	0,y
+ 453 0318 18 30       		tsy
+ 454 031a 18 08       		iny
+ 455 031c 18 08       		iny
+ 456 031e 18 08       		iny
+ 457 0320 18 08       		iny
+ 458 0322 18 EC 00    		ldd	0,y
+ 459 0325 30          		tsx
+ 460 0326 ED 0D       		std	13,x
+ 461 0328 18 DF 00    		sty	*_.xy
+ 462 032b 18 30       		tsy
+ 463 032d CD EE 0D    		ldx	13,y
+ 464 0330 C6 11       		ldab	#17
+ 465 0332 E7 00       		stab	0,x
+ 466 0334 CD EE 0D    		ldx	13,y
+ 467 0337 09          		dex
+ 468 0338 CD EF 0D    		stx	13,y
+ 469 033b 18 EE 0D    		ldy	13,y
+ 470 033e 18 DF 00    		sty	*_.z
+ 471 0341 18 DE 00    		ldy	*_.xy
+ 472 0344 DE 00       		ldx	*_.z
+ 473 0346 CD EF 00    		stx	0,y
+ 474 0349 18 30       		tsy
+ 475 034b 18 08       		iny
+ 476 034d 18 08       		iny
+ 477 034f 18 08       		iny
+ 478 0351 18 08       		iny
+ 479 0353 18 EC 00    		ldd	0,y
+ 480 0356 30          		tsx
+ 481 0357 ED 0D       		std	13,x
+ 482 0359 18 DF 00    		sty	*_.xy
+ 483 035c 18 30       		tsy
+ 484 035e CD EE 0D    		ldx	13,y
+ 485 0361 C6 22       		ldab	#34
+ 486 0363 E7 00       		stab	0,x
+ 487 0365 CD EE 0D    		ldx	13,y
+ 488 0368 09          		dex
+ 489 0369 CD EF 0D    		stx	13,y
+ 490 036c 18 EE 0D    		ldy	13,y
+ 491 036f 18 DF 00    		sty	*_.z
+ 492 0372 18 DE 00    		ldy	*_.xy
+ 493 0375 DE 00       		ldx	*_.z
+ 494 0377 CD EF 00    		stx	0,y
+ 495 037a 18 30       		tsy
+ 496 037c 18 08       		iny
+ 497 037e 18 08       		iny
+ 498 0380 18 08       		iny
+ 499 0382 18 08       		iny
+ 500 0384 18 EC 00    		ldd	0,y
+ 501 0387 37          		pshb
+ 502 0388 36          		psha
+ 503 0389 38          		pulx
+ 504 038a 6F 00       		clr	0,x
+ 505 038c C3 FF FF    		addd	#-1
+ 506 038f 18 ED 00    		std	0,y
+ 507 0392 18 30       		tsy
+ 508 0394 18 08       		iny
+ 509 0396 18 08       		iny
+ 510 0398 18 08       		iny
+ 511 039a 18 08       		iny
+ 512 039c 18 EC 00    		ldd	0,y
+ 513 039f 30          		tsx
+ 514 03a0 ED 0D       		std	13,x
+ 515 03a2 18 DF 00    		sty	*_.xy
+ 516 03a5 18 30       		tsy
+ 517 03a7 CD EE 0D    		ldx	13,y
+ 518 03aa C6 FF       		ldab	#255
+ 519 03ac E7 00       		stab	0,x
+ 520 03ae CD EE 0D    		ldx	13,y
+ 521 03b1 09          		dex
+ 522 03b2 CD EF 0D    		stx	13,y
+ 523 03b5 18 EE 0D    		ldy	13,y
+ 524 03b8 18 DF 00    		sty	*_.z
+ 525 03bb 18 DE 00    		ldy	*_.xy
+ 526 03be DE 00       		ldx	*_.z
+ 527 03c0 CD EF 00    		stx	0,y
+ 528 03c3 18 30       		tsy
+ 529 03c5 18 08       		iny
+ 530 03c7 18 08       		iny
+ 531 03c9 18 08       		iny
+ 532 03cb 18 08       		iny
+ 533 03cd 18 EC 00    		ldd	0,y
+ 534 03d0 30          		tsx
+ 535 03d1 ED 0D       		std	13,x
+ 536 03d3 18 DF 00    		sty	*_.xy
+ 537 03d6 18 30       		tsy
+ 538 03d8 CD EE 0D    		ldx	13,y
+ 539 03db C6 EE       		ldab	#238
+ 540 03dd E7 00       		stab	0,x
+ 541 03df CD EE 0D    		ldx	13,y
+ 542 03e2 09          		dex
+ 543 03e3 CD EF 0D    		stx	13,y
+ 544 03e6 18 EE 0D    		ldy	13,y
+ 545 03e9 18 DF 00    		sty	*_.z
+ 546 03ec 18 DE 00    		ldy	*_.xy
+ 547 03ef DE 00       		ldx	*_.z
+ 548 03f1 CD EF 00    		stx	0,y
+ 549 03f4 18 30       		tsy
+ 550 03f6 18 08       		iny
+ 551 03f8 18 08       		iny
+ 552 03fa 18 08       		iny
+ 553 03fc 18 08       		iny
+ 554 03fe 18 EC 00    		ldd	0,y
+ 555 0401 30          		tsx
+ 556 0402 ED 0D       		std	13,x
+ 557 0404 18 DF 00    		sty	*_.xy
+ 558 0407 18 30       		tsy
+ 559 0409 CD EE 0D    		ldx	13,y
+ 560 040c C6 DD       		ldab	#221
+ 561 040e E7 00       		stab	0,x
+ 562 0410 CD EE 0D    		ldx	13,y
+ 563 0413 09          		dex
+ 564 0414 CD EF 0D    		stx	13,y
+ 565 0417 18 EE 0D    		ldy	13,y
+ 566 041a 18 DF 00    		sty	*_.z
+ 567 041d 18 DE 00    		ldy	*_.xy
+ 568 0420 DE 00       		ldx	*_.z
+ 569 0422 CD EF 00    		stx	0,y
+ 570 0425 18 30       		tsy
+ 571 0427 18 08       		iny
+ 572 0429 18 08       		iny
+ 573 042b 18 08       		iny
+ 574 042d 18 08       		iny
+ 575 042f 18 EC 00    		ldd	0,y
+ 576 0432 30          		tsx
+ 577 0433 ED 0D       		std	13,x
+ 578 0435 18 DF 00    		sty	*_.xy
+ 579 0438 18 30       		tsy
+ 580 043a CD EE 0D    		ldx	13,y
+ 581 043d C6 CC       		ldab	#204
+ 582 043f E7 00       		stab	0,x
+ 583 0441 CD EE 0D    		ldx	13,y
+ 584 0444 09          		dex
+ 585 0445 CD EF 0D    		stx	13,y
+ 586 0448 18 EE 0D    		ldy	13,y
+ 587 044b 18 DF 00    		sty	*_.z
+ 588 044e 18 DE 00    		ldy	*_.xy
+ 589 0451 DE 00       		ldx	*_.z
+ 590 0453 CD EF 00    		stx	0,y
+ 591 0456 18 30       		tsy
+ 592 0458 18 08       		iny
+ 593 045a 18 08       		iny
+ 594 045c 18 08       		iny
+ 595 045e 18 08       		iny
+ 596 0460 18 EC 00    		ldd	0,y
+ 597 0463 30          		tsx
+ 598 0464 ED 0D       		std	13,x
+ 599 0466 18 DF 00    		sty	*_.xy
+ 600 0469 18 30       		tsy
+ 601 046b CD EE 0D    		ldx	13,y
+ 602 046e C6 BB       		ldab	#187
+ 603 0470 E7 00       		stab	0,x
+ 604 0472 CD EE 0D    		ldx	13,y
+ 605 0475 09          		dex
+ 606 0476 CD EF 0D    		stx	13,y
+ 607 0479 18 EE 0D    		ldy	13,y
+ 608 047c 18 DF 00    		sty	*_.z
+ 609 047f 18 DE 00    		ldy	*_.xy
+ 610 0482 DE 00       		ldx	*_.z
+ 611 0484 CD EF 00    		stx	0,y
+ 612 0487 18 30       		tsy
+ 613 0489 18 08       		iny
+ 614 048b 18 08       		iny
+ 615 048d 18 08       		iny
+ 616 048f 18 08       		iny
+ 617 0491 18 EC 00    		ldd	0,y
+ 618 0494 30          		tsx
+ 619 0495 ED 0D       		std	13,x
+ 620 0497 18 DF 00    		sty	*_.xy
+ 621 049a 18 30       		tsy
+ 622 049c CD EE 0D    		ldx	13,y
+ 623 049f C6 AA       		ldab	#170
+ 624 04a1 E7 00       		stab	0,x
+ 625 04a3 CD EE 0D    		ldx	13,y
+ 626 04a6 09          		dex
+ 627 04a7 CD EF 0D    		stx	13,y
+ 628 04aa 18 EE 0D    		ldy	13,y
+ 629 04ad 18 DF 00    		sty	*_.z
+ 630 04b0 18 DE 00    		ldy	*_.xy
+ 631 04b3 DD 00       		std	*_.xy
+ 632 04b5 DC 00       		ldd	*_.z
+ 633 04b7 18 ED 00    		std	0,y
+ 634 04ba 18 30       		tsy
+ 635 04bc DC 00       		ldd	*_.xy
+ 636 04be CD EE 02    		ldx	2,y
+ 637 04c1 18 DF 00    		sty	*_.xy
+ 638 04c4 18 30       		tsy
+ 639 04c6 18 EE 04    		ldy	4,y
+ 640 04c9 1A EF 01    		sty	1,x
+ 641 04cc FE 00 00    		ldx	tcb_head_p
+ 642 04cf 18 DF 00    		sty	*_.z
+ 643 04d2 18 DE 00    		ldy	*_.xy
+ 644 04d5 8C 00 00    		cpx	#0
+ 645 04d8 26 1C       		bne	.L15
+ 646 04da 18 EE 02    		ldy	2,y
+ 647 04dd 18 FF 00 00 		sty	tcb_head_p
+ 648 04e1 18 DF 00    		sty	*_.xy
+ 649 04e4 18 30       		tsy
+ 650 04e6 CD EE 02    		ldx	2,y
+ 651 04e9 6F 0B       		clr	11,x
+ 652 04eb 6F 0A       		clr	10,x
+ 653 04ed 18 DF 00    		sty	*_.z
+ 654 04f0 18 DE 00    		ldy	*_.xy
+ 655 04f3 7E 00 00    		bra	.L16
+ 656                 	.L15:
+ 657 04f6 18 30       		tsy
+ 658 04f8 CD EE 02    		ldx	2,y
+ 659 04fb 18 FE 00 00 		ldy	tcb_head_p
+ 660 04ff E6 07       		ldab	7,x
+ 661 0501 18 E1 07    		cmpb	7,y
+ 662 0504 23 18       		bls	.L17
+ 663 0506 18 30       		tsy
+ 664 0508 CD EE 02    		ldx	2,y
+ 665 050b FC 00 00    		ldd	tcb_head_p
+ 666 050e ED 0A       		std	10,x
+ 667 0510 18 DF 00    		sty	*_.z
+ 668 0513 18 30       		tsy
+ 669 0515 18 EE 02    		ldy	2,y
+ 670 0518 18 FF 00 00 		sty	tcb_head_p
+ 671 051c 20 75       		bra	.L16
+ 672                 	.L17:
+ 673 051e FE 00 00    		ldx	tcb_head_p
+ 674 0521 18 DF 00    		sty	*_.xy
+ 675 0524 18 30       		tsy
+ 676 0526 CD EF 09    		stx	9,y
+ 677 0529 18 DF 00    		sty	*_.z
+ 678 052c 18 DE 00    		ldy	*_.xy
+ 679                 	.L19:
+ 680 052f 18 30       		tsy
+ 681 0531 CD EE 09    		ldx	9,y
+ 682 0534 EC 0A       		ldd	10,x
+ 683 0536 1A 83 00 00 		cpd	#0
+ 684 053a 26 02       		bne	.L21
+ 685 053c 20 27       		bra	.L20
+ 686                 	.L21:
+ 687 053e DF 00       		stx	*_.xy
+ 688 0540 30          		tsx
+ 689 0541 1A EE 02    		ldy	2,x
+ 690 0544 DF 00       		stx	*_.z
+ 691 0546 EE 09       		ldx	9,x
+ 692 0548 EE 0A       		ldx	10,x
+ 693 054a 18 E6 07    		ldab	7,y
+ 694 054d E1 07       		cmpb	7,x
+ 695 054f 23 02       		bls	.L22
+ 696 0551 20 12       		bra	.L20
+ 697                 	.L22:
+ 698 0553 18 30       		tsy
+ 699 0555 CD EE 09    		ldx	9,y
+ 700 0558 EC 0A       		ldd	10,x
+ 701 055a DF 00       		stx	*_.xy
+ 702 055c 30          		tsx
+ 703 055d ED 09       		std	9,x
+ 704 055f DF 00       		stx	*_.z
+ 705 0561 DE 00       		ldx	*_.xy
+ 706 0563 20 CA       		bra	.L19
+ 707                 	.L20:
+ 708 0565 30          		tsx
+ 709 0566 1A EE 02    		ldy	2,x
+ 710 0569 18 DF 00    		sty	*_.xy
+ 711 056c 18 30       		tsy
+ 712 056e CD EE 09    		ldx	9,y
+ 713 0571 EC 0A       		ldd	10,x
+ 714 0573 18 DF 00    		sty	*_.z
+ 715 0576 18 DE 00    		ldy	*_.xy
+ 716 0579 18 ED 0A    		std	10,y
+ 717 057c 18 30       		tsy
+ 718 057e CD EE 09    		ldx	9,y
+ 719 0581 18 DF 00    		sty	*_.xy
+ 720 0584 18 DE 00    		ldy	*_.z
+ 721 0587 18 EE 02    		ldy	2,y
+ 722 058a 1A EF 0A    		sty	10,x
+ 723 058d 18 DF 00    		sty	*_.z
+ 724 0590 18 DE 00    		ldy	*_.xy
+ 725                 	.L16:
+ 726 0593 30          		tsx
+ 727 0594 E6 08       		ldab	8,x
+ 728 0596 C4 10       		andb	#16
+ 729 0598 C1 00       		cmpb	#0
+ 730 059a 26 01       		bne	.L23
+ 731                 	; Begin inline assembler code
+ 732                 	#APP
+ 733 059c 0E          		cli
+ 734                 	; End of inline assembler code
+ 735                 	#NO_APP
+ 736                 	.L23:
+ 737 059d 18 30       		tsy
+ 738 059f CD EE 02    		ldx	2,y
+ 739 05a2 4F          		clra
+ 740 05a3 E6 00       		ldab	0,x
+ 741 05a5 2A 01       		bpl	.L24
+ 742 05a7 4A          		deca
+ 743                 	.L24:
+ 744                 	.L12:
+ 745 05a8 30          		tsx
+ 746 05a9 8F          		xgdx
+ 747 05aa C3 00 0F    		addd	#15
+ 748 05ad 8F          		xgdx
+ 749 05ae 35          		txs
+ 750 05af 39          		rts
+ 751                 	.Lfe2:
+ 752                 		.size	presto_create_task,.Lfe2-presto_create_task
+ 753                 		; extern	set_interrupt
+ 754                 		; extern	presto_system_isr
+ 755                 		; extern	context_switch
+ 756                 		; extern	presto_start_master_timer
+ 757                 		.globl	presto_start_scheduler
+ 758                 		.type	presto_start_scheduler,@function
+ 759                 	presto_start_scheduler:
+ 760 05b0 F6 00 00    		ldab	presto_initialized
+ 761 05b3 C1 00       		cmpb	#0
+ 762 05b5 26 05       		bne	.L26
+ 763 05b7 C6 02       		ldab	#2
+ 764 05b9 BD 00 00    		bsr	presto_fatal_error
+ 765                 	.L26:
+ 766                 	; Begin inline assembler code
+ 767                 	#APP
+ 768 05bc 0F          		sei
+ 769                 	; End of inline assembler code
+ 770                 	#NO_APP
+ 771 05bd CE 00 00    		ldx	#presto_system_isr
+ 772 05c0 3C          		pshx
+ 773 05c1 C6 08       		ldab	#8
+ 774 05c3 BD 00 00    		bsr	set_interrupt
+ 775 05c6 31          		ins
+ 776 05c7 31          		ins
+ 777 05c8 CE 00 00    		ldx	#context_switch
+ 778 05cb 3C          		pshx
+ 779 05cc C6 10       		ldab	#16
+ 780 05ce BD 00 00    		bsr	set_interrupt
+ 781 05d1 31          		ins
+ 782 05d2 31          		ins
+ 783 05d3 BD 00 00    		bsr	presto_start_master_timer
+ 784 05d6 FC 00 00    		ldd	tcb_head_p
+ 785 05d9 FD 00 00    		std	current_tcb_p
+ 786 05dc FE 00 00    		ldx	current_tcb_p
+ 787 05df 8C 00 00    		cpx	#0
+ 788 05e2 26 05       		bne	.L27
+ 789 05e4 C6 03       		ldab	#3
+ 790 05e6 BD 00 00    		bsr	presto_fatal_error
+ 791                 	.L27:
+ 792 05e9 FE 00 00    		ldx	current_tcb_p
+ 793 05ec E6 00       		ldab	0,x
+ 794 05ee F7 00 00    		stab	current_tid
+ 795 05f1 FE 00 00    		ldx	current_tcb_p
+ 796 05f4 EC 01       		ldd	1,x
+ 797 05f6 FD 00 00    		std	global_new_sp
+ 798                 	; Begin inline assembler code
+ 799                 	#APP
+ 800 05f9 BE 00 00    		lds global_new_sp
+ 801 05fc 38          		pulx
+ 802 05fd 38          		pulx
+ 803 05fe 38          		pulx
+ 804 05ff 3B          		rti
+ 805                 	; End of inline assembler code
+ 806                 	#NO_APP
+ 807 0600 C6 04       		ldab	#4
+ 808 0602 BD 00 00    		bsr	presto_fatal_error
+ 809 0605 39          		rts
+ 810                 	.Lfe3:
+ 811                 		.size	presto_start_scheduler,.Lfe3-presto_start_scheduler
+ 812                 		; extern	clock_add
+ 813                 		; extern	presto_restart_master_timer
+ 814                 		; extern	deliver_mail
+ 815                 		; extern	presto_next_tcb_to_run
+ 816                 		.globl	presto_system_isr
+ 817                 		.type	presto_system_isr,@function
+ 818                 		.interrupt	presto_system_isr
+ 819                 	presto_system_isr:
+ 820 0606 DE 00       		ldx	*_.tmp
+ 821 0608 3C          		pshx
+ 822 0609 DE 00       		ldx	*_.z
+ 823 060b 3C          		pshx
+ 824 060c DE 00       		ldx	*_.xy
+ 825 060e 3C          		pshx
+ 826 060f CE 00 64    		ldx	#100
+ 827 0612 3C          		pshx
+ 828 0613 FC 00 02    		ldd	presto_master_clock+2
+ 829 0616 37          		pshb
+ 830 0617 36          		psha
+ 831 0618 FC 00 00    		ldd	presto_master_clock
+ 832 061b 37          		pshb
+ 833 061c 36          		psha
+ 834 061d CC 00 00    		ldd	#presto_master_clock
+ 835 0620 BD 00 00    		bsr	clock_add
+ 836 0623 18 38       		puly
+ 837 0625 18 38       		puly
+ 838 0627 18 38       		puly
+ 839 0629 BD 00 00    		bsr	presto_restart_master_timer
+ 840 062c BD 00 00    		bsr	deliver_mail
+ 841 062f C1 00       		cmpb	#0
+ 842 0631 27 4B       		beq	.L29
+ 843 0633 FE 00 00    		ldx	current_tcb_p
+ 844 0636 18 FE 00 00 		ldy	current_tcb_p
+ 845 063a EC 01       		ldd	1,x
+ 846 063c CD A3 03    		cpd	3,y
+ 847 063f 22 10       		bhi	.L31
+ 848 0641 FE 00 00    		ldx	current_tcb_p
+ 849 0644 18 FE 00 00 		ldy	current_tcb_p
+ 850 0648 EC 01       		ldd	1,x
+ 851 064a CD A3 05    		cpd	5,y
+ 852 064d 25 02       		blo	.L31
+ 853 064f 20 05       		bra	.L30
+ 854                 	.L31:
+ 855 0651 C6 08       		ldab	#8
+ 856 0653 BD 00 00    		bsr	presto_fatal_error
+ 857                 	.L30:
+ 858 0656 FC 00 00    		ldd	current_tcb_p
+ 859 0659 C3 00 01    		addd	#1
+ 860 065c FD 00 00    		std	global_old_sp_p
+ 861 065f 8D 62       		bsr	presto_next_tcb_to_run
+ 862 0661 FD 00 00    		std	current_tcb_p
+ 863 0664 FE 00 00    		ldx	current_tcb_p
+ 864 0667 E6 00       		ldab	0,x
+ 865 0669 F7 00 00    		stab	current_tid
+ 866 066c FE 00 00    		ldx	current_tcb_p
+ 867 066f EC 01       		ldd	1,x
+ 868 0671 FD 00 00    		std	global_new_sp
+ 869                 	; Begin inline assembler code
+ 870                 	#APP
+ 871 0674 18 FE 00 00 		ldy global_old_sp_p
+ 872 0678 18 AF 00    		sts 0,y
+ 873 067b BE 00 00    		lds global_new_sp
+ 874                 	; End of inline assembler code
+ 875                 	#NO_APP
+ 876                 	.L29:
+ 877 067e 38          		pulx
+ 878 067f DF 00       		stx	*_.xy
+ 879 0681 38          		pulx
+ 880 0682 DF 00       		stx	*_.z
+ 881 0684 38          		pulx
+ 882 0685 DF 00       		stx	*_.tmp
+ 883 0687 3B          		rti
+ 884                 	.Lfe4:
+ 885                 		.size	presto_system_isr,.Lfe4-presto_system_isr
+ 886                 		.globl	context_switch
+ 887                 		.type	context_switch,@function
+ 888                 		.interrupt	context_switch
+ 889                 	context_switch:
+ 890 0688 DE 00       		ldx	*_.tmp
+ 891 068a 3C          		pshx
+ 892 068b DE 00       		ldx	*_.z
+ 893 068d 3C          		pshx
+ 894 068e DE 00       		ldx	*_.xy
+ 895 0690 3C          		pshx
+ 896 0691 FC 00 00    		ldd	current_tcb_p
+ 897 0694 C3 00 01    		addd	#1
+ 898 0697 FD 00 00    		std	global_old_sp_p
+ 899 069a 8D 27       		bsr	presto_next_tcb_to_run
+ 900 069c FD 00 00    		std	current_tcb_p
+ 901 069f FE 00 00    		ldx	current_tcb_p
+ 902 06a2 E6 00       		ldab	0,x
+ 903 06a4 F7 00 00    		stab	current_tid
+ 904 06a7 FE 00 00    		ldx	current_tcb_p
+ 905 06aa EC 01       		ldd	1,x
+ 906 06ac FD 00 00    		std	global_new_sp
+ 907                 	; Begin inline assembler code
+ 908                 	#APP
+ 909 06af 18 FE 00 00 		ldy global_old_sp_p
+ 910 06b3 18 AF 00    		sts 0,y
+ 911 06b6 BE 00 00    		lds global_new_sp
+ 912                 	; End of inline assembler code
+ 913                 	#NO_APP
+ 914 06b9 38          		pulx
+ 915 06ba DF 00       		stx	*_.xy
+ 916 06bc 38          		pulx
+ 917 06bd DF 00       		stx	*_.z
+ 918 06bf 38          		pulx
+ 919 06c0 DF 00       		stx	*_.tmp
+ 920 06c2 3B          		rti
+ 921                 	.Lfe5:
+ 922                 		.size	context_switch,.Lfe5-context_switch
+ 923                 		.globl	presto_next_tcb_to_run
+ 924                 		.type	presto_next_tcb_to_run,@function
+ 925                 	presto_next_tcb_to_run:
+ 926 06c3 3C          		pshx
+ 927 06c4 FC 00 00    		ldd	tcb_head_p
+ 928 06c7 30          		tsx
+ 929 06c8 ED 00       		std	0,x
+ 930                 	.L34:
+ 931 06ca 30          		tsx
+ 932 06cb EE 00       		ldx	0,x
+ 933 06cd 8C 00 00    		cpx	#0
+ 934 06d0 26 02       		bne	.L36
+ 935 06d2 20 1E       		bra	.L35
+ 936                 	.L36:
+ 937 06d4 18 30       		tsy
+ 938 06d6 CD EE 00    		ldx	0,y
+ 939 06d9 EC 08       		ldd	8,x
+ 940 06db 1A 83 00 00 		cpd	#0
+ 941 06df 26 05       		bne	.L37
+ 942 06e1 18 EC 00    		ldd	0,y
+ 943 06e4 20 13       		bra	.L33
+ 944                 	.L37:
+ 945 06e6 18 30       		tsy
+ 946 06e8 CD EE 00    		ldx	0,y
+ 947 06eb EC 0A       		ldd	10,x
+ 948 06ed 30          		tsx
+ 949 06ee ED 00       		std	0,x
+ 950 06f0 20 D8       		bra	.L34
+ 951                 	.L35:
+ 952 06f2 C6 0B       		ldab	#11
+ 953 06f4 BD 00 00    		bsr	presto_fatal_error
+ 954 06f7 4F          		clra
+ 955 06f8 5F          		clrb
+ 956                 	.L33:
+ 957 06f9 38          		pulx
+ 958 06fa 39          		rts
+ 959                 	.Lfe6:
+ 960                 		.size	presto_next_tcb_to_run,.Lfe6-presto_next_tcb_to_run
+ 961                 		; extern	presto_timer
+ 962                 		.globl	presto_send_message
+ 963                 		.type	presto_send_message,@function
+ 964                 	presto_send_message:
+ 965 06fb 34          		des
+ 966 06fc 30          		tsx
+ 967 06fd E7 00       		stab	0,x
+ 968 06ff 18 30       		tsy
+ 969 0701 18 EC 05    		ldd	5,y
+ 970 0704 37          		pshb
+ 971 0705 36          		psha
+ 972 0706 18 EC 03    		ldd	3,y
+ 973 0709 37          		pshb
+ 974 070a 36          		psha
+ 975 070b CE 00 00    		ldx	#0
+ 976 070e 3C          		pshx
+ 977 070f 18 30       		tsy
+ 978 0711 18 E6 06    		ldab	6,y
+ 979 0714 8D 09       		bsr	presto_timer
+ 980 0716 18 38       		puly
+ 981 0718 18 38       		puly
+ 982 071a 18 38       		puly
+ 983 071c 4F          		clra
+ 984 071d 31          		ins
+ 985 071e 39          		rts
+ 986                 	.Lfe7:
+ 987                 		.size	presto_send_message,.Lfe7-presto_send_message
+ 988                 		; extern	clock_compare
+ 989                 		.globl	presto_timer
+ 990                 		.type	presto_timer,@function
+ 991                 	presto_timer:
+ 992 071f 30          		tsx
+ 993 0720 8F          		xgdx
+ 994 0721 C3 FF EE    		addd	#-18
+ 995 0724 8F          		xgdx
+ 996 0725 35          		txs
+ 997 0726 30          		tsx
+ 998 0727 E7 00       		stab	0,x
+ 999                 	; Begin inline assembler code
+ 1000                 	#APP
+ 1001 0729 36          		psha
+ 1002 072a 07          		tpa
+ 1003 072b B7 00 00    		staa flag_mirror
+ 1004 072e 32          		pula
+ 1005 072f 0F          		sei
+ 1006                 	; End of inline assembler code
+ 1007                 	#NO_APP
+ 1008 0730 F6 00 00    		ldab	flag_mirror
+ 1009 0733 18 30       		tsy
+ 1010 0735 18 E7 05    		stab	5,y
+ 1011 0738 FE 00 00    		ldx	free_mail_p
+ 1012 073b 8C 00 00    		cpx	#0
+ 1013 073e 26 05       		bne	.L40
+ 1014 0740 C6 0C       		ldab	#12
+ 1015 0742 BD 00 00    		bsr	presto_fatal_error
+ 1016                 	.L40:
+ 1017 0745 18 30       		tsy
+ 1018 0747 18 E6 00    		ldab	0,y
+ 1019 074a BD 00 00    		bsr	tid_to_tcbptr
+ 1020 074d 18 DF 00    		sty	*_.xy
+ 1021 0750 18 30       		tsy
+ 1022 0752 18 ED 03    		std	3,y
+ 1023 0755 30          		tsx
+ 1024 0756 EE 03       		ldx	3,x
+ 1025 0758 18 DF 00    		sty	*_.z
+ 1026 075b 18 DE 00    		ldy	*_.xy
+ 1027 075e 8C 00 00    		cpx	#0
+ 1028 0761 26 05       		bne	.L41
+ 1029 0763 C6 0D       		ldab	#13
+ 1030 0765 BD 00 00    		bsr	presto_fatal_error
+ 1031                 	.L41:
+ 1032 0768 FC 00 00    		ldd	free_mail_p
+ 1033 076b 18 30       		tsy
+ 1034 076d 18 ED 01    		std	1,y
+ 1035 0770 FE 00 00    		ldx	free_mail_p
+ 1036 0773 DD 00       		std	*_.z
+ 1037 0775 EC 0D       		ldd	13,x
+ 1038 0777 FD 00 00    		std	free_mail_p
+ 1039 077a 30          		tsx
+ 1040 077b 1A EE 01    		ldy	1,x
+ 1041 077e FE 00 00    		ldx	current_tcb_p
+ 1042 0781 E6 00       		ldab	0,x
+ 1043 0783 18 E7 02    		stab	2,y
+ 1044 0786 18 30       		tsy
+ 1045 0788 CD EE 01    		ldx	1,y
+ 1046 078b 18 DF 00    		sty	*_.xy
+ 1047 078e 18 30       		tsy
+ 1048 0790 18 EE 03    		ldy	3,y
+ 1049 0793 1A EF 03    		sty	3,x
+ 1050 0796 30          		tsx
+ 1051 0797 EC 01       		ldd	1,x
+ 1052 0799 ED 10       		std	16,x
+ 1053 079b 18 DF 00    		sty	*_.z
+ 1054 079e 18 DE 00    		ldy	*_.xy
+ 1055 07a1 18 EE 14    		ldy	20,y
+ 1056 07a4 18 3C       		pshy
+ 1057 07a6 FC 00 02    		ldd	presto_master_clock+2
+ 1058 07a9 37          		pshb
+ 1059 07aa 36          		psha
+ 1060 07ab FC 00 00    		ldd	presto_master_clock
+ 1061 07ae 37          		pshb
+ 1062 07af 36          		psha
+ 1063 07b0 18 30       		tsy
+ 1064 07b2 18 EC 16    		ldd	22,y
+ 1065 07b5 C3 00 05    		addd	#5
+ 1066 07b8 BD 00 00    		bsr	clock_add
+ 1067 07bb 18 38       		puly
+ 1068 07bd 18 38       		puly
+ 1069 07bf 18 38       		puly
+ 1070 07c1 18 30       		tsy
+ 1071 07c3 CD EE 01    		ldx	1,y
+ 1072 07c6 18 DF 00    		sty	*_.z
+ 1073 07c9 18 30       		tsy
+ 1074 07cb 18 EC 18    		ldd	24,y
+ 1075 07ce ED 0B       		std	11,x
+ 1076 07d0 18 EC 16    		ldd	22,y
+ 1077 07d3 ED 09       		std	9,x
+ 1078 07d5 FE 00 00    		ldx	po_mail_p
+ 1079 07d8 8C 00 00    		cpx	#0
+ 1080 07db 26 1A       		bne	.L42
+ 1081 07dd 18 EE 01    		ldy	1,y
+ 1082 07e0 18 FF 00 00 		sty	po_mail_p
+ 1083 07e4 18 DF 00    		sty	*_.xy
+ 1084 07e7 18 DE 00    		ldy	*_.z
+ 1085 07ea CD EE 01    		ldx	1,y
+ 1086 07ed 6F 0E       		clr	14,x
+ 1087 07ef 6F 0D       		clr	13,x
+ 1088 07f1 18 DE 00    		ldy	*_.xy
+ 1089 07f4 7E 00 00    		bra	.L43
+ 1090                 	.L42:
+ 1091 07f7 FE 00 00    		ldx	po_mail_p
+ 1092 07fa 18 30       		tsy
+ 1093 07fc EC 07       		ldd	7,x
+ 1094 07fe 18 ED 0A    		std	10,y
+ 1095 0801 EC 05       		ldd	5,x
+ 1096 0803 18 ED 08    		std	8,y
+ 1097 0806 18 30       		tsy
+ 1098 0808 CD EE 01    		ldx	1,y
+ 1099 080b EC 07       		ldd	7,x
+ 1100 080d 37          		pshb
+ 1101 080e 36          		psha
+ 1102 080f EC 05       		ldd	5,x
+ 1103 0811 37          		pshb
+ 1104 0812 36          		psha
+ 1105 0813 18 DF 00    		sty	*_.z
+ 1106 0816 18 30       		tsy
+ 1107 0818 18 EC 0E    		ldd	14,y
+ 1108 081b CD EE 0C    		ldx	12,y
+ 1109 081e BD 00 00    		bsr	clock_compare
+ 1110 0821 18 38       		puly
+ 1111 0823 18 38       		puly
+ 1112 0825 C1 00       		cmpb	#0
+ 1113 0827 2F 19       		ble	.L44
+ 1114 0829 18 30       		tsy
+ 1115 082b CD EE 01    		ldx	1,y
+ 1116 082e FC 00 00    		ldd	po_mail_p
+ 1117 0831 ED 0D       		std	13,x
+ 1118 0833 18 DF 00    		sty	*_.z
+ 1119 0836 18 30       		tsy
+ 1120 0838 18 EE 01    		ldy	1,y
+ 1121 083b 18 FF 00 00 		sty	po_mail_p
+ 1122 083f 7E 00 00    		bra	.L43
+ 1123                 	.L44:
+ 1124 0842 FE 00 00    		ldx	po_mail_p
+ 1125 0845 18 DF 00    		sty	*_.xy
+ 1126 0848 18 30       		tsy
+ 1127 084a CD EF 06    		stx	6,y
+ 1128 084d 18 DF 00    		sty	*_.z
+ 1129 0850 18 DE 00    		ldy	*_.xy
+ 1130                 	.L46:
+ 1131 0853 18 30       		tsy
+ 1132 0855 CD EE 06    		ldx	6,y
+ 1133 0858 EC 0D       		ldd	13,x
+ 1134 085a 1A 83 00 00 		cpd	#0
+ 1135 085e 26 02       		bne	.L48
+ 1136 0860 20 4B       		bra	.L47
+ 1137                 	.L48:
+ 1138 0862 18 30       		tsy
+ 1139 0864 CD EE 06    		ldx	6,y
+ 1140 0867 EE 0D       		ldx	13,x
+ 1141 0869 EC 07       		ldd	7,x
+ 1142 086b 18 ED 0E    		std	14,y
+ 1143 086e EC 05       		ldd	5,x
+ 1144 0870 18 ED 0C    		std	12,y
+ 1145 0873 18 30       		tsy
+ 1146 0875 CD EE 01    		ldx	1,y
+ 1147 0878 EC 07       		ldd	7,x
+ 1148 087a 37          		pshb
+ 1149 087b 36          		psha
+ 1150 087c EC 05       		ldd	5,x
+ 1151 087e 37          		pshb
+ 1152 087f 36          		psha
+ 1153 0880 18 DF 00    		sty	*_.z
+ 1154 0883 18 30       		tsy
+ 1155 0885 18 EC 12    		ldd	18,y
+ 1156 0888 CD EE 10    		ldx	16,y
+ 1157 088b BD 00 00    		bsr	clock_compare
+ 1158 088e 18 38       		puly
+ 1159 0890 18 38       		puly
+ 1160 0892 C1 00       		cmpb	#0
+ 1161 0894 2F 02       		ble	.L49
+ 1162 0896 20 15       		bra	.L47
+ 1163                 	.L49:
+ 1164 0898 18 DF 00    		sty	*_.xy
+ 1165 089b 18 30       		tsy
+ 1166 089d CD EE 06    		ldx	6,y
+ 1167 08a0 EC 0D       		ldd	13,x
+ 1168 08a2 30          		tsx
+ 1169 08a3 ED 06       		std	6,x
+ 1170 08a5 18 DF 00    		sty	*_.z
+ 1171 08a8 18 DE 00    		ldy	*_.xy
+ 1172 08ab 20 A6       		bra	.L46
+ 1173                 	.L47:
+ 1174 08ad DF 00       		stx	*_.xy
+ 1175 08af 30          		tsx
+ 1176 08b0 1A EE 01    		ldy	1,x
+ 1177 08b3 DF 00       		stx	*_.z
+ 1178 08b5 EE 06       		ldx	6,x
+ 1179 08b7 EC 0D       		ldd	13,x
+ 1180 08b9 18 ED 0D    		std	13,y
+ 1181 08bc 18 30       		tsy
+ 1182 08be CD EE 06    		ldx	6,y
+ 1183 08c1 18 DF 00    		sty	*_.xy
+ 1184 08c4 18 DE 00    		ldy	*_.z
+ 1185 08c7 18 EE 01    		ldy	1,y
+ 1186 08ca 1A EF 0D    		sty	13,x
+ 1187 08cd 18 DF 00    		sty	*_.z
+ 1188 08d0 18 DE 00    		ldy	*_.xy
+ 1189                 	.L43:
+ 1190 08d3 30          		tsx
+ 1191 08d4 E6 05       		ldab	5,x
+ 1192 08d6 C4 10       		andb	#16
+ 1193 08d8 C1 00       		cmpb	#0
+ 1194 08da 26 01       		bne	.L50
+ 1195                 	; Begin inline assembler code
+ 1196                 	#APP
+ 1197 08dc 0E          		cli
+ 1198                 	; End of inline assembler code
+ 1199                 	#NO_APP
+ 1200                 	.L50:
+ 1201 08dd 4F          		clra
+ 1202 08de 5F          		clrb
+ 1203 08df 30          		tsx
+ 1204 08e0 8F          		xgdx
+ 1205 08e1 C3 00 12    		addd	#18
+ 1206 08e4 8F          		xgdx
+ 1207 08e5 35          		txs
+ 1208 08e6 39          		rts
+ 1209                 	.Lfe8:
+ 1210                 		.size	presto_timer,.Lfe8-presto_timer
+ 1211                 		.globl	presto_wait_for_message
+ 1212                 		.type	presto_wait_for_message,@function
+ 1213                 	presto_wait_for_message:
+ 1214 08e7 3C          		pshx
+ 1215 08e8 3C          		pshx
+ 1216 08e9 34          		des
+ 1217 08ea 30          		tsx
+ 1218 08eb ED 00       		std	0,x
+ 1219                 	; Begin inline assembler code
+ 1220                 	#APP
+ 1221 08ed 36          		psha
+ 1222 08ee 07          		tpa
+ 1223 08ef B7 00 00    		staa flag_mirror
+ 1224 08f2 32          		pula
+ 1225 08f3 0F          		sei
+ 1226                 	; End of inline assembler code
+ 1227                 	#NO_APP
+ 1228 08f4 F6 00 00    		ldab	flag_mirror
+ 1229 08f7 18 30       		tsy
+ 1230 08f9 18 E7 04    		stab	4,y
+ 1231 08fc FE 00 00    		ldx	current_tcb_p
+ 1232 08ff EC 0C       		ldd	12,x
+ 1233 0901 1A 83 00 00 		cpd	#0
+ 1234 0905 26 0B       		bne	.L52
+ 1235 0907 FE 00 00    		ldx	current_tcb_p
+ 1236 090a 18 CE 00 01 		ldy	#1
+ 1237 090e 1A EF 08    		sty	8,x
+ 1238                 	; Begin inline assembler code
+ 1239                 	#APP
+ 1240 0911 3F          		swi
+ 1241                 	; End of inline assembler code
+ 1242                 	#NO_APP
+ 1243                 	.L52:
+ 1244                 	; Begin inline assembler code
+ 1245                 	#APP
+ 1246 0912 36          		psha
+ 1247 0913 07          		tpa
+ 1248 0914 B7 00 00    		staa flag_mirror
+ 1249 0917 32          		pula
+ 1250 0918 0F          		sei
+ 1251                 	; End of inline assembler code
+ 1252                 	#NO_APP
+ 1253 0919 F6 00 00    		ldab	flag_mirror
+ 1254 091c 18 30       		tsy
+ 1255 091e 18 E7 04    		stab	4,y
+ 1256 0921 FE 00 00    		ldx	current_tcb_p
+ 1257 0924 EC 0C       		ldd	12,x
+ 1258 0926 30          		tsx
+ 1259 0927 ED 02       		std	2,x
+ 1260 0929 18 DF 00    		sty	*_.z
+ 1261 092c 18 30       		tsy
+ 1262 092e 18 EC 02    		ldd	2,y
+ 1263 0931 1A 83 00 00 		cpd	#0
+ 1264 0935 26 05       		bne	.L53
+ 1265 0937 C6 0E       		ldab	#14
+ 1266 0939 BD 00 00    		bsr	presto_fatal_error
+ 1267                 	.L53:
+ 1268 093c 18 DF 00    		sty	*_.xy
+ 1269 093f 18 30       		tsy
+ 1270 0941 CD EE 02    		ldx	2,y
+ 1271 0944 EC 03       		ldd	3,x
+ 1272 0946 18 DF 00    		sty	*_.z
+ 1273 0949 18 DE 00    		ldy	*_.xy
+ 1274 094c 1A B3 00 00 		cpd	current_tcb_p
+ 1275 0950 27 05       		beq	.L54
+ 1276 0952 C6 0F       		ldab	#15
+ 1277 0954 BD 00 00    		bsr	presto_fatal_error
+ 1278                 	.L54:
+ 1279 0957 FE 00 00    		ldx	current_tcb_p
+ 1280 095a 18 30       		tsy
+ 1281 095c 18 EC 02    		ldd	2,y
+ 1282 095f 1A A3 0E    		cpd	14,x
+ 1283 0962 26 10       		bne	.L55
+ 1284 0964 FE 00 00    		ldx	current_tcb_p
+ 1285 0967 6F 0D       		clr	13,x
+ 1286 0969 6F 0C       		clr	12,x
+ 1287 096b FE 00 00    		ldx	current_tcb_p
+ 1288 096e 6F 0F       		clr	15,x
+ 1289 0970 6F 0E       		clr	14,x
+ 1290 0972 20 12       		bra	.L56
+ 1291                 	.L55:
+ 1292 0974 FE 00 00    		ldx	current_tcb_p
+ 1293 0977 DF 00       		stx	*_.xy
+ 1294 0979 30          		tsx
+ 1295 097a 1A EE 02    		ldy	2,x
+ 1296 097d 18 EC 0D    		ldd	13,y
+ 1297 0980 DF 00       		stx	*_.z
+ 1298 0982 DE 00       		ldx	*_.xy
+ 1299 0984 ED 0C       		std	12,x
+ 1300                 	.L56:
+ 1301 0986 30          		tsx
+ 1302 0987 EE 00       		ldx	0,x
+ 1303 0989 8C 00 00    		cpx	#0
+ 1304 098c 27 14       		beq	.L57
+ 1305 098e DF 00       		stx	*_.xy
+ 1306 0990 30          		tsx
+ 1307 0991 1A EE 00    		ldy	0,x
+ 1308 0994 DF 00       		stx	*_.z
+ 1309 0996 EE 02       		ldx	2,x
+ 1310 0998 EC 0B       		ldd	11,x
+ 1311 099a 18 ED 02    		std	2,y
+ 1312 099d EC 09       		ldd	9,x
+ 1313 099f 18 ED 00    		std	0,y
+ 1314                 	.L57:
+ 1315 09a2 18 30       		tsy
+ 1316 09a4 CD EE 02    		ldx	2,y
+ 1317 09a7 18 DF 00    		sty	*_.xy
+ 1318 09aa 18 FE 00 00 		ldy	free_mail_p
+ 1319 09ae 1A EF 0D    		sty	13,x
+ 1320 09b1 30          		tsx
+ 1321 09b2 EE 02       		ldx	2,x
+ 1322 09b4 FF 00 00    		stx	free_mail_p
+ 1323 09b7 18 DF 00    		sty	*_.z
+ 1324 09ba 18 DE 00    		ldy	*_.xy
+ 1325 09bd 18 E6 04    		ldab	4,y
+ 1326 09c0 C4 10       		andb	#16
+ 1327 09c2 C1 00       		cmpb	#0
+ 1328 09c4 26 01       		bne	.L58
+ 1329                 	; Begin inline assembler code
+ 1330                 	#APP
+ 1331 09c6 0E          		cli
+ 1332                 	; End of inline assembler code
+ 1333                 	#NO_APP
+ 1334                 	.L58:
+ 1335 09c7 CC 00 01    		ldd	#1
+ 1336 09ca 38          		pulx
+ 1337 09cb 38          		pulx
+ 1338 09cc 31          		ins
+ 1339 09cd 39          		rts
+ 1340                 	.Lfe9:
+ 1341                 		.size	presto_wait_for_message,.Lfe9-presto_wait_for_message
+ 1342                 		.globl	deliver_mail
+ 1343                 		.type	deliver_mail,@function
+ 1344                 	deliver_mail:
+ 1345 09ce 30          		tsx
+ 1346 09cf 8F          		xgdx
+ 1347 09d0 C3 FF F7    		addd	#-9
+ 1348 09d3 8F          		xgdx
+ 1349 09d4 35          		txs
+ 1350 09d5 30          		tsx
+ 1351 09d6 6F 00       		clr	0,x
+ 1352                 	.L60:
+ 1353 09d8 FC 00 00    		ldd	po_mail_p
+ 1354 09db 1A 83 00 00 		cpd	#0
+ 1355 09df 26 03 7E 00 		beq	.L61
+ 1355      00 
+ 1356 09e4 FE 00 00    		ldx	po_mail_p
+ 1357 09e7 18 30       		tsy
+ 1358 09e9 EC 07       		ldd	7,x
+ 1359 09eb 18 ED 07    		std	7,y
+ 1360 09ee EC 05       		ldd	5,x
+ 1361 09f0 18 ED 05    		std	5,y
+ 1362 09f3 FC 00 02    		ldd	presto_master_clock+2
+ 1363 09f6 37          		pshb
+ 1364 09f7 36          		psha
+ 1365 09f8 FC 00 00    		ldd	presto_master_clock
+ 1366 09fb 37          		pshb
+ 1367 09fc 36          		psha
+ 1368 09fd 18 30       		tsy
+ 1369 09ff 18 EC 0B    		ldd	11,y
+ 1370 0a02 CD EE 09    		ldx	9,y
+ 1371 0a05 BD 00 00    		bsr	clock_compare
+ 1372 0a08 18 38       		puly
+ 1373 0a0a 18 38       		puly
+ 1374 0a0c C1 00       		cmpb	#0
+ 1375 0a0e 2F 02       		ble	.L62
+ 1376 0a10 20 77       		bra	.L61
+ 1377                 	.L62:
+ 1378 0a12 FE 00 00    		ldx	po_mail_p
+ 1379 0a15 EC 03       		ldd	3,x
+ 1380 0a17 30          		tsx
+ 1381 0a18 ED 03       		std	3,x
+ 1382 0a1a 18 30       		tsy
+ 1383 0a1c 18 EC 03    		ldd	3,y
+ 1384 0a1f 1A 83 00 00 		cpd	#0
+ 1385 0a23 26 05       		bne	.L64
+ 1386 0a25 C6 10       		ldab	#16
+ 1387 0a27 BD 00 00    		bsr	presto_fatal_error
+ 1388                 	.L64:
+ 1389 0a2a 18 30       		tsy
+ 1390 0a2c CD EE 03    		ldx	3,y
+ 1391 0a2f 6F 09       		clr	9,x
+ 1392 0a31 6F 08       		clr	8,x
+ 1393 0a33 FC 00 00    		ldd	po_mail_p
+ 1394 0a36 30          		tsx
+ 1395 0a37 ED 01       		std	1,x
+ 1396 0a39 FE 00 00    		ldx	po_mail_p
+ 1397 0a3c EC 0D       		ldd	13,x
+ 1398 0a3e FD 00 00    		std	po_mail_p
+ 1399 0a41 CD EE 03    		ldx	3,y
+ 1400 0a44 EC 0C       		ldd	12,x
+ 1401 0a46 1A 83 00 00 		cpd	#0
+ 1402 0a4a 26 16       		bne	.L65
+ 1403 0a4c CD EE 03    		ldx	3,y
+ 1404 0a4f 18 EE 01    		ldy	1,y
+ 1405 0a52 1A EF 0C    		sty	12,x
+ 1406 0a55 18 30       		tsy
+ 1407 0a57 CD EE 03    		ldx	3,y
+ 1408 0a5a 18 EE 01    		ldy	1,y
+ 1409 0a5d 1A EF 0E    		sty	14,x
+ 1410 0a60 20 18       		bra	.L66
+ 1411                 	.L65:
+ 1412 0a62 18 30       		tsy
+ 1413 0a64 CD EE 03    		ldx	3,y
+ 1414 0a67 EE 0E       		ldx	14,x
+ 1415 0a69 18 EE 01    		ldy	1,y
+ 1416 0a6c 1A EF 0D    		sty	13,x
+ 1417 0a6f 18 30       		tsy
+ 1418 0a71 CD EE 03    		ldx	3,y
+ 1419 0a74 18 EE 01    		ldy	1,y
+ 1420 0a77 1A EF 0E    		sty	14,x
+ 1421                 	.L66:
+ 1422 0a7a 18 30       		tsy
+ 1423 0a7c CD EE 01    		ldx	1,y
+ 1424 0a7f 6F 0E       		clr	14,x
+ 1425 0a81 6F 0D       		clr	13,x
+ 1426 0a83 30          		tsx
+ 1427 0a84 6C 00       		inc	0,x
+ 1428 0a86 7E 00 00    		bra	.L60
+ 1429                 	.L61:
+ 1430 0a89 18 30       		tsy
+ 1431 0a8b 4F          		clra
+ 1432 0a8c 18 E6 00    		ldab	0,y
+ 1433 0a8f 30          		tsx
+ 1434 0a90 8F          		xgdx
+ 1435 0a91 C3 00 09    		addd	#9
+ 1436 0a94 8F          		xgdx
+ 1437 0a95 35          		txs
+ 1438 0a96 39          		rts
+ 1439                 	.Lfe10:
+ 1440                 		.size	deliver_mail,.Lfe10-deliver_mail
+ 1441                 		.globl	idle_task
+ 1442                 		.type	idle_task,@function
+ 1443                 	idle_task:
+ 1444 0a97 01          		nop
+ 1445                 	.L68:
+ 1446 0a98 20 FE       		bra	.L68
+ 1447                 	.Lfe11:
+ 1448                 		.size	idle_task,.Lfe11-idle_task
+ 1449                 		.globl	tid_to_tcbptr
+ 1450                 		.type	tid_to_tcbptr,@function
+ 1451                 	tid_to_tcbptr:
+ 1452 0a9a 34          		des
+ 1453 0a9b 30          		tsx
+ 1454 0a9c E7 00       		stab	0,x
+ 1455 0a9e E6 00       		ldab	0,x
+ 1456 0aa0 C1 04       		cmpb	#4
+ 1457 0aa2 23 05       		bls	.L72
+ 1458 0aa4 C6 11       		ldab	#17
+ 1459 0aa6 BD 00 00    		bsr	presto_fatal_error
+ 1460                 	.L72:
+ 1461 0aa9 30          		tsx
+ 1462 0aaa 4F          		clra
+ 1463 0aab E6 00       		ldab	0,x
+ 1464 0aad 05          		asld
+ 1465 0aae 05          		asld
+ 1466 0aaf 05          		asld
+ 1467 0ab0 05          		asld
+ 1468 0ab1 C3 00 08    		addd	#8
+ 1469 0ab4 C3 00 00    		addd	#tcb_list
+ 1470 0ab7 37          		pshb
+ 1471 0ab8 36          		psha
+ 1472 0ab9 38          		pulx
+ 1473 0aba EE 00       		ldx	0,x
+ 1474 0abc 8C 00 02    		cpx	#2
+ 1475 0abf 26 04       		bne	.L73
+ 1476 0ac1 4F          		clra
+ 1477 0ac2 5F          		clrb
+ 1478 0ac3 20 0B       		bra	.L71
+ 1479                 	.L73:
+ 1480 0ac5 30          		tsx
+ 1481 0ac6 4F          		clra
+ 1482 0ac7 E6 00       		ldab	0,x
+ 1483 0ac9 05          		asld
+ 1484 0aca 05          		asld
+ 1485 0acb 05          		asld
+ 1486 0acc 05          		asld
+ 1487 0acd C3 00 00    		addd	#tcb_list
+ 1488                 	.L71:
+ 1489 0ad0 31          		ins
+ 1490 0ad1 39          		rts
+ 1491                 	.Lfe12:
+ 1492                 		.size	tid_to_tcbptr,.Lfe12-tid_to_tcbptr
+ 1493                 		.globl	presto_start_master_timer
+ 1494                 		.type	presto_start_master_timer,@function
+ 1495                 	presto_start_master_timer:
+ 1496 0ad2 CE 10 0E    		ldx	#4110
+ 1497 0ad5 EC 00       		ldd	0,x
+ 1498 0ad7 C3 0D 40    		addd	#3392
+ 1499 0ada CE 10 18    		ldx	#4120
+ 1500 0add ED 00       		std	0,x
+ 1501 0adf CE 10 22    		ldx	#4130
+ 1502 0ae2 E6 00       		ldab	0,x
+ 1503 0ae4 CA 40       		orab	#64
+ 1504 0ae6 E7 00       		stab	0,x
+ 1505 0ae8 CE 10 23    		ldx	#4131
+ 1506 0aeb C6 40       		ldab	#64
+ 1507 0aed E7 00       		stab	0,x
+ 1508 0aef CE 10 20    		ldx	#4128
+ 1509 0af2 E6 00       		ldab	0,x
+ 1510 0af4 C4 3F       		andb	#63
+ 1511 0af6 E7 00       		stab	0,x
+ 1512 0af8 39          		rts
+ 1513                 	.Lfe13:
+ 1514                 		.size	presto_start_master_timer,.Lfe13-presto_start_master_timer
+ 1515                 		.globl	presto_restart_master_timer
+ 1516                 		.type	presto_restart_master_timer,@function
+ 1517                 	presto_restart_master_timer:
+ 1518 0af9 CE 10 18    		ldx	#4120
+ 1519 0afc EC 00       		ldd	0,x
+ 1520 0afe C3 0D 40    		addd	#3392
+ 1521 0b01 ED 00       		std	0,x
+ 1522 0b03 CE 10 23    		ldx	#4131
+ 1523 0b06 C6 40       		ldab	#64
+ 1524 0b08 E7 00       		stab	0,x
+ 1525 0b0a 39          		rts
+ 1526                 	.Lfe14:
+ 1527                 		.size	presto_restart_master_timer,.Lfe14-presto_restart_master_timer
+ 1528                 		.comm	flag_mirror,1,1
+ 1529                 		.comm	global_save_sp,2,1
+ 1530                 		.comm	tcb_list,80,1
+ 1531                 		.comm	presto_master_clock,4,1
+ 1532                 		.comm	idle_stack,50,1
+ 1533                 		.comm	idle_tcb_p,2,1
+ 1534                 		.comm	idle_tid,1,1
+ 1535                 		.comm	mail_list,300,1
+ 1536                 		.ident	"GCC: (GNU) 3.0.4 m68hc1x-20020922"
+DEFINED SYMBOLS
+                            *ABS*:00000000 kernel.c
+C:\WIN98\TEMP\cczsligb.s:14     .data:00000000 global_new_sp
+C:\WIN98\TEMP\cczsligb.s:19     .data:00000002 global_old_sp_p
+C:\WIN98\TEMP\cczsligb.s:24     .data:00000004 global_new_fn
+C:\WIN98\TEMP\cczsligb.s:29     .data:00000006 current_tcb_p
+C:\WIN98\TEMP\cczsligb.s:34     .data:00000008 current_tid
+C:\WIN98\TEMP\cczsligb.s:39     .data:00000009 tcb_head_p
+C:\WIN98\TEMP\cczsligb.s:44     .data:0000000b free_tcb_p
+C:\WIN98\TEMP\cczsligb.s:49     .data:0000000d presto_initialized
+C:\WIN98\TEMP\cczsligb.s:54     .data:0000000e free_mail_p
+C:\WIN98\TEMP\cczsligb.s:59     .data:00000010 po_mail_p
+C:\WIN98\TEMP\cczsligb.s:68     .text:00000000 presto_init
+                            *COM*:00000001 flag_mirror
+C:\WIN98\TEMP\cczsligb.s:93     .text:0000001b .L2
+C:\WIN98\TEMP\cczsligb.s:98     .text:00000025 .L3
+C:\WIN98\TEMP\cczsligb.s:229    .text:0000011b .L1
+                            *COM*:00000004 presto_master_clock
+C:\WIN98\TEMP\cczsligb.s:104    .text:00000033 .L4
+C:\WIN98\TEMP\cczsligb.s:110    .text:0000003e .L7
+C:\WIN98\TEMP\cczsligb.s:165    .text:00000095 .L5
+                            *COM*:00000050 tcb_list
+C:\WIN98\TEMP\cczsligb.s:172    .text:000000a6 .L8
+C:\WIN98\TEMP\cczsligb.s:178    .text:000000b1 .L11
+C:\WIN98\TEMP\cczsligb.s:208    .text:000000eb .L9
+                            *COM*:0000012c mail_list
+                            *COM*:00000032 idle_stack
+C:\WIN98\TEMP\cczsligb.s:1443   .text:00000a97 idle_task
+C:\WIN98\TEMP\cczsligb.s:238    .text:0000011e presto_create_task
+                            *COM*:00000001 idle_tid
+C:\WIN98\TEMP\cczsligb.s:1451   .text:00000a9a tid_to_tcbptr
+                            *COM*:00000002 idle_tcb_p
+C:\WIN98\TEMP\cczsligb.s:233    .text:0000011e .Lfe1
+C:\WIN98\TEMP\cczsligb.s:251    .text:00000134 .L13
+C:\WIN98\TEMP\cczsligb.s:259    .text:00000147 .L14
+C:\WIN98\TEMP\cczsligb.s:744    .text:000005a8 .L12
+C:\WIN98\TEMP\cczsligb.s:656    .text:000004f6 .L15
+C:\WIN98\TEMP\cczsligb.s:725    .text:00000593 .L16
+C:\WIN98\TEMP\cczsligb.s:672    .text:0000051e .L17
+C:\WIN98\TEMP\cczsligb.s:679    .text:0000052f .L19
+C:\WIN98\TEMP\cczsligb.s:686    .text:0000053e .L21
+C:\WIN98\TEMP\cczsligb.s:707    .text:00000565 .L20
+C:\WIN98\TEMP\cczsligb.s:697    .text:00000553 .L22
+C:\WIN98\TEMP\cczsligb.s:736    .text:0000059d .L23
+C:\WIN98\TEMP\cczsligb.s:743    .text:000005a8 .L24
+C:\WIN98\TEMP\cczsligb.s:751    .text:000005b0 .Lfe2
+C:\WIN98\TEMP\cczsligb.s:759    .text:000005b0 presto_start_scheduler
+C:\WIN98\TEMP\cczsligb.s:765    .text:000005bc .L26
+C:\WIN98\TEMP\cczsligb.s:819    .text:00000606 presto_system_isr
+C:\WIN98\TEMP\cczsligb.s:889    .text:00000688 context_switch
+C:\WIN98\TEMP\cczsligb.s:1495   .text:00000ad2 presto_start_master_timer
+C:\WIN98\TEMP\cczsligb.s:791    .text:000005e9 .L27
+C:\WIN98\TEMP\cczsligb.s:810    .text:00000606 .Lfe3
+C:\WIN98\TEMP\cczsligb.s:1517   .text:00000af9 presto_restart_master_timer
+C:\WIN98\TEMP\cczsligb.s:1344   .text:000009ce deliver_mail
+C:\WIN98\TEMP\cczsligb.s:876    .text:0000067e .L29
+C:\WIN98\TEMP\cczsligb.s:854    .text:00000651 .L31
+C:\WIN98\TEMP\cczsligb.s:857    .text:00000656 .L30
+C:\WIN98\TEMP\cczsligb.s:925    .text:000006c3 presto_next_tcb_to_run
+C:\WIN98\TEMP\cczsligb.s:884    .text:00000688 .Lfe4
+C:\WIN98\TEMP\cczsligb.s:921    .text:000006c3 .Lfe5
+C:\WIN98\TEMP\cczsligb.s:930    .text:000006ca .L34
+C:\WIN98\TEMP\cczsligb.s:936    .text:000006d4 .L36
+C:\WIN98\TEMP\cczsligb.s:951    .text:000006f2 .L35
+C:\WIN98\TEMP\cczsligb.s:944    .text:000006e6 .L37
+C:\WIN98\TEMP\cczsligb.s:956    .text:000006f9 .L33
+C:\WIN98\TEMP\cczsligb.s:959    .text:000006fb .Lfe6
+C:\WIN98\TEMP\cczsligb.s:964    .text:000006fb presto_send_message
+C:\WIN98\TEMP\cczsligb.s:991    .text:0000071f presto_timer
+C:\WIN98\TEMP\cczsligb.s:986    .text:0000071f .Lfe7
+C:\WIN98\TEMP\cczsligb.s:1016   .text:00000745 .L40
+C:\WIN98\TEMP\cczsligb.s:1031   .text:00000768 .L41
+C:\WIN98\TEMP\cczsligb.s:1090   .text:000007f7 .L42
+C:\WIN98\TEMP\cczsligb.s:1189   .text:000008d3 .L43
+C:\WIN98\TEMP\cczsligb.s:1123   .text:00000842 .L44
+C:\WIN98\TEMP\cczsligb.s:1130   .text:00000853 .L46
+C:\WIN98\TEMP\cczsligb.s:1137   .text:00000862 .L48
+C:\WIN98\TEMP\cczsligb.s:1173   .text:000008ad .L47
+C:\WIN98\TEMP\cczsligb.s:1163   .text:00000898 .L49
+C:\WIN98\TEMP\cczsligb.s:1200   .text:000008dd .L50
+C:\WIN98\TEMP\cczsligb.s:1209   .text:000008e7 .Lfe8
+C:\WIN98\TEMP\cczsligb.s:1213   .text:000008e7 presto_wait_for_message
+C:\WIN98\TEMP\cczsligb.s:1243   .text:00000912 .L52
+C:\WIN98\TEMP\cczsligb.s:1267   .text:0000093c .L53
+C:\WIN98\TEMP\cczsligb.s:1278   .text:00000957 .L54
+C:\WIN98\TEMP\cczsligb.s:1291   .text:00000974 .L55
+C:\WIN98\TEMP\cczsligb.s:1300   .text:00000986 .L56
+C:\WIN98\TEMP\cczsligb.s:1314   .text:000009a2 .L57
+C:\WIN98\TEMP\cczsligb.s:1334   .text:000009c7 .L58
+C:\WIN98\TEMP\cczsligb.s:1340   .text:000009ce .Lfe9
+C:\WIN98\TEMP\cczsligb.s:1352   .text:000009d8 .L60
+C:\WIN98\TEMP\cczsligb.s:1429   .text:00000a89 .L61
+C:\WIN98\TEMP\cczsligb.s:1377   .text:00000a12 .L62
+C:\WIN98\TEMP\cczsligb.s:1388   .text:00000a2a .L64
+C:\WIN98\TEMP\cczsligb.s:1411   .text:00000a62 .L65
+C:\WIN98\TEMP\cczsligb.s:1421   .text:00000a7a .L66
+C:\WIN98\TEMP\cczsligb.s:1439   .text:00000a97 .Lfe10
+C:\WIN98\TEMP\cczsligb.s:1445   .text:00000a98 .L68
+C:\WIN98\TEMP\cczsligb.s:1447   .text:00000a9a .Lfe11
+C:\WIN98\TEMP\cczsligb.s:1460   .text:00000aa9 .L72
+C:\WIN98\TEMP\cczsligb.s:1479   .text:00000ac5 .L73
+C:\WIN98\TEMP\cczsligb.s:1488   .text:00000ad0 .L71
+C:\WIN98\TEMP\cczsligb.s:1491   .text:00000ad2 .Lfe12
+C:\WIN98\TEMP\cczsligb.s:1513   .text:00000af9 .Lfe13
+C:\WIN98\TEMP\cczsligb.s:1526   .text:00000b0b .Lfe14
+                            *COM*:00000002 global_save_sp
+
+UNDEFINED SYMBOLS
+clock_reset
+_.tmp
+presto_fatal_error
+_.z
+_.xy
+set_interrupt
+clock_add
+clock_compare

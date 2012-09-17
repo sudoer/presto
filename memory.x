@@ -3,15 +3,17 @@ OUTPUT_FORMAT("srec")
 
 MEMORY
 {
-  page0    (rwx) : ORIGIN = 0x0040, LENGTH = 0x0100 - 0x0040
-  nothing        : ORIGIN = 0x0100, LENGTH = 0x8000 - 0x0100
-  ram1     (rwx) : ORIGIN = 0x8000, LENGTH = 0xB600 - 0x8000
-  eeprom         : ORIGIN = 0xB600, LENGTH = 0xB800 - 0xB600
-  ram2     (rwx) : ORIGIN = 0xB800, LENGTH = 0xBFD6 - 0xB800
-  specvect  (r)  : ORIGIN = 0xBFD6, LENGTH = 0xC000 - 0xBFD6
-  ram3     (rwx) : ORIGIN = 0xC000, LENGTH = 0xFFD6 - 0xC000
-  normvect  (r)  : ORIGIN = 0xFFD6, LENGTH = 0x0000 - 0xFFD6
+   page0    (rwx) : ORIGIN = 0x0040, LENGTH = 0x0100 - 0x0040
+   nothing        : ORIGIN = 0x0100, LENGTH = 0x8000 - 0x0100
+   ram1     (rwx) : ORIGIN = 0x8000, LENGTH = 0xBFD6 - 0x8000
+   specvect  (r)  : ORIGIN = 0xBFD6, LENGTH = 0xC000 - 0xBFD6
+   ram2     (rwx) : ORIGIN = 0xC000, LENGTH = 0xFFD6 - 0xC000
+   normvect  (r)  : ORIGIN = 0xFFD6, LENGTH = 0x0000 - 0xFFD6
 }
+
+/* ram1     (rwx) : ORIGIN = 0x8000, LENGTH = 0xB600 - 0x8000 */
+/* eeprom         : ORIGIN = 0xB600, LENGTH = 0xB800 - 0xB600 */
+/* ram2     (rwx) : ORIGIN = 0xB800, LENGTH = 0xBFD6 - 0xB800 */
 
 
 SECTIONS
@@ -42,7 +44,7 @@ SECTIONS
      *(.text)
      *(.strings)
      ___text_end = . ;
-   } > ram3
+   } > ram1
 
 
    /* uninitialized data */
@@ -51,7 +53,7 @@ SECTIONS
       *(.bss)
       *(COMMON)
      ___bss_end = . ;
-   } > ram1
+   } > ram2
 
 
    /* initialized data */
@@ -59,7 +61,7 @@ SECTIONS
      ___data_start = . ;
       *(.data)
      ___data_end = . ;
-   } > ram2
+   } > ram1
 
 
    /* stack */
@@ -67,7 +69,7 @@ SECTIONS
      ___stack_start = . ;
       *(.stack)
      ___stack_end = . ;
-   } > ram1
+   } > ram2
 
 
    /* symbol information */
@@ -75,7 +77,7 @@ SECTIONS
      ___comment_start = . ;
      *(.comment)
      ___comment_end = . ;
-   } > ram1
+   } > ram2
 
 
 }

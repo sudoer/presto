@@ -92,8 +92,6 @@ void __premain() {
    // promote IRQ interrupt priority
    // (must be in special mode, more or less)
    HPRIO=0x25;
-
-   //INTR_ON();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -62,11 +62,6 @@
 #define TEST1  *(volatile unsigned char *)(IO_BASE + 0x3E)
 #define CONFIG *(volatile unsigned char *)(IO_BASE + 0x3F)
 
-#ifndef INTR_ON
-#define INTR_ON()   asm(" cli")
-#define INTR_OFF()  asm(" sei")
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
 
 // SPECIAL FUNCTION REGISTERS

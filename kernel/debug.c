@@ -8,6 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "hc11regs.h"
+#include "presto.h"       // for INTR_OFF()
 #include "types.h"
 #include "debug.h"
 
