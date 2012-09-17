@@ -5,69 +5,37 @@ ProjSetConfigFlags=0x04100940
 
 [State]
 SysSetCwd='C:\alan\projects\presto\work'
-SrchSetFlags=0x461a2826
+SrchSetFlags=0x441a2826
 SrchSetAgainFlags=0x04032004,0
-SrchSetAgainFlags=0x06132004,1
+SrchSetAgainFlags=0x42022026,1
 SrchSetAttrElements=
 SrchSetAgainAttrElements=
 FileSortMode=0x12
-_StateView='C:\alan\projects\presto\work\presto\kernel\kernel.c',66,66,632,439,-1,-1,149,1,115,1,11,'',0x0b400048,0,80,0,0,'',0,1
-_StateView='C:\alan\projects\presto\work\presto\kernel\semaphore.c',104,104,733,491,-1,-1,80,68,39,1,2,'',0x0b400048,0,80,0,0,'',0,2
-_StateView='C:\alan\projects\presto\work\versions.txt',52,52,733,491,-1,-1,20,1,1,1,1,'',0x0b400058,0,80,0,0,'',0,3
-_StateView='C:\alan\projects\presto\work\presto\kernel\error_kernel.h',0,0,733,491,-1,-1,17,57,1,1,5,'',0x0b400048,0,80,0,0,'',0,4
-_StateView='C:\alan\projects\presto\work\app\president.c',208,208,733,491,-1,-1,23,11,1,1,6,'',0x0b400048,0,80,0,0,'',0,5
-_StateView='C:\alan\projects\presto\work\app\debug.c',0,0,733,491,-1,-1,1,1,1,1,12,'',0x0b400048,0,80,0,0,'',0,6
-_StateView='C:\alan\projects\presto\work\app\employee.c',26,26,733,491,-1,-1,21,11,1,1,9,'',0x0b400048,0,80,0,0,'',0,7
-_StateView='C:\alan\projects\presto\work\app\main.c',52,52,733,491,-1,-1,31,25,31,1,13,'',0x0b400048,0,80,0,0,'',0,8
-_StateView='C:\alan\projects\presto\work\app\manager.c',78,78,733,491,-1,-1,32,29,1,1,14,'',0x0b400048,0,80,0,0,'',0,9
-_StateView='C:\alan\projects\presto\work\app\control.c',104,104,733,491,-1,-1,36,1,1,1,10,'',0x0b400048,0,80,0,0,'',0,10
-_StateView='C:\alan\projects\presto\work\app\shared.c',130,130,733,491,-1,-1,11,7,1,1,8,'',0x0b400048,0,80,0,0,'',0,11
-_StateView='C:\alan\projects\presto\work\app\shared.h',208,208,733,491,-1,-1,7,14,1,1,7,'',0x0b400048,0,80,0,0,'',0,12
-_StateView='C:\alan\projects\presto\work\app\small_test.c',156,156,733,491,-1,-1,1,1,1,1,15,'',0x0b400048,0,80,0,0,'',0,13
-_StateView='C:\alan\projects\presto\work\app\student.c',182,182,733,491,-1,-1,1,1,1,1,16,'',0x0b400048,0,80,0,0,'',0,14
-_StateView='C:\alan\projects\presto\work\presto\kernel\semaphore.h',130,130,733,491,-1,-1,24,16,1,1,4,'',0x0b400048,0,80,0,0,'',0,15
-_StateView='C:\alan\projects\presto\work\presto\kernel\timer.h',182,182,733,491,-1,-1,1,1,1,1,17,'',0x0b400048,0,80,0,0,'',0,16
-_StateView='C:\alan\projects\presto\work\presto\kernel\kernel.h',88,88,632,439,-1,-1,38,9,3,1,20,'',0x0b400048,0,80,0,0,'',0,20
-_StateView='C:\alan\projects\presto\work\build.pl',22,22,594,439,-1,-1,595,37,560,1,21,'',0x0b400048,0,80,0,0,'',0,21
-_StateView='C:\alan\projects\presto\work\presto\presto.h',176,176,632,439,-1,-1,136,67,97,1,3,'',0x0b400048,0,80,0,0,'',0,17
-_StateView='C:\alan\projects\presto\work\presto\kernel\mail.c',26,26,733,491,-1,-1,249,1,210,1,18,'',0x0b400048,0,80,0,0,'',0,18
-_StateView='C:\alan\projects\presto\work\cpu\m68hc11\configure.h',52,52,733,491,-1,-1,21,1,1,1,19,'',0x0b400048,0,80,0,0,'',0,19
-_StateBuffer='C:\alan\projects\presto\work\presto\kernel\kernel.c',0x04001c82,149,1,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\presto\kernel\semaphore.c',0x0c001c82,80,68,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\versions.txt',0x04001c8a,20,1,25,'4 7','',0x1,'',1,72,1,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\presto\kernel\error_kernel.h',0x04001c82,17,57,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\app\president.c',0x04001c82,23,11,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\app\debug.c',0x00001c82,1,1,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\app\employee.c',0x04001c82,21,11,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\app\main.c',0x04001c82,31,25,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\app\manager.c',0x04001c82,32,29,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\app\control.c',0x04001c82,36,1,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\app\shared.c',0x04001c82,11,7,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\app\shared.h',0x04001c82,7,14,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\app\small_test.c',0x00001c82,1,1,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\app\student.c',0x00001c82,1,1,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\presto\kernel\semaphore.h',0x04001c82,24,16,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\presto\kernel\timer.h',0x00001c82,1,1,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\presto\kernel\kernel.h',0x04001c82,38,9,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\build.pl',0x0400048e,595,37,25,'5 9','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\presto\presto.h',0x04001c82,136,67,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\presto\kernel\mail.c',0x04001c82,249,1,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateBuffer='C:\alan\projects\presto\work\cpu\m68hc11\configure.h',0x04001c82,21,1,25,'4 7','',0x0,'',1,72,0,0,'',''
-_StateHistory=FILELIST,'C:\alan\projects\presto\work\app\error_app.h','C:\alan\projects\presto\work\app\messages.h','C:\alan\projects\presto\work\presto\error_codes.h','C:\alan\projects\presto\work\presto\types.h','C:\alan\projects\presto\work\app\unused\motor_test.c','C:\alan\projects\presto\work\services\serial.c','C:\alan\projects\presto\work\services\serial.h','C:\alan\projects\presto\work\services\string.c','C:\alan\projects\presto\work\services\string.h'
-_StateHistory=SEARCH,'KERNEL_SEMWAIT_T','_SEMAPHORE_RESOURCE_T','_SEMAPHORE_T','ERROR_SEMAPHORE_RESOURCE_TOOMANYWAITERS','ERROR_SEMAPHORE_NOTREGISTERED','sem_p','KERNEL_SEMAPHORE_S','KERNEL_SEMWAIT_S','clients','user_p'
-_StateHistory=REPLACE,'PRESTO_SEMAPHORE_LOCK_T','KERNEL_SEMAPHORE_RESOURCE_T','KERNEL_SEMAPHORE_LOCK_T','_SEMAPHORE_T','_SEMAPHORE_RESOURCE_T','resource_p','KERNEL_SEMAPHORE_RESOURCE_S','KERNEL_SEMAPHORE_LOCK_S','num_locks','semlock_p'
+_StateView='C:\alan\projects\presto\work\build.pl',156,156,733,491,-1,-1,113,33,88,1,4,'',0x0b400048,0,80,0,0,'',0,1
+_StateView='C:\alan\projects\presto\work\app\big_test\debug.c',104,104,733,491,-1,-1,1,1,1,1,3,'',0x0b400048,0,80,0,0,'',0,2
+_StateView='C:\alan\projects\presto\work\services\string.h',130,130,733,491,-1,-1,25,37,14,1,2,'',0x0b400048,0,80,0,0,'',0,3
+_StateView='C:\alan\projects\presto\work\small_test.prj',0,0,733,491,-1,-1,6,24,1,1,1,'',0x0b400058,0,80,0,0,'',0,4
+_StateView='C:\alan\projects\presto\work\big_test.prj',26,26,733,491,-1,-1,4,16,1,1,5,'',0x0b400048,0,80,0,0,'',0,5
+_StateBuffer='C:\alan\projects\presto\work\build.pl',0x04001c82,113,33,25,'5 9','',0x0,'',1,72,0,0,'',''
+_StateBuffer='C:\alan\projects\presto\work\app\big_test\debug.c',0x00001c82,1,1,25,'4 7','',0x0,'',1,72,0,0,'',''
+_StateBuffer='C:\alan\projects\presto\work\services\string.h',0x0c001c82,25,37,25,'4 7','',0x0,'',1,72,0,0,'',''
+_StateBuffer='C:\alan\projects\presto\work\small_test.prj',0x04001c8a,6,24,25,'4 7','',0x1,'',1,72,1,0,'',''
+_StateBuffer='C:\alan\projects\presto\work\big_test.prj',0x04001c8a,4,16,25,'4 7','',0x1,'',1,72,0,0,'',''
+_StateHistory=FILELIST,'C:\win98\Desktop\yesterday\build.pl','C:\alan\projects\presto\work\app\big_test\main.c','C:\alan\projects\presto\work\app\big_test\debug.h','C:\alan\projects\presto\work\small_test.prj','C:\alan\projects\presto\work\big_test.prj','C:\alan\projects\presto\work\obj\avr2\cpu_timer.lst','C:\alan\projects\presto\work\hw\handyboard\serial.c','C:\alan\projects\presto\work\app\big_test\debug.c','C:\alan\projects\presto\work\services\string.h'
+_StateHistory=SEARCH,'open','push','cpu_dir','CPU_FAMILY','/',',','\\','STRING_H','string','STRING'
+_StateHistory=REPLACE,'semlock_p','presto_semaphore_protocol','_SEMLOCK_T','_SEMRESOURCE_T','/','$CPU_AVR2','$CPU_AVR2,   ','\\\\','','\big_test\\'
 _StateHistory=EDITFILE,'C:\alan\projects\hc11\work\presto1.psp','C:\alan\projects\hc11\work\presto\presto.h','C:\alan\projects\hc11\work\build.pl','C:\alan\projects\hc11\work\gcc.txt','C:\alan\projects\hc11\work\obj\presto.map','C:\alan\projects\hc11\work\obj\presto.lst','C:\programs\avr\gnu\avr\lib\ldscripts\avrmega128.x','C:\programs\avr\gnu\avr\lib\ldscripts\avr2.x','C:\programs\avr\gnu\avr\lib\ldscripts\avr85xx.x','C:\alan\projects\presto\work\build.out'
 _StateHistory=DIRECTORY,'C:\sde\CC\EUSALPO_r1a_dev_snapshot\crh1069104_carmencentral1\cxc1122529\ADS-ARM7\inc','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_002\cnh1010329_cdma_dmss','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_002','C:\sde\CC\EUSALPO_iris1_snapshot\crh1069119_carmeniris\cxc1122529\ADS-ARM7\inc','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_002\cnh1010329_cdma_dmss\internsw','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_001\cnh1010326_test_handler','C:\sde\CC\EUSALPO_iris1_snapshot\snapshot\RTPD_SwModules_001\cnh1010317_coresw_cdma','C:\WIN98\Desktop\stuff\avr','C:\alan\projects\presto\work'
 _StateHistory=FILTER,'sort','sort /11','sort /+11','sort','sort /+50','sort','sort /r','sort','sort /+72','sort'
 _StateHistory=FFIND,'p_types','p_types.h','comdef.h','nv.h'
-_StateHistory=FGREP,'misc_hw','_real_init_','section','copy','inline','asm volatile','__attribute__','init','intvect','error_codes'
-_StateHistory=GREPSCOPE,'*.h','*.c *.h','*.bat','*.pl','*.c ; *.h ; *.s','*.c','*.pl ; *.cgi ; *.lib','*.html ; *.htm','*.*','*.c ; *.h'
+_StateHistory=FGREP,'_real_init_','section','copy','inline','asm volatile','__attribute__','init','intvect','error_codes','open'
+_StateHistory=GREPSCOPE,'*.h','*.c *.h','*.bat','*.c ; *.h ; *.s','*.c','*.pl ; *.cgi ; *.lib','*.html ; *.htm','*.*','*.c ; *.h','*.pl'
 _StateHistory=DIFFFILE,'K:\EUSALPO_r1a_dev_view\RTPD_SwModules_001\cnh1010325_sysbus_cdma\includeg\acm_if.h','K:\EUSALPO_r1a_dev_view\RTPD_SwModules_001\cnh1010325_sysbus_cdma\internsw\acm\acm_if.c','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\LD_SwModules_006\cnh1010155_uicamera\internsw\appdesc_camera.c.keep','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\LD_SwModules_003\cnh1010041_xformat\internsw\xf.c','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\RTPD_SwModules_001\cnh1010325_sysbus_cdma\swbp\dstask_swbp.h','<untitled>2','C:\alan\projects\presto\work\obj\avr8515\presto.hex','C:\alan\projects\presto\work\cpu\avr8515.x','C:\programs\avr\gnu\avr\lib\ldscripts\avr2.x','C:\alan\projects\presto\old\obj\presto.lst'
 _StateHistory=PRNHEADER,'%f','acm_if.c','%b%e','%f - page %p'
 _StateHistory=DIFFTARGET,'C:\WINNT\Profiles\eusalpo\Desktop\fail.txt','K:\EUSALPO_t606maint_merge_view\RTPD_SwModules_001\cnh1010325_sysbus_cdma\includeg\acm_if.h','K:\EUSALPO_t606maint_merge_view\RTPD_SwModules_001\cnh1010325_sysbus_cdma\internsw\acm\acm_if.c','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\LD_SwModules_006\cnh1010155_uicamera\internsw\appdesc_camera.c','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\alan\xf.c','C:\sde\CC\EUSALPO_r1a_dev_snapshot\snapshot\RTPD_SwModules_001\cnh1010325_sysbus_cdma\swbp\dstask_swbp.h.keep','<untitled>1','C:\alan\projects\presto\work\t\presto.hex','C:\programs\avr\gnu\avr\lib\ldscripts\avr85xx.x','C:\alan\projects\presto\work\obj\m68hc11\presto.lst'
 _StateHistory=FFINDDIR,'C:\sde\CC\EUSALPO_camera2\snapshot','C:\sde\CC\EUSALPO_camera2'
-_StateHistory=FGREPDIR,'C:\WIN98\Desktop\stuff\avr','\alan\projects\presto','c:\programs\avr','\programs\avr\gnu','C:\programs\avr\gnu','\alan','C:\programs\hc11','c:\alan','C:\\','C:\alan\projects\presto\work'
-_StateHistory=DOCUMENTVISIT,'1           1           C:\alan\projects\presto\work\presto\error_codes.h','345         35          C:\alan\projects\presto\work\presto\kernel\semaphore.c','1           1           C:\alan\projects\presto\work\presto\types.h','1           1           C:\alan\projects\presto\work\app\unused\motor_test.c','1           1           C:\alan\projects\presto\work\services\serial.c','1           1           C:\alan\projects\presto\work\services\serial.h','1           1           C:\alan\projects\presto\work\services\string.c','1           1           C:\alan\projects\presto\work\services\string.h','136         67          C:\alan\projects\presto\work\presto\presto.h','80          68          C:\alan\projects\presto\work\presto\kernel\semaphore.c'
+_StateHistory=FGREPDIR,'\alan\projects\presto','c:\programs\avr','\programs\avr\gnu','C:\programs\avr\gnu','\alan','C:\programs\hc11','c:\alan','C:\\','C:\alan\projects\presto\work','C:\alan\\'
+_StateHistory=DOCUMENTVISIT,'12          1           C:\alan\projects\presto\work\small_test.prj','7           1           C:\alan\projects\presto\work\big_test.prj','113         33          C:\alan\projects\presto\work\build.pl','1           1           C:\alan\projects\presto\work\app\big_test\debug.c','25          37          C:\alan\projects\presto\work\services\string.h','1           1           C:\alan\projects\presto\work\app\big_test\debug.c','4           16          C:\alan\projects\presto\work\big_test.prj','113         33          C:\alan\projects\presto\work\build.pl','1           1           C:\alan\projects\presto\work\app\big_test\debug.c','25          37          C:\alan\projects\presto\work\services\string.h'
 _StateHistory=XOBJECTS,'OBEX_HEADERFRAME_BUFFER_MAXSIZE'
 _StateHistory=DIFFDIRREFERENCE,'C:\sde\CC\EUSALPO_camera2\snapshot\RTPD_SwModules_001\cnh1010325_sysbus_cdma\internsw\ts0710'
 _StateHistory=DIFFDIRTARGET,'K:\EUSALPO_merge_view\RTPD_SwModules_001\cnh1010325_sysbus_cdma\internsw\ts0710'
@@ -80,18 +48,39 @@ ToolAddCmd='$_custom_tool_$_1','API Database Editor',1342177312,'cwtedit.exe'
 ToolAddCmd='$_custom_tool_$_2','Paint',1342177312,'pbrush.exe'
 
 [Compiler]
-CompilerNewExt=.htm
-CompilerNewExt=.pl
-CompilerNewExt=.bat
-CompilerNewExt=.html
-CompilerNewExt=.txt
-CompilerNewExt=.java
-CompilerNewExt=.jav
 TagSetCmd='"${HOME}${WTAGS}" -oc -d -t"${TAGFILE}.tag" -p"${TAGFILE}.ptg"',0x8000060
 BrowseSetFile='C:\programs\CodeWright\tagfile.ptg'
 TagSetFile='C:\programs\CodeWright\tagfile.tag'
 CompilerAddCmdEx='$_cw_proj_hash_$','',1073741824,'',0,'${FTEE} perl build.pl',432,'${FTEE} nmake',176,'${FTEE} nmake',176,'${FTEE} nmake',176,'',0,'',0,'_ErrorInfoDefault','','','proj.err','%x'
 CompilerAddResponse='$_cw_proj_hash_$',
+CompilerNewExt=.htm
+CompilerNewExt=.v
+CompilerNewExt=.awk
+CompilerNewExt=.bas
+CompilerNewExt=.adb
+CompilerNewExt=.cfml
+CompilerNewExt=.jsp
+CompilerNewExt=.pl
+CompilerNewExt=.vhd
+CompilerNewExt=.pas
+CompilerNewExt=.tk
+CompilerNewExt=.asp
+CompilerNewExt=.rul
+CompilerNewExt=.cob
+CompilerNewExt=.js
+CompilerNewExt=.php
+CompilerNewExt=.rc
+CompilerNewExt=.tcl
+CompilerNewExt=.ini
+CompilerNewExt=.cs
+CompilerNewExt=.bat
+CompilerNewExt=.html
+CompilerNewExt=.txt
+CompilerNewExt=.nrx
+CompilerNewExt=.xml
+CompilerNewExt=.java
+CompilerNewExt=.jav
+CompilerNewExt=.sqlj
 
 [Editor]
 _RestoreSysFlags=0x43097fca, 0xfffffffc, 0
@@ -125,57 +114,26 @@ ConfigSetSymbolDBFilename='C:\alan\projects\presto\work\presto1.sbl'
 EditSetPath=''
 
 [Files]
-.\app\control.c
-.\app\debug.c
-.\app\debug.h
-.\app\employee.c
-.\app\error_app.h
-.\app\main.c
-.\app\manager.c
-.\app\messages.h
-.\app\president.c
-.\app\shared.c
-.\app\shared.h
-.\app\small_test.c
-.\app\student.c
+.\app\small_test\small_test.c
+.\app\small_test\error_app.h
+.\app\big_test\error_app.h
+.\app\big_test\debug.c
+.\app\big_test\employee.c
+.\app\big_test\main.c
+.\app\big_test\manager.c
+.\app\big_test\president.c
+.\app\big_test\shared.c
+.\app\big_test\student.c
+.\app\big_test\debug.h
+.\app\big_test\control.c
+.\app\big_test\messages.h
+.\app\big_test\shared.h
 .\app\unused\motor_test.c
-.\cpu\avr8515\board.h
-.\cpu\avr8515\boot.c
-.\cpu\avr8515\boot.h
-.\cpu\avr8515\cpu_debug.h
-.\cpu\avr8515\cpu_locks.h
-.\cpu\avr8515\cpu_magic.h
-.\cpu\avr8515\cpu_timer.c
-.\cpu\avr8515\cpu_timer.h
-.\cpu\avr8515\error.c
-.\cpu\avr8515\error.h
-.\cpu\avr8515\error_cpu.h
-.\cpu\avr8515\registers.h
-.\cpu\avr8515\vectors.c
-.\cpu\avr8515\vectors.h
-.\cpu\avr8515\configure.h
-.\cpu\m68hc11\board.h
-.\cpu\m68hc11\boot.c
-.\cpu\m68hc11\boot.h
-.\cpu\m68hc11\cpu_debug.h
-.\cpu\m68hc11\cpu_locks.h
-.\cpu\m68hc11\cpu_magic.h
-.\cpu\m68hc11\cpu_timer.c
-.\cpu\m68hc11\cpu_timer.h
-.\cpu\m68hc11\error.c
-.\cpu\m68hc11\error.h
-.\cpu\m68hc11\error_cpu.h
-.\cpu\m68hc11\registers.h
-.\cpu\m68hc11\vectors.c
-.\cpu\m68hc11\vectors.h
-.\cpu\m68hc11\configure.h
 .\presto\error_codes.h
 .\presto\presto.h
 .\presto\types.h
 .\presto\kernel\clock.c
 .\presto\kernel\clock.h
-.\presto\kernel\Copy of clock.c
-.\presto\kernel\Copy of clock.h
 .\presto\kernel\error_kernel.h
 .\presto\kernel\kernel.c
 .\presto\kernel\kernel.h
@@ -187,8 +145,38 @@ EditSetPath=''
 .\presto\kernel\semaphore.h
 .\presto\kernel\timer.c
 .\presto\kernel\timer.h
-.\services\serial.c
-.\services\serial.h
+.\presto\cpu\avr2\boot.c
+.\presto\cpu\avr2\boot.h
+.\presto\cpu\avr2\cpu_debug.h
+.\presto\cpu\avr2\cpu_locks.h
+.\presto\cpu\avr2\cpu_magic.h
+.\presto\cpu\avr2\cpu_timer.c
+.\presto\cpu\avr2\cpu_timer.h
+.\presto\cpu\avr2\error_cpu.h
+.\presto\cpu\avr2\registers.h
+.\presto\cpu\avr2\vectors.c
+.\presto\cpu\avr2\vectors.h
+.\presto\cpu\avr2\configure.h
+.\presto\cpu\m68hc11\boot.c
+.\presto\cpu\m68hc11\boot.h
+.\presto\cpu\m68hc11\cpu_debug.h
+.\presto\cpu\m68hc11\cpu_locks.h
+.\presto\cpu\m68hc11\cpu_magic.h
+.\presto\cpu\m68hc11\cpu_timer.c
+.\presto\cpu\m68hc11\cpu_timer.h
+.\presto\cpu\m68hc11\error_cpu.h
+.\presto\cpu\m68hc11\registers.h
+.\presto\cpu\m68hc11\vectors.c
+.\presto\cpu\m68hc11\vectors.h
+.\presto\cpu\m68hc11\configure.h
 .\services\string.c
 .\services\string.h
+.\hw\handyboard\board.h
+.\hw\handyboard\error.h
+.\hw\handyboard\error.c
+.\hw\handyboard\serial.h
+.\hw\handyboard\serial.c
+.\hw\avr_eval\board.h
+.\hw\avr_eval\error.h
+.\hw\avr_eval\error.c
 

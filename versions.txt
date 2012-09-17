@@ -1,6 +1,23 @@
 
 2003.11.30
 
+First attempt at breaking the build.pl script into a SCRIPT and a
+PROJECT file.  Looks pretty good.  I moved around all of the source
+files, so something I have to scratch my head to find things.  But
+the project file seems to work pretty well.  It has three sections:
+
+   OPTIONS - where specific variables are set (TARGET, MEM_MAP, etc)
+   SOURCE - a list of source files
+   INCLUDE - a list of include directories
+
+The most significant changes to the directory structure are: (1) the
+apps are now in separate directories and (2) there is a new directory
+called "hw" where board-specific stuff goes.
+
+---
+
+2003.11.30
+
 I finally got tired of the fixed limit of waiters in the semaphore
 system.  I have a fix, and it sort of resembles the way that the
 mail system uses envelopes for all of it internal record-keeping.

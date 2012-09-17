@@ -9,9 +9,9 @@ use Cwd;
 
 heading("PREPARING");
 prepare();
+parse_command_line();
 
 heading("CONFIGURATION");
-setup_project();
 setup_compiler();
 
 heading("PRE-BUILD CLEANING");
@@ -35,137 +35,10 @@ exit;
 #   C U S T O M I Z E   T H I S   P A R T
 ################################################################################
 
-sub setup_project {
-
-   print("setting up project...");
-
-   $TARGET="presto";
-
-   $OBJ_DIR=""
-      .ifcpu($CPU_M68HC11,"obj\\m68hc11")
-      .ifcpu($CPU_AVR8515,"obj\\avr8515")
-      ;
-
-   my $cpu_dir=""
-      .ifcpu($CPU_M68HC11,"cpu\\m68hc11")
-      .ifcpu($CPU_AVR8515,"cpu\\avr8515")
-      ;
-
-   @SRC_FILES=(
-
-      # APPLICATION FILES
-
-      ifcpu($CPU_M68HC11,"app\\main.c"),
-      ifcpu($CPU_M68HC11,"app\\control.c"),
-      ifcpu($CPU_M68HC11,"app\\president.c"),
-      ifcpu($CPU_M68HC11,"app\\manager.c"),
-      ifcpu($CPU_M68HC11,"app\\employee.c"),
-      ifcpu($CPU_M68HC11,"app\\student.c"),
-      ifcpu($CPU_M68HC11,"app\\shared.c"),
-      ifcpu($CPU_M68HC11,"app\\debug.c"),
-      ifcpu($CPU_M68HC11,"services\\serial.c"),
-      ifcpu($CPU_M68HC11,"services\\string.c"),
-
-      ifcpu($CPU_AVR8515,"app\\small_test.c"),
-
-      # CORE RTOS KERNEL
-
-      "presto\\kernel\\clock.c",
-      "presto\\kernel\\memory.c",
-      "presto\\kernel\\semaphore.c",
-      "presto\\kernel\\timer.c",
-      "presto\\kernel\\mail.c",
-      "presto\\kernel\\kernel.c",
-
-      # CPU SUPPORT FILES
-
-      "$cpu_dir\\boot.c",
-      "$cpu_dir\\error.c",
-      "$cpu_dir\\cpu_timer.c",
-      "$cpu_dir\\vectors.c",
-
-      ifcpu($CPU_M68HC11,"$cpu_dir\\crt0.s"),
-
-   );
-
-   @INCLUDE_DIRS=(
-      "$BUILD_DIR",
-      "$BUILD_DIR\\app",
-      "$BUILD_DIR\\presto",
-      "$BUILD_DIR\\$cpu_dir",
-      "."
-   );
-
-   print("OK\n");
-}
-
-################################################################################
-
-sub setup_compiler {
-
-   print("setting up compiler...");
-   $COMPILER_HOME=""
-      .ifcpu($CPU_M68HC11,"c:\\programs\\embedded\\hc11\\gnu")
-      .ifcpu($CPU_AVR8515,"c:\\programs\\embedded\\avr\\gnu")
-      ;
-   $GNU_PREFIX=""
-      .ifcpu($CPU_M68HC11,"m6811-elf-")
-      .ifcpu($CPU_AVR8515,"avr-")
-      ;
-   add_to_path("$COMPILER_HOME\\bin");
-   print("OK\n");
-
-   print("setting up linker...");
-   #$LIB_DIR=$COMPILER_HOME
-   #   .ifcpu($CPU_M68HC11,"\\m6811-elf\\lib")
-   #   .ifcpu($CPU_AVR8515,"\\avr\\lib")
-   #   ;
-   $GCC_LIB=$COMPILER_HOME
-      .ifcpu($CPU_M68HC11,"\\lib\\gcc-lib\\m6811-elf\\3.0.4\\libgcc.a")
-      .ifcpu($CPU_AVR8515,"\\lib\\gcc-lib\\avr\\3.3.1\\libgcc.a")
-      ;
-   print("OK\n");
-}
-
-################################################################################
-#   T H I S   S T U F F   S H O U L D   S T A Y   T H E   S A M E
-################################################################################
-
 sub prepare {
 
    # flush after print();
    $|=1;
-
-   # DEFINE CPU ARCHITECTURES
-   print("defining architectures...");
-   $CPU_M68HC11=1;
-   $CPU_AVR8515=2;
-   print("OK\n");
-
-   # turn debug info on/off
-   print("parsing command-line arguments...");
-   $DEBUG=0;
-   foreach $arg (@ARGV) {
-      if(tolower($arg) eq "debug") {
-         $DEBUG=1;
-      }
-      if(tolower($arg) eq "m68hc11") {
-         $CPU=$CPU_M68HC11;
-      }
-      if(tolower($arg) eq "avr8515") {
-         $CPU=$CPU_AVR8515;
-      }
-   }
-   print("OK\n");
-
-   if(!defined($CPU)) {
-      print("MUST SPECIFY TARGET:\n");
-      print(" - M68HC11\n");
-      print(" - AVR8515\n");
-      print("\n");
-      print("usage: PERL BUILD.PL <target> [DEBUG]\n");
-      exit(1);
-   }
 
    # REMEMBER WHERE YOU STARTED
    print("remembering build directory...");
@@ -176,6 +49,135 @@ sub prepare {
 
 }
 
+################################################################################
+
+sub parse_command_line {
+
+   # turn debug info on/off
+   print("parsing command-line arguments...");
+   $DEBUG=0;
+   foreach $arg (@ARGV) {
+      if(tolower($arg) eq "debug") {
+         $DEBUG=1;
+      }	else {
+          $project_file=$arg;
+      }
+   }
+   print("OK\n");
+
+   if(!open(PRJ,"<$project_file")) {
+      print("\n");
+      print("usage: PERL BUILD.PL <project file> [DEBUG]\n");
+      exit(1);
+   }
+
+   # defaults
+
+   @SRC_FILES=();
+   @INCLUDE_DIRS=("$BUILD_DIR",".");
+
+   $section="";
+   while($line=<PRJ>) {
+      # do not chop($line); messes up on last line... instead s/\012//g;
+      $line=~s/\012//g;
+      $line=~s/\015//g;
+      $line=~s/#.*$//g;
+      $line=~s/^ *//g;
+      $line=~s/ *$//g;
+
+      if(length($line)==0) {
+
+         # line is blank, or was a comment
+
+      } elsif(index($line,"[")==0) {
+
+         # line is a new section
+
+         $section=toupper($line);
+
+         # trim off brackets
+         $section=~s/^\[//g;
+         $section=~s/\]$//g;
+      } else {
+
+         # line has some information
+
+         if($section eq "OPTIONS") {
+            ($option,$value)=split('=',$line);
+            debug("OPTION $option = $value\n");
+            if($option eq "CPU_FAMILY") {         $CPU_FAMILY=$value;
+            } elsif($option eq "CPU_VARIANT") {   $CPU_VARIANT=$value;
+            } elsif($option eq "TARGET") {        $TARGET=$value;
+            } elsif($option eq "OBJ_DIR") {       $OBJ_DIR=$value;
+            } elsif($option eq "MEM_MAP") {       $MEM_MAP=$value;
+            } else {  print("unknown option '$option'\n");
+            }
+         } elsif($section eq "SOURCE") {
+            $line=~s/\\\\/\//g;     #  \\  ->  /
+            debug("SOURCE $line\n");
+            $line=~s/\//\\\\/g;     #  /  ->  \\
+            push(@SRC_FILES,$line);
+         } elsif($section eq "INCLUDE") {
+            $line=~s/\\\\/\//g;     #  \\  ->  /
+            debug("INCLUDE $line\n");
+            $line=~s/\//\\\\/g;     #  /  ->  \\
+            push(@INCLUDE_DIRS,"$BUILD_DIR/".$line);
+         } else {
+            print("unknown section '$section'\n");
+         }
+      }
+   }
+   close(PRJ);
+
+   print("OK\n");
+}
+
+################################################################################
+
+sub setup_compiler {
+
+   # DEFINE CPU ARCHITECTURES
+   print("defining architectures...");
+   $CPU_M68HC11=1;
+   $CPU_AVR2=2;
+   print("OK\n");
+
+   # turn debug info on/off
+   print("parsing command-line arguments...");
+   $DEBUG=0;
+   $CPU=0;
+   foreach $arg (@ARGV) {
+      if(tolower($CPU_FAMILY) eq "m68hc11") { $CPU=$CPU_M68HC11; }
+      if(tolower($CPU_FAMILY) eq "avr2")    { $CPU=$CPU_AVR2; }
+   }
+   print("OK\n");
+
+   if($CPU==0) {
+      print("ERROR - unknown CPU type ($CPU_FAMILY)\n");
+   }
+
+   print("setting up compiler...");
+   $COMPILER_HOME=""
+      .ifcpu($CPU_M68HC11,"c:\\programs\\embedded\\hc11\\gnu")
+      .ifcpu($CPU_AVR2,   "c:\\programs\\embedded\\avr\\gnu")
+      ;
+   $GNU_PREFIX=""
+      .ifcpu($CPU_M68HC11,"m6811-elf-")
+      .ifcpu($CPU_AVR2,   "avr-")
+      ;
+   add_to_path("$COMPILER_HOME\\bin");
+   print("OK\n");
+
+   print("setting up linker...");
+   $GCC_LIB=$COMPILER_HOME
+      .ifcpu($CPU_M68HC11,"\\lib\\gcc-lib\\m6811-elf\\3.0.4\\libgcc.a")
+      .ifcpu($CPU_AVR2,   "\\lib\\gcc-lib\\avr\\3.3.1\\libgcc.a")
+      ;
+   print("OK\n");
+}
+
+################################################################################
+#   T H I S   S T U F F   S H O U L D   S T A Y   T H E   S A M E
 ################################################################################
 
 sub prebuild_cleaning {
@@ -220,6 +222,10 @@ sub compile_stage {
    foreach $src_file (@SRC_FILES) {
       $errors=0;
 
+      $pretty_filename=$src_file;
+      $pretty_filename=~s/\\\\/\//g;     #  \\  ->  /
+      $src_file=~s/\//\\\\/g;            #  /  ->  \\
+
       # DETERMINE FILE NAMES, BASE NAMES, EXTENSIONS, PATHS
 
       $src_path="$BUILD_DIR\\$src_file";
@@ -262,25 +268,25 @@ sub compile_stage {
 
       if( $work == 1 ) {
          if($src_ext eq "c") {
-            print("COMPILING  $src_file...");
+            print("COMPILING  $pretty_filename...");
             debug("");
 
             my $gcc_options=""
 
                # TELL MY PROGRAMS WHAT CPU WE'RE USING
                .ifcpu($CPU_M68HC11,"-DCPU_M68HC11 ")      # 
-               .ifcpu($CPU_AVR8515,"-DCPU_AVR8515 ")      # 
+               .ifcpu($CPU_AVR2,   "-DCPU_AVR8515 ")      # 
 
                # DEFINE ARCHITECTURE
                .ifcpu($CPU_M68HC11,"-m68hc11 ")           # platform, hc11 or hc12
-               .ifcpu($CPU_AVR8515,"-mmcu=at90s8515 ")    # platform, which AVR
+               .ifcpu($CPU_AVR2,   "-mmcu=at90s8515 ")    # platform, which AVR
 
                # WHERE TO FIND INCLUDE FILES
                .$include_path                             # include path
 
                # OPTIMIZATION
                .ifcpu($CPU_M68HC11,"-Os ")                # optimization, was (oh-zero)
-               .ifcpu($CPU_AVR8515,"-O1 ")                # optimization = (oh-zero)
+               .ifcpu($CPU_AVR2,   "-O1 ")                # optimization = (oh-zero)
                ."-fomit-frame-pointer "                   # when possible do not generate stack frames
 
                # SIZES OF TYPES
@@ -308,7 +314,7 @@ sub compile_stage {
             $errors+=run($GNU_PREFIX."gcc.exe $gcc_options -o $obj_path $src_name");
             print("OK\n");
          } elsif($src_ext eq "s") {
-            print("ASSEMBLING $src_file...");
+            print("ASSEMBLING $pretty_filename...");
             debug("");
             $errors+=run($GNU_PREFIX."as.exe "
                #."-x assembler-with-cpp "        # used with gcc, not with as
@@ -319,7 +325,7 @@ sub compile_stage {
             print("OK\n");
          }
       } else {
-         print("NO WORK ON $src_file\n");
+         print("NO WORK ON $pretty_filename\n");
          debug("");
       }
 
@@ -365,11 +371,10 @@ sub link_stage {
 
       # DEFINE ARCHITECTURE
       .ifcpu($CPU_M68HC11,"-m m68hc11elf ")            # architecture, file format
-      .ifcpu($CPU_AVR8515,"-m avr85xx ")               # architecture, file format
+      .ifcpu($CPU_AVR2,   "-m avr85xx ")               # architecture, file format
 
       # DEFINE MEMORY MAP
-      .ifcpu($CPU_M68HC11,"--script $BUILD_DIR\\cpu\\m68hc11.x ")
-      .ifcpu($CPU_AVR8515,"--script $BUILD_DIR\\cpu\\avr8515.x ")
+      ."--script $BUILD_DIR\\$MEM_MAP "
 
       # GIVE FEEDBACK ON THE SCREEN, IN MAP FILE
       ."$trace "                                       # print file names as they are completed
@@ -384,14 +389,14 @@ sub link_stage {
       .ifcpu($CPU_M68HC11,"--oformat=elf32-m68hc11 ")  # output file format
 
       # AVR-SPECIFIC STUFF
-      .ifcpu($CPU_AVR8515,"-nostdlib ")                # do not include C standard library
+      .ifcpu($CPU_AVR2,   "-nostdlib ")                # do not include C standard library
 
       # OUTPUT FILE
       ."-o $TARGET.elf "
 
       # INPUT FILES
       ."$ofiles "
-      .ifcpu($CPU_AVR8515,"$COMPILER_HOME\\avr\\lib\\crts8515.o ")
+      .ifcpu($CPU_AVR2,   "$COMPILER_HOME\\avr\\lib\\crts8515.o ")
       ."$GCC_LIB "
    );
 
@@ -412,7 +417,7 @@ sub convert_binary {
 
    chdir("$BUILD_DIR\\$OBJ_DIR");
 
-   if(cpu($CPU_AVR8515)) {
+   if(cpu($CPU_AVR2)) {
       print("CONVERTING...\n");
 
       #$errors+=run($GNU_PREFIX."objcopy.exe -O avrobj -R .eeprom $TARGET.elf $TARGET.obj");
@@ -468,7 +473,7 @@ sub show_target_file {
 
    my $tempfile="$TARGET.dir";
    my $target_file=""
-      .ifcpu($CPU_AVR8515,"$OBJ_DIR\\$TARGET.elf")
+      .ifcpu($CPU_AVR2,   "$OBJ_DIR\\$TARGET.elf")
       .ifcpu($CPU_M68HC11,"$OBJ_DIR\\$TARGET.S19")
       ;
    run("dir $target_file > $tempfile");
@@ -498,7 +503,7 @@ sub generate_listing {
    print("GENERATING LISTING...\n");
    $errors+=run($GNU_PREFIX."objdump.exe "
       ."--disassemble-all "
-      .ifcpu($CPU_AVR8515,"--architecture=avr:2 ")
+      .ifcpu($CPU_AVR2,   "--architecture=avr:2 ")
       .ifcpu($CPU_M68HC11,"--architecture=m68hc11 ")
       #."--section=.text "
       #."--debugging "
